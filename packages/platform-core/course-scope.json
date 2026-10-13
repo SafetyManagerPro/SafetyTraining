@@ -1,0 +1,47 @@
+{
+  "source": "SafetyManagerPro/SafetyManager js/data.js window.DB_CORSI",
+  "strategy": "include_by_id_or_prefix_then_exclude",
+  "include_exact": [
+    "lav_basso",
+    "lav_medio",
+    "lav_alto",
+    "dl_base",
+    "preposto",
+    "dirigente",
+    "mod_cantieri",
+    "lav_quota",
+    "rls",
+    "primo_soccorso_12h",
+    "antincendio_liv2",
+    "agg_lav",
+    "agg_prep",
+    "agg_dir"
+  ],
+  "include_prefixes": [
+    "dl_spp_",
+    "attr_",
+    "agg_attr_",
+    "agg_dl",
+    "agg_primo_soccorso",
+    "agg_antincendio"
+  ],
+  "exclude_exact": [
+    "amb_confinati",
+    "agg_spazi_confinati_4h",
+    "agg_pratico_4h",
+    "agg_attrezzature_4h"
+  ],
+  "exclude_prefixes": [
+    "rspp",
+    "aspp",
+    "coordinatore",
+    "csp",
+    "cse"
+  ],
+  "notes": [
+    "RSPP, ASPP, Coordinatore sicurezza e ambienti confinati sono fuori perimetro LMS su richiesta.",
+    "Le voci legacy generiche per attrezzature non devono generare nuovi percorsi; usare la specifica attrezzatura.",
+    "Il modulo cantieri DL/Dirigente resta sincronizzabile perché è già nel catalogo SafetyManager, ma può essere disabilitato lato LMS se non utilizzato.",
+    "Il catalogo LMS non determina da solo la formazione: ATECO, mansione, DVR e rischi reali alimentano il builder del percorso."
+  ]
+}
