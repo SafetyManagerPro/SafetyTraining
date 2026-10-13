@@ -1,0 +1,9 @@
+no_drop_table: OK
+no_delete: OK
+no_hardcoded_admin_uuid: OK
+references_existing_core: OK
+rls_enabled: OK
+question_keys_separated: OK
+active_tracking_rpc: OK
+comprehension_rpc: OK
+test_rpcs: OK
