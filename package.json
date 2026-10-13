@@ -1,0 +1,9 @@
+{
+  "name": "safety-platform-v19-foundation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check apps/training/app.js && node --check apps/training/data.js && node --check apps/training/dpi.js && node --check packages/platform-core/constants.js && node --check packages/platform-core/activity-tracker.js && node --check tools/export_training_units.mjs && node --check tools/import_safetymanager_catalog.mjs && node --check tools/generate_seed_sql.mjs",
+    "seed:training": "node tools/export_training_units.mjs apps/training/data.js seeds && node tools/generate_seed_sql.mjs seeds seeds/v19_content_seed.sql"
+  }
+}
