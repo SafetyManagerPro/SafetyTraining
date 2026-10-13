@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+  <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#0f1b30"/><stop offset="1" stop-color="#132844"/></linearGradient>
+  <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#4dd3a8"/><stop offset="1" stop-color="#75e0ff"/></linearGradient>
+  <filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#000" flood-opacity=".28"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1430" cy="120" r="170" fill="#1d3656" opacity=".35"/>
+<circle cx="160" cy="760" r="180" fill="#14304d" opacity=".3"/>
+<text x="70" y="86" fill="#f4f7fb" font-family="Arial" font-size="46" font-weight="700">Organigramma della sicurezza</text>
+<text x="70" y="124" fill="#a8b3c7" font-family="Arial" font-size="22">Visione sintetica delle figure, delle responsabilità e dei collegamenti nel sistema prevenzionistico.</text>
+<g filter="url(#shadow)">
+  <rect x="590" y="160" width="420" height="88" rx="22" fill="url(#g1)"/>
+  <text x="800" y="205" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="31" font-weight="800">DATORE DI LAVORO</text>
+  <text x="800" y="230" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="18">organizza, valuta, decide e assicura le misure</text>
+
+  <rect x="230" y="320" width="290" height="106" rx="20" fill="#172943" stroke="#6aa8ff" stroke-width="3"/>
+  <text x="375" y="368" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="29" font-weight="700">DIRIGENTE</text>
+  <text x="375" y="398" text-anchor="middle" fill="#a8b3c7" font-family="Arial" font-size="18">organizza e attua</text>
+
+  <rect x="560" y="320" width="240" height="106" rx="20" fill="#172943" stroke="#ffd166" stroke-width="3"/>
+  <text x="680" y="368" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="29" font-weight="700">PREPOSTO</text>
+  <text x="680" y="398" text-anchor="middle" fill="#a8b3c7" font-family="Arial" font-size="18">vigila sul campo</text>
+
+  <rect x="840" y="320" width="260" height="106" rx="20" fill="#172943" stroke="#4dd3a8" stroke-width="3"/>
+  <text x="970" y="368" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="29" font-weight="700">RSPP / ASPP</text>
+  <text x="970" y="398" text-anchor="middle" fill="#a8b3c7" font-family="Arial" font-size="18">supporto tecnico</text>
+
+  <rect x="1140" y="320" width="240" height="106" rx="20" fill="#172943" stroke="#d57aff" stroke-width="3"/>
+  <text x="1260" y="368" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="26" font-weight="700">MEDICO</text>
+  <text x="1260" y="394" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="26" font-weight="700">COMPETENTE</text>
+  <text x="1260" y="418" text-anchor="middle" fill="#a8b3c7" font-family="Arial" font-size="18">sorveglianza sanitaria</text>
+
+  <rect x="350" y="535" width="350" height="120" rx="22" fill="#172943" stroke="#ff7a7a" stroke-width="3"/>
+  <text x="525" y="585" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="29" font-weight="700">LAVORATORI</text>
+  <text x="525" y="615" text-anchor="middle" fill="#a8b3c7" font-family="Arial" font-size="18">applicano misure, usano DPI, segnalano</text>
+
+  <rect x="740" y="535" width="250" height="120" rx="22" fill="#172943" stroke="#75e0ff" stroke-width="3"/>
+  <text x="865" y="585" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="29" font-weight="700">RLS</text>
+  <text x="865" y="615" text-anchor="middle" fill="#a8b3c7" font-family="Arial" font-size="18">consulta, raccoglie e propone</text>
+
+  <rect x="1040" y="535" width="290" height="120" rx="22" fill="#172943" stroke="#57d68d" stroke-width="3"/>
+  <text x="1185" y="585" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="29" font-weight="700">ADDETTI EMERGENZA</text>
+  <text x="1185" y="615" text-anchor="middle" fill="#a8b3c7" font-family="Arial" font-size="18">antincendio e primo soccorso</text>
+</g>
+<g stroke="#7f93b1" stroke-width="5" fill="none" stroke-linecap="round">
+  <line x1="800" y1="248" x2="800" y2="288"/>
+  <line x1="375" y1="320" x2="1260" y2="320" opacity=".28"/>
+  <line x1="375" y1="288" x2="375" y2="320"/>
+  <line x1="680" y1="288" x2="680" y2="320"/>
+  <line x1="970" y1="288" x2="970" y2="320"/>
+  <line x1="1260" y1="288" x2="1260" y2="320"/>
+  <line x1="680" y1="426" x2="680" y2="485"/>
+  <line x1="525" y1="485" x2="1185" y2="485" opacity=".28"/>
+  <line x1="525" y1="485" x2="525" y2="535"/>
+  <line x1="865" y1="485" x2="865" y2="535"/>
+  <line x1="1185" y1="485" x2="1185" y2="535"/>
+</g>
+<g>
+  <rect x="70" y="734" width="1460" height="108" rx="20" fill="#101a2c" stroke="#28405f" stroke-width="2"/>
+  <text x="100" y="774" fill="#4dd3a8" font-family="Arial" font-size="24" font-weight="700">Come leggerlo in aula</text>
+  <text x="100" y="808" fill="#d5deec" font-family="Arial" font-size="20">1) Ogni figura ha compiti diversi ma complementari. 2) Nessuna figura “fa tutto da sola”. 3) La sicurezza funziona quando informazione, consultazione, vigilanza e comportamento operativo lavorano insieme.</text>
+</g>
+</svg>

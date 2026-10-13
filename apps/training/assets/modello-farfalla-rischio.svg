@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#0f1828"/><stop offset="1" stop-color="#132844"/></linearGradient></defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<text x="70" y="88" fill="#f4f7fb" font-family="Arial" font-size="46" font-weight="700">Dal pericolo al danno: modello a farfalla</text>
+<text x="70" y="126" fill="#a8b3c7" font-family="Arial" font-size="22">Cause e barriere prima dell’evento, conseguenze e protezioni dopo l’evento.</text>
+<g transform="translate(90 180)">
+<rect x="0" y="0" width="380" height="500" rx="26" fill="#172943" stroke="#6aa8ff" stroke-width="3"/>
+<text x="190" y="56" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="30" font-weight="700">CAUSE / MINACCE</text>
+<text x="40" y="118" fill="#d5deec" font-family="Arial" font-size="22">• errori organizzativi</text><text x="40" y="158" fill="#d5deec" font-family="Arial" font-size="22">• attrezzatura difettosa</text><text x="40" y="198" fill="#d5deec" font-family="Arial" font-size="22">• ambiente non controllato</text><text x="40" y="238" fill="#d5deec" font-family="Arial" font-size="22">• formazione non applicata</text>
+<rect x="34" y="320" width="312" height="116" rx="18" fill="#0f1b2d" stroke="#4dd3a8" stroke-width="2"/>
+<text x="190" y="368" text-anchor="middle" fill="#4dd3a8" font-family="Arial" font-size="26" font-weight="700">BARRIERE PREVENTIVE</text>
+<text x="190" y="405" text-anchor="middle" fill="#d5deec" font-family="Arial" font-size="20">valutazione, procedure, ordine, manutenzione, formazione</text>
+</g>
+<g>
+<polygon points="640,390 800,250 960,390 800,530" fill="#ff7a7a"/>
+<text x="800" y="378" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="32" font-weight="800">EVENTO</text>
+<text x="800" y="414" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="26" font-weight="700">contatto / errore / incendio / caduta</text>
+</g>
+<g transform="translate(1130 180)">
+<rect x="0" y="0" width="380" height="500" rx="26" fill="#172943" stroke="#ffd166" stroke-width="3"/>
+<text x="190" y="56" text-anchor="middle" fill="#f4f7fb" font-family="Arial" font-size="30" font-weight="700">CONSEGUENZE</text>
+<text x="40" y="118" fill="#d5deec" font-family="Arial" font-size="22">• infortunio / malore</text><text x="40" y="158" fill="#d5deec" font-family="Arial" font-size="22">• danni a terzi</text><text x="40" y="198" fill="#d5deec" font-family="Arial" font-size="22">• danni materiali</text><text x="40" y="238" fill="#d5deec" font-family="Arial" font-size="22">• interruzione del servizio</text>
+<rect x="34" y="320" width="312" height="116" rx="18" fill="#0f1b2d" stroke="#75e0ff" stroke-width="2"/>
+<text x="190" y="368" text-anchor="middle" fill="#75e0ff" font-family="Arial" font-size="26" font-weight="700">MISURE DI MITIGAZIONE</text>
+<text x="190" y="405" text-anchor="middle" fill="#d5deec" font-family="Arial" font-size="20">DPI, emergenza, pronto intervento, esodo, soccorso</text>
+</g>
+</svg>

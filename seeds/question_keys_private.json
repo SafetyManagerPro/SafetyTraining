@@ -1,0 +1,1532 @@
+[
+  {
+    "stable_key": "fondamenti:quadro-normativo:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Apri il modulo spiegando che la normativa non è una raccolta di articoli isolati: è un sistema che assegna compiti, poteri e responsabilità a soggetti diversi e obbliga a tradurre la valutazione dei rischi in misure concrete.",
+    "case_solution": [
+      "Individua norma",
+      "Verifica campo di applicazione",
+      "Collega obbligo a soggetto"
+    ],
+    "general_solution": [
+      "Conoscere il quadro applicabile",
+      "Aggiornare valutazione e misure",
+      "Collegare norme, DVR e procedure"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:principi-tutela:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Le misure generali di tutela sono la bussola di tutto il decreto: valutare tutti i rischi, eliminare quelli evitabili, ridurre gli altri alla fonte, organizzare il lavoro, formare e informare, sorvegliare la salute quando previsto e migliorare nel tempo.",
+    "case_solution": [
+      "Valuta",
+      "Elimina/riduci",
+      "Proteggi collettivamente"
+    ],
+    "general_solution": [
+      "Gerarchia delle misure",
+      "Prevenzione integrata",
+      "Programmazione contro violenze/molestie"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:datore-dirigente:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Il datore di lavoro è il vertice del sistema prevenzionistico e mantiene gli obblighi non delegabili di valutazione dei rischi/DVR e designazione dell’RSPP. Dirigenti e datore devono poi organizzare concretamente le misure e verificarne l’attuazione.",
+    "case_solution": [
+      "Valuta rischi",
+      "Organizza prevenzione",
+      "Nomina/designa figure"
+    ],
+    "general_solution": [
+      "DVR aggiornato",
+      "Organizzazione chiara",
+      "Risorse adeguate"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:preposto:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Il preposto è la figura che rende visibile la vigilanza sul campo. Non è un semplice tramite: deve osservare come si lavora, intervenire sulle non conformità e segnalare ciò che non può risolvere direttamente.",
+    "case_solution": [
+      "Osserva",
+      "Richiama",
+      "Interviene"
+    ],
+    "general_solution": [
+      "Presenza effettiva",
+      "Intervento tempestivo",
+      "Segnalazione"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:lavoratore:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il lavoratore non è un destinatario passivo della sicurezza. Ha doveri precisi: seguire istruzioni, usare correttamente attrezzature e DPI, segnalare pericoli e non rimuovere protezioni.",
+    "case_solution": [
+      "Comprendi istruzioni",
+      "Applica",
+      "Segnala"
+    ],
+    "general_solution": [
+      "Formazione",
+      "Segnalazione",
+      "Collaborazione"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:rspp-aspp:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "RSPP e ASPP sono figure tecniche del servizio prevenzione e protezione. Aiutano a individuare rischi, misure, procedure e bisogni formativi, ma non sostituiscono i soggetti che hanno potere decisionale e di vigilanza.",
+    "case_solution": [
+      "Raccoglie dati",
+      "Analizza rischi",
+      "Propone misure"
+    ],
+    "general_solution": [
+      "Coinvolgimento preventivo",
+      "Accesso a informazioni",
+      "Collaborazione con MC e RLS"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:medico-competente:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Il medico competente entra nel sistema quando la sorveglianza sanitaria è prevista o quando la valutazione dei rischi ne determina la necessità. Il suo obiettivo non è fare “visite generiche”, ma verificare l’idoneità alla mansione in rapporto ai rischi lavorativi.",
+    "case_solution": [
+      "Valuta protocollo",
+      "Effettua visite/accertamenti",
+      "Esprime giudizio"
+    ],
+    "general_solution": [
+      "Nomina quando prevista o richiesta dalla valutazione",
+      "Programma sanitario",
+      "Rispetto scadenze"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:rls-fondamenti:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "L’RLS non gestisce la sicurezza: rappresenta i lavoratori e rende strutturata la loro partecipazione. Ha attribuzioni di accesso, consultazione, informazione, proposta e rapporto con gli organismi competenti.",
+    "case_solution": [
+      "Raccoglie segnalazioni",
+      "Consulta documenti",
+      "Partecipa"
+    ],
+    "general_solution": [
+      "Consultazione tempestiva",
+      "Accesso a informazioni",
+      "Segnalazioni strutturate"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:emergenze-figure:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Gli addetti alle emergenze non sono figure “simboliche”: devono essere designati in numero adeguato, formati e presenti nei turni in modo coerente con dimensioni, rischi e organizzazione.",
+    "case_solution": [
+      "Conosci piano",
+      "Attiva allarme",
+      "Opera entro competenze"
+    ],
+    "general_solution": [
+      "Designazione",
+      "Formazione/aggiornamento",
+      "Dotazioni"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:enti-controllo:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "La vigilanza sulla sicurezza è distribuita tra più soggetti. I servizi delle ASL/aziende sanitarie svolgono funzioni di prevenzione e vigilanza; l’INL opera nell’ambito delle competenze ispettive; i Vigili del Fuoco presidiano gli aspetti antincendio di competenza; INAIL ha funzioni assicurative, statistiche, tecniche e di prevenzione.",
+    "case_solution": [
+      "Identifica autorità competente",
+      "Metti a disposizione documenti",
+      "Accompagna ispezione secondo organizzazione"
+    ],
+    "general_solution": [
+      "Conoscere competenze",
+      "Cooperare con vigilanza",
+      "Conservare documentazione"
+    ]
+  },
+  {
+    "stable_key": "fondamenti:sanzioni:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "L’apparato sanzionatorio va spiegato con una logica, non con un elenco di importi: ogni violazione si collega a un obbligo e a un soggetto specifico. Le conseguenze possono essere penali o amministrative e variano in base alla fattispecie.",
+    "case_solution": [
+      "Individua obbligo",
+      "Individua soggetto",
+      "Verifica violazione"
+    ],
+    "general_solution": [
+      "Adempimenti sostanziali",
+      "Documentazione",
+      "Vigilanza"
+    ]
+  },
+  {
+    "stable_key": "generale:rischio:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Quando spieghi questo argomento, parti sempre da un esempio concreto: il pavimento bagnato è il pericolo; il lavoratore che passa di lì è l’esposizione; la caduta è l’evento; la frattura è il danno. Questa sequenza aiuta molto più di una definizione astratta.",
+    "case_solution": [
+      "Osserva l'attività",
+      "Individua il pericolo",
+      "Valuta chi può essere esposto"
+    ],
+    "general_solution": [
+      "Riconoscere le fonti di pericolo",
+      "Applicare procedure e istruzioni",
+      "Segnalare tempestivamente condizioni anomale"
+    ]
+  },
+  {
+    "stable_key": "generale:organizzazione:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Spiega le figure non come nomi da imparare a memoria ma come ruoli che devono coordinarsi. Il datore organizza, il dirigente attua e controlla a livello gestionale, il preposto vigila sul campo, il lavoratore collabora, l’RSPP supporta tecnicamente, il medico competente presidia gli aspetti sanitari, l’RLS rappresenta i lavoratori.",
+    "case_solution": [
+      "Individua il problema",
+      "Segnala al referente/preposto",
+      "Attiva RSPP o funzione competente se necessario"
+    ],
+    "general_solution": [
+      "Organigramma sicurezza chiaro",
+      "Procedure di segnalazione",
+      "Riunioni e consultazioni"
+    ]
+  },
+  {
+    "stable_key": "generale:diritti-doveri:quiz",
+    "correct_answer": {
+      "option_id": "2"
+    },
+    "explanation": "Questo tema va presentato come un patto operativo: il lavoratore ha diritto a formazione, informazione e mezzi idonei, ma ha anche il dovere di usare correttamente attrezzature e DPI e di segnalare situazioni pericolose.",
+    "case_solution": [
+      "Ricevi istruzioni",
+      "Verifica di aver compreso",
+      "Applica le regole"
+    ],
+    "general_solution": [
+      "Formazione comprensibile",
+      "Vigilanza",
+      "Procedure semplici"
+    ]
+  },
+  {
+    "stable_key": "generale:prevenzione-protezione:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Qui è fondamentale spiegare la gerarchia delle misure: prima eliminare il rischio, poi ridurlo tecnicamente e organizzativamente, poi proteggere collettivamente, e solo dopo ricorrere al DPI per il rischio residuo.",
+    "case_solution": [
+      "Individua il rischio",
+      "Valuta se può essere eliminato",
+      "Applica misure tecniche/collettive"
+    ],
+    "general_solution": [
+      "Eliminare o sostituire ciò che è pericoloso quando possibile",
+      "Preferire protezioni collettive",
+      "Organizzare il lavoro"
+    ]
+  },
+  {
+    "stable_key": "generale:incidenti:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Spiega bene la differenza tra infortunio, mancato infortunio e situazione pericolosa. Il mancato infortunio è prezioso perché consente di intervenire prima che qualcuno si faccia male.",
+    "case_solution": [
+      "Metti in sicurezza",
+      "Assisti eventuali persone coinvolte",
+      "Segnala"
+    ],
+    "general_solution": [
+      "Segnalazione semplice",
+      "Analisi delle cause",
+      "Azioni correttive"
+    ]
+  },
+  {
+    "stable_key": "generale:emergenze-generale:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "L’emergenza va spiegata come comportamento organizzato, non come improvvisazione. Allarme, interruzione in sicurezza, esodo ordinato, punto di raccolta e attesa di istruzioni sono la sequenza base da memorizzare.",
+    "case_solution": [
+      "Riconosci/allarme",
+      "Interrompi in sicurezza se possibile",
+      "Segui percorso indicato"
+    ],
+    "general_solution": [
+      "Conoscere il piano",
+      "Vie di esodo libere",
+      "Segnaletica leggibile"
+    ]
+  },
+  {
+    "stable_key": "generale:segnaletica-generale:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La segnaletica non va insegnata come un elenco di cartelli, ma come un linguaggio operativo. Colori e forme servono a fare riconoscere a colpo d’occhio divieti, obblighi, pericoli e presidi di soccorso o antincendio.",
+    "case_solution": [
+      "Osserva segnale",
+      "Comprendi significato",
+      "Applica comportamento"
+    ],
+    "general_solution": [
+      "Segnaletica coerente",
+      "Percorsi liberi",
+      "Informazione"
+    ]
+  },
+  {
+    "stable_key": "frontoffice:utenza:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Nel front office la relazione con il pubblico è parte del lavoro, ma può trasformarsi in rischio quando aumentano tensione, attesa, incomprensione o frustrazione dell’utente. Per questo la prevenzione non è solo comportamentale: coinvolge anche spazi, procedure e supporti.",
+    "case_solution": [
+      "Mantieni distanza e tono calmo",
+      "Non bloccare la via di uscita",
+      "Chiama supporto secondo procedura"
+    ],
+    "general_solution": [
+      "Postazione con uscita libera",
+      "Pulsante/chiamata di supporto dove previsto",
+      "Gestione ordinata delle attese"
+    ]
+  },
+  {
+    "stable_key": "frontoffice:vdt-front:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Nel front office il videoterminale non va letto solo come postura: spesso l’operatore usa contemporaneamente schermo, telefono, stampante, documenti e relazione con il pubblico. Questo aumenta il carico mentale e le torsioni posturali.",
+    "case_solution": [
+      "Regola la sedia",
+      "Posiziona schermo a distanza adeguata",
+      "Allinea tastiera e mouse"
+    ],
+    "general_solution": [
+      "Schermo frontale",
+      "Sedia regolata",
+      "Avambracci appoggiati"
+    ]
+  },
+  {
+    "stable_key": "frontoffice:spazi-front:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Spazi, accessi e vie di fuga nel front office devono essere pensati anche in funzione dell’afflusso di utenti. L’ordine del banco, i percorsi, le code e le uscite condizionano sia la sicurezza ordinaria sia l’emergenza.",
+    "case_solution": [
+      "Controlla passaggi",
+      "Rimuovi ostacoli",
+      "Verifica accesso alle uscite"
+    ],
+    "general_solution": [
+      "Percorsi liberi",
+      "Gestione code",
+      "Arredi stabili"
+    ]
+  },
+  {
+    "stable_key": "frontoffice:stress-front:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Nel front office il carico mentale deriva spesso da sovrapposizione di compiti, attese, richieste divergenti e pressione relazionale. Non è “fragilità individuale”: è un fattore organizzativo da governare.",
+    "case_solution": [
+      "Riconosci criticità organizzativa",
+      "Segnalala",
+      "Usa canali di supporto"
+    ],
+    "general_solution": [
+      "Ruoli chiari",
+      "Pause e rotazioni coerenti",
+      "Supporto del responsabile"
+    ]
+  },
+  {
+    "stable_key": "frontoffice:elettrico-front:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Negli uffici il rischio elettrico è spesso sottovalutato perché gli impianti sembrano “normali” e familiari. In realtà multiprese sovraccariche, cavi danneggiati, adattatori improvvisati o apparecchi difettosi possono generare scossa, surriscaldamento o incendio.",
+    "case_solution": [
+      "Scollega solo se sicuro",
+      "Metti fuori uso",
+      "Segnala"
+    ],
+    "general_solution": [
+      "Impianti mantenuti",
+      "Niente sovraccarichi",
+      "Attrezzature integre"
+    ]
+  },
+  {
+    "stable_key": "frontoffice:privacy-sicurezza-front:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "La sicurezza nella gestione dei documenti riguarda anche il modo in cui la postazione viene fisicamente organizzata. Faldoni, stampati e pacchi non devono diventare ostacoli nei passaggi o sulle vie di fuga.",
+    "case_solution": [
+      "Mantieni superfici libere",
+      "Riponi documenti",
+      "Controlla accessi"
+    ],
+    "general_solution": [
+      "Ordine",
+      "Separazione zone",
+      "Gestione accessi"
+    ]
+  },
+  {
+    "stable_key": "frontoffice:emergenza-utenza:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Quando c’è pubblico, l’evacuazione richiede una competenza in più: non basta conoscere il piano, bisogna saper comunicare in modo chiaro e rassicurante. Il personale diventa guida del comportamento collettivo.",
+    "case_solution": [
+      "Dai indicazioni semplici",
+      "Indirizza verso esodo",
+      "Non usare ascensori se vietati"
+    ],
+    "general_solution": [
+      "Informazione",
+      "Addetti formati",
+      "Segnaletica"
+    ]
+  },
+  {
+    "stable_key": "backoffice:archivi:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "In archivio il rischio non dipende solo dal peso dei materiali, ma anche da come sono distribuiti e da come è organizzato lo spazio. Scaffali sovraccarichi, materiali in quota e passaggi stretti aumentano la probabilità di urti, cadute e schiacciamenti.",
+    "case_solution": [
+      "Verifica stabilità",
+      "Usa scala idonea",
+      "Non superare portate"
+    ],
+    "general_solution": [
+      "Ordine dei percorsi",
+      "Scaffalature stabili",
+      "Scale portatili idonee"
+    ]
+  },
+  {
+    "stable_key": "backoffice:vdt-back:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Nel back office il rischio VDT è spesso legato alla lunga durata del lavoro sedentario. Una postazione tecnicamente corretta può comunque diventare affaticante se il lavoratore resta immobile per ore senza alternanza.",
+    "case_solution": [
+      "Regola sedia",
+      "Posiziona schermo",
+      "Avvicina mouse/tastiera"
+    ],
+    "general_solution": [
+      "Regolazione postazione",
+      "Schermo frontale",
+      "Riduzione riflessi"
+    ]
+  },
+  {
+    "stable_key": "backoffice:scale-portatili:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La scala portatile è un’attrezzatura di lavoro, non un oggetto qualsiasi. Va scelta, posizionata e usata correttamente; in archivio gli errori nascono spesso dall’abitudine a “fare in fretta” usando sedie, ripiani o soluzioni di fortuna.",
+    "case_solution": [
+      "Controlla scala",
+      "Posiziona in piano",
+      "Mantieni area libera"
+    ],
+    "general_solution": [
+      "Scala idonea",
+      "Pavimento stabile",
+      "Tre punti di contatto quando applicabile"
+    ]
+  },
+  {
+    "stable_key": "backoffice:incendio-archivi:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Carta, faldoni e archivi aumentano il carico d’incendio. Questo non significa che l’archivio sia “pericoloso per definizione”, ma che deve essere più ordinato, controllato e protetto sul piano impiantistico e procedurale.",
+    "case_solution": [
+      "Mantieni distanze previste",
+      "Non ostruire estintori",
+      "Segnala accumuli critici"
+    ],
+    "general_solution": [
+      "Ordine",
+      "Riduzione accumuli",
+      "Separazione da fonti di calore"
+    ]
+  },
+  {
+    "stable_key": "backoffice:mmc-back:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Anche in ufficio la movimentazione manuale può essere significativa: scatole di carta, faldoni e materiali d’archivio diventano problematici quando sono pesanti, ingombranti, lontani dal corpo o movimentati molte volte.",
+    "case_solution": [
+      "Valuta peso",
+      "Libera percorso",
+      "Avvicina carico"
+    ],
+    "general_solution": [
+      "Pesi a quota favorevole",
+      "Ausili",
+      "Presa stabile"
+    ]
+  },
+  {
+    "stable_key": "backoffice:elettrico-back:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il rischio elettrico in ufficio è spesso invisibile perché l’utilizzatore vede solo apparecchi di uso quotidiano. Le anomalie da riconoscere sono invece concrete: cavi lesionati, spine allentate, surriscaldamenti, scintille e odori anomali.",
+    "case_solution": [
+      "Metti fuori uso se sicuro",
+      "Segnala",
+      "Non riparare"
+    ],
+    "general_solution": [
+      "Impianti mantenuti",
+      "Niente sovraccarichi",
+      "Attrezzature integre"
+    ]
+  },
+  {
+    "stable_key": "backoffice:emergenza-back:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "In uffici e archivi l’emergenza richiede soprattutto conoscenza preventiva. Quando l’allarme suona non è il momento di cercare la planimetria o chiedere quale uscita usare.",
+    "case_solution": [
+      "Allarme",
+      "Interrompi se sicuro",
+      "Esodo"
+    ],
+    "general_solution": [
+      "Vie libere",
+      "Porte efficienti",
+      "Ordine"
+    ]
+  },
+  {
+    "stable_key": "polizia:stradale:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il rischio stradale per la Polizia Locale non è solo guida del veicolo: riguarda il momento in cui l’operatore entra in carreggiata, si ferma in posizione esposta, gestisce un incidente o regola il traffico.",
+    "case_solution": [
+      "Valuta scenario",
+      "Proteggi l'area",
+      "Renditi visibile"
+    ],
+    "general_solution": [
+      "Alta visibilità",
+      "Posizionamento protetto",
+      "Segnalazione dell'area"
+    ]
+  },
+  {
+    "stable_key": "polizia:aggressioni-polizia:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La gestione del conflitto non è una tecnica di comunicazione isolata: è una misura di sicurezza che si integra con procedure operative, lavoro in squadra, distanza e possibilità di ricevere supporto.",
+    "case_solution": [
+      "Valuta persone e ambiente",
+      "Mantieni posizione sicura",
+      "Coordina con collega/centrale"
+    ],
+    "general_solution": [
+      "Valutazione dello scenario",
+      "Lavoro in squadra",
+      "Comunicazione radio"
+    ]
+  },
+  {
+    "stable_key": "polizia:microclima-polizia:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il lavoro all’aperto espone a caldo, freddo, sole e cambiamenti improvvisi del meteo. Questi fattori influenzano attenzione, capacità decisionale e resistenza fisica.",
+    "case_solution": [
+      "Valuta meteo",
+      "Prepara dotazione",
+      "Alterna esposizione"
+    ],
+    "general_solution": [
+      "Pianificare turni",
+      "Idratazione",
+      "Pause"
+    ]
+  },
+  {
+    "stable_key": "polizia:veicoli-servizio:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il veicolo di servizio va trattato come attrezzatura di lavoro: controlli pre-uso, regolazione della postazione, cinture dove previste, sosta sicura e gestione delle manovre sono parte della prevenzione.",
+    "case_solution": [
+      "Controlla mezzo",
+      "Regola sedile",
+      "Allaccia cintura quando prevista"
+    ],
+    "general_solution": [
+      "Controlli pre-uso",
+      "Guida difensiva",
+      "Sosta sicura"
+    ]
+  },
+  {
+    "stable_key": "polizia:rumore-polizia:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Traffico, eventi, sirene e manifestazioni possono generare esposizioni significative a rumore. Il punto didattico è distinguere tra fastidio e esposizione valutata.",
+    "case_solution": [
+      "Segui valutazione",
+      "Usa DPI assegnati correttamente",
+      "Segnala condizioni anomale"
+    ],
+    "general_solution": [
+      "Valutare esposizione",
+      "Ridurre tempi dove possibile",
+      "Organizzare distanza dalle sorgenti"
+    ]
+  },
+  {
+    "stable_key": "polizia:biologico-polizia:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Negli interventi può verificarsi contatto con sangue, fluidi biologici o materiali contaminati. La prevenzione parte dalle precauzioni standard e dall’uso corretto dei DPI previsti.",
+    "case_solution": [
+      "Proteggi te stesso",
+      "Evita contatto diretto",
+      "Lava/disinfetta secondo procedura"
+    ],
+    "general_solution": [
+      "Guanti",
+      "Igiene",
+      "Protezione occhi se rischio schizzi"
+    ]
+  },
+  {
+    "stable_key": "polizia:posture-polizia:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Stazione eretta prolungata, guida, equipaggiamento e posture statiche possono generare sovraccarico muscolo-scheletrico. Il problema è spesso la durata, non il singolo gesto.",
+    "case_solution": [
+      "Regola postazione",
+      "Alterna postura",
+      "Evita torsioni"
+    ],
+    "general_solution": [
+      "Alternanza",
+      "Ergonomia veicolo",
+      "Pause"
+    ]
+  },
+  {
+    "stable_key": "polizia:lavoro-notturno:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Il lavoro notturno modifica attenzione, ritmo sonno-veglia e capacità di recupero. In sicurezza questo significa maggiore vulnerabilità a errori, guida affaticata e tempi di reazione più lunghi.",
+    "case_solution": [
+      "Valuta condizioni",
+      "Mantieni illuminazione/visibilità",
+      "Fai pause previste"
+    ],
+    "general_solution": [
+      "Turni organizzati",
+      "Pause",
+      "Illuminazione"
+    ]
+  },
+  {
+    "stable_key": "polizia:dpi-polizia:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Uniforme, dotazione di servizio e DPI non sono la stessa cosa. Un DPI deve essere scelto in funzione di un rischio specifico e deve mantenere caratteristiche adeguate nel tempo.",
+    "case_solution": [
+      "Controlla",
+      "Indossa",
+      "Regola"
+    ],
+    "general_solution": [
+      "Scelta da DVR",
+      "Formazione/addestramento",
+      "Controllo"
+    ]
+  },
+  {
+    "stable_key": "polizia:emergenze-polizia:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Nelle emergenze esterne la Polizia Locale può svolgere compiti di viabilità, perimetrazione, supporto e comunicazione. Il punto chiave è rispettare ruoli e competenze senza esporsi inutilmente.",
+    "case_solution": [
+      "Ricevi compito",
+      "Valuta sicurezza",
+      "Coordina"
+    ],
+    "general_solution": [
+      "Comando chiaro",
+      "Radio",
+      "Perimetrazione"
+    ]
+  },
+  {
+    "stable_key": "polizia:stress-polizia:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Eventi critici, aggressioni, incidenti e carico decisionale possono produrre stress acuto e affaticamento. La prevenzione è organizzativa: supporto, debriefing, rotazione, riposo e procedure chiare.",
+    "case_solution": [
+      "Riconosci criticità",
+      "Segnala",
+      "Usa supporti"
+    ],
+    "general_solution": [
+      "Supporto organizzativo",
+      "Debriefing",
+      "Rotazioni"
+    ]
+  },
+  {
+    "stable_key": "ecologici:biologico:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Per gli operatori ecologici il rischio biologico nasce dal contatto con rifiuti, liquidi, sacchi lesionati, aerosol e superfici contaminate. La lezione deve far capire che il rischio non è “vedere sporco”, ma entrare in contatto con materiali potenzialmente contaminanti.",
+    "case_solution": [
+      "Evita contatto diretto",
+      "Non comprimere sacchi con mani o piedi",
+      "In caso di esposizione interrompi il lavoro"
+    ],
+    "general_solution": [
+      "Guanti adeguati",
+      "Igiene mani",
+      "Divieto di mangiare nelle aree di lavoro"
+    ]
+  },
+  {
+    "stable_key": "ecologici:taglienti:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Taglienti e aghi sono tra i pericoli più insidiosi perché spesso non visibili. Il messaggio da far passare è che non si “sente” un rischio del genere con l’esperienza: va prevenuto con metodo.",
+    "case_solution": [
+      "Interrompi attività",
+      "Metti in sicurezza l'oggetto senza manipolarlo ulteriormente",
+      "Esegui primo trattamento secondo procedura"
+    ],
+    "general_solution": [
+      "Tecniche di presa sicure",
+      "Guanti adeguati",
+      "Contenitori rigidi quando previsti"
+    ]
+  },
+  {
+    "stable_key": "ecologici:mezzi-raccolta:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il mezzo di raccolta è contemporaneamente strumento di lavoro e sorgente di rischio. L’operatore a terra deve leggere le traiettorie del mezzo, la visibilità reciproca e i tempi della manovra.",
+    "case_solution": [
+      "Valuta area",
+      "Renditi visibile",
+      "Mantieniti fuori traiettoria"
+    ],
+    "general_solution": [
+      "Zone di esclusione",
+      "Alta visibilità",
+      "Comunicazione squadra"
+    ]
+  },
+  {
+    "stable_key": "ecologici:mmc-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La raccolta espone a carichi imprevedibili: un sacco può essere molto più pesante di quanto appaia. Per questo la prima regola è valutare prima di sollevare e non affidarsi all’abitudine.",
+    "case_solution": [
+      "Valuta peso/ingombro",
+      "Avvicinati al carico",
+      "Evita torsioni"
+    ],
+    "general_solution": [
+      "Ausili",
+      "Lavoro in coppia quando necessario",
+      "Riduzione pesi"
+    ]
+  },
+  {
+    "stable_key": "ecologici:rumore-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Rumore e vibrazioni nei mezzi di raccolta sono esposizioni che si accumulano nel tempo. Il lavoratore può abituarsi alla sensazione, ma questo non significa che il rischio sia diminuito.",
+    "case_solution": [
+      "Controlla attrezzatura",
+      "Usa secondo istruzioni",
+      "Rispetta tempi e pause"
+    ],
+    "general_solution": [
+      "Manutenzione",
+      "Riduzione tempi",
+      "Scelta attrezzature"
+    ]
+  },
+  {
+    "stable_key": "ecologici:chimico-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "I rifiuti sconosciuti richiedono una regola semplice: se non so che cosa contiene un recipiente, non lo apro, non lo annuso e non lo travaso. L’identificazione viene prima della manipolazione.",
+    "case_solution": [
+      "Non toccare",
+      "Mantieni distanza",
+      "Segnala"
+    ],
+    "general_solution": [
+      "Non manipolare materiali sconosciuti",
+      "Segnalazione",
+      "Gestione separata"
+    ]
+  },
+  {
+    "stable_key": "ecologici:microclima-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Caldo, freddo, pioggia e vento non sono solo fastidi: modificano attenzione, affaticamento, idratazione, presa, equilibrio e velocità di reazione. Questo vale soprattutto per chi lavora all’aperto e in movimento.",
+    "case_solution": [
+      "Consulta condizioni",
+      "Prepara dotazione",
+      "Segui turnazione"
+    ],
+    "general_solution": [
+      "Idratazione",
+      "Pause",
+      "Abbigliamento"
+    ]
+  },
+  {
+    "stable_key": "ecologici:cadute-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Durante la raccolta le cadute a livello sono favorite da marciapiedi irregolari, gradini del mezzo bagnati, buio, rifiuti e fretta. Sono eventi spesso considerati banali, ma possono produrre traumi importanti.",
+    "case_solution": [
+      "Osserva percorso",
+      "Evita salti",
+      "Segnala ostacolo"
+    ],
+    "general_solution": [
+      "Calzature",
+      "Ordine",
+      "Illuminazione"
+    ]
+  },
+  {
+    "stable_key": "ecologici:compattatore:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Gli organi in movimento del compattatore espongono a schiacciamento, trascinamento e cesoiamento. Qui la didattica deve essere netta: non si interviene su inceppamenti o anomalie con macchina in funzione o solo “quasi ferma”.",
+    "case_solution": [
+      "Arresta",
+      "Metti in sicurezza",
+      "Segui procedura blocco"
+    ],
+    "general_solution": [
+      "Protezioni",
+      "Interblocchi",
+      "Zone esclusione"
+    ]
+  },
+  {
+    "stable_key": "ecologici:vetri-ingombranti:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Vetri e ingombranti hanno rischi combinati: taglio, peso, ingombro e perdita di presa. Prima di toccarli bisogna capire come afferrarli e dove portarli.",
+    "case_solution": [
+      "Valuta",
+      "Proteggi bordi se previsto",
+      "Usa presa/ausilio"
+    ],
+    "general_solution": [
+      "Guanti idonei",
+      "Calzature",
+      "Ausili"
+    ]
+  },
+  {
+    "stable_key": "ecologici:incendio-rifiuti:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Batterie e materiali non correttamente conferiti possono innescare incendi nel carico o nel compattatore. Fumo e odori anomali vanno trattati come segnali di emergenza.",
+    "case_solution": [
+      "Arresta attività",
+      "Allontana persone",
+      "Dai allarme"
+    ],
+    "general_solution": [
+      "Separazione",
+      "Controllo carichi",
+      "Segnalazione"
+    ]
+  },
+  {
+    "stable_key": "ecologici:traffico-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La raccolta su strada avviene in interferenza continua con il traffico. Per questo alta visibilità, scelta della posizione, lato di lavoro e attraversamenti sono elementi fondamentali della spiegazione.",
+    "case_solution": [
+      "Valuta traffico",
+      "Posizionati protetto",
+      "Mantieni contatto con squadra"
+    ],
+    "general_solution": [
+      "Alta visibilità",
+      "Pianificazione",
+      "Coordinamento"
+    ]
+  },
+  {
+    "stable_key": "ecologici:igiene-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Igiene personale e gestione degli indumenti sono parte integrante della prevenzione. Dopo il contatto con i rifiuti la contaminazione può essere trasferita su mani, volto, telefono, abitacolo del mezzo o spogliatoi.",
+    "case_solution": [
+      "Rimuovi DPI correttamente",
+      "Lava mani",
+      "Separa indumenti"
+    ],
+    "general_solution": [
+      "Igiene",
+      "Spogliatoi",
+      "Gestione indumenti"
+    ]
+  },
+  {
+    "stable_key": "ecologici:aggressioni-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Anche chi lavora nella raccolta può incontrare conflitti con cittadini, soprattutto per accessi, orari, rifiuti non ritirati o viabilità. Il rischio cresce quando l’operatore è isolato.",
+    "case_solution": [
+      "Mantieni distanza",
+      "Non alimentare conflitto",
+      "Chiama supporto"
+    ],
+    "general_solution": [
+      "Comunicazioni",
+      "Squadra",
+      "Procedure"
+    ]
+  },
+  {
+    "stable_key": "ecologici:emergenze-ecologici:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Nel lavoro itinerante la gestione dell’emergenza è resa più difficile dalla posizione variabile. Sapere indicare con precisione dove ci si trova è parte del primo soccorso organizzativo.",
+    "case_solution": [
+      "Proteggi scena",
+      "Allerta",
+      "Fornisci luogo/evento"
+    ],
+    "general_solution": [
+      "Procedure",
+      "Comunicazione",
+      "Kit"
+    ]
+  },
+  {
+    "stable_key": "verde:decespugliatore:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il decespugliatore espone a proiezione di materiali, rumore, vibrazioni, contatto con l’organo di taglio e interferenza con terzi. La lezione deve far capire che la sicurezza inizia ben prima dell’accensione.",
+    "case_solution": [
+      "Controlla attrezzatura",
+      "Ispeziona e delimita area",
+      "Indossa DPI"
+    ],
+    "general_solution": [
+      "Ispezione preventiva dell'area",
+      "Delimitazione",
+      "Distanza di sicurezza"
+    ]
+  },
+  {
+    "stable_key": "verde:motosega:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La motosega richiede una spiegazione essenziale ma chiara: controllo pre-uso, catena, freno, impugnatura, posizione del corpo, stabilità e area libera. Anche se il corso non sostituisce addestramenti specifici, deve trasmettere rispetto per il rischio.",
+    "case_solution": [
+      "Controlla macchina",
+      "Delimita area",
+      "Indossa DPI"
+    ],
+    "general_solution": [
+      "Formazione/addestramento",
+      "Controllo catena e freno",
+      "Area delimitata"
+    ]
+  },
+  {
+    "stable_key": "verde:tosaerba:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Anche il tosaerba, proprio perché percepito come attrezzatura comune, viene talvolta sottovalutato. In realtà presenta rischi da taglio, proiezione, rumore, vibrazioni e contatto con parti calde o in movimento.",
+    "case_solution": [
+      "Ispeziona terreno",
+      "Controlla macchina",
+      "Delimita"
+    ],
+    "general_solution": [
+      "Controllo area",
+      "Protezioni integre",
+      "Distanza di sicurezza"
+    ]
+  },
+  {
+    "stable_key": "verde:rumore-vibrazioni-verde:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Nel verde pubblico il rumore e le vibrazioni sono esposizioni cumulative: spesso non generano un danno immediato percepibile, ma producono effetti nel tempo se non gestite con metodo.",
+    "case_solution": [
+      "Controlla stato",
+      "Rispetta tempi",
+      "Alterna attività se previsto"
+    ],
+    "general_solution": [
+      "Attrezzature efficienti",
+      "Manutenzione",
+      "Tempi di esposizione"
+    ]
+  },
+  {
+    "stable_key": "verde:biologico-verde:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Nel verde il rischio biologico comprende terreno, materiale organico, ferite sporche, insetti e animali. La prevenzione parte dall’osservazione dell’area e dalla protezione della pelle.",
+    "case_solution": [
+      "Controlla area",
+      "Evita manipolazioni inutili",
+      "Proteggi ferite"
+    ],
+    "general_solution": [
+      "Ispezione area",
+      "Guanti",
+      "Igiene"
+    ]
+  },
+  {
+    "stable_key": "verde:lavoro-strada-verde:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Taglio dell’erba, potature e manutenzioni vicino alla strada combinano rischio da attrezzature e rischio investimento. La zona di lavoro deve essere riconoscibile prima che l’operatore inizi.",
+    "case_solution": [
+      "Valuta traffico",
+      "Predisponi area",
+      "Posiziona mezzi/segni"
+    ],
+    "general_solution": [
+      "Delimitazione",
+      "Segnaletica temporanea",
+      "Alta visibilità"
+    ]
+  },
+  {
+    "stable_key": "verde:mmc-verde:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Rami, sacchi e attrezzature possono essere voluminosi anche quando non sono molto pesanti. L’ingombro modifica la presa e il baricentro e aumenta lo sforzo.",
+    "case_solution": [
+      "Valuta peso",
+      "Avvicina",
+      "Evita torsione"
+    ],
+    "general_solution": [
+      "Ausili",
+      "Rotazione",
+      "Tecniche"
+    ]
+  },
+  {
+    "stable_key": "verde:microclima-verde:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Nel verde il microclima condiziona direttamente il lavoro perché le attività si svolgono all’aperto e spesso in esposizione solare. Il rischio va spiegato come combinazione di temperatura, umidità, sforzo fisico, abbigliamento e durata.",
+    "case_solution": [
+      "Controlla meteo",
+      "Prepara dotazioni",
+      "Adatta lavoro"
+    ],
+    "general_solution": [
+      "Pianificazione",
+      "Pause",
+      "Acqua"
+    ]
+  },
+  {
+    "stable_key": "verde:chimico-verde:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Carburanti, lubrificanti e altri prodotti richiedono una spiegazione molto pratica: etichetta, contenitore corretto, rifornimento a motore spento, assenza di fonti di innesco e protezione della pelle e degli occhi secondo il rischio.",
+    "case_solution": [
+      "Identifica prodotto",
+      "Leggi istruzioni",
+      "Usa DPI"
+    ],
+    "general_solution": [
+      "Etichettatura",
+      "SDS",
+      "Contenitori idonei"
+    ]
+  },
+  {
+    "stable_key": "verde:potatura-alto:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Quando si parla di potatura e lavoro in quota bisogna chiarire subito che non esiste una soluzione unica: scala, piattaforma, accesso in pianta o altri metodi richiedono valutazione preventiva, area delimitata e personale formato dove necessario.",
+    "case_solution": [
+      "Valuta metodo",
+      "Delimita sotto",
+      "Controlla attrezzature"
+    ],
+    "general_solution": [
+      "Attrezzatura idonea",
+      "Delimitazione",
+      "Formazione"
+    ]
+  },
+  {
+    "stable_key": "verde:emergenze-verde:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Nei parchi e nelle aree verdi un’emergenza può avvenire lontano da ingressi o riferimenti stradali. La squadra deve sapere descrivere il punto e facilitare l’accesso dei soccorsi.",
+    "case_solution": [
+      "Ferma pericolo",
+      "Proteggi area",
+      "Allerta"
+    ],
+    "general_solution": [
+      "Procedure",
+      "Kit",
+      "Comunicazioni"
+    ]
+  },
+  {
+    "stable_key": "antincendio:combustione:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Per spiegare la combustione, parti da esempi semplici: carta, liquidi infiammabili, apparecchiature e materiali presenti nella sede. Lo scopo è capire come nasce un incendio e quali fattori ne favoriscono la propagazione.",
+    "case_solution": [
+      "Riconosci l'emergenza",
+      "Dai l'allarme",
+      "Valuta se l'intervento è possibile in sicurezza"
+    ],
+    "general_solution": [
+      "Ordine e pulizia",
+      "Controllo fonti di innesco",
+      "Corretta gestione materiali combustibili"
+    ]
+  },
+  {
+    "stable_key": "antincendio:triangolo:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Il triangolo del fuoco è un modello semplice: combustibile, comburente e sorgente di innesco. L’estinzione avviene agendo su almeno uno di questi fattori o interrompendo la reazione.",
+    "case_solution": [
+      "Riconosci materiale",
+      "Valuta estintore disponibile",
+      "Mantieni distanza e uscita"
+    ],
+    "general_solution": [
+      "Conoscere classi e mezzi presenti",
+      "Mantenere via di fuga",
+      "Valutare condizioni prima dell’intervento"
+    ]
+  },
+  {
+    "stable_key": "antincendio:esodo-compartimentazione:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La protezione passiva è ciò che limita il danno senza richiedere una decisione immediata del lavoratore: compartimenti, porte resistenti al fuoco, percorsi e uscite.",
+    "case_solution": [
+      "Non bloccare porte",
+      "Mantieni percorsi liberi",
+      "Segnala difetti"
+    ],
+    "general_solution": [
+      "Porte efficienti",
+      "Vie libere",
+      "Segnaletica"
+    ]
+  },
+  {
+    "stable_key": "antincendio:rivelazione-allarme:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Rivelazione e allarme trasformano un evento locale in una risposta organizzata. L’addetto deve conoscere i segnali presenti nella sede e cosa deve fare quando si attivano.",
+    "case_solution": [
+      "Riconosci allarme",
+      "Attiva procedura",
+      "Non manomettere impianti"
+    ],
+    "general_solution": [
+      "Conoscere segnali",
+      "Controlli/manutenzione",
+      "Procedure chiare"
+    ]
+  },
+  {
+    "stable_key": "antincendio:gsa:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "La gestione della sicurezza antincendio è ciò che mantiene efficaci nel tempo le misure: sorveglianza, controlli, manutenzione, formazione, registro e gestione delle anomalie.",
+    "case_solution": [
+      "Osserva presidio",
+      "Verifica accessibilità",
+      "Rileva anomalie"
+    ],
+    "general_solution": [
+      "Sorveglianza",
+      "Controlli periodici",
+      "Manutenzione"
+    ]
+  },
+  {
+    "stable_key": "antincendio:pratica-estintori:quiz",
+    "correct_answer": {
+      "option_id": "2"
+    },
+    "explanation": "Questa parte deve essere presentata chiaramente come esercitazione reale. La web-app può preparare il ragionamento, ma non sostituisce la prova pratica prevista per il corso 2-FOR.",
+    "case_solution": [
+      "Briefing",
+      "Presa visione",
+      "Dimostrazione"
+    ],
+    "general_solution": [
+      "Briefing",
+      "Area prova controllata",
+      "DPI previsti"
+    ]
+  },
+  {
+    "stable_key": "rls:ruolo-rls:quiz",
+    "correct_answer": {
+      "option_id": "2"
+    },
+    "explanation": "Il primo obiettivo del corso RLS è chiarire che rappresentare i lavoratori significa portare nel sistema prevenzionistico osservazioni, segnalazioni e proposte in modo strutturato.",
+    "case_solution": [
+      "Raccogli segnalazione",
+      "Verifica il contesto",
+      "Confrontati con le figure competenti"
+    ],
+    "general_solution": [
+      "Accesso alle informazioni previste",
+      "Consultazione tempestiva",
+      "Confronto con RSPP, MC e datore di lavoro"
+    ]
+  },
+  {
+    "stable_key": "rls:normativa-rls:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Il modulo normativo RLS deve essere operativo: non basta elencare articoli, bisogna capire come gli obblighi dei diversi soggetti incidono sulla capacità dell’RLS di chiedere informazioni e formulare proposte.",
+    "case_solution": [
+      "Individua soggetto competente",
+      "Formula osservazione",
+      "Confrontati"
+    ],
+    "general_solution": [
+      "Mappare responsabilità",
+      "Conoscere flussi",
+      "Usare canali formali e informali"
+    ]
+  },
+  {
+    "stable_key": "rls:dvr-rls:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "Leggere il DVR significa verificare se descrive il lavoro reale. L’RLS dovrebbe partire da attività e mansioni, poi verificare rischi individuati, persone esposte, misure esistenti e programma di miglioramento.",
+    "case_solution": [
+      "Individua attività",
+      "Leggi rischio",
+      "Verifica misure"
+    ],
+    "general_solution": [
+      "Consultazione",
+      "Confronto tra DVR e lavoro reale",
+      "Verifica azioni programmate"
+    ]
+  },
+  {
+    "stable_key": "rls:consultazione-rls:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La consultazione è efficace quando avviene prima delle decisioni importanti e quando l’RLS dispone di elementi sufficienti per esprimere osservazioni.",
+    "case_solution": [
+      "Raccogli tema",
+      "Prepara evidenze",
+      "Partecipa"
+    ],
+    "general_solution": [
+      "Agenda",
+      "Evidenze",
+      "Verbali"
+    ]
+  },
+  {
+    "stable_key": "rls:comunicazione-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "La qualità della comunicazione è centrale: una segnalazione efficace descrive fatti, contesto, frequenza, persone esposte e impatto sul lavoro, senza trasformarsi in accusa personale.",
+    "case_solution": [
+      "Ascolta",
+      "Verifica elementi",
+      "Classifica urgenza"
+    ],
+    "general_solution": [
+      "Ascolto strutturato",
+      "Tracciabilità",
+      "Feedback"
+    ]
+  },
+  {
+    "stable_key": "rls:rischi-specifici-rls:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "La parte sui rischi specifici deve essere costruita sul DVR reale dell’ente. Per un Comune possono coesistere uffici, utenza, strada, rifiuti, verde, mezzi, agenti biologici, rumore, vibrazioni, microclima e aggressioni.",
+    "case_solution": [
+      "Scegli rischio",
+      "Ricostruisci esposizione",
+      "Verifica misure"
+    ],
+    "general_solution": [
+      "Casi per mansione",
+      "Visite/analisi di situazioni",
+      "DVR reale"
+    ]
+  },
+  {
+    "stable_key": "rls:infortuni-rls:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "L’analisi di un infortunio o near miss deve andare oltre “chi ha sbagliato”. L’RLS può contribuire chiedendo quali barriere avrebbero dovuto impedire l’evento e perché non hanno funzionato.",
+    "case_solution": [
+      "Ricostruisci fatti",
+      "Individua barriere",
+      "Cerca cause organizzative"
+    ],
+    "general_solution": [
+      "Analisi sistemica",
+      "Azioni correttive",
+      "Verifica efficacia"
+    ]
+  },
+  {
+    "stable_key": "rls:principi-giuridici-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Questo modulo deve dare al RLS una mappa delle fonti: Costituzione, leggi, decreti, regolamenti, accordi, norme tecniche e procedure interne.",
+    "case_solution": [
+      "Identifica fonte",
+      "Verifica vigenza",
+      "Leggi campo applicazione"
+    ],
+    "general_solution": [
+      "Gerarchia fonti",
+      "Aggiornamento",
+      "Contestualizzazione"
+    ]
+  },
+  {
+    "stable_key": "rls:organi-vigilanza-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "L’RLS deve conoscere la differenza tra organi di vigilanza e soggetti di supporto. ASL/servizi di prevenzione, INL e VVF intervengono con competenze diverse; INAIL ha anche funzioni assicurative, tecniche e di prevenzione.",
+    "case_solution": [
+      "Identifica ente",
+      "Prepara evidenze",
+      "Partecipa se previsto"
+    ],
+    "general_solution": [
+      "Conoscere competenze",
+      "Tracciabilità",
+      "Gestione prescrizioni"
+    ]
+  },
+  {
+    "stable_key": "rls:sorveglianza-sanitaria-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "L’RLS deve comprendere finalità e limiti della sorveglianza sanitaria per poter partecipare senza invadere la riservatezza individuale.",
+    "case_solution": [
+      "Consulta aspetti organizzativi",
+      "Rispetta privacy",
+      "Verifica attuazione prescrizioni organizzative"
+    ],
+    "general_solution": [
+      "Protocollo coerente",
+      "Scadenze",
+      "Collaborazione MC-DL-RSPP-RLS"
+    ]
+  },
+  {
+    "stable_key": "rls:dpi-rls:quiz",
+    "correct_answer": {
+      "option_id": "1"
+    },
+    "explanation": "L’RLS non sceglie il DPI al posto del datore, ma può verificare se la scelta tiene conto del lavoro reale, della compatibilità tra dispositivi e delle segnalazioni dei lavoratori.",
+    "case_solution": [
+      "Rischio",
+      "Requisiti",
+      "Scelta"
+    ],
+    "general_solution": [
+      "Valutazione",
+      "Confronto con lavoratori",
+      "Prove di vestibilità/compatibilità"
+    ]
+  },
+  {
+    "stable_key": "rls:appalti-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Gli appalti generano rischio quando più organizzazioni lavorano nello stesso luogo con attività che si influenzano. L’RLS deve saper riconoscere l’interferenza, non solo il rischio proprio dell’impresa.",
+    "case_solution": [
+      "Identifica attività",
+      "Scambia rischi",
+      "Coordina"
+    ],
+    "general_solution": [
+      "Coordinamento",
+      "Informazione",
+      "DUVRI ove previsto"
+    ]
+  },
+  {
+    "stable_key": "rls:emergenze-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "L’RLS può contribuire alla qualità del sistema di emergenza osservando prove, segnalando ostacoli e raccogliendo feedback dei lavoratori.",
+    "case_solution": [
+      "Osserva prova",
+      "Raccogli criticità",
+      "Confronta col piano"
+    ],
+    "general_solution": [
+      "Prove",
+      "Aggiornamento",
+      "Consultazione"
+    ]
+  },
+  {
+    "stable_key": "rls:stress-violenza-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "Stress, aggressioni e molestie devono essere letti anche come rischi organizzativi. L’RLS può raccogliere indicatori, episodi, aree critiche e proposte dei lavoratori.",
+    "case_solution": [
+      "Raccogli segnali",
+      "Valuta organizzazione",
+      "Consulta"
+    ],
+    "general_solution": [
+      "Valutazione",
+      "Procedure",
+      "Supporto"
+    ]
+  },
+  {
+    "stable_key": "rls:sanzioni-responsabilita-rls:quiz",
+    "correct_answer": {
+      "option_id": "0"
+    },
+    "explanation": "L’RLS deve comprendere la logica delle responsabilità per dialogare correttamente con il sistema, ma non va trasformato in un corso di diritto penale.",
+    "case_solution": [
+      "Individua obbligo",
+      "Individua soggetto",
+      "Verifica deleghe/poteri"
+    ],
+    "general_solution": [
+      "Chiarezza ruoli",
+      "MOG",
+      "Audit"
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Safety Training</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b1220"></head>
+<body>
+<header class="topbar">
+  <div class="brandwrap">
+    <div class="brand">SAFETY <span>TRAINING</span></div>
+    <div class="brandsub">web app didattica locale</div>
+  </div>
+  <input id="search" class="search" placeholder="Cerca rischio, DPI, procedura, normativa...">
+  <div class="mode">
+    <button id="modeClass" class="active">Aula</button>
+    <button id="modeTeacher">Docente</button>
+  </div>
+  <img class="partner-logo" src="assets/cna-avellino.png" alt="CNA Avellino">
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <h3>Programma</h3>
+    <button class="navbtn active" data-home>🏠 Home</button>
+    <div id="sideCourses"></div>
+    <h3>Strumenti</h3>
+    <button class="navbtn" id="showFav">⭐ Preferiti</button>
+    <button class="navbtn" id="showRecent">🕘 Recenti</button>
+    <button class="navbtn" id="showDpi">🥽 Libreria DPI</button>
+    <button class="navbtn" id="showRefs">📚 Fonti e approfondimenti</button>
+    <button class="navbtn" id="showChecklist">✅ Checklist docente</button>
+    <div class="sidebar-footer">
+      <img class="sidebar-logo" src="assets/cna-avellino.png" alt="CNA Avellino">
+      <div class="sidebar-note">Logo inserito in modo discreto e non invasivo.</div>
+    </div>
+  </aside>
+  <main id="app"></main>
+</div>
+<script src="data.js"></script><script src="dpi.js"></script><script src="app.js"></script>
+<script>
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script></body></html>

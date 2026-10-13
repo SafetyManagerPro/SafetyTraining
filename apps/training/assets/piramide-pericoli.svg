@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+  <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#10192c"/><stop offset="1" stop-color="#142239"/></linearGradient>
+  <linearGradient id="p1" x1="0" x2="1"><stop offset="0" stop-color="#ff7a7a"/><stop offset="1" stop-color="#ffb08a"/></linearGradient>
+  <linearGradient id="p2" x1="0" x2="1"><stop offset="0" stop-color="#ff9a62"/><stop offset="1" stop-color="#ffd166"/></linearGradient>
+  <linearGradient id="p3" x1="0" x2="1"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#c6ec72"/></linearGradient>
+  <linearGradient id="p4" x1="0" x2="1"><stop offset="0" stop-color="#75e0ff"/><stop offset="1" stop-color="#4dd3a8"/></linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<text x="80" y="90" fill="#f4f7fb" font-family="Arial" font-size="46" font-weight="700">Piramide dei pericoli / degli eventi</text>
+<text x="80" y="128" fill="#a8b3c7" font-family="Arial" font-size="22">Più in basso si collocano segnali deboli e near miss: se li trascuriamo, più in alto troviamo infortuni e danni gravi.</text>
+<g transform="translate(180 165)">
+  <polygon points="620,0 740,120 500,120" fill="url(#p1)" stroke="#ffffff22" stroke-width="2"/>
+  <polygon points="500,120 740,120 840,240 400,240" fill="url(#p2)" stroke="#ffffff22" stroke-width="2"/>
+  <polygon points="400,240 840,240 930,360 310,360" fill="url(#p3)" stroke="#ffffff22" stroke-width="2"/>
+  <polygon points="310,360 930,360 1030,500 210,500" fill="url(#p4)" stroke="#ffffff22" stroke-width="2"/>
+  <text x="620" y="72" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="30" font-weight="800">INFORTUNIO GRAVE</text>
+  <text x="620" y="188" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="28" font-weight="800">INFORTUNI E DANNI</text>
+  <text x="620" y="305" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="28" font-weight="800">NEAR MISS / QUASI INFORTUNI</text>
+  <text x="620" y="432" text-anchor="middle" fill="#08121f" font-family="Arial" font-size="28" font-weight="800">COMPORTAMENTI INSICURI E ANOMALIE</text>
+</g>
+<g>
+  <rect x="1070" y="250" width="440" height="360" rx="24" fill="#101a2c" stroke="#28405f" stroke-width="2"/>
+  <text x="1100" y="296" fill="#4dd3a8" font-family="Arial" font-size="26" font-weight="700">Messaggio chiave</text>
+  <text x="1100" y="334" fill="#e9eef6" font-family="Arial" font-size="22">• La base della piramide produce i segnali più frequenti.</text>
+  <text x="1100" y="372" fill="#e9eef6" font-family="Arial" font-size="22">• Segnalare piccoli eventi aiuta a prevenire quelli gravi.</text>
+  <text x="1100" y="410" fill="#e9eef6" font-family="Arial" font-size="22">• Near miss e anomalie vanno discussi, non ignorati.</text>
+  <text x="1100" y="448" fill="#e9eef6" font-family="Arial" font-size="22">• L’obiettivo è intercettare la criticità prima del danno.</text>
+  <text x="1100" y="500" fill="#ffd166" font-family="Arial" font-size="24" font-weight="700">Domanda all’aula</text>
+  <text x="1100" y="540" fill="#d5deec" font-family="Arial" font-size="21">Quali near miss o piccole anomalie vedete più spesso nel vostro lavoro e cosa potrebbero anticipare?</text>
+</g>
+<g>
+  <rect x="80" y="730" width="1430" height="98" rx="18" fill="#0d1727" stroke="#28405f" stroke-width="2"/>
+  <text x="110" y="786" fill="#d5deec" font-family="Arial" font-size="22">Usa questa piramide per spiegare che la prevenzione efficace nasce dall’osservazione, dalla segnalazione e dalla correzione delle anomalie minori.</text>
+</g>
+</svg>
