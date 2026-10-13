@@ -1,0 +1,17 @@
+{
+  "version": "19-foundation",
+  "architecture": "single-database-single-auth-two-frontends",
+  "database": "SafetyManagerPro Supabase",
+  "production_migration_applied": false,
+  "training_player": "Safety Training v18 preserved under apps/training",
+  "learning_units_seeded": 90,
+  "comprehension_questions_seeded": 90,
+  "risk_categories_seeded": 16,
+  "certification_default": "not_certified",
+  "excluded_course_families": ["RSPP", "ASPP", "Coordinatore sicurezza", "Ambienti confinati"],
+  "tracking": {
+    "heartbeat_seconds": 30,
+    "idle_timeout_seconds": 300,
+    "server_authoritative": true
+  }
+}
