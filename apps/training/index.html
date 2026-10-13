@@ -4,12 +4,13 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Safety Training</title>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="cloud.css">
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b1220"></head>
 <body>
 <header class="topbar">
   <div class="brandwrap">
     <div class="brand">SAFETY <span>TRAINING</span></div>
-    <div class="brandsub">web app didattica locale</div>
+    <div class="brandsub">cloud-first · percorso interno</div>
   </div>
   <input id="search" class="search" placeholder="Cerca rischio, DPI, procedura, normativa...">
   <div class="mode">
@@ -36,7 +37,8 @@
   </aside>
   <main id="app"></main>
 </div>
-<script src="data.js"></script><script src="dpi.js"></script><script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
+<script src="data.js"></script><script src="dpi.js"></script><script src="cloud.js"></script><script src="app.js"></script>
 <script>
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
