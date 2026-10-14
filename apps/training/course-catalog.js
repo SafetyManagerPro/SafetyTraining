@@ -13,7 +13,7 @@
 
   function ensureNav(){
     const shell=adminRoot(); if(!shell||shell.querySelector('[data-sm-course-catalog]')) return;
-    const nav=shell.querySelector('.admin-nav'); if(!nav) return;
+    const nav=shell.querySelector('.admin-nav nav'); if(!nav) return;
     const b=document.createElement('button');
     b.type='button'; b.dataset.smCourseCatalog='1';
     b.innerHTML='<span>⇄</span> Catalogo SafetyManager';
