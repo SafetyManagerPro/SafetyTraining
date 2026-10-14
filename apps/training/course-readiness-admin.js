@@ -25,12 +25,14 @@
     missing_course_modules: 'Moduli corso mancanti',
     missing_practical_requirement: 'Requisito pratico mancante',
     missing_verification_requirement: 'Verifica finale mancante',
+    missing_test_definition: 'Definizione test mancante',
     draft_version: 'Versione in bozza',
     admin_review_required: 'Revisione amministrativa/didattica richiesta',
     learner_catalog_hidden: 'Nascosto al catalogo corsisti',
     dynamic_content_selection_required: 'Contenuti dinamici da selezionare',
     collective_bargaining_check_required: 'Verifica contrattazione collettiva richiesta',
-    platform_question_bank_incomplete: 'Question bank piattaforma incompleta',
+    verification_path_selection_required: 'Scegliere test oppure colloquio',
+    platform_question_bank_incomplete: 'Question bank del test incompleta',
     external_practical_validation_required: 'Validazione pratica esterna/in presenza richiesta'
   };
 
@@ -100,7 +102,7 @@
           <tbody>${rows.map(c => `<tr>
             <td><strong>${esc(c.title)}</strong><div class="admin-note">${esc(c.stable_key)} · ${esc(c.family || '—')} · ${c.nominal_minutes ? hours(c.nominal_minutes) : '—'}</div><div class="admin-note">Blueprint: ${esc(c.blueprint_key || '—')}${c.variant_key ? ` · Variante: ${esc(c.variant_key)}` : ''}</div></td>
             <td>${badge(c.readiness_state)}<div class="admin-note">Versione ${esc(c.version_number || '—')} · ${esc(c.version_status || '—')}</div>${c.delivery_constraint ? `<div class="admin-note">${esc(c.delivery_constraint)}</div>` : ''}</td>
-            <td><strong>${esc(c.module_count || 0)}</strong> moduli · <strong>${esc(c.unit_count || 0)}</strong> LU<br><span class="admin-note">Pratica: ${esc(c.required_practical_count || 0)} · Verifiche: ${esc(c.required_verification_count || 0)}</span>${c.required_practical_minutes ? `<br><span class="admin-note">Pratica richiesta: ${hours(c.required_practical_minutes)}</span>` : ''}</td>
+            <td><strong>${esc(c.module_count || 0)}</strong> moduli · <strong>${esc(c.unit_count || 0)}</strong> LU<br><span class="admin-note">Pratica: ${esc(c.required_practical_count || 0)} · Verifiche: ${esc(c.required_verification_count || 0)}</span>${c.required_practical_minutes ? `<br><span class="admin-note">Pratica richiesta: ${hours(c.required_practical_minutes)}</span>` : ''}<br><span class="admin-note">Test richiesti: ${esc(c.required_test_count || 0)} · Test definiti: ${esc(c.test_count || 0)} · Domande collegate: ${esc(c.linked_required_test_question_count || 0)}</span>${c.verification_path_selection_count ? `<br><span class="admin-warn">Scelta verifica da effettuare: ${esc(c.verification_path_selection_count)}</span>` : ''}</td>
             <td>${chips(c.hard_blockers, true)}</td>
             <td>${chips(c.review_items, false)}</td>
           </tr>`).join('')}</tbody>
@@ -111,7 +113,7 @@
     host().innerHTML = `
       <section class="admin-card">
         <h2>Gate amministrativo di pubblicazione</h2>
-        <p class="admin-note">Questo controllo misura soltanto la readiness tecnica/amministrativa del catalogo. Non pubblica corsi automaticamente e non attribuisce validità legale alla formazione. I requisiti pratici, le verifiche finali, la revisione didattica e le condizioni applicabili restano separati.</p>
+        <p class="admin-note">Questo controllo misura soltanto la readiness tecnica/amministrativa del catalogo. Non pubblica corsi automaticamente e non attribuisce validità legale alla formazione. Dove la verifica può essere test oppure colloquio, il metodo deve essere scelto esplicitamente: la banca domande è obbligatoria solo se viene selezionato il test.</p>
         <div class="admin-stats">${stats}</div>
       </section>
       ${sections || '<section class="admin-card"><p class="admin-note">Nessun corso disponibile per il controllo.</p></section>'}
