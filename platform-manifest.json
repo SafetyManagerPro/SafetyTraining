@@ -1,17 +1,33 @@
 {
-  "version": "19-foundation",
+  "version": "20.046",
   "architecture": "single-database-single-auth-two-frontends",
   "database": "SafetyManagerPro Supabase",
-  "production_migration_applied": false,
-  "training_player": "Safety Training v18 preserved under apps/training",
-  "learning_units_seeded": 90,
-  "comprehension_questions_seeded": 90,
-  "risk_categories_seeded": 16,
+  "production_state": "active",
+  "repository_sync_state": "partial-content-drift-see-docs",
+  "training_player": "SafetyTraining current under apps/training",
+  "catalog_snapshot": {
+    "active_courses": 92,
+    "courses_with_material": 92,
+    "empty_active_courses": 0,
+    "snapshot_date": "2026-10-15"
+  },
+  "source_library": {
+    "enabled": true,
+    "migration": "v20_046",
+    "initial_sources": 9,
+    "initial_links": 509,
+    "initial_linked_learning_units": 375
+  },
+  "course_scope": "full-safety-training-catalog-with-specialist-families",
+  "excluded_course_families": [],
+  "test_builder": "paused",
+  "new_content_default": "draft_hidden",
   "certification_default": "not_certified",
-  "excluded_course_families": ["RSPP", "ASPP", "Coordinatore sicurezza", "Ambienti confinati"],
   "tracking": {
     "heartbeat_seconds": 30,
     "idle_timeout_seconds": 300,
     "server_authoritative": true
-  }
+  },
+  "documentation_entrypoint": "docs/START_HERE_COLLABORATORS.md",
+  "version_history": "docs/VERSION_HISTORY_V20.md"
 }
