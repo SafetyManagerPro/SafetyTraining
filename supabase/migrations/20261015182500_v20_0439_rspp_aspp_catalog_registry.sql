@@ -1,0 +1,25 @@
+-- SafetyTraining v20.0439
+-- Seed the local SafetyTraining integration catalog before v20.044 creates
+-- training_blueprint_course_types rows (FK: source_system + external_course_code).
+
+insert into public.integration_course_catalog(
+  source_system,external_course_code,title,nominal_minutes,delivery_status,metadata,last_seen_at,updated_at
+)
+values
+('safetytraining','rspp_aspp_a','RSPP/ASPP - Modulo A - 28h',1680,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_aspp_a","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','rspp_aspp_b','RSPP/ASPP - Modulo B comune - 48h',2880,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_aspp_b","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','rspp_aspp_bsp1','RSPP/ASPP - B-SP1 Agricoltura, silvicoltura e zootecnia - 16h',960,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_aspp_bsp","variant_key":"bsp1_agricoltura","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','rspp_aspp_bsp2','RSPP/ASPP - B-SP2 Pesca - 12h',720,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_aspp_bsp","variant_key":"bsp2_pesca","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','rspp_aspp_bsp3','RSPP/ASPP - B-SP3 Costruzioni - 16h',960,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_aspp_bsp","variant_key":"bsp3_costruzioni","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','rspp_aspp_bsp4','RSPP/ASPP - B-SP4 Sanità residenziale - 12h',720,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_aspp_bsp","variant_key":"bsp4_sanita_residenziale","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','rspp_aspp_bsp5','RSPP/ASPP - B-SP5 Chimico-petrolchimico - 16h',960,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_aspp_bsp","variant_key":"bsp5_chimico_petrolchimico","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','rspp_c','RSPP - Modulo C - 24h',1440,'needs_configuration','{"family":"RSPP","blueprint_key":"rspp_c","registry":"local_safetytraining","publication_blocked":true}'::jsonb,now(),now()),
+('safetytraining','agg_aspp','Aggiornamento ASPP - 20h / 5 anni',1200,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"aspp_update","registry":"local_safetytraining","publication_blocked":true,"dynamic_update":true}'::jsonb,now(),now()),
+('safetytraining','agg_rspp','Aggiornamento RSPP - 40h / 5 anni',2400,'needs_configuration','{"family":"RSPP/ASPP","blueprint_key":"rspp_update","registry":"local_safetytraining","publication_blocked":true,"dynamic_update":true}'::jsonb,now(),now())
+on conflict(source_system,external_course_code) do update set
+  title=excluded.title,
+  nominal_minutes=excluded.nominal_minutes,
+  delivery_status='needs_configuration',
+  metadata=public.integration_course_catalog.metadata||excluded.metadata,
+  last_seen_at=now(),
+  updated_at=now();
