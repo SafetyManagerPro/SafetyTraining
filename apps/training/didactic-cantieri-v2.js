@@ -1,133 +1,140 @@
-/* SafetyTraining — Modulo aggiuntivo Cantieri 6h, revisione didattica v2.
+/* SafetyTraining — Modulo Cantieri 6h, revisione didattica v2.
    Core condiviso per Datore di lavoro / Dirigente dell'impresa affidataria.
-   La selezione del ruolo è demandata al Course Composer; il modulo non è universale.
-   Non modifica Test Builder o banca domande finale. */
+   Il Course Composer lo abilita solo con construction_role = entrusted_company.
+   La scansione in 6 LU da 60 minuti è interna; Test Builder finale non modificato. */
 (() => {
   'use strict';
-  const data = window.SAFETY_DATA || [];
-  const norm = s => String(s || '').toLowerCase();
-  const course = data.find(c => c.id === 'mod_cantieri' || c.id === 'cantieri') ||
-    data.find(c => norm(c.title).includes('modulo cantieri')) ||
-    data.find(c => norm(c.title).includes('cantieri') && (norm(c.title).includes('datore') || norm(c.title).includes('dirigente')));
-  if (!course) return;
+  const data=window.SAFETY_DATA||[];
+  const norm=s=>String(s||'').toLowerCase();
+  const course=data.find(c=>c.id==='mod_cantieri'||c.id==='cantieri')||data.find(c=>norm(c.title).includes('modulo cantieri'))||data.find(c=>norm(c.title).includes('cantieri')&&(norm(c.title).includes('datore')||norm(c.title).includes('dirigente')));
+  if(!course) return;
 
-  const mk = (o) => ({
-    icon:'🏗️', minutes:60, visual:'roles', risks:[], prevention:[], procedure:[],
-    idea_images:[], graphic_cards:[], teacher_expansion:[], teaching_steps:[], common_errors:[],
+  const base=o=>({
+    icon:'🏗️',minutes:60,visual:'general',risks:[],prevention:[],dpi:[],procedure:[],good:[],bad:[],
+    idea_images:[],graphic_cards:[],resources:[],teacher_expansion:[],teaching_steps:[],common_errors:[],
     guided:{observe:[],importance:[],apply:[]},
-    operational:{before:[],during:[],after:[],step_by_step:[],if_problem:[],stop_conditions:[],who_to_involve:[]},
+    operational:{objective:'',before:[],during:[],after:[],step_by_step:[],if_problem:[],stop_conditions:[],who_to_involve:[],remember:'',adaptation:''},
     discussion_feedback:{answer:[],case_solution:[],general_solution:[]},
-    quality:{score:100,complete:true,version:'cantieri-v2',classroom_first:false,final_assessment:false,construction:true},
-    didactic_version:'cantieri-v2', ...o
+    quiz:{q:'',answers:[],correct:0,explanation:'',case_solution:[],general_solution:[]},
+    quality:{score:100,complete:true,version:'datore-cantieri-v2',construction:true,final_assessment:false},
+    didactic_version:'datore-cantieri-v2',...o
   });
 
-  course.didactic_version='cantieri-v2';
-  course.subtitle='6 ore · impresa affidataria: soggetti, PSC/POS, organizzazione, cronoprogramma, verifica e coordinamento';
-  course.disclaimer='Il modulo è richiesto nel percorso del Datore di lavoro o del Dirigente dell’impresa affidataria quando ricorrono le condizioni dell’art. 97. La suddivisione in 3 blocchi da 120 minuti e 6 unità da 60 minuti è una scelta didattica interna e non una durata normativa per singolo argomento.';
-  course.delivery_note='Erogazione consentita in presenza, videoconferenza sincrona o e-learning secondo le condizioni applicabili al progetto formativo. Il Test Builder finale resta separato.';
+  course.didactic_version='datore-cantieri-v2';
+  course.subtitle='6 ore · impresa affidataria: soggetti, PSC/POS, artt. 95-96, cronoprogramma, verifica, congruenza e coordinamento';
+  course.disclaimer='Modulo condizionale per Datore di lavoro o Dirigente dell’impresa affidataria. La suddivisione in 2 blocchi da 180 minuti e 6 unità da 60 minuti è una scelta didattica interna, non una durata normativa per singolo argomento.';
+  course.delivery_note='Erogazione consentita in presenza, videoconferenza sincrona o e-learning secondo l’Accordo Stato-Regioni 17/04/2025 e i requisiti del progetto formativo.';
   course.context_note='Il Course Composer deve proporre questo modulo solo con construction_role = entrusted_company.';
-
   course.modules=[
-    {id:'cant-a',title:'CANT-A · Soggetti, responsabilità, PSC e POS',topic_ids:['cant01','cant02'],minutes:120,start_minute:0,end_minute:120},
-    {id:'cant-b',title:'CANT-B · Misure di tutela, obblighi e cronoprogramma',topic_ids:['cant03','cant04'],minutes:120,start_minute:120,end_minute:240},
-    {id:'cant-c',title:'CANT-C · Verifica dei lavori, congruenza POS e coordinamento',topic_ids:['cant05','cant06'],minutes:120,start_minute:240,end_minute:360}
+    {id:'cant-a',title:'CANT-A · Sistema di cantiere, piani, misure e programmazione',topic_ids:['cant01','cant02','cant03'],minutes:180,start_minute:0,end_minute:180},
+    {id:'cant-b',title:'CANT-B · Verifica, coordinamento e congruenza',topic_ids:['cant04','cant05','cant06'],minutes:180,start_minute:180,end_minute:360}
   ];
 
   course.topics=[
-    mk({id:'cant01',title:'CANT01 · Soggetti del Titolo IV e relativi obblighi',icon:'🏗️',visual:'roles',
-      slide_title:'Nel cantiere la sicurezza dipende da una rete di soggetti',
-      summary:'Committente, responsabile dei lavori, coordinatori, impresa affidataria, imprese esecutrici e autonomi hanno funzioni diverse che devono essere comprese e coordinate.',
-      detail:'Il punto non è memorizzare un organigramma: bisogna capire chi decide, chi coordina, chi esegue, quali informazioni devono circolare e quando una criticità deve essere fatta risalire.',
-      question:'Se un problema coinvolge più imprese, chi deve sapere cosa e chi può decidere la misura necessaria?',
-      case:'Una lavorazione di un’impresa esecutrice interferisce con l’accesso di un’altra. Tutti conoscono il problema, ma ciascuno ritiene che debba intervenire un altro soggetto. Come agisce l’impresa affidataria?',
-      risks:['Ruoli confusi','Informazioni frammentate','Responsabilità non presidiate','Interferenze non coordinate'],
-      prevention:['Mappa soggetti e responsabilità','Flussi informativi definiti','Coordinamento prima delle variazioni','Escalation chiara'],
-      procedure:['Identifica i soggetti','Definisci responsabilità e flussi','Rileva l’interferenza','Coordina la misura','Comunica','Verifica la chiusura'],
-      teacher:'Disegna la rete del cantiere e chiedi ai corsisti dove passa una decisione reale.',
-      teacher_expansion:['0–10 · Il cantiere come sistema multi-soggetto','10–25 · Soggetti del Titolo IV','25–40 · Focus impresa affidataria','40–50 · Caso di interferenza','50–60 · Mappa decisionale'],
-      common_errors:['Confondere impresa affidataria ed esecutrice.','Delegare tutto al preposto di una singola impresa.','Non aggiornare i flussi quando entrano nuovi soggetti.'],
-      operational:{objective:'Rendere espliciti soggetti, responsabilità, flussi ed escalation.',step_by_step:['Mappa soggetti','Attribuisci funzioni','Definisci flussi','Coordina','Escala','Verifica'],who_to_involve:['Datore/Dirigente impresa affidataria','Coordinatori','Imprese esecutrici','Preposti']},
-      discussion_feedback:{answer:['La responsabilità va letta per funzione e potere effettivo.','L’affidataria deve presidiare i flussi e il coordinamento che le competono.'],case_solution:['Blocca l’interferenza non coordinata','Coinvolgi i soggetti necessari','Definisci misura e responsabilità','Verifica prima della ripresa'],general_solution:['Ruoli chiari','Flussi chiari','Decisioni tracciate','Riesame alle variazioni']},
-      idea_images:[{file:'organigramma-sicurezza.svg',caption:'Ruoli e relazioni da leggere come sistema decisionale.'},{file:'idea-safety-system.svg',caption:'Il cantiere come sistema di soggetti e processi collegati.'}]}),
+    base({id:'cant01',title:'CANT01 · Soggetti del Titolo IV, ruoli e responsabilità',icon:'🏗️',visual:'roles',
+      slide_title:'Il cantiere è una rete di responsabilità: chiarisci chi decide, coordina e verifica',
+      summary:'Committente, coordinatori, impresa affidataria, esecutrici, autonomi, preposti e lavoratori hanno funzioni diverse che devono essere comprese e collegate.',
+      detail:'Il punto non è memorizzare un organigramma: il datore o dirigente dell’affidataria deve capire chi decide, chi coordina, quali informazioni devono circolare e quali responsabilità restano da presidiare anche quando il lavoro è eseguito da altri.',
+      question:'Quali decisioni restano in capo all’impresa affidataria quando entrano nuove imprese esecutrici?',
+      case:'Due nuove imprese devono entrare in una fase già avviata. Referenti e flussi non sono stati aggiornati. Cosa deve accadere prima dell’avvio?',
+      risks:['Ruoli e referenti non chiari','Informazioni che non raggiungono chi opera','Affidamento confuso con trasferimento totale del rischio'],
+      prevention:['Matrice ruoli-responsabilità','Referenti nominativi aggiornati','Flussi di coordinamento ed escalation'],
+      procedure:['Mappa i soggetti','Attribuisci obblighi e referenti','Verifica i flussi','Coordina prima dell’ingresso','Autorizza l’avvio','Riesamina ai cambiamenti'],
+      good:['Responsabilità esplicite','Referenti raggiungibili','Variazioni comunicate prima dell’attività'],
+      bad:['Ingresso senza coordinamento','Ruoli affidati alla memoria','Subaffidamento usato come scarico totale di responsabilità'],
+      teacher_expansion:['0–15 · Mappa dei soggetti del Titolo IV','15–30 · Obblighi e responsabilità','30–45 · Impresa affidataria: ruolo di governo','45–55 · Caso nuova impresa','55–60 · Decision map'],
+      common_errors:['Confondere coordinamento documentale e operativo.','Lasciare invariata la catena informativa quando cambia il cantiere.'],
+      guided:{observe:['Chi decide','Chi coordina','Chi controlla','Chi deve essere informato'],importance:['Le responsabilità devono corrispondere al lavoro reale.'],apply:['Usa una matrice ruoli/flussi prima dell’avvio.']},
+      operational:{objective:'Rendere espliciti ruoli, flussi e responsabilità prima dell’attività.',before:['Identifica imprese e soggetti presenti'],during:['Verifica che i flussi funzionino'],after:['Aggiorna assetto e registrazioni'],step_by_step:['Mappa','Assegna','Verifica','Comunica','Autorizza','Riesamina'],if_problem:['Ferma l’ingresso non coordinato','Escala la responsabilità non definita'],stop_conditions:['Referente non identificato','Nuova impresa senza coordinamento'],who_to_involve:['Datore/dirigente affidataria','Coordinatori quando previsti','Preposti','Imprese esecutrici'],remember:'Il cantiere cambia: ruoli e flussi devono cambiare con lui.'},
+      discussion_feedback:{answer:['L’affidataria mantiene le funzioni di verifica e coordinamento che le competono.'],case_solution:['Non avviare','Aggiornare soggetti e referenti','Verificare condizioni e documenti','Comunicare prescrizioni'],general_solution:['Ruoli chiari','Flussi aggiornati','Avvio solo dopo coordinamento']},
+      quiz:{q:'L’ingresso di una nuova impresa può avvenire solo perché il suo POS è disponibile?',answers:['No: servono anche verifica delle condizioni e coordinamento coerente con il cantiere reale.','Sì, il POS basta sempre.','Sì, se ha già lavorato in altri cantieri.'],correct:0,explanation:'Il documento non sostituisce il coordinamento e la verifica delle condizioni effettive.',case_solution:['Aggiorna il sistema prima dell’avvio'],general_solution:['Documento + condizioni reali + coordinamento']},
+      idea_images:[{file:'organigramma-sicurezza.svg',caption:'Ruoli e relazioni letti come sistema decisionale.'},{file:'idea-safety-system.svg',caption:'Il cantiere come sistema di soggetti e processi collegati.'}],
+      norm:'Accordo Stato-Regioni 17/04/2025 Rep. 59/CSR; Titolo IV d.lgs. 81/2008'}),
 
-    mk({id:'cant02',title:'CANT02 · PSC e POS: finalità, tempi e contenuti',icon:'📑',visual:'general',
-      slide_title:'PSC e POS devono descrivere il lavoro reale prima che il lavoro inizi',
-      summary:'PSC e POS sono strumenti di pianificazione e coordinamento: devono essere coerenti con lavorazioni, fasi, organizzazione, rischi e misure effettive.',
-      detail:'Si confrontano finalità, tempi e contenuti dei piani, concentrandosi sulla relazione PSC–POS e sugli scostamenti tra carta e cantiere.',
-      question:'Quale incoerenza tra PSC, POS e lavorazione reale richiede un riesame prima di iniziare?',
-      case:'Il POS descrive un accesso e un’attrezzatura diversi da quelli realmente presenti; il PSC non considera la nuova configurazione. Si può iniziare perché i documenti esistono?',
-      risks:['Piano generico','Misure non coerenti col sito','Variazioni non recepite','Avvio prima del coordinamento'],
-      prevention:['Confronto PSC-POS-lavoro reale','Riesame alle variazioni','Condivisione delle prescrizioni','Avvio solo dopo verifica di coerenza'],
-      procedure:['Leggi attività prevista','Confronta PSC e POS','Verifica condizioni reali','Individua scostamenti','Coordina aggiornamento','Autorizza solo dopo coerenza'],
-      teacher:'Usa due esempi documentali e fai cercare prima le incoerenze, poi la soluzione.',
-      teacher_expansion:['0–15 · Finalità di PSC e POS','15–30 · Cosa deve essere coerente','30–45 · Esempio comparato','45–55 · Caso variazione in campo','55–60 · Regola di stop'],
-      common_errors:['Considerare sufficiente la presenza dei documenti.','Confondere controllo formale e congruenza sostanziale.','Accettare variazioni non riflesse nei piani.'],
-      operational:{objective:'Usare PSC e POS come strumenti vivi.',step_by_step:['Confronta','Verifica sul campo','Rileva scostamento','Aggiorna','Comunica','Autorizza'],stop_conditions:['Condizione reale non prevista','Misura essenziale incoerente','Variazione non coordinata']},
-      discussion_feedback:{answer:['Il documento è utile solo se descrive e governa il lavoro reale.'],case_solution:['Non avviare','Allinea documenti e condizioni','Coordina la variazione','Verifica sul campo'],general_solution:['Confronto sostanziale','Aggiornamento tempestivo','Avvio condizionato alla coerenza']},
-      idea_images:[{file:'idea-dvr-reading.svg',caption:'Dal documento alla decisione operativa.'},{file:'idea-duvri.svg',caption:'Coordinamento di attività e interferenze.'}]}),
+    base({id:'cant02',title:'CANT02 · PSC e POS: finalità, tempi, contenuti e relazione operativa',icon:'📑',visual:'general',
+      slide_title:'PSC e POS governano il lavoro prima che inizi e quando cambia',
+      summary:'PSC e POS devono essere coerenti con lavorazioni, fasi, aree, metodi, rischi e interferenze reali.',
+      detail:'Il controllo utile non è “il documento c’è?”, ma “descrive ancora il lavoro che stiamo per fare?”. Una variazione significativa deve attivare il confronto tra piani, programma e realtà.',
+      question:'Quale segnale ti dice che PSC o POS non stanno più descrivendo il cantiere reale?',
+      case:'Una lavorazione prevista in zona A viene spostata in zona B, dove opera un’altra impresa. PSC e POS non recepiscono la nuova sovrapposizione.',
+      risks:['Piani presenti ma non aderenti','Prescrizioni non trasferite alle squadre','Variazioni gestite dopo l’avvio'],
+      prevention:['Confronto PSC-POS-lavoro reale','Riesame alle variazioni','Prescrizioni operative comunicate'],
+      procedure:['Leggi la fase prevista','Confronta PSC','Confronta POS','Verifica area e interferenze','Riallinea','Comunica','Autorizza'],
+      good:['Piani coerenti con la fase reale','Variazioni gestite prima dell’avvio'],bad:['POS archiviato e mai riesaminato','PSC trattato come documento statico'],
+      teacher_expansion:['0–15 · Finalità e differenze PSC/POS','15–30 · Tempi e contenuti','30–45 · Coerenza col lavoro reale','45–55 · Caso spostamento lavorazione','55–60 · Check di congruenza'],
+      common_errors:['Controllare solo presenza e firme.','Ritenere che il piano resti valido dopo ogni modifica.'],
+      operational:{objective:'Usare PSC e POS come condizioni di avvio e controllo.',before:['Confronta i documenti con la fase prevista'],during:['Controlla che le prescrizioni siano applicate'],after:['Riesamina dopo variazioni'],step_by_step:['Confronta','Individua scostamenti','Coordina','Aggiorna','Comunica','Autorizza'],if_problem:['Non avviare una fase incoerente'],stop_conditions:['Piano incoerente con l’attività','Interferenza non valutata'],who_to_involve:['Affidataria','Esecutrice','Coordinatore quando previsto'],remember:'Un piano è utile solo se descrive il lavoro reale.'},
+      quiz:{q:'Un POS può essere considerato adeguato solo perché completo nei suoi campi?',answers:['No, deve essere congruo con lavorazione, PSC e condizioni reali.','Sì, completezza formale equivale a congruenza.','Sì, se firmato dal datore.'],correct:0,explanation:'La verifica deve essere sostanziale e riferita al cantiere concreto.'},
+      idea_images:[{file:'idea-dvr-reading.svg',caption:'Dal documento alla decisione operativa.'},{file:'idea-duvri.svg',caption:'Coordinamento di attività e interferenze.'}],
+      norm:'Accordo Stato-Regioni 17/04/2025 Rep. 59/CSR; Titolo IV d.lgs. 81/2008'}),
 
-    mk({id:'cant03',title:'CANT03 · Misure generali di tutela e obblighi ex artt. 95 e 96',icon:'🛡️',visual:'risk',
-      slide_title:'Gli artt. 95 e 96 diventano criteri per organizzare il cantiere',
-      summary:'Le misure generali di tutela e gli obblighi di datore, dirigenti e preposti devono tradursi in scelte concrete sulle lavorazioni.',
-      detail:'Ordine, accessi, movimentazioni, manutenzione, depositi, cooperazione e protezioni vanno letti come elementi dell’organizzazione reale del cantiere.',
-      question:'Quale scelta organizzativa può ridurre il rischio prima ancora di introdurre un DPI?',
-      case:'Per recuperare ritardo si sovrappongono due lavorazioni nello stesso spazio e si affida ai preposti il compito di “stare attenti”. È sufficiente?',
-      risks:['Sovrapposizione non pianificata','Spazi inadeguati','Misure affidate al solo comportamento','Protezione collettiva insufficiente'],
-      prevention:['Pianificazione delle fasi','Gerarchia delle misure','Coordinamento organizzativo','Controllo prima dell’avvio'],
-      procedure:['Individua pericoli di fase','Applica gerarchia misure','Separa o coordina attività','Definisci responsabilità','Verifica prima dell’avvio','Riesamina'],
-      teacher:'Trasforma gli articoli in decisioni concrete: spazio, tempo, protezione e responsabilità.',
-      teacher_expansion:['0–15 · Misure generali di tutela','15–30 · Obblighi operativi ex art. 96','30–45 · Organizzazione prima del DPI','45–55 · Caso fasi sovrapposte','55–60 · Decisione e verifica'],
-      common_errors:['Studiare gli articoli come elenco mnemonico.','Affidare la prevenzione al comportamento individuale.','Non riesaminare l’organizzazione quando cambia la sequenza.'],
-      operational:{objective:'Tradurre gli obblighi in misure verificabili.',step_by_step:['Analizza fase','Elimina/riduci','Separa','Proteggi','Comunica','Verifica']},
-      discussion_feedback:{answer:['La prima leva è l’organizzazione della fase, non il richiamo individuale.'],case_solution:['Riesamina la sovrapposizione','Separa o proteggi','Coordina le imprese','Verifica prima della ripresa'],general_solution:['Gerarchia delle misure','Organizzazione','Protezione collettiva','Verifica']},
-      idea_images:[{file:'piramide-pericoli.svg',caption:'Intervenire prima possibile sulla fonte e sull’organizzazione.'},{file:'idea-dpi-hierarchy.svg',caption:'Il DPI è l’ultimo livello, non il primo.'}]}),
+    base({id:'cant03',title:'CANT03 · Artt. 95 e 96: misure generali e obblighi operativi',icon:'🛡️',visual:'risk',
+      slide_title:'Le misure degli artt. 95 e 96 devono diventare condizioni organizzative verificabili',
+      summary:'Spazi, accessi, ordine, stoccaggi, viabilità, protezioni e coordinamento devono restare efficaci durante l’evoluzione del cantiere.',
+      detail:'L’unità collega gli obblighi alle condizioni quotidiane, con un approccio osserva-confronta-correggi-verifica e con la gerarchia delle misure prima del semplice richiamo al comportamento.',
+      question:'Quali condizioni possono diventare insicure anche se erano corrette all’apertura del cantiere?',
+      case:'Materiali e rifiuti restringono i passaggi e un percorso pedonale finisce condiviso con i mezzi. Come gestisci la deviazione?',
+      risks:['Viabilità degradata','Accumuli e accessi critici','Protezione rimossa o spostata','Misure temporanee diventate permanenti'],
+      prevention:['Controlli periodici','Responsabili di area','Regole di ripristino','Riesame dopo modifiche'],
+      procedure:['Osserva','Confronta con le misure previste','Proteggi subito','Assegna correzione','Verifica ripristino','Riesamina causa'],
+      good:['Anomalie corrette e verificate','Misure mantenute nel tempo'],bad:['Accettare deviazioni “solo per oggi” senza controllo','Chiudere senza verifica'],
+      teacher_expansion:['0–15 · Logica art. 95','15–30 · Obblighi art. 96','30–45 · Mantenere le misure','45–55 · Caso viabilità/depositi','55–60 · Audit rapido'],
+      common_errors:['Considerare definitiva l’organizzazione iniziale.','Correggere il sintomo senza owner e scadenza.'],
+      operational:{objective:'Mantenere nel tempo le condizioni organizzative di sicurezza.',before:['Definisci criteri di controllo'],during:['Osserva e correggi gli scostamenti'],after:['Verifica il ripristino'],step_by_step:['Verifica','Segnala','Proteggi','Assegna','Ripristina','Controlla'],if_problem:['Metti in sicurezza prima della soluzione definitiva'],stop_conditions:['Passaggi non sicuri','Protezione essenziale assente'],who_to_involve:['Affidataria','Esecutrice interessata','Preposti'],remember:'Una misura non è “fatta”: deve restare efficace.'},
+      quiz:{q:'Una misura organizzativa corretta all’apertura resta automaticamente adeguata fino a fine lavori?',answers:['No, deve essere mantenuta e riesaminata quando cambiano condizioni e fasi.','Sì, salvo incidente.','Sì, se prevista nel PSC.'],correct:0,explanation:'Il cantiere è dinamico e richiede verifica continuativa.'},
+      idea_images:[{file:'piramide-pericoli.svg',caption:'Intervenire prima possibile sulla fonte e sull’organizzazione.'},{file:'idea-dpi-hierarchy.svg',caption:'Il DPI è l’ultimo livello, non il primo.'}],
+      norm:'Accordo Stato-Regioni 17/04/2025 Rep. 59/CSR; artt. 95 e 96 d.lgs. 81/2008'}),
 
-    mk({id:'cant04',title:'CANT04 · Cronoprogramma e organizzazione del cantiere',icon:'🗓️',visual:'risk',
-      slide_title:'Il cronoprogramma è anche una misura di sicurezza',
-      summary:'Tempi, sequenze e sovrapposizioni determinano esposizioni e interferenze. Il programma lavori deve essere letto anche come strumento di prevenzione.',
-      detail:'Si impara a leggere fasi, spazi condivisi, mezzi, energie e protezioni necessarie, riconoscendo quando una variazione richiede nuovo coordinamento.',
-      question:'Come cambia il rischio quando una fase viene anticipata senza riesaminare il cronoprogramma?',
-      case:'Una lavorazione in quota viene anticipata mentre al piano inferiore continua la movimentazione materiali. Il ritardo contrattuale spinge a mantenerle entrambe. Cosa fai?',
-      risks:['Sovrapposizioni','Caduta materiali','Interferenze mezzi-persone','Protezione non pronta'],
-      prevention:['Sequenze compatibili','Zone interdette','Protezione collettiva prima della fase','Riesame a variazioni significative'],
-      procedure:['Leggi fasi e tempi','Evidenzia sovrapposizioni','Valuta interferenze','Modifica sequenza o misure','Comunica','Verifica'],
-      teacher:'Fai lavorare i corsisti su un mini cronoprogramma e chiedi di segnare le sovrapposizioni critiche.',
-      teacher_expansion:['0–10 · Tempo come fattore di rischio','10–25 · Lettura del cronoprogramma','25–40 · Interferenze di fase','40–55 · Caso quota/movimentazione','55–60 · Gate prima della variazione'],
-      common_errors:['Trattare il cronoprogramma solo come strumento produttivo.','Anticipare attività senza riesame.','Non comunicare la modifica a tutte le imprese.'],
-      operational:{objective:'Integrare sicurezza e programmazione.',step_by_step:['Leggi sequenza','Trova sovrapposizioni','Valuta rischio','Coordina modifica','Comunica','Verifica']},
-      discussion_feedback:{answer:['Una modifica temporale può creare nuovi rischi anche senza cambiare la lavorazione.'],case_solution:['Evita la sovrapposizione o crea protezioni adeguate','Aggiorna il coordinamento','Comunica','Verifica'],general_solution:['Tempo e spazio sono variabili di sicurezza','Ogni variazione significativa riapre la valutazione']},
-      idea_images:[{file:'idea-risk-cycle.svg',caption:'Ogni variazione riapre il ciclo di valutazione.'},{file:'idea-duvri.svg',caption:'Interferenze lette per spazio e tempo.'}]}),
+    base({id:'cant04',title:'CANT04 · Cronoprogramma, fasi di lavoro e interferenze',icon:'🗓️',visual:'risk',
+      slide_title:'Il cronoprogramma è una mappa temporale dei rischi e delle interferenze',
+      summary:'Anticipi, ritardi e sovrapposizioni possono modificare rischi, accessi, spazi condivisi e misure di coordinamento.',
+      detail:'Il cronoprogramma non serve solo alla produttività: è un trigger per individuare contemporaneità e incompatibilità prima che diventino esposizioni reali.',
+      question:'Quale variazione temporale dovrebbe attivare un safety gate?',
+      case:'Una lavorazione viene anticipata per recuperare un ritardo e si sovrappone a sollevamenti programmati.',
+      risks:['Sovrapposizioni non valutate','Pressione temporale','Spazi e risorse condivisi','Modifiche comunicate tardi'],
+      prevention:['Safety review delle variazioni','Separazione spazio-tempo','Coordinamento prima della modifica'],
+      procedure:['Confronta vecchio e nuovo programma','Individua sovrapposizioni','Valuta interferenze','Definisci misure','Comunica','Autorizza'],
+      good:['Variazione gestita prima dell’esecuzione'],bad:['Cambio programma deciso solo per recuperare tempi'],
+      teacher_expansion:['0–15 · Cronoprogramma come prevenzione','15–30 · Interferenze spazio-tempo','30–45 · Change control','45–55 · Caso anticipo','55–60 · Safety gate'],
+      common_errors:['Aggiornare il programma senza aggiornare il coordinamento.','Guardare solo durata e produttività.'],
+      operational:{objective:'Fare della variazione temporale un trigger di rivalutazione.',before:['Confronta le sequenze'],during:['Controlla sovrapposizioni reali'],after:['Aggiorna programma e prescrizioni'],step_by_step:['Rileva','Mappa impatti','Coordina','Proteggi','Comunica','Autorizza'],if_problem:['Rimuovi o separa l’interferenza'],stop_conditions:['Sovrapposizione non valutata','Variazione non condivisa'],who_to_involve:['Affidataria','Esecutrici','Coordinatore quando previsto'],remember:'Cambiare quando si lavora può cambiare anche come si rischia.'},
+      quiz:{q:'Un anticipo di lavorazione senza modifica tecnica richiede attenzione alla sicurezza?',answers:['Sì, perché può creare nuove sovrapposizioni e interferenze.','No, conta solo il metodo tecnico.','No, se riduce la durata del cantiere.'],correct:0,explanation:'Tempo e sequenza sono variabili del rischio.'},
+      idea_images:[{file:'idea-risk-cycle.svg',caption:'Ogni variazione riapre il ciclo di valutazione.'},{file:'idea-duvri.svg',caption:'Interferenze lette per spazio e tempo.'}],
+      norm:'Accordo Stato-Regioni 17/04/2025 Rep. 59/CSR; Titolo IV d.lgs. 81/2008'}),
 
-    mk({id:'cant05',title:'CANT05 · Verifica delle condizioni di sicurezza dei lavori affidati',icon:'🔎',visual:'risk',
-      slide_title:'L’impresa affidataria deve verificare le condizioni, non presumere che siano corrette',
-      summary:'La verifica riguarda condizioni di sicurezza, applicazione delle prescrizioni del PSC e coordinamento degli interventi.',
-      detail:'Si costruisce un metodo: cosa osservare, quali evidenze raccogliere, quando intervenire, come gestire uno scostamento e come accertare la chiusura.',
-      question:'Quali evidenze permettono di dire che una prescrizione del PSC è realmente applicata?',
-      case:'Una protezione prevista nel PSC è stata rimossa temporaneamente e non ripristinata. L’impresa esecutrice sostiene che “manca poco”. Cosa deve fare l’affidataria?',
-      risks:['Prescrizioni non applicate','Anomalie tollerate','Correzioni senza verifica','Normalizzazione dello scostamento'],
-      prevention:['Controlli programmati e situazionali','Criteri di stop','Azioni con owner e scadenza','Verifica del ripristino'],
-      procedure:['Osserva condizione','Confronta con PSC/POS','Classifica scostamento','Metti in sicurezza','Assegna correzione','Verifica ripristino','Registra esito'],
-      teacher:'Distingui osservazione, rilievo, misura immediata, correzione e verifica di chiusura.',
-      teacher_expansion:['0–15 · Cosa significa verificare','15–30 · PSC e condizione reale','30–45 · Stop, correzione, ripresa','45–55 · Caso protezione rimossa','55–60 · Evidenza di chiusura'],
-      common_errors:['Limitarsi a chiedere se è tutto a posto.','Accettare il temporaneo senza controllo.','Chiudere l’anomalia senza verificare il ripristino.'],
-      operational:{objective:'Rendere la verifica sistematica e tracciabile.',step_by_step:['Osserva','Confronta','Intervieni','Assegna','Verifica','Chiudi'],stop_conditions:['Prescrizione PSC non rispettata con rischio attuale','Protezione essenziale assente','Interferenza non coordinata']},
-      discussion_feedback:{answer:['Verificare significa confrontare requisito e realtà e chiudere lo scostamento.'],case_solution:['Metti in sicurezza','Pretendi il ripristino','Verifica prima della ripresa','Registra l’esito'],general_solution:['Controllo','Azione','Verifica efficacia','Chiusura']},
-      idea_images:[{file:'idea-inspection-flow.svg',caption:'Rilievo, azione correttiva, verifica e chiusura.'},{file:'stop-segnala-ripristina.svg',caption:'Stop, segnalazione e ripristino prima della ripresa.'}]}),
+    base({id:'cant05',title:'CANT05 · Verifica dei lavori affidati e applicazione del PSC',icon:'🔎',visual:'general',
+      slide_title:'Verificare significa osservare il lavoro reale e chiudere gli scostamenti',
+      summary:'La verifica delle condizioni dei lavori affidati e dell’applicazione del PSC richiede criteri, evidenze, responsabilità e follow-up.',
+      detail:'Un sopralluogo non basta: il rilievo deve diventare messa in sicurezza, azione assegnata, scadenza, evidenza e verifica del ripristino.',
+      question:'Quando un rilievo può dirsi davvero chiuso?',
+      case:'Una protezione collettiva è stata rimossa. Il preposto promette il ripristino entro sera. Puoi considerare la criticità chiusa?',
+      risks:['Rilievi senza follow-up','Azioni solo verbali','Ripresa prematura','Prescrizioni PSC non applicate'],
+      prevention:['Criteri di verifica','Stop ed escalation','Owner e scadenza','Evidenza del ripristino'],
+      procedure:['Rileva','Valuta gravità','Metti in sicurezza','Assegna','Traccia','Verifica ripristino','Chiudi o escala'],
+      good:['Chiusura con evidenza'],bad:['Chiudere sul “me l’hanno detto”'],
+      teacher_expansion:['0–15 · Cosa significa verificare','15–30 · Criteri ed evidenze','30–45 · Gestione scostamenti','45–55 · Caso protezione rimossa','55–60 · Closed-loop verification'],
+      common_errors:['Confondere sopralluogo e verifica efficace.','Non sospendere quando manca una condizione essenziale.'],
+      operational:{objective:'Chiudere ogni criticità con evidenza del ripristino.',before:['Definisci criteri di controllo'],during:['Gestisci subito le criticità'],after:['Verifica la chiusura'],step_by_step:['Rileva','Proteggi','Assegna','Traccia','Verifica','Chiudi'],if_problem:['Sospendi la fase se manca una barriera essenziale'],stop_conditions:['Protezione essenziale assente','Prescrizione PSC non rispettata'],who_to_involve:['Affidataria','Esecutrice','Preposto','Coordinatore quando previsto'],remember:'Una criticità non è chiusa finché non hai verificato il ripristino.'},
+      quiz:{q:'La promessa di ripristino di una protezione collettiva consente di riprendere subito il lavoro?',answers:['No, occorre assicurare la condizione di sicurezza e verificarne il ripristino.','Sì, se fatta dal preposto.','Sì, se annotata nel verbale.'],correct:0,explanation:'La gestione documentale non sostituisce la condizione reale di sicurezza.'},
+      idea_images:[{file:'idea-inspection-flow.svg',caption:'Rilievo, azione correttiva e verifica di chiusura.'},{file:'stop-segnala-ripristina.svg',caption:'Fermare, segnalare, ripristinare e verificare.'}],
+      norm:'Accordo Stato-Regioni 17/04/2025 Rep. 59/CSR; Titolo IV d.lgs. 81/2008'}),
 
-    mk({id:'cant06',title:'CANT06 · Congruenza dei POS e coordinamento',icon:'🔗',visual:'general',
-      slide_title:'Congruenza dei POS: chiudere il cerchio tra documenti, imprese e lavoro reale',
-      summary:'La congruenza non è solo completezza formale: i POS devono essere compatibili con PSC, cronoprogramma, condizioni reali e attività delle altre imprese.',
-      detail:'Lo scenario finale integra soggetti, PSC, POS, artt. 95-96 e cronoprogramma in una decisione di avvio o ripresa tracciabile.',
-      question:'Che cosa significa “congruente” se un POS è completo ma non compatibile con PSC o condizioni reali?',
-      case:'Due POS sono completi, ma prevedono accessi e aree di deposito incompatibili nello stesso intervallo; il PSC non è stato aggiornato dopo una variante. Qual è la sequenza corretta?',
-      risks:['Congruenza solo formale','Misure incompatibili','Variante non coordinata','Avvio con condizioni indefinite'],
-      prevention:['Analisi comparata PSC-POS','Coordinamento delle sovrapposizioni','Aggiornamento prima dell’avvio','Tracciabilità della decisione'],
-      procedure:['Confronta PSC e POS','Verifica cronoprogramma e sito','Rileva incongruenze','Coordina correzioni','Conferma responsabilità','Autorizza avvio','Controlla sul campo'],
-      teacher:'Chiudi il modulo con una simulazione: il gruppo deve produrre una decisione di avvio/ripresa motivata.',
-      teacher_expansion:['0–10 · Congruenza sostanziale','10–25 · Metodo comparato PSC/POS','25–40 · Coordinamento tra imprese','40–55 · Scenario integrato','55–60 · Decision record'],
-      common_errors:['Controllare solo campi e firme.','Valutare i POS separatamente senza interferenze.','Autorizzare prima della chiusura delle incongruenze.'],
-      operational:{objective:'Arrivare a una decisione di avvio/ripresa basata sulla coerenza reale.',step_by_step:['Confronta','Verifica','Coordina','Correggi','Conferma','Autorizza','Controlla'],stop_conditions:['POS incompatibile con PSC','Interferenza non risolta','Condizione reale diversa dal piano senza valutazione']},
-      discussion_feedback:{answer:['Congruenza significa compatibilità sostanziale tra piani e lavoro reale.'],case_solution:['Blocca l’avvio','Allinea PSC/POS','Coordina spazi e tempi','Conferma responsabilità','Verifica prima della partenza'],general_solution:['Coerenza documentale','Coerenza operativa','Coordinamento','Verifica sul campo']},
-      idea_images:[{file:'idea-duvri.svg',caption:'Coordinamento tra soggetti, tempi e spazi.'},{file:'procedura-operativa-5-fasi.svg',caption:'Verifica, correzione e riesame prima dell’avvio.'}]})
+    base({id:'cant06',title:'CANT06 · Congruenza dei POS, coordinamento e scenario integrato',icon:'🧩',visual:'general',
+      slide_title:'Documenti, sequenze e lavoro reale devono raccontare la stessa storia',
+      summary:'Congruenza dei POS, PSC, cronoprogramma e condizioni di cantiere devono convergere prima dell’autorizzazione di una fase.',
+      detail:'Scenario integrato: il datore/dirigente deve riconoscere incoerenze, impedire l’avvio prematuro, coordinare le correzioni e verificare sul campo. Non sostituisce la verifica finale del corso.',
+      question:'Quali incoerenze ti farebbero fermare una nuova fase prima dell’avvio?',
+      case:'Una nuova esecutrice ha un POS formalmente completo, ma il metodo differisce dal PSC, il cronoprogramma crea una sovrapposizione e l’area prevista è già occupata.',
+      risks:['POS formalmente completo ma non congruo','Interferenze da sequenza','Area incompatibile','Pressione a partire comunque'],
+      prevention:['Analisi di congruenza','Coordinamento prima dell’avvio','Riallineamento di documenti e condizioni'],
+      procedure:['Confronta PSC/POS','Confronta cronoprogramma','Verifica area','Risolvi interferenze','Aggiorna','Comunica','Autorizza','Verifica sul campo'],
+      good:['Avvio condizionato alla chiusura delle criticità'],bad:['Autorizzare con problemi da sistemare dopo'],
+      teacher_expansion:['0–10 · Metodo di congruenza','10–25 · POS vs PSC','25–40 · POS vs cronoprogramma e area','40–50 · Scenario integrato','50–60 · Decision record'],
+      common_errors:['Valutare il POS isolatamente.','Non verificare sul campo il coordinamento concordato.'],
+      operational:{objective:'Autorizzare la fase solo quando documenti e condizioni reali sono coerenti.',before:['Confronta piani, programma e area'],during:['Verifica l’applicazione delle prescrizioni'],after:['Riesamina eventuali scostamenti'],step_by_step:['Confronta','Rileva','Coordina','Aggiorna','Comunica','Autorizza','Verifica'],if_problem:['Non autorizzare la fase'],stop_conditions:['POS non congruo','Interferenza aperta','Area incompatibile'],who_to_involve:['Affidataria','Esecutrice','Coordinatore quando previsto','Preposti'],remember:'La congruenza è sostanziale: carta e cantiere devono coincidere.'},
+      discussion_feedback:{answer:['La congruenza non è solo completezza formale.','PSC, POS, cronoprogramma e condizioni reali devono essere coerenti.'],case_solution:['Non avviare','Riallineare metodo e PSC','Rimuovere sovrapposizione','Verificare area','Autorizzare solo dopo chiusura'],general_solution:['Confronto','Coordinamento','Chiusura criticità','Verifica sul campo']},
+      quiz:{q:'Un POS completo ma incoerente con PSC e cronoprogramma è sufficiente per iniziare?',answers:['No, occorre risolvere le incongruenze e coordinare la fase.','Sì, se firmato.','Sì, se l’impresa è qualificata.'],correct:0,explanation:'La congruenza riguarda il rapporto tra piano, fase reale e coordinamento.'},
+      idea_images:[{file:'idea-duvri.svg',caption:'Coordinamento e interferenze come sistema.'},{file:'modello-farfalla-rischio.svg',caption:'Dalle criticità alle barriere e alle cause di sistema.'}],
+      norm:'Accordo Stato-Regioni 17/04/2025 Rep. 59/CSR; Titolo IV d.lgs. 81/2008'})
   ];
 })();
