@@ -1,49 +1,89 @@
-# Safety Platform v19 — foundation package
+# SafetyTraining — piattaforma didattica SafetyManager
 
-Questa versione segna il passaggio da Safety Training come sola app di presentazione a una piattaforma condivisa con SafetyManager Pro.
+SafetyTraining è la piattaforma didattica/LMS integrata con SafetyManager. Condivide database e identità con il gestionale, ma mantiene un front-end specializzato per aula, docente, corsista, Learning Unit, tracking e materiali formativi.
 
-## Cosa contiene
+## Stato corrente
 
-- `apps/training/` — Safety Training v18 preservata come player didattico;
-- `apps/manager/` — nota di integrazione con il repository SafetyManager Pro esistente;
-- `packages/platform-core/` — ruoli, stati, tracking client e filtro catalogo corsi;
-- `supabase/migrations/2026-10-13_v19_lms_foundation.sql` — schema LMS additivo;
-- `seeds/learning_units.json` — 90 Learning Unit estratte dalla v18;
-- `seeds/questions_public.json` — 90 domande pubbliche;
-- `seeds/question_keys_private.json` — chiavi/feedback da mantenere lato server;
-- `seeds/risk_catalog.json` — primo catalogo rischi derivato dalle unità;
-- `seeds/v19_content_seed.sql` — seed SQL generato;
-- `tools/` — export unità, import catalogo SafetyManager e generatore seed SQL;
-- `docs/` — architettura, piano, perimetro, tracking e strategia RLS.
+Versione logica migration: **v20_046** (15/10/2026).
 
-## Decisioni v19
+Baseline tecnica della fase v20_046:
 
-1. **Database unico Supabase**: si riutilizzano le tabelle SafetyManager esistenti per enti, aziende, corsisti, docenti, progetti e iscrizioni.
-2. **Login unico**: `auth.users` viene collegato ai corsisti/docenti solo quando serve un account.
-3. **Multiutente e multiazienda**: introdotti `platform_memberships` e ruoli per ente/azienda.
-4. **Due front-end, una piattaforma**: Manager e Training restano interfacce separate sopra gli stessi dati.
-5. **E-learning interno prima della certificazione**: corso seguito, tempo attivo, avanzamento, comprensione e test sono separati dallo stato di certificazione.
-6. **Date libere**: un percorso può partire subito, da una data, in una finestra o manualmente, senza obbligo di generare attestati.
-7. **Contenuti riutilizzabili**: le 90 schede diventano Learning Unit versionate.
-8. **Risposte protette**: le soluzioni non vengono esposte nel payload pubblico della domanda.
+- catalogo DB-backed completo;
+- Learning Unit versionate e riutilizzabili;
+- Blueprint/regole/varianti;
+- tracking tempo attivo e progressi;
+- famiglie formative D.Lgs. 81/08 / ASR 2025 ampliate;
+- RSPP/ASPP, DL-RSPP, CSP/CSE, confinati, quota, attrezzature e famiglie specialistiche incluse nel perimetro;
+- PWA e navigazione responsive;
+- Source Library con provenance fonte -> Learning Unit;
+- nuovi corsi mantenuti in draft/hidden fino alla revisione.
 
-## Importante
+Ultimo snapshot verificato del database live: **92 corsi attivi, 92 con materiale, 0 vuoti**.
 
-La migrazione SQL è stata preparata come fondazione **additiva** ma in questa consegna non è stata applicata al database di produzione. Prima dell'applicazione conviene provarla su una branch Supabase o in un ambiente di sviluppo, poi eseguire i security advisor.
+## Prima di lavorare sul progetto
 
-La policy RLS legacy di SafetyManager legata al singolo amministratore viene volutamente lasciata intatta nella prima fase: la migrazione al vero multiutente sarà successiva al bootstrap delle membership.
+Leggere in quest'ordine:
 
-## Verifiche locali
+1. [`docs/START_HERE_COLLABORATORS.md`](docs/START_HERE_COLLABORATORS.md) — stato, decisioni, principi e debito tecnico;
+2. [`docs/VERSION_HISTORY_V20.md`](docs/VERSION_HISTORY_V20.md) — progressione migration/versioni;
+3. [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) — roadmap corrente;
+4. [`docs/ARCHITECTURE_V19.md`](docs/ARCHITECTURE_V19.md) — documento storico della fondazione single database / two frontends;
+5. [`docs/SECURITY_MIGRATION.md`](docs/SECURITY_MIGRATION.md) — principi RLS/multiutente.
 
-Eseguire:
+## Architettura
+
+```text
+                   SUPABASE / AUTH
+                         │
+        ┌────────────────┴────────────────┐
+        │                                 │
+ SafetyManager Pro                  SafetyTraining
+ gestione/amministrazione           didattica / LMS
+        │                                 │
+        └──────────── dati unici ─────────┘
+```
+
+Principio: non duplicare anagrafiche, corsi o rischi se esiste già una fonte canonica. Le Learning Unit sono componibili e possono essere riutilizzate in più corsi.
+
+## Regole didattiche essenziali
+
+- materiale completo per docente e corsista indipendentemente dalla modalità legale di erogazione;
+- modalità di erogazione = regola/metadata, non riduzione del contenuto;
+- contenuti operativi: cosa fare, come, controlli, errori, STOP, emergenza, casi;
+- ogni domanda deve avere spiegazione;
+- distinguere durata normativa da allocazione didattica interna;
+- riutilizzare le LU comuni;
+- Test Builder/finale resta sospeso finché non viene riattivato esplicitamente;
+- nuove famiglie in draft/hidden fino a revisione;
+- ogni fonte esterna va tracciata e verificata prima dell'uso.
+
+## Source Library
+
+Da `v20_046` sono presenti:
+
+- `training_sources`;
+- `learning_unit_sources`.
+
+Le fonti vengono classificate per autorevolezza, licenza/riuso, stato normativo e finalità. Materiali senza licenza aperta verificata vengono usati come benchmark e riscritti, non copiati.
+
+## Struttura repository
+
+- `apps/training/` — front-end SafetyTraining;
+- `packages/` — componenti/core condivisi;
+- `supabase/migrations/` — fonte canonica delle migration versionate;
+- `seeds/` — seed e dati di supporto;
+- `tools/` — utility/import;
+- `docs/` — architettura, handoff, roadmap, audit e cronologia.
+
+## Verifiche
 
 ```bash
 npm run check
 npm run seed:training
 ```
 
-Per sincronizzare il catalogo corsi da una copia locale di `SafetyManager/js/data.js`:
+## Nota sullo stato DB/repository
 
-```bash
-node tools/import_safetymanager_catalog.mjs /percorso/SafetyManager/js/data.js
-```
+Il database live contiene alcuni grandi blocchi didattici creati direttamente in Supabase che devono ancora essere trasformati in migration idempotenti nel repository (22 corsi completati, CSP/CSE, famiglia antincendio aggiuntiva, ponteggi, funi, segnaletica stradale e alcune integrazioni evidence-based). Questo è il debito tecnico prioritario prima di accumulare molte altre famiglie.
+
+Vedere `docs/START_HERE_COLLABORATORS.md` per il dettaglio.
