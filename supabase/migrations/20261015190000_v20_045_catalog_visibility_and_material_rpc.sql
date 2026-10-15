@@ -49,38 +49,29 @@ grant execute on function public.training_catalog_summary() to anon, authenticat
 
 create or replace function public.training_course_bundle(p_stable_key text)
 returns jsonb
-language sql
+language plpgsql
 stable
 security definer
 set search_path = public
 as $$
-  with course_row as (
-    select c.id,c.stable_key,c.title,c.family,c.description,c.nominal_minutes,c.metadata
-    from public.courses c
-    where c.active=true and c.stable_key=p_stable_key
-    limit 1
-  ), latest as (
-    select cv.id,cv.course_id,cv.version_number,cv.status,cv.syllabus_snapshot,cv.normative_snapshot
-    from public.course_versions cv
-    join course_row c on c.id=cv.course_id
-    order by cv.version_number desc
-    limit 1
-  )
-  select case when not exists(select 1 from course_row) then null else jsonb_build_object(
-    'course', (select jsonb_build_object(
+declare
+  v_result jsonb;
+begin
+  select jsonb_build_object(
+    'course', jsonb_build_object(
       'stable_key',c.stable_key,
       'title',c.title,
       'family',c.family,
       'description',c.description,
       'nominal_minutes',c.nominal_minutes,
       'metadata',c.metadata
-    ) from course_row c),
-    'version', (select jsonb_build_object(
-      'version_number',l.version_number,
-      'status',l.status,
-      'syllabus_snapshot',l.syllabus_snapshot,
-      'normative_snapshot',l.normative_snapshot
-    ) from latest l),
+    ),
+    'version', jsonb_build_object(
+      'version_number',cv.version_number,
+      'status',cv.status,
+      'syllabus_snapshot',cv.syllabus_snapshot,
+      'normative_snapshot',cv.normative_snapshot
+    ),
     'modules', coalesce((
       select jsonb_agg(
         jsonb_build_object(
@@ -109,9 +100,22 @@ as $$
         ) order by cm.position
       )
       from public.course_modules cm
-      join latest l on l.id=cm.course_version_id
+      where cm.course_version_id=cv.id
     ),'[]'::jsonb)
-  ) end;
+  ) into v_result
+  from public.courses c
+  join lateral (
+    select v.id,v.version_number,v.status,v.syllabus_snapshot,v.normative_snapshot
+    from public.course_versions v
+    where v.course_id=c.id
+    order by v.version_number desc
+    limit 1
+  ) cv on true
+  where c.active=true and c.stable_key=p_stable_key
+  limit 1;
+
+  return v_result;
+end;
 $$;
 
 revoke all on function public.training_course_bundle(text) from public;
