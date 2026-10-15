@@ -1,14 +1,104 @@
-# SafetyTraining — stato riconciliazione DB → GitHub
+# SafetyTraining — riconciliazione DB live → GitHub
 
 Aggiornato: 15 ottobre 2026
 
-Questo documento integra `START_HERE_COLLABORATORS.md` e `VERSION_HISTORY_V20.md` durante il riallineamento dei contenuti creati direttamente nel database Supabase. Finché il riallineamento non è concluso, usare questo file per distinguere ciò che è già riproducibile dal repository da ciò che esiste ancora soltanto nel database live.
+## Esito
 
-## Menu laterale corsi — implementato e live
+La riconciliazione dei contenuti didattici creati direttamente nel database live è **completata** per tutte le famiglie note emerse dall’audit post `v20.046`.
 
-La navigazione del catalogo non è più un elenco piatto. È stato introdotto un menu laterale a sezioni espandibili/collassabili, basato sul catalogo completo restituito da `training_catalog_summary()` per utenti autenticati non learner.
+Stato verificato al termine del lavoro:
 
-Categorie correnti:
+- **92 corsi attivi**;
+- **92 corsi attivi con materiale**;
+- **0 corsi attivi senza materiale**;
+- **42 corsi riconciliati** rispetto al drift post-`v20.046`;
+- tutti i 42 corsi riconciliati hanno ultima versione `draft`;
+- tutti i 42 corsi riconciliati hanno `learner_catalog_hidden=true`;
+- tutti i 42 corsi riconciliati hanno `material_complete=true`;
+- Test Builder / banca domande finale resta sospeso, come da decisione di progetto.
+
+La modalità legale di erogazione resta modellata come regola/metadata e non riduce il materiale didattico disponibile.
+
+## Learning Unit riconciliate
+
+Conteggio live finale per i source group interessati:
+
+| source_group | Learning Unit |
+|---|---:|
+| `SafetyTraining completion-v2` | 51 |
+| `SafetyTraining csp-cse-v2` | 30 |
+| `SafetyTraining csp-cse-update-v2` | 10 |
+| `SafetyTraining fire-v2` | 17 |
+| `SafetyTraining ponteggi-v2` | 16 |
+| `SafetyTraining funi-v2` | 22 |
+| `SafetyTraining road-sign-v2` | 15 |
+| **Totale** | **161** |
+
+Il precedente conteggio intermedio di 151 LU era sottostimato: la verifica finale sul database live ha corretto i conteggi di antincendio, funi e segnaletica stradale.
+
+## Migration di riconciliazione
+
+Tutte le seguenti migration sono presenti nel repository, costruite con lookup per `stable_key`, senza UUID hardcoded e con operazioni idempotenti (`ON CONFLICT` / update deterministici):
+
+| Versione | File | Contenuto principale |
+|---|---|---|
+| v20.047 | `20261015214500_v20_047_completion_equipment_updates.sql` | 13 aggiornamenti attrezzature |
+| v20.048 | `20261015220000_v20_048_completion_role_updates.sql` | aggiornamenti lavoratori, preposti, dirigenti |
+| v20.049 | `20261015222000_v20_049_completion_rls_updates.sql` | RLS 4h/8h con riuso LU comuni |
+| v20.050a | `20261015224000_v20_050a_completion_first_aid_updates.sql` | primo soccorso 4h/6h con riuso 4 LU comuni |
+| v20.050b | `20261015224500_v20_050b_completion_confined_update.sql` | aggiornamento spazi confinati + Infor.MO |
+| v20.050c | `20261015225000_v20_050c_completion_work_height.sql` | lavori in quota / DPI III; 8h interne non minimo legale universale |
+| v20.051 | `20261015230000_v20_051_csp_cse_reconciliation.sql` | CSP/CSE 120h + aggiornamento 40h |
+| v20.052 | `20261015232000_v20_052_fire_family_reconciliation.sql` | antincendio L1/L3 + aggiornamenti L1/L2/L3 |
+| v20.053a | `20261015234000_v20_053a_ponteggi_reconciliation.sql` | ponteggi 28h + aggiornamento 4h |
+| v20.053b | `20261015235000_v20_053b_funi_reconciliation.sql` | funi A/B, aggiornamenti, preposto e aggiornamento |
+| v20.054 | `20261015235900_v20_054_road_sign_reconciliation.sql` | segnaletica stradale lavoratori/preposti/integrazione/aggiornamenti |
+
+## Migration history Supabase
+
+La migration history formale Supabase è stata riallineata agli stessi timestamp e nomi fino a:
+
+`20261015235900 — v20_054_road_sign_reconciliation`
+
+Le migration 047–054 rappresentano contenuti che **esistevano già nel live** prima della loro formalizzazione nel repository. Per questo il flusso adottato è stato di reconciliation/repair:
+
+1. estrazione dello stato live tramite stable key;
+2. costruzione della migration idempotente;
+3. esecuzione transazionale completa o rappresentativa con `BEGIN ... ROLLBACK` per validare SQL, vincoli e composizione senza alterare lo stato corretto;
+4. registrazione della versione nella `supabase_migrations.schema_migrations` solo dopo la verifica di equivalenza.
+
+Non è stato effettuato un replay cieco che duplicasse o sostituisse dati già corretti.
+
+## Requisiti preservati
+
+La riconciliazione mantiene:
+
+- versioni nuove/revisionate in `draft` e learner hidden;
+- riuso delle Learning Unit condivise;
+- separazione fra durata normativa e allocazione didattica interna;
+- pratica/addestramento come requisito reale quando previsto;
+- verifica finale separata dal materiale didattico quando il live la modella così;
+- Test Builder finale sospeso;
+- provenance e `source_audit` già presenti nel live;
+- evidence-based cases Infor.MO;
+- riferimenti VVF per antincendio;
+- INAIL Quaderni per cantieri/ponteggi/CSP;
+- cross-check Regione Piemonte post ASR 2025;
+- nessuna copia diretta di materiale privo di licenza aperta verificata.
+
+## Riuso strutturale preservato
+
+Esempi verificati:
+
+- primo soccorso Gruppo A 6h riusa le 4 LU comuni del 4h e aggiunge 2 LU;
+- RLS 8h riusa il nucleo delle 4 LU del percorso 4h;
+- `funi_siti_32h` e `funi_alberi_32h` condividono realmente il modulo base `rope-base`;
+- CSP/CSE è separato in moduli giuridico, tecnico, metodologico-organizzativo e pratico;
+- `lav_quota` conserva 8h come configurazione interna/legacy e `statutory_total_duration_claim=false`.
+
+## Menu laterale
+
+Resta operativo il menu laterale a categorie espandibili/collassabili, alimentato dal catalogo DB completo. Le famiglie correnti sono:
 
 1. Lavoratori e aggiornamenti
 2. Preposti e Dirigenti
@@ -24,163 +114,10 @@ Categorie correnti:
 12. Segnaletica stradale e traffico
 13. Rischi specialistici e altri percorsi
 
-File principali:
-- `apps/training/sidebar-course-groups.js`
-- `apps/training/sidebar-course-groups.css`
-- `apps/training/index.html`
-- `apps/training/sw.js`
+File principali: `apps/training/sidebar-course-groups.js` e `apps/training/sidebar-course-groups.css`.
 
-Comportamento:
-- stato aperto/chiuso persistito in `localStorage`;
-- corso corrente apre automaticamente la propria famiglia;
-- corsi iniziali ordinati prima degli aggiornamenti;
-- badge `AGG.` sugli aggiornamenti;
-- conteggio corsi per famiglia;
-- fallback su `SAFETY_DATA` mentre il catalogo DB non è disponibile;
-- route `#course/<key>` per i corsi locali e `#library/<stable_key>` per quelli DB-only;
-- compatibile con il menu mobile off-canvas esistente.
+## Stato finale del drift
 
-Il deploy di produzione che ha introdotto il menu è risultato `READY` ed è stato associato agli alias principali `safety-training-safety-manager.vercel.app` e `training-six-livid.vercel.app`.
+Per le famiglie/source group sopra elencati, **non resta alcun drift didattico live-only noto** dopo `v20.054`.
 
-## Drift originario misurato
-
-Il blocco di materiale creato direttamente nel DB e non ancora completamente rappresentato da migration dedicate comprendeva:
-
-| source_group | Learning Unit | corsi collegati |
-|---|---:|---:|
-| `SafetyTraining completion-v2` | 51 | 22 |
-| `SafetyTraining csp-cse-v2` | 30 | 1 |
-| `SafetyTraining csp-cse-update-v2` | 10 | 1 |
-| `SafetyTraining fire-v2` | 14 | 5 |
-| `SafetyTraining ponteggi-v2` | 16 | 2 |
-| `SafetyTraining funi-v2` | 20 | 6 |
-| `SafetyTraining road-sign-v2` | 10 | 5 |
-| **Totale** | **151** | **42** |
-
-## Reconciliation migrations create in GitHub
-
-### v20.047 — aggiornamenti attrezzature
-
-File:
-`supabase/migrations/20261015214500_v20_047_completion_equipment_updates.sql`
-
-Copre i 13 corsi:
-- `agg_attr_cmm_4h`
-- `agg_attr_carrelli_all_4h`
-- `agg_attr_carrelli_ind_4h`
-- `agg_attr_carroponte_all_11h_4h`
-- `agg_attr_carroponte_10h_4h`
-- `agg_attr_gru_torre_4h`
-- `agg_attr_gru_autocarro_4h`
-- `agg_attr_crf_4h`
-- `agg_attr_mmt_all_4h`
-- `agg_attr_mmt_esc_4h`
-- `agg_attr_ple_4h`
-- `agg_attr_pompe_4h`
-- `agg_attr_trattori_4h`
-
-Caratteristiche:
-- lookup tramite stable key, nessun UUID generato altrove;
-- upsert idempotenti;
-- LU e course version restano `draft`;
-- `learner_catalog_hidden=true`;
-- materiale pratico completo 240 min per corso;
-- delivery constraints conservati come metadata;
-- integrazione INAIL Infor.MO per i carrelli;
-- test transazionale rappresentativo eseguito con `BEGIN ... ROLLBACK` e superato dopo la correzione dello schema `course_modules`.
-
-Commit stabilizzato:
-`3911983f3dc0d9868564d5fd9098fc0fbbb4fcfd`
-
-GitHub Actions run #115: `success`.
-
-### v20.048 — aggiornamenti Lavoratori / Preposti / Dirigenti
-
-File:
-`supabase/migrations/20261015220000_v20_048_completion_role_updates.sql`
-
-Copre:
-- `agg_lav` — 4 LU x 90 min = 360 min;
-- `agg_prep` — 4 LU x 90 min = 360 min;
-- `agg_dir` — 4 LU x 90 min = 360 min.
-
-La migration conserva:
-- casi e scenari del DB live;
-- procedure operative;
-- errori comuni;
-- riferimenti normativi;
-- attività guidate;
-- modalità di erogazione come metadata;
-- draft/hidden;
-- Test Builder finale sospeso;
-- verifica finale dei corsi di ruolo distinta dal materiale LU.
-
-È stato eseguito un test transazionale rappresentativo contro lo schema live, con rollback: superato.
-
-### v20.049 — aggiornamenti RLS 4h / 8h
-
-File:
-`supabase/migrations/20261015222000_v20_049_completion_rls_updates.sql`
-
-Modello di riuso:
-- il 4h usa quattro LU comuni;
-- l'8h riusa le stesse quattro LU come modulo `agg-rls-core`;
-- il percorso 8h aggiunge quattro LU nel modulo `agg-rls-extra`;
-- nessuna duplicazione del nucleo comune.
-
-Corsi:
-- `agg_rls_4h`
-- `agg_rls_8h`
-
-La durata è modellata secondo art. 37, comma 11, mantenendo la necessità di verificare la contrattazione collettiva applicabile.
-
-Il pattern shared-core + modulo extra è stato verificato con transazione di prova e rollback: superato.
-
-## Stato importante: GitHub migration != Supabase migration history
-
-Al momento della redazione di questo file:
-
-- `v20.047`, `v20.048` e `v20.049` sono **presenti nel repository e testate strutturalmente**;
-- la migration history formalmente registrata in Supabase risultava ancora ferma a `v20.046`;
-- non dichiarare quindi queste migration come formalmente applicate finché non vengono eseguite/registrate con il flusso Supabase previsto;
-- il DB live contiene già i contenuti funzionali corrispondenti perché erano stati creati precedentemente direttamente nel database.
-
-La riconciliazione serve quindi a rendere quel live state riproducibile, non ad aggiungere per la prima volta quei corsi.
-
-## Drift `completion-v2` ancora da versionare dopo v20.047-v20.049
-
-Restano da riconciliare nel gruppo `SafetyTraining completion-v2`:
-
-### Primo soccorso
-- `agg_primo_soccorso_4h`
-- `agg_primo_soccorso_a_6h`
-- 6 LU complessive, con riuso delle 4 comuni.
-
-### Spazi confinati
-- `agg_spazi_confinati_4h`
-- 4 LU.
-
-### Lavori in quota
-- `lav_quota`
-- 8 LU;
-- 8h = allocazione didattica interna SafetyTraining, non dichiarazione di minimo legale universale ex art. 77.
-
-Dopo questo blocco resteranno le nuove famiglie:
-- CSP/CSE;
-- antincendio;
-- ponteggi;
-- lavori su funi;
-- segnaletica stradale.
-
-## Sequenza raccomandata
-
-1. completare `completion-v2` con primo soccorso + confinati + quota;
-2. riconciliare CSP/CSE;
-3. riconciliare antincendio;
-4. riconciliare ponteggi + funi preservando le LU condivise;
-5. riconciliare segnaletica stradale;
-6. rieseguire conteggio drift per `source_group`;
-7. applicare/registrare le migration in ordine su Supabase dopo controllo finale;
-8. eseguire security/performance advisors se viene toccato lo schema/RLS;
-9. verificare CI e produzione;
-10. aggiornare `VERSION_HISTORY_V20.md` e `START_HERE_COLLABORATORS.md` come documenti canonici, poi archiviare questo status come snapshot storico.
+Le future modifiche ai corsi devono essere introdotte prima tramite migration/versionamento nel repository, evitando di ricreare divergenze strutturali tra Supabase live e GitHub.
