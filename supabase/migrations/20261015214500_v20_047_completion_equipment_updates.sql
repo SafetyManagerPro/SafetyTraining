@@ -193,9 +193,9 @@ BEGIN
       normative_snapshot=excluded.normative_snapshot,published_at=NULL;
     SELECT id INTO v_cv FROM public.course_versions WHERE course_id=v_course AND version_number=1;
 
-    INSERT INTO public.course_modules(course_version_id,module_key,title,position,nominal_minutes,required,metadata)
-    VALUES(v_cv,'agg-pratica','Aggiornamento pratico operativo',1,240,true,jsonb_build_object('didactic_version','completion-v2'))
-    ON CONFLICT(course_version_id,module_key) DO UPDATE SET title=excluded.title,position=1,nominal_minutes=240,required=true,metadata=public.course_modules.metadata || excluded.metadata;
+    INSERT INTO public.course_modules(course_version_id,module_key,title,position,nominal_minutes)
+    VALUES(v_cv,'agg-pratica','Aggiornamento pratico operativo',1,240)
+    ON CONFLICT(course_version_id,module_key) DO UPDATE SET title=excluded.title,position=1,nominal_minutes=240;
     SELECT id INTO v_module FROM public.course_modules WHERE course_version_id=v_cv AND module_key='agg-pratica';
 
     INSERT INTO public.course_module_units(module_id,unit_version_id,position,required,min_active_seconds,requires_comprehension,completion_rules)
