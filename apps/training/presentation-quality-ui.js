@@ -1,5 +1,6 @@
 /* SafetyTraining — presentation quality inspector.
-   Visible only to authenticated admin/teacher contexts; never changes course status or learner progress. */
+   Visible only to authenticated admin/teacher contexts; never changes course status or learner progress.
+   Authored material and automatic presentation scaffolding are counted separately. */
 (() => {
   'use strict';
 
@@ -7,9 +8,6 @@
   const cloud = () => window.SAFETY_CLOUD;
   const isLearner = () => !!cloud()?.state?.learner;
   const isAuthenticated = () => !!cloud()?.state?.user;
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[c]));
 
   function topicScore(t) {
     if (Number.isFinite(Number(t?.presentation_quality?.score))) return Number(t.presentation_quality.score);
@@ -45,8 +43,15 @@
     const autoOperational = topics.filter(t =>
       t?.presentation_quality?.operational_mode === 'auto-structured' || t?.operational?.auto_generated
     ).length;
-    const quiz = topics.filter(t => !!t?.quiz).length;
-    const teacher = topics.filter(t => (t?.teacher_expansion || []).length || t?.teacher).length;
+    const authoredGraphics = topics.filter(t => t?.presentation_quality?.graphic_mode === 'authored').length;
+    const autoGraphics = topics.filter(t => t?.presentation_quality?.graphic_mode === 'auto').length;
+    const authoredQuiz = topics.filter(t => t?.presentation_quality?.quiz_mode === 'authored' || (t?.quiz && !t.quiz.auto_generated)).length;
+    const autoQuiz = topics.filter(t => t?.presentation_quality?.quiz_mode === 'auto-formative' || t?.quiz?.auto_generated).length;
+    const authoredTeacher = topics.filter(t =>
+      t?.presentation_quality?.teacher_mode === 'authored' ||
+      (((t?.teacher_expansion || []).length || t?.teacher) && t?.presentation_quality?.teacher_mode !== 'auto')
+    ).length;
+    const autoTeacher = topics.filter(t => t?.presentation_quality?.teacher_mode === 'auto').length;
 
     return {
       score,
@@ -56,8 +61,12 @@
       autoVisuals,
       authoredOperational,
       autoOperational,
-      quiz,
-      teacher
+      authoredGraphics,
+      autoGraphics,
+      authoredQuiz,
+      autoQuiz,
+      authoredTeacher,
+      autoTeacher
     };
   }
 
@@ -85,16 +94,20 @@
       panel.innerHTML = `
         <div class="pq-heading">
           <div><span class="pq-kicker">QUALITÀ PRESENTAZIONE · CONTROLLO INTERNO</span><strong>${q.score}/100 · ${label(q.level)}</strong></div>
-          <small>Non modifica validità, pubblicazione o requisiti normativi del corso.</small>
+          <small>Il punteggio valuta la presentabilità. Le voci “auto” sono scaffolding didattico e non contenuto autoriale o verifica finale.</small>
         </div>
         <div class="pq-metrics">
           <div><b>${q.topics}</b><span>argomenti</span></div>
           <div><b>${q.authoredVisuals}</b><span>visuali autoriali</span></div>
           <div><b>${q.autoVisuals}</b><span>visuali tematici auto</span></div>
+          <div><b>${q.authoredGraphics}</b><span>schemi autoriali</span></div>
+          <div><b>${q.autoGraphics}</b><span>schemi auto</span></div>
           <div><b>${q.authoredOperational}</b><span>guide operative autoriali</span></div>
           <div><b>${q.autoOperational}</b><span>guide auto-strutturate</span></div>
-          <div><b>${q.quiz}</b><span>argomenti con quiz</span></div>
-          <div><b>${q.teacher}</b><span>supporti docente</span></div>
+          <div><b>${q.authoredQuiz}</b><span>quiz autoriali</span></div>
+          <div><b>${q.autoQuiz}</b><span>check formativi auto</span></div>
+          <div><b>${q.authoredTeacher}</b><span>supporti docente autoriali</span></div>
+          <div><b>${q.autoTeacher}</b><span>cue docente auto</span></div>
         </div>`;
       hero.appendChild(panel);
     }, 20));
