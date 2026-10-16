@@ -1,9 +1,9 @@
-/* SafetyTraining — safe course-version selector for new editions. */
+/* SafetyTraining — strict approved course-version selector for new editions. */
 (() => {
   'use strict';
   const cloud=()=>window.SAFETY_CLOUD;
   const db=()=>cloud()?.state?.client;
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   let running=false,timer=null;
 
   function roleLabel(value){
@@ -20,6 +20,7 @@
     const select=document.querySelector('#editionForm select[name="course_version_id"]');
     if(!select||select.dataset.safeVersions==='ready')return;
     running=true;
+    select.dataset.safeVersions='loading';
     try{
       const [{data:courses,error:ce},{data:versions,error:ve}]=await Promise.all([
         db().from('courses').select('id,title,stable_key,active,metadata').eq('active',true).order('title'),
@@ -34,29 +35,33 @@
       (versions||[]).forEach(v=>{if(!byCourse.has(v.course_id))byCourse.set(v.course_id,[]);byCourse.get(v.course_id).push(v);});
       const options=[];
       eligible.forEach(c=>{
-        const all=(byCourse.get(c.id)||[]).sort((a,b)=>Number(b.version_number)-Number(a.version_number));
-        const readyCandidates=all.filter(v=>isCandidate(v)&&isGoLiveReady(v));
-        const legacy=all.filter(v=>!isCandidate(v));
-        const chosen=readyCandidates.length?readyCandidates:legacy.slice(0,1);
-        chosen.sort((a,b)=>Number(a.version_number)-Number(b.version_number)).forEach(v=>options.push({course:c,version:v}));
+        const approved=(byCourse.get(c.id)||[]).filter(v=>isCandidate(v)&&isGoLiveReady(v));
+        approved.sort((a,b)=>Number(a.version_number)-Number(b.version_number)).forEach(v=>options.push({course:c,version:v}));
       });
       options.sort((a,b)=>a.course.title.localeCompare(b.course.title,'it')||Number(a.version.version_number)-Number(b.version.version_number));
       const current=select.value;
       select.innerHTML='<option value="">Corso / versione approvata…</option>'+options.map(({course,version})=>{
         const role=roleLabel(version.syllabus_snapshot?.role_variant);
-        const candidate=isCandidate(version)&&isGoLiveReady(version);
         const suffix=role?` · ${role}`:` · v${version.version_number}`;
-        return `<option value="${version.id}">${esc(course.title)}${esc(suffix)}${candidate?' · approvata':''}</option>`;
+        return `<option value="${version.id}" data-approved="true">${esc(course.title)}${esc(suffix)} · approvata</option>`;
       }).join('');
       if([...select.options].some(o=>o.value===current))select.value=current;
       select.dataset.safeVersions='ready';
-      if(!document.getElementById('editionVersionHint')){
-        const hint=document.createElement('p');hint.id='editionVersionHint';hint.className='admin-note';hint.textContent='Per le nuove edizioni sono mostrate solo versioni pubblicate pronte al go-live; corsi congelati e librerie interne sono esclusi.';select.closest('form')?.appendChild(hint);
-      }
-    }catch(e){console.warn('[Edition version selector]',e?.message||e);}finally{running=false;}
+      select.disabled=options.length===0;
+      let hint=document.getElementById('editionVersionHint');
+      if(!hint){hint=document.createElement('p');hint.id='editionVersionHint';hint.className='admin-note';select.closest('form')?.appendChild(hint);}
+      hint.textContent=options.length
+        ? `${options.length} versioni approvate disponibili. Per le nuove edizioni non vengono proposte versioni legacy, corsi congelati o librerie interne.`
+        : 'Nessuna versione approvata disponibile per una nuova edizione.';
+      document.dispatchEvent(new CustomEvent('safety:approved-versions-ready',{detail:{count:options.length}}));
+    }catch(e){
+      select.dataset.safeVersions='error';
+      select.disabled=true;
+      console.warn('[Edition version selector]',e?.message||e);
+    }finally{running=false;}
   }
-  function schedule(){clearTimeout(timer);timer=setTimeout(refresh,100);}
+  function schedule(){clearTimeout(timer);timer=setTimeout(refresh,80);}
   async function boot(){for(let i=0;i<40&&!db();i++)await new Promise(r=>setTimeout(r,200));new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});schedule();}
-  window.SAFETY_EDITION_VERSION_SELECTOR={refresh:()=>{document.querySelector('#editionForm select[name="course_version_id"]')?.removeAttribute('data-safe-versions');schedule();}};
+  window.SAFETY_EDITION_VERSION_SELECTOR={refresh:()=>{const s=document.querySelector('#editionForm select[name="course_version_id"]');if(s){s.removeAttribute('data-safe-versions');s.disabled=false;}schedule();}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

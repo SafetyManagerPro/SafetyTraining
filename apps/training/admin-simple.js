@@ -1,28 +1,35 @@
-/* SafetyTraining — simplify single-organization administration. */
+/* SafetyTraining — simplify administration only when exactly one organization is active. */
 (() => {
   'use strict';
   let defaultOrgId = null;
+  let simpleMode = false;
 
   const cloud = () => window.SAFETY_CLOUD;
   const db = () => cloud()?.state?.client;
 
   async function resolveDefaultOrganization() {
     if (!db()) return;
-    const { data } = await db().from('organizations').select('id,name,code,active').eq('active', true).order('created_at');
-    if (data?.length === 1) defaultOrgId = data[0].id;
-    else defaultOrgId = data?.find(x => x.code === 'DEFAULT')?.id || null;
+    const { data, error } = await db().from('organizations').select('id,name,code,active').eq('active', true).order('created_at');
+    if (error) {
+      console.warn('[SafetyTraining Admin Simple]', error.message);
+      simpleMode = false;
+      defaultOrgId = null;
+    } else {
+      simpleMode = (data || []).length === 1;
+      defaultOrgId = simpleMode ? data[0].id : null;
+    }
     patchAdmin();
   }
 
-  function hideOrganizationColumns(root) {
+  function organizationColumns(root, hidden) {
     root.querySelectorAll('table.admin-table').forEach(table => {
       const heads = [...table.querySelectorAll('thead th')];
       heads.forEach((th, index) => {
         if (th.textContent.trim().toLowerCase() !== 'organizzazione') return;
-        th.style.display = 'none';
+        th.style.display = hidden ? 'none' : '';
         table.querySelectorAll('tbody tr').forEach(tr => {
           const cell = tr.children[index];
-          if (cell) cell.style.display = 'none';
+          if (cell) cell.style.display = hidden ? 'none' : '';
         });
       });
     });
@@ -33,17 +40,17 @@
     if (!shell) return;
 
     const orgNav = shell.querySelector('[data-tab="organizations"]');
-    if (orgNav) orgNav.style.display = 'none';
+    if (orgNav) orgNav.style.display = simpleMode ? 'none' : '';
 
     shell.querySelectorAll('.admin-stat').forEach(card => {
-      if (card.textContent.toLowerCase().includes('organizzazioni')) card.style.display = 'none';
+      if (card.textContent.toLowerCase().includes('organizzazioni')) card.style.display = simpleMode ? 'none' : '';
     });
 
     shell.querySelectorAll('.admin-flow span').forEach(span => {
       if (!span.textContent.toLowerCase().includes('organizzazione')) return;
       const next = span.nextElementSibling;
-      span.style.display = 'none';
-      if (next?.tagName === 'B') next.style.display = 'none';
+      span.style.display = simpleMode ? 'none' : '';
+      if (next?.tagName === 'B') next.style.display = simpleMode ? 'none' : '';
     });
 
     const flow = shell.querySelector('.admin-flow');
@@ -53,7 +60,12 @@
     }
 
     shell.querySelectorAll('select[name="organization_id"]').forEach(select => {
-      if (!defaultOrgId) return;
+      if (!simpleMode || !defaultOrgId) {
+        select.classList.remove('admin-org-hidden');
+        select.removeAttribute('aria-hidden');
+        select.tabIndex = 0;
+        return;
+      }
       if (select.value !== defaultOrgId) {
         select.value = defaultOrgId;
         select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -67,7 +79,7 @@
       if (opt.textContent.trim() === "Tutta l'organizzazione") opt.textContent = 'Tutte le aziende';
     });
 
-    hideOrganizationColumns(shell);
+    organizationColumns(shell, simpleMode);
   }
 
   async function boot() {
@@ -78,6 +90,7 @@
     db()?.auth?.onAuthStateChange(() => setTimeout(resolveDefaultOrganization, 50));
   }
 
+  window.SAFETY_ADMIN_SIMPLE = { refresh: resolveDefaultOrganization, isSimple: () => simpleMode };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
