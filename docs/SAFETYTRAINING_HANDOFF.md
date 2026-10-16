@@ -224,6 +224,16 @@ Performance:
 - warning legacy `training_blueprint_rules` FK non indicizzata ancora fuori scope
 - warning `auth_rls_initplan`, multiple permissive policies e unused indexes ancora presenti; non auto-fixare senza blocco dedicato
 
+## CI / deploy dopo backend v21
+
+Verifica eseguita sul commit `a8afe3d3438756cfe3fabb45ce5f77c26f85bfb7`:
+- GitHub Actions `SafetyTraining checks` run #221: `SUCCESS`
+- Vercel status sul commit: `FAILURE` esclusivamente per `build-rate-limit` / richiesta upgrade Pro
+- il fallimento Vercel non è un errore di compilazione dell'applicazione
+- questo blocco ha modificato Supabase + migration/docs, non il frontend servito; le migration DB sono già applicate live indipendentemente dal build Vercel
+
+Prima di un prossimo deploy frontend, verificare che il rate limit Vercel sia rientrato oppure gestire il limite del piano.
+
 ## Inviti / portale corsista
 
 Inviti account:
