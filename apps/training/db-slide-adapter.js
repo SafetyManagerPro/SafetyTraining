@@ -138,7 +138,7 @@
     }).filter(Boolean);
   }
 
-  function normalizeTopic(unit, index) {
+  function normalizeTopic(unit, index, presentationId) {
     const content = unit?.content && typeof unit.content === 'object' ? unit.content : {};
     const title = firstText(content.title, unit?.title, `Unità ${index + 1}`);
     const summary = firstText(content.summary, unit?.summary, title);
@@ -164,7 +164,8 @@
     const feedback = content.discussion_feedback && typeof content.discussion_feedback === 'object' ? content.discussion_feedback : {};
 
     return {
-      id: firstText(unit?.stable_key, `db-unit-${index + 1}`),
+      id: firstText(presentationId, unit?.stable_key, `db-unit-${index + 1}`),
+      source_stable_key: firstText(unit?.stable_key),
       title,
       slide_title: firstText(content.slide_title, title),
       minutes: Math.max(1, numberOr(content.minutes, numberOr(unit?.default_minutes, 30))),
@@ -215,13 +216,18 @@
     const topics = [];
     const modules = rawModules.map((m, mi) => {
       const units = Array.isArray(m?.units) ? [...m.units].sort((a, b) => numberOr(a.position) - numberOr(b.position)) : [];
-      const moduleTopics = units.map((u, ui) => normalizeTopic(u, topics.length + ui));
+      const moduleId = firstText(m?.module_key, `db-module-${mi + 1}`);
+      const moduleTopics = units.map((u, ui) => {
+        const sourceKey = firstText(u?.stable_key, `unit-${ui + 1}`);
+        const presentationId = `db:${moduleId}:${sourceKey}:${ui + 1}`.replaceAll('/', '~');
+        return normalizeTopic(u, topics.length + ui, presentationId);
+      });
       topics.push(...moduleTopics);
       const minutes = moduleTopics.reduce((sum, t) => sum + numberOr(t.minutes), 0) || numberOr(m?.nominal_minutes);
       const start = cursor;
       cursor += minutes;
       return {
-        id: firstText(m?.module_key, `db-module-${mi + 1}`),
+        id: moduleId,
         title: firstText(m?.title, `Modulo ${mi + 1}`),
         topic_ids: moduleTopics.map(t => t.id),
         minutes,
