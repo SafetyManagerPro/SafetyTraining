@@ -90,8 +90,8 @@ Gate:
 
 ## Amministrazione v21
 
-### Frontend
-La vecchia amministrazione frammentata è stata sostituita da console unica in `apps/training/admin.js` con:
+### Frontend amministrativo
+Console unica in `apps/training/admin.js` con:
 - Dashboard
 - Organizzazioni
 - Aziende
@@ -101,11 +101,37 @@ La vecchia amministrazione frammentata è stata sostituita da console unica in `
 - Iscrizioni
 - Attività
 
-Service worker corrente prima del backend work: cache `safety-training-v21-1`.
+Dal blocco v21 backend è presente anche:
+- `apps/training/admin-backend-v21.js`
 
-Il frontend v21 legge correttamente il modello dati, ma alcune scritture sono ancora dirette sulle tabelle. La priorità successiva è collegarle alle RPC v21 già pronte.
+Il file viene caricato subito dopo `admin.js` ed è il bridge tra UI amministrativa e service layer Supabase.
 
-### Backend amministrativo v21 — PRIMO BLOCCO COMPLETATO
+Funzioni del bridge:
+- intercetta in capture phase i submit/modifiche core prima delle vecchie scritture dirette di `admin.js`
+- instrada le scritture sulle RPC v21
+- mantiene `admin.js` come layer UI/lettura
+- usa `admin_dashboard_summary()` per riallineare i KPI dashboard al backend
+- usa `admin_recent_actions()` per mostrare nella tab Attività l'audit amministrativo separato dagli eventi didattici
+- mantiene l'invio account tramite Edge Function `invite-learner`
+
+Scritture core instradate via RPC:
+- organizzazioni
+- aziende
+- corsisti
+- corsi
+- creazione/modifica edizioni
+- apertura/chiusura edizioni
+- iscrizione multipla
+- revoca/riattivazione iscrizione
+- attiva/disattiva organizzazione/azienda/corsista
+
+Service worker aggiornato:
+- cache corrente `safety-training-v21-2`
+- `admin-backend-v21.js` incluso negli asset offline
+
+Nota architetturale: le vecchie funzioni di scrittura dentro `admin.js` restano fisicamente presenti per ora, ma a runtime il bridge intercetta le operazioni sensibili prima che vengano eseguite. I guardrail DB v21 restano la seconda barriera se il bridge non fosse caricato. Consolidare in futuro il bridge dentro `admin.js` solo dopo stabilizzazione, senza cambiare comportamento.
+
+### Backend amministrativo v21 — SERVICE LAYER ATTIVO
 
 Migration Supabase applicate e salvate nel repository con timestamp esatto:
 - `20261016212444_v21_001_admin_backend_service_layer`
@@ -189,13 +215,13 @@ Correzioni applicate:
 
 Non ripristinare le vecchie policy recursive.
 
-## QA backend v21
+## QA backend/frontend v21
 
 QA autorizzazioni:
 - platform admin simulato: RPC admin accessibile
 - non-admin simulato: rifiutato con `platform_admin_required` / SQLSTATE 42501
 
-QA E2E in singola transazione con `ROLLBACK` superato:
+QA E2E backend in singola transazione con `ROLLBACK` superato:
 1. creazione azienda QA
 2. creazione corsista QA
 3. creazione edizione su `course_version` go-live
@@ -213,6 +239,14 @@ Residui dopo QA:
 - edizioni QA: 0
 - audit QA: 0
 
+QA bridge frontend:
+- `admin-backend-v21.js` passa `node --check`
+- `index.html` carica `admin-backend-v21.js` subito dopo `admin.js`
+- `sw.js` cache `safety-training-v21-2` include il bridge
+- `admin_dashboard_summary()` verificata come platform admin
+- `admin_recent_actions()` verificata come platform admin
+- snapshot QA corrente: 2 aziende attive, 3 corsisti attivi, 92 corsi attivi, 0 edizioni, 0 iscrizioni
+
 ## Advisor Supabase dopo v21
 
 Security:
@@ -224,15 +258,18 @@ Performance:
 - warning legacy `training_blueprint_rules` FK non indicizzata ancora fuori scope
 - warning `auth_rls_initplan`, multiple permissive policies e unused indexes ancora presenti; non auto-fixare senza blocco dedicato
 
-## CI / deploy dopo backend v21
+## CI / deploy dopo admin backend bridge v21
 
-Verifica eseguita sul commit `a8afe3d3438756cfe3fabb45ce5f77c26f85bfb7`:
-- GitHub Actions `SafetyTraining checks` run #221: `SUCCESS`
+Ultimo commit funzionale verificato:
+- `3e699b3324885c396e456e3a490a92a8b83e23b0`
+
+Verifica:
+- GitHub Actions `SafetyTraining checks` run #225: `SUCCESS`
+- `admin-backend-v21.js`, `index.html` e `sw.js` superano i check del repository
 - Vercel status sul commit: `FAILURE` esclusivamente per `build-rate-limit` / richiesta upgrade Pro
-- il fallimento Vercel non è un errore di compilazione dell'applicazione
-- questo blocco ha modificato Supabase + migration/docs, non il frontend servito; le migration DB sono già applicate live indipendentemente dal build Vercel
+- il fallimento Vercel non è un errore di compilazione del codice SafetyTraining
 
-Prima di un prossimo deploy frontend, verificare che il rate limit Vercel sia rientrato oppure gestire il limite del piano.
+Supabase è già aggiornato live con `v21_001`–`v21_006`; il frontend aggiornato è nel repository ma la produzione Vercel non può ricevere il nuovo commit finché il limite build non rientra o viene aumentato.
 
 ## Inviti / portale corsista
 
@@ -249,13 +286,15 @@ Portale corsista:
 
 ## Prossimo lavoro operativo
 
-Priorità corrente:
-1. collegare `apps/training/admin.js` alle RPC v21 eliminando le scritture sensibili dirette
-2. usare `admin_dashboard_summary()` per la dashboard amministrativa
-3. mostrare `admin_recent_actions()` nella tab Attività separando audit amministrativo da eventi didattici
-4. aggiornare service worker/cache dopo modifica `admin.js`
-5. eseguire CI + verifica Vercel
-6. aggiornare QUESTO handoff nello stesso blocco
+Backend amministrativo core ora collegato alla console tramite bridge RPC.
+
+Priorità successiva consigliata:
+1. completare il read/service layer amministrativo per ridurre progressivamente anche le query dirette sensibili dal frontend
+2. aggiungere viste/detail amministrative per singola azienda, corsista ed edizione
+3. definire ruoli amministrativi più granulari oltre al solo `platform_admin` (organization admin / training manager) senza allargare privilegi accidentalmente
+4. consolidare `admin-backend-v21.js` dentro `admin.js` solo dopo stabilizzazione e QA browser
+5. eseguire test browser reale su produzione appena Vercel torna disponibile
+6. aggiornare questo handoff dopo ogni blocco
 
 Flusso applicativo finale da preservare:
 1. completare email dei corsisti che devono avere accesso digitale
