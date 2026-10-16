@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
+  <title id="title">Scenario critico: osserva, ferma, segnala, ripristina</title>
+  <desc id="desc">Schema didattico per esercitare le decisioni operative del preposto davanti a una condizione non sicura.</desc>
+  <rect width="1200" height="640" fill="#0f1828"/>
+  <rect x="28" y="28" width="1144" height="584" rx="26" fill="#142239" stroke="#28405f" stroke-width="2"/>
+  <text x="60" y="88" fill="#f4f7fb" font-family="Arial,sans-serif" font-size="34" font-weight="700">Scenario critico: cosa deve decidere il preposto?</text>
+  <text x="60" y="124" fill="#a8b3c7" font-family="Arial,sans-serif" font-size="20">Dalla prima anomalia al ripristino: la sicurezza viene prima della continuità operativa.</text>
+
+  <rect x="60" y="180" width="245" height="250" rx="20" fill="#0c1523" stroke="#6aa8ff" stroke-width="3"/>
+  <circle cx="96" cy="216" r="20" fill="#6aa8ff"/><text x="96" y="223" text-anchor="middle" fill="#07140f" font-family="Arial,sans-serif" font-size="19" font-weight="700">1</text>
+  <text x="182" y="223" text-anchor="middle" fill="#f4f7fb" font-family="Arial,sans-serif" font-size="24" font-weight="700">OSSERVA</text>
+  <text x="82" y="270" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• comportamento</text>
+  <text x="82" y="305" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• attrezzatura</text>
+  <text x="82" y="340" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• ambiente</text>
+  <text x="82" y="375" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• variazioni rispetto</text>
+  <text x="101" y="402" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">alla condizione prevista</text>
+
+  <path d="M320 305 H350" stroke="#70839d" stroke-width="5" stroke-linecap="round"/><path d="M344 294 L358 305 L344 316" fill="none" stroke="#70839d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="365" y="180" width="245" height="250" rx="20" fill="#0c1523" stroke="#ff7a7a" stroke-width="3"/>
+  <circle cx="401" cy="216" r="20" fill="#ff7a7a"/><text x="401" y="223" text-anchor="middle" fill="#07140f" font-family="Arial,sans-serif" font-size="19" font-weight="700">2</text>
+  <text x="487" y="223" text-anchor="middle" fill="#f4f7fb" font-family="Arial,sans-serif" font-size="24" font-weight="700">FERMA</text>
+  <text x="389" y="270" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">Se la condizione espone</text>
+  <text x="389" y="302" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">a un rischio non controllato:</text>
+  <text x="389" y="350" fill="#ffb0b0" font-family="Arial,sans-serif" font-size="23" font-weight="700">STOP all’attività</text>
+  <text x="389" y="388" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">Niente scorciatoie o</text>
+  <text x="389" y="416" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">“solo per finire”.</text>
+
+  <path d="M625 305 H655" stroke="#70839d" stroke-width="5" stroke-linecap="round"/><path d="M649 294 L663 305 L649 316" fill="none" stroke="#70839d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="670" y="180" width="215" height="250" rx="20" fill="#0c1523" stroke="#ffd166" stroke-width="3"/>
+  <circle cx="706" cy="216" r="20" fill="#ffd166"/><text x="706" y="223" text-anchor="middle" fill="#07140f" font-family="Arial,sans-serif" font-size="19" font-weight="700">3</text>
+  <text x="779" y="223" text-anchor="middle" fill="#f4f7fb" font-family="Arial,sans-serif" font-size="24" font-weight="700">SEGNALA</text>
+  <text x="694" y="270" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">Coinvolgi chi può</text>
+  <text x="694" y="302" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">rimuovere la causa:</text>
+  <text x="694" y="347" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• datore/dirigente</text>
+  <text x="694" y="382" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• manutenzione</text>
+  <text x="694" y="417" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• RSPP / funzione tecnica</text>
+
+  <path d="M900 305 H930" stroke="#70839d" stroke-width="5" stroke-linecap="round"/><path d="M924 294 L938 305 L924 316" fill="none" stroke="#70839d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="945" y="180" width="195" height="250" rx="20" fill="#0c1523" stroke="#4dd3a8" stroke-width="3"/>
+  <circle cx="981" cy="216" r="20" fill="#4dd3a8"/><text x="981" y="223" text-anchor="middle" fill="#07140f" font-family="Arial,sans-serif" font-size="19" font-weight="700">4</text>
+  <text x="1044" y="223" text-anchor="middle" fill="#f4f7fb" font-family="Arial,sans-serif" font-size="23" font-weight="700">RIPRISTINA</text>
+  <text x="968" y="270" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">Riparti solo dopo:</text>
+  <text x="968" y="316" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• correzione</text>
+  <text x="968" y="351" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• verifica</text>
+  <text x="968" y="386" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">• comunicazione</text>
+  <text x="968" y="421" fill="#d9e4f3" font-family="Arial,sans-serif" font-size="19">  agli interessati</text>
+
+  <rect x="60" y="478" width="1080" height="82" rx="18" fill="#10243a" stroke="#4dd3a8" stroke-width="2"/>
+  <text x="600" y="514" text-anchor="middle" fill="#a7f3db" font-family="Arial,sans-serif" font-size="22" font-weight="700">Domanda alla classe</text>
+  <text x="600" y="545" text-anchor="middle" fill="#f4f7fb" font-family="Arial,sans-serif" font-size="20">Quale informazione ti serve per decidere se correggere subito o fermare completamente il lavoro?</text>
+  <text x="60" y="592" fill="#4dd3a8" font-family="Arial,sans-serif" font-size="16">Schema originale SafetyTraining per discussione guidata in aula.</text>
+</svg>
