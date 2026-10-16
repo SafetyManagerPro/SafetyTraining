@@ -96,7 +96,7 @@ Tab:
 - Iscrizioni
 - Attività
 
-Bridge RPC attivo:
+Bridge RPC:
 - `apps/training/admin-backend-v21.js`
 
 Il bridge intercetta in capture phase le principali scritture legacy di `admin.js` e le instrada al service layer DB.
@@ -118,11 +118,53 @@ Dashboard/audit:
 Inviti account:
 - Edge Function `invite-learner`
 
+### Detail amministrativi server-side
+Modulo UI:
+- `apps/training/admin-details-v21.js`
+
+RPC:
+- `admin_company_detail()`
+- `admin_learner_detail()`
+- `admin_edition_detail()`
+
+La console aggiunge pulsante `Dettagli` alle righe Azienda/Corsista/Edizione.
+
+Scheda Azienda include:
+- anagrafica / organizzazione
+- corsisti totali/attivi/account
+- edizioni aperte/totali
+- iscrizioni/in corso/completate
+- lista corsisti con invito/account
+- lista edizioni
+- audit amministrativo recente dell'azienda
+
+Scheda Corsista include:
+- anagrafica / azienda / organizzazione
+- stato account e invito
+- tutte le iscrizioni
+- corso/versione/edizione
+- progress/tempo/score
+- completion gate
+- tentativi test
+- evidenze requisiti
+- audit amministrativo recente del corsista
+
+Scheda Edizione include:
+- corso/versione e `go_live_ready`
+- azienda/organizzazione
+- stato/modalità/disponibilità
+- iscritti/account/da iniziare/in corso/completati/revocati
+- numero gate pratici/verifiche
+- corsisti con stato/progresso/score/evidenze
+- audit edizione/enrollment recente
+
+Le tre RPC detail sono platform-admin only lato server e non affidano l'autorizzazione al browser.
+
 ### Gate amministrativi
 Modulo attivo:
 - `apps/training/requirement-evidence-admin-v21.js`
 
-Il vecchio `requirement-evidence-admin-v20.js` resta nel repository ma non viene più caricato dalla nuova `index.html`.
+Il vecchio `requirement-evidence-admin-v20.js` resta nel repository ma non viene caricato dalla nuova `index.html`.
 
 Il modulo v21:
 - non scrive direttamente `enrollment_requirement_evidence`
@@ -131,28 +173,29 @@ Il modulo v21:
 - impedisce modifiche manuali dei test gestiti dal Test Builder
 
 ### Catalogo SafetyManager governance
-Modulo legacy di catalogo:
+Modulo legacy:
 - `apps/training/course-catalog.js`
 
-Filtro governance v21 aggiunto:
+Filtro governance v21:
 - `apps/training/course-catalog-governance-v21.js`
 
-Il filtro rimuove dal selettore mapping:
+Esclude dal selettore mapping:
 - corsi non `go_live_ready`
 - corsi non finalizzati
 - corsi congelati
-- corsi esclusi dalla finalizzazione
-- librerie interne/reference
+- corsi esclusi
+- reference library
 - placeholder SafetyManager
 
-La protezione definitiva resta comunque lato DB nella RPC `configure_safetymanager_course()`.
+La protezione definitiva resta lato DB in `configure_safetymanager_course()`.
 
 ### PWA / cache
 Cache corrente:
-- `safety-training-v21-4`
+- `safety-training-v21-5`
 
 Asset amministrativi v21 cacheati:
 - `admin-backend-v21.js`
+- `admin-details-v21.js`
 - `requirement-evidence-admin-v21.js`
 - `course-catalog-governance-v21.js`
 
@@ -169,6 +212,7 @@ Migration Supabase applicate e presenti nel repository con timestamp esatto:
 - `20261016215039_v21_008_harden_platform_requirement_evidence_status`
 - `20261016215923_v21_009_restore_safetymanager_staging_compatibility`
 - `20261016220140_v21_010_harden_safetymanager_course_configuration`
+- `20261016220621_v21_011_admin_detail_read_service`
 
 ### Audit amministrativo
 Tabella privata:
@@ -190,6 +234,9 @@ Registra actor, azione, entity type/id, organizzazione, before/after state, cont
 - `admin_set_enrollment_revoked()`
 - `admin_recent_actions()`
 - `admin_dashboard_summary()`
+- `admin_company_detail()`
+- `admin_learner_detail()`
+- `admin_edition_detail()`
 
 Tutte le RPC core sensibili fanno autorizzazione server-side; `TO authenticated` NON è considerato autorizzazione sufficiente.
 
@@ -238,116 +285,110 @@ Trigger core:
 - `course_editions`
 - `enrollments`
 
-## SafetyManager integration — compatibilità e hardening v21_009/v21_010
+## SafetyManager integration — v21_009/v21_010
 
-### Problema trovato
-La RPC legacy `import_safetymanager_package()` utilizzava `course_editions.metadata`, ma la tabella non aveva quella colonna. L'import di un corso nuovo falliva con errore DB `column "metadata" of relation "course_editions" does not exist`.
+### Problema corretto
+`import_safetymanager_package()` utilizzava `course_editions.metadata`, ma la colonna non esisteva. L'import di un corso nuovo falliva con `column "metadata" of relation "course_editions" does not exist`.
 
-Inoltre i guardrail v21 originali richiedevano `go_live_ready` anche per una nuova edizione `draft` e richiedevano sempre edizione `open` per l'enrollment: questo avrebbe impedito lo staging intenzionale SafetyManager `needs_configuration`.
+Inoltre i primi guardrail v21 bloccavano lo staging SafetyManager intenzionale per corsi `needs_configuration`.
 
-### Correzione v21_009
-Aggiunto a `course_editions`:
-- `metadata jsonb not null default '{}'`
+### v21_009
+Aggiunto:
+- `course_editions.metadata jsonb not null default '{}'`
 
-Regola staging SafetyManager:
-- solo platform admin
-- solo `source_system=safetymanager`
-- solo edizioni `draft|closed`
-- enrollment staging deve avere source/project coerenti con l'edizione
-- compatibilità tenant/azienda/corsista resta obbligatoria
+Eccezione staging strettamente limitata:
+- platform admin
+- `source_system=safetymanager`
+- edizione `draft|closed`
+- source/project enrollment coerenti con l'edizione
+- tenant/azienda/corsista ancora obbligatoriamente coerenti
 
-Le normali edizioni Admin NON beneficiano dell'eccezione:
-- normale bulk enrollment su edizione `draft` continua a fallire con `edition_must_be_open`
+Le normali edizioni Admin `draft` NON accettano enrollment.
+Aprire una edizione richiede sempre versione go-live valida.
 
-Aprire una edizione SafetyManager richiede comunque una versione `published + finalization_candidate + go_live_ready`, attiva e non congelata/esclusa.
-
-### Hardening v21_010
+### v21_010
 `configure_safetymanager_course()` ora:
-- richiede platform admin lato DB
-- usa `search_path=''`
-- per `ready|hybrid` accetta solo corso attivo, non congelato/escluso/reference library
-- richiede una `course_version` pubblicata, finalizzata e `go_live_ready`
-- salva il `course_version_id` validato nei metadata del catalogo
+- platform-admin lato DB
+- `search_path=''`
+- per `ready|hybrid`: corso attivo, non congelato/escluso/reference
+- versione published + finalization_candidate + go_live_ready
+- salva `course_version_id` validato
 - aggiorna le edizioni SafetyManager alla versione validata
-- registra audit `safetymanager.course_configure`
-- mapping verso corso congelato/non-go-live viene respinto
+- audit `safetymanager.course_configure`
+- respinge corsi congelati/non-go-live
 
-Anche queste RPC legacy sono state irrigidite con `search_path=''` e revoke `public/anon` mantenendo l'autorizzazione server-side esistente:
+Irrigidite anche:
 - `import_safetymanager_package()`
 - `sync_safetymanager_training_context()`
 - `preview_safetymanager_composition()`
 - `get_course_readiness()`
 - `set_course_verification_path()`
 
+Per queste RPC: `search_path=''`, revoke `public/anon`, autorizzazione server-side esistente preservata.
+
 ### Normalizzazione catalogo
-Prima di v21_010:
+Prima:
 - 10 voci `ready|hybrid`
-- 4 `hybrid` non avevano alcun mapping go-live valido
-- 2 mapping storici puntavano a corsi congelati, già `needs_configuration`
+- 4 `hybrid` senza mapping go-live valido
+- 2 mapping congelati già `needs_configuration`
 
-v21_010 ha portato automaticamente a `needs_configuration` le 4 voci incoerenti senza cancellare collegamenti validi.
-
-Stato dopo normalizzazione:
+Dopo v21_010:
 - 6 `ready|hybrid`
 - 0 `ready|hybrid` senza go-live valido
-- 0 corsi congelati marcati `ready|hybrid`
+- 0 frozen marcati `ready|hybrid`
 
 ## Correzione RLS legacy
-Risolta la ricorsione RLS fra `enrollments` e `course_editions` tramite:
+Risolta ricorsione RLS fra `enrollments` e `course_editions` con:
 - `private.can_use_enrollment()` RLS-safe
 - `private.can_manage_edition_id()`
 - `private.current_user_has_edition_enrollment()`
-- policy enrollment/edition riscritte senza ciclo cross-table
+- policy enrollment/edition senza ciclo cross-table
 
 NON ripristinare le vecchie policy recursive.
 
 ## QA v21
 
 ### Core backend
-QA E2E con `ROLLBACK` superato:
+QA E2E rollback:
 - azienda
 - corsista
 - edizione go-live
 - bulk enrollment
-- lettura via RLS
+- lettura RLS
 - revoke/restore
-- dashboard summary
-- audit
+- dashboard/audit
 - 0 residui
 
 ### Gate v21_007/v21_008
-QA con `ROLLBACK`:
-- practical complete => evidenza external, `practical_completed` 0→1, audit presente
-- revoke => `practical_completed` 1→0, audit presente
-- tentativo manuale su verification Test Builder respinto
-- zero evidenze illegittime
-- zero residui
-- verificato che authenticated non possa leggere direttamente `private.admin_audit_log`
+QA rollback:
+- practical complete => evidenza external, gate 0→1, audit
+- revoke => gate 1→0, audit
+- manipolazione manuale Test Builder respinta
+- 0 evidenze illegittime
+- 0 residui
+- authenticated non legge direttamente `private.admin_audit_log`
 
-### SafetyManager staging v21_009
-QA con `ROLLBACK`:
-- import corso sconosciuto SafetyManager riuscito
-- placeholder course creato
-- edizione `draft` creata con metadata SafetyManager
-- enrollment `not_started` creato in staging
-- delivery `needs_configuration`
-- normale edizione Admin `draft` continua a rifiutare enrollment con `edition_must_be_open`
-- 0 residui finali
+### SafetyManager v21_009/v21_010
+QA rollback:
+- import corso sconosciuto: placeholder + edizione draft + enrollment staging + needs_configuration
+- normale draft Admin continua a bloccare enrollment
+- import/sync/readiness funzionano con `search_path=''`
+- mapping valido configurato e auditato
+- mapping frozen respinto
+- 0 residui
 
-### SafetyManager configuration v21_010
-QA con `ROLLBACK`:
-- `import_safetymanager_package()` funziona dopo `search_path=''`
-- `sync_safetymanager_training_context()` funziona (`risk-v1` nel caso QA)
-- `get_course_readiness()` funziona
-- configurazione di un mapping valido riuscita e auditata
-- `course_version_id` go-live presente nella risposta
-- mapping verso corso congelato respinto con `selected_course_has_no_approved_go_live_version`
-- 0 residui QA
+### Detail v21_011
+QA rollback su dati temporanei collegati:
+- company detail: nome corretto, 1 learner, 1 edition
+- learner detail: email corretta, 1 enrollment
+- edition detail: titolo corretto, 1 enrollment, course version presente, `go_live_ready=true`
+- utente non-platform-admin respinto con `platform_admin_required`
+- residui QA: 0
 
-## Advisor Supabase dopo v21_010
+## Advisor Supabase dopo v21_011
 
 Security:
-- warning `authenticated_security_definer_function_executable` sulle RPC intenzionalmente esposte a authenticated: non convertire automaticamente; le RPC applicano autorizzazione interna
+- 22 warning `authenticated_security_definer_function_executable`, inclusi i nuovi detail RPC: attesi perché callable da authenticated ma con controllo platform-admin interno; non convertirli automaticamente
 - leaked password protection disabilitato: warning noto
 
 Performance:
@@ -358,16 +399,16 @@ Performance:
 ## CI / deploy
 
 Ultimo commit funzionale verificato prima di questo handoff:
-- `9696b0e190158dc9214bb226f7a547f4405d34ff`
+- `0c2ae3abb690bc05d1011d88158f8786b1d87902`
 
 GitHub Actions:
-- `SafetyTraining checks` run #237: `SUCCESS`
+- `SafetyTraining checks` run #242: `SUCCESS`
 
 Vercel:
-- status ancora `FAILURE` esclusivamente per `build-rate-limit` / richiesta upgrade Pro
-- NON è un errore di compilazione SafetyTraining
-- Supabase v21_001–v21_010 è già live
-- frontend v21-4 è nel repository ma non va considerato verificato in produzione finché Vercel non riesce a deployarlo
+- status `FAILURE` esclusivamente per `build-rate-limit` / richiesta upgrade Pro
+- NON è errore di compilazione SafetyTraining
+- Supabase v21_001–v21_011 è live
+- frontend v21-5 è nel repository ma non va considerato verificato in produzione finché Vercel non riesce a deployarlo
 
 ## Inviti / portale corsista
 
@@ -382,19 +423,24 @@ Portale corsista:
 - catalogo completo/strumenti interni nascosti
 - corsi revocati rimossi
 
-## Prossimo lavoro operativo
+## Moduli amministrativi auditati
 
-Audit moduli amministrativi completato:
 - `blueprint-admin.js`: read-only
 - `course-readiness-admin.js`: read-only via RPC
 - `integration-import.js`: import/sync via RPC
-- `course-catalog.js`: mapping via RPC; governance v21 aggiunta
+- `course-catalog.js`: mapping via RPC + filtro governance v21
+- `requirement-evidence-admin-v21.js`: evidence write via RPC
+- `admin-details-v21.js`: detail read via RPC
+
+## Prossimo lavoro operativo
+
+Command layer + read/detail layer amministrativo ora presenti.
 
 Priorità successiva:
-1. completare read/service layer amministrativo per detail azienda/corsista/edizione
-2. aggiungere viste detail amministrative con storico, attività, iscrizioni, gate e accesso account
-3. progettare ruoli granulari `organization_admin` / `training_manager` per operazioni oggi platform-admin only
-4. appena Vercel torna disponibile: deploy + QA browser reale di bridge Admin, Gate v21, Catalog governance e PWA v21-4
+1. progettare e applicare ruoli granulari `organization_admin` / `training_manager` alle operazioni oggi platform-admin only, con scope tenant/azienda e senza privilege escalation
+2. creare una RPC capability/permission summary per far mostrare alla UI solo le funzioni consentite al ruolo corrente
+3. adattare progressivamente la console v21 a tali capability senza esporre il pannello editoriale globale a ruoli tenant
+4. appena Vercel torna disponibile: deploy + QA browser reale di Admin bridge, Detail, Gate, Catalog governance e PWA v21-5
 5. solo dopo QA produzione valutare revoca delle scritture dirette legacy su `enrollment_requirement_evidence`
 6. consolidare i bridge dentro `admin.js` solo dopo stabilizzazione
 7. aggiornare SEMPRE questo handoff dopo ogni blocco
