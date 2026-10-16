@@ -2,137 +2,250 @@
 
 Ultimo aggiornamento: 2026-10-16
 
-Questo file è il punto di ripartenza rapido quando si cambia chat. Va aggiornato a ogni blocco sostanziale completato.
+Questo file è la fonte rapida di ripartenza quando si cambia chat. Va aggiornato dopo ogni blocco sostanziale.
 
-## Regole operative da NON perdere
+## Decisioni utente da NON perdere
 
-- Nuovi contenuti/versioni sempre `draft`.
-- Mai auto-publish e mai auto-link/relink nei corsi attivi.
-- Test Builder finale congelato/pausato finché non richiesto esplicitamente; i check interni restano formativi e separati.
-- Ogni domanda didattica deve avere spiegazione.
-- Delivery rules (presenza/VCS/e-learning/pratica) sono metadata/regole e non riducono il contenuto didattico.
-- Contenuto authored deve includere: cosa fare, come procedere, chi coinvolgere, errori, STOP, casi/scenari, domanda+spiegazione, attività docente, takeaway/visual quando utile.
-- Fonti: priorità a normativa/Ministeri/VVF/INAIL, poi fonti pubbliche tecniche; contenuti sempre riscritti originalmente.
-- Se si analizza un PDF normativo sul web, usare screenshot delle pagine pertinenti.
-- Catalogo di riferimento: 92 corsi attivi / 92 con materiale / 0 vuoti.
-- Gli RSPP/ASPP esterni sono CONGELATI e non vanno proseguiti salvo nuova istruzione esplicita.
+### Percorsi fuori roadmap / congelati
+NON sviluppare, modernizzare, finalizzare o pubblicare salvo richiesta esplicita dell'utente:
+- CSP/CSE
+- Ponteggi
+- Lavori su funi, inclusi preposti/sorveglianti
+- Spazi confinati
+- Segnaletica stradale
+- tutti gli RSPP/ASPP esterni
 
-## Stato authored completato
+Freeze DB:
+- 10 corsi RSPP/ASPP esterni: `freeze_scope=external_rspp_aspp`
+- 17 corsi specialistici: `freeze_scope=user_out_of_roadmap_specialist`
 
-### Ruoli / governance
-- Preposto base + aggiornamento: `role-authored-v3` — completato.
-- Dirigente base + aggiornamento: `role-authored-v3` — completato.
-- Datore di lavoro 16h + aggiornamento 6h: `datore-authored-v3` — completato.
-- RLS base + aggiornamenti: `rls-authored-v3` — completato.
+### Politica di pubblicazione
+- Nuove LU e nuove composizioni: prima `draft`.
+- Nessun auto-publish e nessun auto-relink.
+- Le candidate diventano ufficiali solo con passaggio esplicito di go-live.
+- Storico delle vecchie versioni da preservare.
 
-### Lavoratori
-- Formazione lavoratori/job profiles + aggiornamento: `worker-authored-v3` — completato.
-- Unità generali condivise: `general-authored-v4` — completato.
+## Stato contenuti authored
 
-### Primo soccorso
-- Base + aggiornamenti: `first-aid-authored-v3` — 16 LU draft.
-- Gate pratici separati; la fruizione digitale non certifica la competenza pratica.
+Completati e candidati:
+- Lavoratori generale/specifica/aggiornamenti: `general-authored-v4`, `worker-authored-v3`
+- Preposto e Dirigente + aggiornamenti: `role-authored-v3`
+- Datore 16h + aggiornamento: `datore-authored-v3`
+- RLS + aggiornamenti: `rls-authored-v3`
+- Primo soccorso + aggiornamenti: `first-aid-authored-v3`
+- Antincendio livelli/aggiornamenti: `fire-authored-v3`
+- Attrezzature/aggiornamenti: `equipment-authored-v3`
+- Emergenze/evacuazione: `emergency-authored-v3` + shared authored
+- Lavori in quota: `height-authored-v3`
+- DL-RSPP Datore comune + Agricoltura + Pesca + Chimico/Petrolchimico + Costruzioni + aggiornamento: `dl-rspp-authored-v3`
+- Modulo Cantieri Datore 6h: `datore-cantieri-authored-v3`
+- Modulo Cantieri Dirigente 6h: `dirigente-cantieri-authored-v3`
 
-### Antincendio
-- Livelli + aggiornamenti: `fire-authored-v3` — 23 LU draft.
+`mod_cantieri` resta UN SOLO corso catalogo; il Blueprint `employer_construction_addon` seleziona variante Datore/Dirigente tramite ruolo. Non creare un 93° corso.
 
-### Attrezzature
-- Blocco attrezzature e aggiornamenti: `equipment-authored-v3` — 63 LU authored draft distribuite sui 26 corsi/aggiornamenti del catalogo.
-- Migration di completamento: `v20_078_equipment_authored_completion`.
+## Finalizzazione candidate — COMPLETA lato preparazione
 
-### Emergenze / evacuazione e lavori in quota
-- `emergenze_evacuazione`: candidato composto da `general-authored-v4` + `emergency-authored-v3` + `fire-authored-v3`; percorso interno non certificante.
-- `lav_quota`: 8/8 LU `height-authored-v3`; pratica/addestramento separati dalla fruizione digitale.
-- Migration: `20261016160609_v20_080_emergency_height_authored_completion.sql`.
+Migrations principali:
+- `v20_084` freeze specialistici fuori roadmap
+- `v20_085` gate pratici antincendio / confine prova evacuazione
+- `v20_086` normalizzazione Blueprint/finalization scope
+- `v20_087` composizioni candidate authored
+- `v20_088` candidate role-specific `mod_cantieri`
+- `v20_089` verification paths
+- `v20_090` banca domande authored
+- `v20_091` candidate tests
+- `v20_091` secure test runtime
+- `v20_092` completion gate per iscrizione
+- `v20_093` Blueprint finalization review
+- `v20_094` normalizzazione URL Napo
+- `v20_095` cleanup metadata attivazione test
+- `v20_096` registro inviti account corsisti
 
-### DL-RSPP del Datore
-- Modulo comune + Agricoltura + Pesca + Chimico/Petrolchimico + aggiornamento: `dl-rspp-authored-v3` — completati.
-- Costruzioni: 18 LU / 960 min `dl-rspp-authored-v3` — completato con `v20_081a–d`.
-- Il percorso Costruzioni completo è 8h comune + 16h settore = 24h, dopo il corso Datore.
+Stato candidate:
+- 60 `course_versions` candidate
+- 59 corsi (due candidate per `mod_cantieri`: Datore e Dirigente)
+- tutte `draft`
+- 365 link LU authored-ready
+- 60/60 composition/linking complete
+- 60/60 verification configured
+- 36 candidate con Test Builder
+- 37 candidate con requisiti pratici
+- 0 candidate editions
+- 0 candidate enrollments
+- nessuna candidate pubblicata
 
-### Modulo aggiuntivo Cantieri — impresa affidataria
-Il contenitore catalogo è volutamente unico: `mod_cantieri` (6h / 360 min). Il Blueprint `employer_construction_addon` risolve il ruolo tramite `audience_rule`; NON creare un nuovo 93° corso.
+## Test Builder
 
-**Variante Datore**
-- `datore-cantieri-authored-v3`
-- 6 LU / 360 min
-- prerequisito: `employer_initial` / corso `dl_base` 16h
-- 25 evidence refs
-- 0 auto-link
-- migration: `20261016163358_v20_082_datore_cantieri_authored_completion.sql`
+Banca nuova authored:
+- 1.450 domande
+- 290 LU candidate × 5 domande
+- 3 alternative
+- explanation pubblica
+- answer key separata
 
-**Variante Dirigente — ultimo blocco completato**
-- `dirigente-cantieri-authored-v3`
-- 6 LU / 360 min
-- prerequisito: `dirigente_initial` / corso `dirigente` 12h
-- percorso complessivo ruolo + modulo: 18h
-- 25 evidence refs
-- 0 auto-link
-- distingue esplicitamente poteri del Dirigente, obblighi del Datore, vigilanza del Preposto e funzioni del CSE
-- nessun obbligo aggiuntivo autonomo di aggiornamento Cantieri inventato: resta l'aggiornamento generale Dirigente 6h quinquennale, da contestualizzare ai fabbisogni reali
-- migration: `20261016164702_v20_083_dirigente_cantieri_authored_completion.sql`
+Test candidate:
+- 36 test
+- 660 test-question links
+- 0 duplicati
+- 30 domande per iniziali/ruolo quando previsto
+- 10 per aggiornamenti e questionari teorici attrezzature
+- soglia 70%
+- tutti `active=false`
 
-## RSPP/ASPP esterni — CONGELATI
+Runtime sicuro DB:
+- `private.prepare_test_attempt()`
+- `private.grade_test_answer()`
+- `private.sync_test_attempt_score()`
+- score/pass non scrivibili dal browser corsista
+- binding test/LU alla `course_version` assegnata
 
-Migration di freeze: `20261016155345_v20_079_freeze_external_rspp_aspp`.
+## Gate di completamento
 
-Già modernizzati prima del freeze:
-- Modulo A: 5 LU `rspp-aspp-authored-v3`
-- Modulo B comune: 12 LU `rspp-aspp-authored-v3`
+Tabella: `enrollment_requirement_evidence`.
 
-Da NON proseguire finché l'utente non lo sblocca:
-- B-SP1 Agricoltura
-- B-SP2 Pesca
-- B-SP3 Costruzioni
-- B-SP4 Sanità
-- B-SP5 Chimico/Petrolchimico
-- Modulo C
-- aggiornamenti ASPP/RSPP
+Regola: 100% LU digitali NON basta se la versione richiede pratica/addestramento/verifica.
 
-## Cantieri / lavori specialistici ancora da modernizzare
+Verificato in rollback:
+- PLE: contenuti 100% resta `in_progress` finché non risultano pratica + prova finale + test teorico
+- Datore 16h: contenuti 100% resta `in_progress` finché non supera il test finale
 
-Sono presenti contenuti v2 ma non ancora portati allo standard authored finale:
-- CSP/CSE 120h (`csp-cse-v2`, 30 LU) + aggiornamento 40h (`csp-cse-update-v2`, 10 LU)
-- Ponteggi 28h (`ponteggi-v2`, 14 LU) + aggiornamento (`ponteggi-update-v2`, 2 LU)
-- Lavori su funi (`funi-v2`, 13 LU) + aggiornamento (`funi-update-v2`, 4 LU)
-- Preposto/sorvegliante funi (`funi-preposto-v2`, 4 LU) + aggiornamento (`funi-preposto-update-v2`, 1 LU)
+UI:
+- staff può registrare/revocare evidenze esterne/pratiche
+- corsista vede lo stato dei gate ma non può autocertificarli
+- test di piattaforma si chiudono solo dal motore DB
 
-Altri blocchi differiti:
-- spazi confinati
-- segnaletica stradale / viabilità (`road-sign-v2` e update)
+## Blueprint QA
 
-## Migrazioni recenti da Primo Soccorso in avanti
+- 22 Blueprint in QA
+- 0 varianti orfane
+- 0 regole con varianti inesistenti
+- regola verifica Lavoratori aggiunta
+- duplicato pratico lavori in quota disattivato
+- vecchie regole RLS update duplicate disattivate
+- `publication_blocked=true` ancora intenzionale fino al go-live
+- congelati esclusi dalla finalizzazione
 
-- `20261016132900_v20_076_first_aid_authored_completion`
-- `20261016134027_v20_077_fire_authored_completion`
-- `20261016154330_v20_078_equipment_authored_completion`
-- `20261016155345_v20_079_freeze_external_rspp_aspp`
-- `20261016160609_v20_080_emergency_height_authored_completion`
-- `20261016162021_v20_081a_dl_rspp_costruzioni_sources_metadata`
-- `20261016162106_v20_081b_dl_rspp_costruzioni_authored_part1`
-- `20261016162143_v20_081c_dl_rspp_costruzioni_authored_part2`
-- `20261016162235_v20_081d_dl_rspp_costruzioni_provenance_audit`
-- `20261016163358_v20_082_datore_cantieri_authored_completion`
-- `20261016164702_v20_083_dirigente_cantieri_authored_completion`
+## Binding app / versioning
 
-## Ultimo audit DB
+Corretto il bug per cui il client cercava l'ultima LU pubblicata globale.
+Ora un corsista apre esattamente le LU collegate alla `course_version_id` della propria edizione.
+Commit storico: `44c858b0...`.
 
-Dopo `v20_083`:
-- Dirigente Cantieri: 6 draft / 360 min
-- 6/6 quality gate
-- 25 evidence refs / 6 LU con provenance
-- 0 link delle nuove versioni authored
-- Datore Cantieri invariato: `datore-cantieri-authored-v3`
-- prerequisiti role-specific corretti nel corso condiviso `mod_cantieri`
-- catalogo: 92 attivi / 92 con materiale / 0 vuoti
+## Napo / risorse esterne
 
-## Prossimo punto di lavoro
+- bridge `video_plan -> player` attivo
+- `video_plan.media_url` = video diretto
+- `video_plan.url` = pagina ufficiale fallback
+- 23/23 video plan authored hanno pagina + media diretto
+- slug Napo obsoleti: 0
+- fallback resiliente attivo
+- corsi authored con riferimenti Napo disponibili
 
-Il Modulo Cantieri Datore e Dirigente è chiuso lato contenuti candidati. Il prossimo blocco specialistico NON è ancora scelto. Candidati naturali: CSP/CSE, ponteggi, oppure lavori su funi. RSPP/ASPP esterni restano congelati.
+## Amministrazione / inviti / portale corsista
 
-## Servizi / repository
+### Modello esistente
+- `course_editions`
+- `learners`
+- `enrollments`
+- `learner.auth_user_id`
+- `claim_learner_account()` collega account Auth all'anagrafica tramite email verificata
+
+### Inviti account — implementato
+Migration:
+`20261016190217_v20_096_learner_account_invitation_registry`
+
+Tabella:
+`learner_account_invitations`
+
+Stati:
+- not_sent
+- sent
+- accepted
+- failed
+- revoked
+
+Trigger aggiorna automaticamente a `accepted` quando `learners.auth_user_id` viene collegato.
+
+Edge Function Supabase:
+`invite-learner`
+- verify_jwt=true
+- solo platform admin
+- usa `auth.admin.inviteUserByEmail`
+- se account Auth già esistente usa recovery/reset password
+- service role mai esposta al browser
+- registra invii/errori/stato
+
+UI Admin:
+- tab Corsisti: stato Account/Invito + `Invita`/`Reinvia`
+- tab Iscrizioni: stato account + `Invita`/`Reinvia`
+- primo accesso: `learner-onboarding-v20.js`, scelta password + claim learner
+
+### Iscrizione multipla — implementata
+`admin-bulk-enrollment-v20.js`
+- selezione edizione open
+- filtra corsisti compatibili per organizzazione/azienda
+- esclude chi è già iscritto
+- selezione multipla
+- inserimento in blocco
+- opzione invito immediato agli account non attivi
+- vincolo DB `UNIQUE(edition_id, learner_id)` protegge dai duplicati
+
+### Edizioni — overview implementata
+`admin-edition-overview-v20.js`
+Mostra per edizione:
+- iscritti
+- account attivi
+- da iniziare
+- in corso
+- completati
+- pulsante `Gestisci corsisti`
+
+### Portale corsista — assigned courses only
+`learner-dashboard.js` già gestisce `I miei corsi` e route guard per assegnazioni.
+Aggiunto `learner-access-guard-v20.js`:
+- Home corsista -> `I miei corsi`
+- nasconde catalogo completo
+- nasconde ricerca globale
+- nasconde modalità Aula/Docente
+- nasconde strumenti docente/libreria
+- impedisce `library/*`
+- sidebar resta limitata alle assegnazioni
+- corsi revocati rimossi dalla vista
+
+Service worker cache aggiornata durante questi blocchi per evitare PWA stale.
+
+## Stato dati amministrativi al momento del blocco
+
+- 3 learners attivi
+- 0 course editions
+- 0 enrollments
+- quindi nessun utente reale è stato contaminato dai test amministrativi
+
+## Stato pubblicazione
+
+NON ancora eseguito:
+- candidate `course_versions` restano draft
+- 36 test restano inattivi
+- 22 Blueprint restano publication-blocked
+- nessuna edizione candidate
+- nessuna iscrizione candidate
+
+Questo è voluto: il prossimo grande passaggio dopo QA amministrativo è il go-live controllato.
+
+## Prossimi passi consigliati
+
+1. Chiudere CI/Vercel del blocco Admin corrente.
+2. QA end-to-end amministrativo senza email reali: edizione -> iscrizione -> visibilità learner -> gate -> revoca.
+3. Definire/promuovere le candidate approvate a `published` senza toccare congelati.
+4. Attivare i 36 test solo sulle versioni pubblicate.
+5. Creare una vera edizione pilota e testarla con account corsista controllato.
+6. Solo dopo: go-live per nuove edizioni.
+
+## Servizi
 
 - GitHub: `SafetyManagerPro/SafetyTraining`
-- Supabase project: `ejkwvatmzdqqjozpxntk`
+- Supabase: `ejkwvatmzdqqjozpxntk`
 - Vercel project: `safety-training`
-- Produzione: `safety-training-safety-manager.vercel.app`
+- produzione: `safety-training-safety-manager.vercel.app`
+
+Ultimo commit applicativo al momento di questo aggiornamento: `0ce0f04aa2c1a09836ef808e1311ad0ff9a862c1` (`Add edition learner overview`).
