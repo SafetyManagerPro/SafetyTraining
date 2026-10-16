@@ -170,7 +170,7 @@
       const edition = editionMap.get(e.edition_id) || {};
       const version = versionMap.get(edition.course_version_id) || {};
       const course = courseMap.get(version.course_id) || {};
-      return { id:e.id, editionId:e.edition_id, editionTitle:edition.title, courseStableKey:course.stable_key, courseTitle:course.title, versionNumber:version.version_number, status:e.status, activeSeconds:e.active_seconds, progressPct:e.progress_pct, finalScorePct:e.final_score_pct, availableFrom:edition.available_from, availableUntil:edition.available_until };
+      return { id:e.id, editionId:e.edition_id, editionTitle:edition.title, courseVersionId:version.id || edition.course_version_id || null, courseStableKey:course.stable_key, courseTitle:course.title, versionNumber:version.version_number, status:e.status, activeSeconds:e.active_seconds, progressPct:e.progress_pct, finalScorePct:e.final_score_pct, availableFrom:edition.available_from, availableUntil:edition.available_until };
     });
   }
 
@@ -181,12 +181,33 @@
     return { type:'other' };
   }
 
-  async function lookupUnitVersion(stableKey) {
-    if (!stableKey || !state.user) return null;
-    const { data: unit } = await state.client.from('learning_units').select('id,stable_key').eq('stable_key', stableKey).eq('active', true).maybeSingle();
+  async function lookupUnitVersion(stableKey, courseVersionId) {
+    if (!stableKey || !courseVersionId || !state.user) return null;
+    const { data: unit, error: unitError } = await state.client.from('learning_units').select('id,stable_key').eq('stable_key', stableKey).eq('active', true).maybeSingle();
+    if (unitError) throw unitError;
     if (!unit) return null;
-    const { data: version } = await state.client.from('learning_unit_versions').select('id,version_number,status').eq('learning_unit_id', unit.id).eq('status', 'published').order('version_number', { ascending:false }).limit(1).maybeSingle();
-    return version?.id || null;
+
+    const { data: modules, error: modulesError } = await state.client.from('course_modules').select('id').eq('course_version_id', courseVersionId);
+    if (modulesError) throw modulesError;
+    const moduleIds = (modules || []).map((row) => row.id).filter(Boolean);
+    if (!moduleIds.length) return null;
+
+    const { data: links, error: linksError } = await state.client.from('course_module_units').select('unit_version_id').in('module_id', moduleIds);
+    if (linksError) throw linksError;
+    const linkedVersionIds = [...new Set((links || []).map((row) => row.unit_version_id).filter(Boolean))];
+    if (!linkedVersionIds.length) return null;
+
+    const { data: versions, error: versionsError } = await state.client.from('learning_unit_versions')
+      .select('id,learning_unit_id,version_number,status')
+      .in('id', linkedVersionIds)
+      .eq('learning_unit_id', unit.id);
+    if (versionsError) throw versionsError;
+    if (!versions?.length) return null;
+    if (versions.length > 1) {
+      console.warn('[SafetyTraining Cloud] multiple linked versions for unit/course snapshot', { stableKey, courseVersionId, versions:versions.map((v) => v.id) });
+      return null;
+    }
+    return versions[0].id;
   }
 
   async function syncRouteContext() {
@@ -206,14 +227,14 @@
       await startLearningSession(assignment.id);
     }
     const previous = state.currentUnitVersionId;
-    const unitVersionId = await lookupUnitVersion(route.unitStableKey);
+    const unitVersionId = await lookupUnitVersion(route.unitStableKey, assignment.courseVersionId);
     if (!unitVersionId) return;
     if (previous && previous !== unitVersionId) await recordEvent('unit_closed', previous, 0).catch(() => {});
     state.currentUnitStableKey = route.unitStableKey;
     state.currentUnitVersionId = unitVersionId;
     if (previous !== unitVersionId) {
       await recordEvent('unit_opened', unitVersionId, 0).catch(() => {});
-      await recordEvent('content_viewed', unitVersionId, 0, { route:location.hash }).catch(() => {});
+      await recordEvent('content_viewed', unitVersionId, 0, { route:location.hash, course_version_id:assignment.courseVersionId }).catch(() => {});
     }
     startHeartbeat();
     window.setTimeout(enhanceVisibleQuiz, 0);
@@ -261,7 +282,7 @@
   function stopHeartbeat() { if (state.heartbeatTimer) clearInterval(state.heartbeatTimer); state.heartbeatTimer = null; }
 
   async function getQuestionForUnit(stableKey) {
-    const unitVersionId = await lookupUnitVersion(stableKey);
+    const unitVersionId = await lookupUnitVersion(stableKey, state.activeAssignment?.courseVersionId);
     if (!unitVersionId) return null;
     const { data, error } = await state.client.from('questions').select('id,stable_key,prompt,question_type,options,metadata').eq('unit_version_id', unitVersionId).eq('active', true).order('created_at', { ascending:true }).limit(1).maybeSingle();
     if (error) throw error;
