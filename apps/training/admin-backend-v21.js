@@ -4,7 +4,7 @@
 
   const db = () => window.SAFETY_CLOUD?.state?.client;
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  const state = { edit:{}, enhancing:false, enhanceTimer:null };
+  const state = { edit:{}, enhancing:false, enhanceTimer:null, enhanceSeq:0 };
 
   const ACTION_LABELS = {
     'organization.create':'Organizzazione creata', 'organization.update':'Organizzazione aggiornata',
@@ -34,7 +34,7 @@
   }
 
   function closeModal(){document.querySelector('#adminModal .admin-modal-close')?.click();}
-  async function rerender(){closeModal();await window.SAFETY_ADMIN?.render?.();scheduleEnhance();}
+  async function rerender(){closeModal();await window.SAFETY_ADMIN?.render?.();scheduleEnhance(40);}
   const iso=v=>v?new Date(v).toISOString():null;
   const formTitle=form=>form.closest('#adminModal')?.querySelector('h2')?.textContent?.trim()||'';
 
@@ -205,22 +205,40 @@
     }catch(err){console.error('[Admin v21 RPC action]',err);notify(err?.message||'Operazione non riuscita.','error');}
   },true);
 
-  async function enhanceDashboard() {
+  function dashboardMarkup(summary) {
+    const stat=(value,label)=>`<article class="admin-stat"><strong>${esc(value??0)}</strong><span>${esc(label)}</span></article>`;
+    return `
+      <div class="admin-stats">${stat(summary?.companies_active,'Aziende attive')}${stat(summary?.learners_active,'Corsisti attivi')}${stat(summary?.courses_active,'Corsi attivi')}${stat(summary?.editions_open,'Edizioni aperte')}${stat(summary?.enrollments_in_progress,'Percorsi in corso')}${stat(summary?.pending_invites,'Accessi da gestire')}</div>
+      <div class="admin-grid two">
+        <section class="admin-card"><div class="admin-card-head"><div><h2>Flusso operativo</h2><p>Dall’anagrafica all’erogazione.</p></div></div><div class="admin-step-list"><button data-jump="companies"><b>1</b><span>Azienda<small>Anagrafica, P.IVA e ATECO</small></span></button><button data-jump="learners"><b>2</b><span>Corsisti<small>Dati, account e inviti</small></span></button><button data-jump="courses"><b>3</b><span>Corsi<small>Catalogo e versioni</small></span></button><button data-jump="editions"><b>4</b><span>Edizioni<small>Versione approvata e disponibilità</small></span></button><button data-jump="enrollments"><b>5</b><span>Iscrizioni<small>Assegnazione, accessi e avanzamento</small></span></button></div></section>
+        <section class="admin-card"><div class="admin-card-head"><div><h2>Stato piattaforma</h2><p>Snapshot amministrativo server-side.</p></div></div><div class="admin-summary-list"><div><span>Edizioni complessive</span><strong>${esc(summary?.editions_total??0)}</strong></div><div><span>Iscrizioni complessive</span><strong>${esc(summary?.enrollments_total??0)}</strong></div><div><span>Ambito</span><strong>${esc(summary?.scope==='platform'?'Piattaforma':'Organizzazione')}</strong></div><div><span>Pubblicazione contenuti</span><strong>Controllata</strong></div></div><p class="admin-note">I contatori della dashboard arrivano da un unico snapshot autorizzato lato server; nessun polling DOM o refresh ricorsivo.</p></section>
+      </div>`;
+  }
+
+  async function enhanceDashboard(seq) {
     const active=document.querySelector('#adminShell .admin-nav [data-tab="dashboard"].active');
     if(!active)return;
     const summary=await rpc('admin_dashboard_summary');
+    if(seq!==state.enhanceSeq)return;
+    const host=document.getElementById('adminContent');
+    if(!host)return;
+    if(host.querySelector('.admin-loading') || !host.querySelector('.admin-stats')) {
+      host.innerHTML=dashboardMarkup(summary);
+      return;
+    }
     const stats=[summary?.companies_active,summary?.learners_active,summary?.courses_active,summary?.editions_open,summary?.enrollments_in_progress,summary?.pending_invites];
-    document.querySelectorAll('#adminContent .admin-stats .admin-stat strong').forEach((el,i)=>{if(stats[i]!=null&&el.textContent!==String(stats[i]))el.textContent=String(stats[i]);});
-    const rows=document.querySelectorAll('#adminContent .admin-summary-list strong');
+    host.querySelectorAll('.admin-stats .admin-stat strong').forEach((el,i)=>{if(stats[i]!=null&&el.textContent!==String(stats[i]))el.textContent=String(stats[i]);});
+    const rows=host.querySelectorAll('.admin-summary-list strong');
     if(rows[0]&&summary?.editions_total!=null)rows[0].textContent=String(summary.editions_total);
     if(rows[1]&&summary?.enrollments_total!=null)rows[1].textContent=String(summary.enrollments_total);
   }
 
-  async function enhanceActivity() {
+  async function enhanceActivity(seq) {
     const active=document.querySelector('#adminShell .admin-nav [data-tab="activity"].active');
     if(!active)return;
     const {data:actions,error}=await db().rpc('admin_recent_actions',{p_limit:100});
     if(error)throw error;
+    if(seq!==state.enhanceSeq)return;
     let section=document.getElementById('adminAuditActions');
     if(!section){section=document.createElement('section');section.id='adminAuditActions';section.className='admin-card';document.getElementById('adminContent')?.prepend(section);}
     const rows=(actions||[]).map(x=>`<tr><td>${esc(new Date(x.created_at).toLocaleString('it-IT'))}</td><td>${esc(ACTION_LABELS[x.action]||x.action)}</td><td>${esc(x.entity_type)}</td><td><code>${esc(x.entity_id||'—')}</code></td></tr>`).join('');
@@ -231,12 +249,18 @@
   async function enhance(){
     if(state.enhancing)return;
     state.enhancing=true;
-    try{await enhanceDashboard();await enhanceActivity();}catch(err){console.warn('[Admin v21 enhance]',err?.message||err);}finally{state.enhancing=false;}
+    const seq=++state.enhanceSeq;
+    try{await enhanceDashboard(seq);await enhanceActivity(seq);}catch(err){console.warn('[Admin v21 enhance]',err?.message||err);}finally{state.enhancing=false;}
   }
-  function scheduleEnhance(){clearTimeout(state.enhanceTimer);state.enhanceTimer=setTimeout(enhance,80);}
+  function scheduleEnhance(delay=100){clearTimeout(state.enhanceTimer);state.enhanceTimer=setTimeout(enhance,delay);}
 
-  const observer=new MutationObserver(scheduleEnhance);
-  const boot=()=>{observer.observe(document.body,{childList:true,subtree:true});scheduleEnhance();};
+  function boot(){
+    scheduleEnhance(120);
+    document.addEventListener('click',event=>{
+      if(event.target.closest('#adminConsoleBtn,#adminRefresh,#adminShell [data-tab],#adminContent [data-jump]')) scheduleEnhance(80);
+    });
+    db()?.auth?.onAuthStateChange(()=>scheduleEnhance(180));
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-  window.SAFETY_ADMIN_BACKEND_V21={rpc,enhance,version:'21.2'};
+  window.SAFETY_ADMIN_BACKEND_V21={rpc,enhance,scheduleEnhance,version:'21.3'};
 })();
