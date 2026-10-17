@@ -1,0 +1,16 @@
+/* SafetyTraining v21.5 — responsive list controls. */
+.admin-list-tools{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin:12px 0;padding:10px;border:1px solid var(--admin-line);border-radius:12px;background:rgba(255,255,255,.025);min-width:0}
+.admin-list-search{display:flex;align-items:center;gap:7px;flex:1 1 260px;min-width:min(100%,220px)}
+.admin-list-search input{width:100%;min-width:0}
+.admin-list-controls{display:flex;align-items:flex-end;gap:8px;flex:2 1 520px;flex-wrap:wrap;min-width:0}
+.admin-list-control{display:grid;gap:4px;min-width:145px;flex:1 1 150px}
+.admin-list-control>span{font-size:10px;color:var(--admin-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.admin-list-control select{width:100%;min-width:0}
+.admin-list-direction,.admin-list-reset{min-height:38px;white-space:nowrap}
+.admin-list-direction{flex:0 0 42px;font-size:18px}
+.admin-list-count{align-self:center;margin-left:auto;padding:7px 10px;border-radius:999px;background:rgba(95,167,255,.1);color:#cfe2ff;font-size:11px;font-weight:800;white-space:nowrap}
+.admin-list-card-empty{display:none!important}
+
+@media(max-width:860px){.admin-list-tools{align-items:stretch}.admin-list-search,.admin-list-controls{flex-basis:100%}.admin-list-count{margin-left:0}}
+@media(max-width:560px){.admin-list-tools{padding:9px;gap:8px}.admin-list-controls{display:grid;grid-template-columns:minmax(0,1fr) 42px;align-items:end}.admin-list-control{grid-column:1/-1;min-width:0}.admin-list-reset{grid-column:1}.admin-list-direction{grid-column:2}.admin-list-count{grid-column:1/-1;justify-self:start}.admin-list-search{min-width:0}.admin-list-search input{min-height:42px}.admin-list-control select,.admin-list-reset,.admin-list-direction{min-height:42px}}
+
