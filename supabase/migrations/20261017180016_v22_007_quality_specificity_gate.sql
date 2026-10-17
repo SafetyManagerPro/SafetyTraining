@@ -60,7 +60,7 @@ begin
        case when coalesce(ss.scenario_media_count,0)+coalesce(ls.lab_media_count,0)>0 then 10 else 0 end+
        case when coalesce(cs.sourced_units,0)>0 or coalesce(ss.scenario_source_count,0)+coalesce(ls.lab_source_count,0)>0 then 5 else 0 end+
        case when coalesce(v.verification_count,0)>0 and (coalesce(v.required_test_count,0)=0 or (coalesce(t.active_tests,0)>=v.required_test_count and coalesce(t.active_questions,0)>=greatest(coalesce(v.min_questions,0),1))) then 10 else 0 end)::int quality_score
-    from public.courses c left join latest l on l.course_id=c.id left join content_stats cs on cs.course_id=c.id left join scenario_stats ss on ss.course_id=c.id left join lab_stats ls on ls.course_id=c.id left join ver v on v.course_id=c.id left join tst t on tst.course_id=c.id
+    from public.courses c left join latest l on l.course_id=c.id left join content_stats cs on cs.course_id=c.id left join scenario_stats ss on ss.course_id=c.id left join lab_stats ls on ls.course_id=c.id left join ver v on v.course_id=c.id left join tst t on t.course_id=c.id
     where c.active and coalesce(c.metadata->>'freeze_scope','')=''
   ), gapped as (
     select s.*,array_remove(array[
