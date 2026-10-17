@@ -1,9 +1,9 @@
 # SafetyTraining — handoff LATEST
 
-Ultimo aggiornamento: 2026-10-16
-Stato: backend amministrazione v21 fino a `v21_014`, frontend capability fino a cache `safety-training-v21-6`.
+Ultimo aggiornamento: 2026-10-17
+Stato: backend amministrazione live fino a `v21_016`; frontend admin/PWA repository cache `safety-training-v21-7`.
 
-> Questo file integra/supersede operativamente `docs/SAFETYTRAINING_HANDOFF.md` per le modifiche successive a v21_011. Dopo ogni blocco sostanziale aggiornare sempre il promemoria di progetto; non lasciare lo stato soltanto nella chat.
+> Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche il promemoria di progetto: lo stato non deve restare soltanto in chat.
 
 ## Vincoli permanenti
 
@@ -15,26 +15,31 @@ NON sviluppare/modernizzare/finalizzare/pubblicare senza richiesta esplicita:
 - Segnaletica stradale
 - tutti gli RSPP/ASPP esterni
 
-Freeze DB già attivi:
+Freeze DB:
 - 10 corsi RSPP/ASPP esterni: `freeze_scope=external_rspp_aspp`
 - 17 corsi specialistici: `freeze_scope=user_out_of_roadmap_specialist`
 
-`mod_cantieri` resta UN SOLO corso catalogo con due course_versions role-specific. Non creare un 93° corso.
+`mod_cantieri` resta UN SOLO corso catalogo con due `course_versions` role-specific. Non creare un 93° corso.
 
-## Go-live didattico v20 già completato
+## Go-live didattico v20 — completato
 
-- 60 course_versions go-live
+- 60 `course_versions` go-live
 - 59 corsi distinti
-- 290 learning_unit_versions
+- 290 `learning_unit_versions`
+- 60/60 composizioni complete
+- 60/60 verification path selezionati
 - 36 test attivi
+- 1.450 domande authored
 - 660 test-question links
+- soglia 70%
 - 37 percorsi con gate pratico
+- 73 requirement rows complessive
 - v20_097–v20_100 completati
 - nessuna auto-creazione di edizioni/iscrizioni al go-live
 
-## Backend amministrativo v21 — migration live
+## Backend amministrativo v21 — stato live
 
-Migration Supabase applicate e salvate nel repository:
+Migration DB correnti rilevanti:
 - `20261016212444_v21_001_admin_backend_service_layer`
 - `20261016212541_v21_002_admin_backend_core_crud`
 - `20261016212933_v21_003_admin_backend_guardrails`
@@ -46,251 +51,193 @@ Migration Supabase applicate e salvate nel repository:
 - `20261016215923_v21_009_restore_safetymanager_staging_compatibility`
 - `20261016220140_v21_010_harden_safetymanager_course_configuration`
 - `20261016220621_v21_011_admin_detail_read_service`
-- `20261016222858_v21_012_scoped_admin_capabilities`
-- `20261016223712_v21_013_scoped_invitation_visibility`
-- `20261016224026_v21_014_allow_rls_training_scope_helper`
+- `20261016221243_v21_012_scoped_admin_capabilities`
+- `20261016221548_v21_013_scoped_invitation_visibility`
+- `20261016221704_v21_014_allow_rls_training_scope_helper`
+- `20261017042729_v21_015_restore_platform_evidence_status_guard`
+- `20261017042912_v21_016_admin_membership_service`
 
-Supabase project: `ejkwvatmzdqqjozpxntk`.
+### Incidente migration duplicata del 17/10
 
-## Audit / service layer
+È stata rilevata una seconda applicazione accidentale di `v21_007_admin_requirement_evidence_service` con versione DB `20261017042346`. Aveva sovrascritto il guard introdotto da v21_008, rimuovendo la restrizione `platform` a soli stati `completed|failed`.
 
-Tabella privata:
-- `private.admin_audit_log`
+Correzione applicata immediatamente con `v21_015`:
+- ripristinato `platform_evidence_status_invalid`
+- piattaforma test solo `completed|failed`
+- binding test/versione/requisito preservato
+- pass/fail deve combaciare con il test attempt
+- nessuna revoca manuale di evidence platform
 
-Accesso diretto negato a browser authenticated; lettura tramite RPC autorizzata.
+Verifica live dopo la correzione: guard ripristinato = `true`.
 
-RPC amministrative principali:
-- `admin_capabilities()`
-- `admin_save_organization()`
-- `admin_save_company()`
-- `admin_save_learner()`
-- `admin_save_course()`
-- `admin_set_active()`
-- `admin_create_edition()`
-- `admin_update_edition()`
-- `admin_bulk_enroll()`
-- `admin_set_enrollment_revoked()`
-- `admin_dashboard_summary()`
-- `admin_recent_actions()`
-- `admin_company_detail()`
-- `admin_learner_detail()`
-- `admin_edition_detail()`
-- `admin_set_requirement_evidence()`
-
-## Ruoli amministrativi v21_012
+## Ruoli e capability
 
 ### platform_admin
-Pieno accesso amministrativo e globale:
-- organizzazioni
-- aziende
-- corsisti
-- corsi/editorial
-- edizioni/iscrizioni/gate
-- SafetyManager integration
-- audit globale
+Accesso globale a organizzazioni, aziende, corsisti, corsi/editorial, edizioni, iscrizioni, gate, SafetyManager, audit e gestione membership amministrative.
 
 ### organization_admin
-Scope solo sulle organizzazioni di membership:
-- dashboard scoped
-- gestione aziende della propria organizzazione
+Solo sulle organizzazioni di membership:
+- dashboard/audit scoped
+- gestione aziende
 - gestione corsisti
-- creazione/modifica edizioni
-- enrollment/revoke/restore
-- gate evidenze
-- detail azienda/corsista/edizione
-- audit scoped
+- edizioni/iscrizioni
+- evidence gate
+- detail amministrativi
 - inviti account scoped
 
-NON può:
-- creare/modificare organizzazioni globali
-- creare/modificare corsi globali/editorial
-- usare integrazione SafetyManager globale
-- operare su altre organizzazioni
+Non può gestire organizzazioni globali, corsi/editorial globali, SafetyManager globale o membership amministrative.
 
 ### training_manager
-Scope solo sulle organizzazioni di membership:
-- dashboard scoped
+Solo sulle organizzazioni di membership:
+- dashboard/audit scoped
 - lettura aziende
 - gestione corsisti
-- creazione/modifica edizioni
-- enrollment/revoke/restore
-- gate evidenze
-- detail azienda/corsista/edizione
-- audit scoped
+- edizioni/iscrizioni
+- evidence gate
+- detail amministrativi
 - inviti account scoped
 
-NON può:
-- creare/modificare aziende
-- gestire organizzazioni globali
-- gestire corsi globali/editorial
-- SafetyManager globale
-- operare cross-tenant
+Non può modificare aziende, organizzazioni/corsi globali, SafetyManager o membership amministrative.
 
 ### company_admin
-Ruolo esistente nello schema ma NON abilitato alla console amministrativa v21 in questo blocco. Lasciarlo fuori finché non viene progettato esplicitamente lo scope company-only.
+Esiste nello schema ma resta deliberatamente NON abilitato. Non abilitarlo senza progettazione esplicita company-only.
 
-## Capability RPC
+`admin_capabilities()` include ora anche:
+- `manage_admin_memberships`: `true` solo per platform admin
 
-`admin_capabilities()` restituisce:
-- `admin_console`
-- `platform_admin`
-- ruoli scoped
-- capability granulari
-- scopes organizzazione
+## v21_016 — Membership administration
 
-Capability correnti:
-- view_dashboard
-- manage_organizations
-- manage_companies
-- manage_learners
-- manage_courses
-- manage_editions
-- manage_enrollments
-- manage_evidence
-- view_activity
-- manage_safetymanager
-- view_editorial_tools
+Nuove RPC:
+- `admin_memberships_overview(uuid default null)`
+- `admin_set_organization_membership(uuid,text,text,boolean)`
 
-Helper privati:
-- `private.can_manage_training_org(uuid)`
-- `private.can_manage_company_registry(uuid)`
+Regole server-side:
+- solo `platform_admin`
+- ruoli ammessi esclusivamente `organization_admin|training_manager`
+- `company_admin` e qualunque altro ruolo respinti
+- target risolto da email esatta/case-insensitive su `auth.users`
+- account Auth deve esistere
+- assegnazione/riattivazione solo su organizzazione attiva
+- revoca possibile su membership esistente
+- membership amministrative org-level sempre `company_id IS NULL`
+- audit `membership.assign`, `membership.reactivate`, `membership.revoke`
+- nessuna modifica a `platform_admins`
 
-`private.can_manage_training_org()` ha EXECUTE per authenticated/service_role perché viene invocata da una policy RLS; il private schema non è esposto come RPC pubblica.
+Hardening importante:
+- revocati `INSERT/UPDATE/DELETE/TRUNCATE` browser su `organization_memberships`
+- rimossa la vecchia policy `memberships_manage`, che consentiva a un `organization_admin` CRUD diretto della tabella membership
+- le mutation amministrative passano esclusivamente dalla RPC platform-only
+- SELECT scoped preesistente resta separato
 
-## QA ruoli scoped
+QA v21_016 in transazione + rollback — VERDE:
+- assign `organization_admin`
+- assign `training_manager`
+- overview vede entrambi
+- revoke `organization_admin`
+- `company_admin` respinto con `unsupported_admin_membership_role`
+- organizzazione inattiva respinta con `organization_inactive`
+- caller non-platform respinto su overview e mutation con `platform_admin_required`
+- residui finali: 0 org QA, 0 membership admin, 0 audit QA
+- DML grants authenticated sulla tabella membership: 0
+- policy `memberships_manage`: assente
 
-Non esistono attualmente membership reali organization_admin/training_manager nel progetto.
+Stato Auth al momento del QA:
+- 1 utente Auth totale
+- 1 platform admin
+- 0 utenti Auth non-platform
+- 0 membership reali `organization_admin|training_manager`
 
-QA effettuato senza creare utenti permanenti:
-- dentro transazione è stato temporaneamente rimosso il flag platform dell'admin esistente
-- inserita membership QA
-- sessione simulata come authenticated
-- tutto ripristinato con ROLLBACK
+Quindi la nuova schermata partirà senza assegnazioni finché non esisteranno account Auth aggiuntivi.
 
-organization_admin QA — VERDE:
-- capability corrette
-- creazione azienda propria consentita
-- corsista proprio consentito
-- edizione + bulk enrollment propri consentiti
-- detail proprio consentito
-- azienda cross-org negata
-- corso globale negato
-- organizzazione globale negata
-- dashboard scoped corretta
+## Frontend amministrativo
 
-training_manager QA — VERDE:
-- manage_companies=false
-- creazione azienda negata
-- corsista consentito
-- edizione + enrollment consentiti
-- detail learner/edition consentiti
-- dashboard scoped corretta
-
-Residui QA finali: 0 membership, 0 aziende/corsisti/edizioni/inviti QA.
-
-## Inviti account v21_013/v21_014
-
-Edge Function `invite-learner` aggiornata e DEPLOYATA su Supabase:
-- versione 2
-- `verify_jwt=true`
-- service role soltanto server-side
-
-Autorizzazione:
-- platform_admin globale
-- oppure organization_admin/training_manager sulla STESSA organization del corsista
-- cross-tenant => 403
-- learner e organization devono essere attivi
-
-Registro `learner_account_invitations`:
-- lettura scoped via RLS per training admin autorizzato
-- browser non riceve accesso diretto in scrittura
-
-QA RLS inviti — VERDE:
-- manager di org1 vede solo invito org1
-- invito org2 invisibile
-- detail corsista mostra invite status corretto
-- rollback completo
-
-Nota: non è stato creato un auth user scoped permanente, quindi non è stato inviato un vero invito email in QA; logica di autorizzazione DB/RLS è stata verificata separatamente e Edge Function v2 è attiva.
-
-## Frontend amministrativo v21
-
-Moduli attivi:
+Moduli attivi/in repository:
 - `apps/training/admin.js`
-- `apps/training/admin-capabilities-v21.js`
 - `apps/training/admin-backend-v21.js`
 - `apps/training/admin-details-v21.js`
 - `apps/training/requirement-evidence-admin-v21.js`
+- `apps/training/admin-capabilities-v21.js` v21.2
+- `apps/training/admin-memberships-v21.js` v21.2
 - `apps/training/course-catalog-governance-v21.js`
 
-`admin-capabilities-v21.js`:
-- chiama `admin_capabilities()`
-- abilita console anche per organization_admin/training_manager
-- nasconde funzioni non consentite
-- training_manager vede aziende ma senza mutation controls
-- Corsi/Organizzazioni/SafetyManager/editorial restano nascosti ai ruoli scoped quando non autorizzati
-- usa compatibility shim TEMPORANEO solo durante `SAFETY_ADMIN.refreshRole()` per superare il vecchio check UI platform-only
-- lo shim viene immediatamente rimosso e NON altera l'autorizzazione reale server-side
+Correzione 17/10:
+- `admin-capabilities-v21.js` esisteva ma NON era realmente caricato da `index.html`
+- `sw.js` era ancora `safety-training-v21-5` nonostante il vecchio handoff dicesse v21-6
+- ora `index.html` carica capability e membership module
+- `sw.js` cache corrente repository: `safety-training-v21-7`
+- entrambi i nuovi asset sono nella precache PWA
 
-Tutte le autorizzazioni reali restano nelle RPC/RLS DB.
+### UI Ruoli amministrativi
 
-PWA cache corrente:
-- `safety-training-v21-6`
+Nuova voce nav platform-only: `Ruoli amministrativi`.
+Permette:
+- assegnazione per email account Auth
+- selezione organizzazione attiva
+- scelta solo `Admin organizzazione` / `Training manager`
+- elenco assegnazioni incluse revocate
+- revoca e riattivazione
+- messaggio chiaro che non crea utenti Auth e non modifica platform admin
 
-## Detail / Gate / SafetyManager già completati
+La UI chiama soltanto le RPC v21_016; nessun CRUD diretto della tabella membership.
 
-Detail server-side:
-- Azienda
-- Corsista
-- Edizione
+## Altri componenti v21 già completati
 
-Gate:
+### Detail
+RPC/server UI per Azienda, Corsista, Edizione con progress, account/inviti, test, gate ed audit.
+
+### Gate evidence
 - `admin_set_requirement_evidence()`
 - Test Builder platform non modificabile manualmente
-- guardrail context su evidence
+- context guard DB
+- v21_015 ripristina l’hardening perso dalla migration duplicata
 
-SafetyManager:
+### SafetyManager
 - staging draft compatibile
-- metadata edizioni ripristinati
-- mapping solo a versioni finalizzate/go_live_ready
+- `course_editions.metadata` presente
+- mapping solo a versioni finalizzate/published/go_live_ready
 - frozen/reference/placeholder esclusi
-- catalogo normalizzato: 0 ready/hybrid senza mapping go-live valido
+- catalogo normalizzato: 0 `ready|hybrid` con mapping go-live invalido
 
-## RLS legacy corretto
+### Inviti
+Edge Function `invite-learner` versione 2 live:
+- platform admin globale oppure org admin/training manager della stessa org
+- cross-tenant 403
+- learner/org devono essere attivi
+- RLS inviti scoped
 
-Risolta ricorsione `enrollments` ↔ `course_editions`.
-NON ripristinare vecchie policy recursive.
+## RLS legacy
+
+Risolta ricorsione `enrollments` ↔ `course_editions` con helper RLS-safe. NON ripristinare le vecchie policy recursive.
 
 ## Advisor noti
 
-Non auto-fixare salvo blocco dedicato:
-- warning SECURITY DEFINER authenticated: attesi per RPC esposte ma con authorization server-side
+Non auto-fixare senza blocco dedicato:
+- warning SECURITY DEFINER authenticated per RPC con auth server-side
 - leaked password protection disabilitato
-- auth_rls_initplan
+- `auth_rls_initplan`
 - multiple permissive policies
 - unused indexes
 - FK legacy non indicizzata `training_blueprint_rules`
 
 ## Produzione / deploy
 
-Supabase v21_001–v21_014 è live.
+Supabase è live fino a `v21_016`.
 Edge `invite-learner` v2 è live.
 
-Vercel negli ultimi controlli rifiutava i nuovi deploy per `build-rate-limit` / richiesta upgrade Pro; non era un errore di compilazione SafetyTraining.
-Finché il build-rate-limit non rientra, considerare frontend v21-6 presente nel repository ma NON ancora QA browser in produzione.
+Vercel: negli ultimi controlli noti i deploy erano bloccati da `build-rate-limit / upgradeToPro`, NON da errore di compilazione SafetyTraining. Verificare nuovamente prima di dichiarare frontend v21-7 presente in produzione.
 
-## Prossimo lavoro consigliato
+## Prossimi passi
 
-1. creare gestione controllata delle membership amministrative (assegna/revoca organization_admin e training_manager), inizialmente platform-admin only
-2. aggiungere overview membership per organizzazione
-3. non abilitare company_admin finché non viene progettato scope company-only
-4. appena Vercel torna disponibile: deploy + QA browser reale di capability UI, Detail, Gate, Catalog governance, inviti e PWA v21-6
-5. solo dopo QA produzione valutare rimozione definitiva dei fallback legacy e consolidamento dei bridge dentro `admin.js`
-6. aggiornare SEMPRE il promemoria dopo ogni blocco sostanziale
+1. verificare GitHub Actions sul HEAD contenente v21_015/v21_016 + UI v21-7
+2. verificare se il rate limit Vercel è rientrato; se sì deploy + QA browser reale
+3. creare account Auth scoped reale solo quando serve operativamente, poi assegnare membership dalla nuova schermata
+4. dopo stabilizzazione produzione valutare consolidamento dei bridge legacy dentro `admin.js`
+5. NON abilitare `company_admin` senza blocco di progettazione dedicato
+6. aggiornare SEMPRE entrambi gli handoff dopo modifiche sostanziali
 
 ## Servizi
 
 - GitHub: `SafetyManagerPro/SafetyTraining`
 - Supabase: `ejkwvatmzdqqjozpxntk`
-- Vercel: `safety-training`
+- Vercel project: `safety-training`
 - produzione: `safety-training-safety-manager.vercel.app`
