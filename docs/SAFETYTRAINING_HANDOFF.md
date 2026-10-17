@@ -31,12 +31,13 @@ Freeze DB:
 - 37 percorsi con gate pratico
 - 73 requirement rows
 
-## Amministrazione v21 — live fino a v21_022
+## Amministrazione v21 — LIVE fino a v21_023
 Ultime migration:
 - `20261017052016_v21_019_multichannel_learner_invites`
 - `20261017052054_v21_020_company_bulk_and_registry_import`
 - `20261017052210_v21_021_invite_public_claim_flow`
 - `20261017052954_v21_022_qualify_invite_crypto_extensions`
+- `20261017161000_v21_023_preserve_current_company_training_history`
 
 Restano attive v21_001–018: service layer admin, guardrail/RLS, evidence, SafetyManager governance, detail, scoped admin, membership e dedupe CF/PIVA.
 
@@ -46,152 +47,111 @@ Restano attive v21_001–018: service layer admin, guardrail/RLS, evidence, Safe
 - `admin_registry_conflict()` = preflight UI; DB/RPC resta source of truth.
 - Non rendere mai CF/PIVA global unique tra tenant.
 
+## Storico azienda learner — v21_023 LIVE
+`learners.company_id` rappresenta l'azienda corrente del learner e NON deve essere retrocessa da un import di progetto storico.
+
+Nuova tabella:
+- `learner_company_training_history`
+- una riga per enrollment, con organization, learner, company storica del corso, edition, enrollment, periodo e riferimenti SafetyManager.
+- RLS: platform admin oppure admin scoped sulla stessa organization.
+
+Importer SafetyManager:
+- il precedente importer è conservato internamente come `import_safetymanager_package_v21_legacy(jsonb)` senza EXECUTE pubblico/browser;
+- il nuovo `import_safetymanager_package(jsonb)` salva l'azienda corrente dei learner già esistenti, esegue l'import legacy, ripristina la company corrente se il progetto era storico e registra la company del corso nello storico formale;
+- restituisce anche `preserved_current_company` e `training_company_history_rows`.
+
+RPC di lettura:
+- `admin_learner_company_history(p_learner_id)` restituisce azienda corrente + storico training company, con authorization server-side.
+
+QA reale transazionale:
+- learner esistente con company corrente `COMUNE DI SAN MARTINO VALLE CAUDINA`;
+- import di progetto storico con `G. & G. AUTO SERVICE S.A.S. DI NATALE GAETANO & C.`;
+- `preserved_current_company=1`;
+- company corrente dopo import invariata sul Comune;
+- storico corso correttamente registrato su G. & G. Auto Service;
+- `training_company_history_rows=1`;
+- rollback finale;
+- controllo post-rollback: 0 mapping QA, 0 catalog QA, 0 history QA.
+
+Il problema azienda storica→corrente è quindi CHIUSO.
+
+## Dashboard amministrativa — stabilizzata
+Diagnosi 2026-10-17:
+- le query DB della dashboard, simulate con ruolo authenticated/platform admin, rispondono correttamente;
+- il problema non era un blocco dei dati;
+- `admin-backend-v21.js` usava un `MutationObserver` globale che poteva richiamare ripetutamente `enhance()` mentre lo stesso enhance mutava il DOM, producendo refresh/server call ricorsive e la sensazione di caricamento infinito.
+
+Fix live in `apps/training/admin-backend-v21.js` v21.3:
+- rimosso il `MutationObserver` globale;
+- refresh solo su eventi espliciti: apertura console, refresh, cambio tab, jump dashboard, auth state e rerender amministrativo;
+- `enhanceSeq` scarta risposte stale/concorrenziali;
+- dashboard alimentata/fallback tramite UNA sola RPC `admin_dashboard_summary()`;
+- se il renderer legacy resta sul loader, il layer v21 sostituisce il loader con lo snapshot server-side;
+- activity audit via `admin_recent_actions()` solo quando serve.
+
+PWA SafetyTraining aggiornata a `safety-training-v21-10`, con JS/CSS/HTML network-first, così il browser non resta bloccato sul vecchio admin JS.
+
 ## Inviti corsisti multicanale — LIVE
 Canali: email, WhatsApp, SMS, copia link, QR personale.
-
-Token:
-- 32 byte random / 64 hex
-- raw solo all'emissione, SHA-256 nel DB
-- monouso, scadenza 1–720h, revocabile/rigenerabile
-- nessun DML browser diretto sulla tabella inviti
-
-RPC principali:
-- `admin_set_learner_contact`
-- `admin_issue_learner_invite`
-- `admin_record_learner_invite_delivery`
-- `admin_revoke_learner_invite`
-- `learner_invite_public_info(token)`
-- `claim_learner_invite(token, identity_value)`
-
-Verifica identità: CF → email → ultime 4 telefono → manual review.
-Email riusa `invite-learner` v2 con `verify_jwt=true`; WhatsApp/SMS sono handoff client/deep-link, non provider server.
+Token raw solo all'emissione, SHA-256 nel DB, monouso, scadenza/revoca. Claim Auth + identity verification obbligatoria. Nessun DML browser diretto sulla tabella inviti.
 
 ## Bulk azienda / import CSV-XLSX — LIVE
 - `admin_company_bulk_context(company_id)`
 - UI `Accessi & import`
 - bulk enrollment tramite `admin_bulk_enroll()`
-- max 100 inviti UI per operazione
 - preview import max 500 righe
-- classificazioni: `create`, `existing_same_company`, `existing_other_company`, `duplicate_in_file`, `needs_review`, `invalid`
-- azioni: `create`, `create_reviewed`, `reuse`, `link`, `skip`
-- learner esistente in altra azienda richiede `link` esplicito nel flusso CSV/XLSX.
-
-Nota modello: `learners.company_id` rappresenta una sola azienda corrente; non esiste ancora storico formale learner↔aziende.
-
-## Frontend SafetyTraining
-Principali moduli attivi:
-- `apps/training/admin-access-import-v21.js` v21.3
-- `apps/training/learner-invite-activation-v21.js` v21.3
-- `admin-registry-dedup-v21.js`
-- `admin-backend-v21.js`
-- `admin-details-v21.js`
-- `requirement-evidence-admin-v21.js`
-- `admin-capabilities-v21.js`
-- `admin-memberships-v21.js`
-- `course-catalog-governance-v21.js`
-
-PWA SafetyTraining: `safety-training-v21-9`.
+- `existing_other_company` richiede `link` esplicito nel flusso standard.
 
 ## SafetyManager → SafetyTraining bridge v1.2 — LIVE + E2E VERDE
-Repo sorgente: `SafetyManagerPro/SafetyManager`.
+SafetyManager produce `safetytraining.transfer` v1.2 con azienda, corso/progetto, date/sede, rischi e iscritti, senza documenti/firme/dati sanitari/credenziali.
+Mismatch azienda corrente/progetto = warning storico, non blocco.
 
-SafetyManager produce `safetytraining.transfer` v1.2 con:
-- azienda + P.IVA/CF normalizzato + ATECO + indirizzo/sede;
-- progetto/corso + durata + norma + modalità + date + sede + presenza/pratica;
-- contesto fabbisogni/rischi;
-- corsisti iscritti + enrollment external ID + CF normalizzato + mansione;
-- nessun documento/firma/dato sanitario/credenziale;
-- nessuna email/telefono inventati.
+QA SafetyManager in sola lettura:
+- 72 progetti con azienda + corso
+- 138 iscrizioni
+- 0 aziende senza P.IVA/CF
+- 0 corsisti senza CF
+- 0 CF duplicati nello stesso progetto
+- 40 mismatch azienda corrente/progetto gestiti come storico.
 
-Controlli SafetyManager:
-- blocco su identificativi essenziali/CF mancanti;
-- blocco su CF duplicato nello stesso progetto;
-- mismatch azienda corrente learner vs azienda progetto = warning storico, non blocco.
+E2E doppio import precedente: idempotenza e dedupe verificati, rollback pulito.
+Con v21_023 è stato aggiunto e verificato anche il caso learner esistente con altra azienda corrente.
 
-QA dati reali SafetyManager in sola lettura:
-- 72 progetti con azienda + corso;
-- 138 iscrizioni;
-- 0 aziende senza P.IVA/CF;
-- 0 corsisti senza CF;
-- 0 CF duplicati nello stesso progetto;
-- 40 mismatch azienda corrente/progetto gestiti come storico/warning.
+## Produzione SafetyManager
+Vercel `dpl_2bAGCma5NeQVgv2L49rdhZ2yaZVm`, commit `3cc579b80dbec9c1cc68e4158ce2c0c3fe592175`, production READY. Bridge v1.2 e PWA `safetymanager-pwa-v11` verificati live.
 
-### Importer SafetyTraining
-`import_safetymanager_package(jsonb)`:
-- richiede platform admin;
-- accetta `schema_version` `1.x`, incluso v1.2;
-- mapping idempotenti per company, learner, project, enrollment;
-- dedupe azienda via P.IVA/CF e learner via CF/email;
-- course code sconosciuto => placeholder tecnico draft `needs_configuration`;
-- enrollment dedupe tramite external mapping e fallback `(edition_id, learner_id)`.
+## Produzione SafetyTraining — stato corrente
+Supabase live fino a `v21_023`.
 
-Nessuna migration SafetyTraining è stata necessaria per v1.2.
+Commit funzionali del blocco:
+- `23e1822bb10a5395e4148e66dcfbe0e50e1a19b5` — migration/history v21_023
+- `db5d7da2b04c040eff71a321b8271979044907b8` — stabilizzazione dashboard admin
+- `e74418900ec0cb5e19b12441e3ebe90839cb3ae0` — PWA v21-10
 
-### E2E transazionale doppio import
-Payload QA v1.2 importato due volte nella stessa transazione.
+GitHub Actions:
+- SafetyTraining checks #283 SUCCESS sul fix dashboard
+- SafetyTraining checks #284 SUCCESS sul PWA bump.
 
-Primo import:
-- `created_company=1`
-- `created_learners=1`
-- `created_edition=1`
-- `created_enrollments=1`
-- `created_placeholder_course=1`
-- `reused_enrollments=0`.
+Vercel production più recente funzionale:
+- `dpl_D4APzr14W8puJLePb4HDgiHKvrtP`
+- commit `e74418900ec0cb5e19b12441e3ebe90839cb3ae0`
+- target production
+- `READY`
+- alias `safety-training-safety-manager.vercel.app`.
 
-Secondo import identico:
-- stessi company/course/edition ID;
-- tutti i contatori `created_*` = 0;
-- `reused_enrollments=1`;
-- `updated_or_reused_learners=1`.
-
-Conclusione: idempotenza/dedupe verificati. Dopo `ROLLBACK`, controllo separato = 0 mapping QA, 0 aziende QA, 0 learner QA, 0 catalog rows QA.
-
-### Produzione SafetyManager verificata
-Vercel:
-- deployment `dpl_2bAGCma5NeQVgv2L49rdhZ2yaZVm`
-- commit `3cc579b80dbec9c1cc68e4158ce2c0c3fe592175`
-- production / `READY`
-- alias `safety-manager-ultimate-safety-manager.vercel.app`.
-
-Smoke live HTTP 200:
-- `app.js` carica direttamente il bridge;
-- bridge live è v1.2 e contiene warning storico;
-- `sw.js` live = `safetymanager-pwa-v11` con bridge in APP_SHELL.
-
-Il precedente limite Hobby `api-deployments-free-per-day` non blocca più questo deploy.
-
-## Punto di hardening emerso
-`import_safetymanager_package()` oggi, quando riusa un learner esistente, imposta `learners.company_id` all'azienda del progetto importato. Poiché SafetyManager può esportare un progetto storico e SafetyTraining usa `company_id` come azienda corrente, questo comportamento può trasformare un datore storico nel datore corrente. Non correggere alla cieca: prossimo blocco consigliato = preservare la company corrente o introdurre storico learner↔azienda, mantenendo idempotenza e compatibilità.
-
-## QA inviti v21_019–022
-Già verificati con rollback: contatti, hash token, public info mascherata, wrong identity, revoca, claim, one-time, import preview/apply, bulk enrollment, 0 DML browser inviti, residui QA 0.
-Bug v21_022 corretto: con `search_path=''`, usare `extensions.gen_random_bytes` e `extensions.digest`.
-
-## Ruoli
-- `platform_admin`: globale
-- `organization_admin`: scoped
-- `training_manager`: scoped; aziende read-only, training gestibile
-- `company_admin`: NON abilitato
-
-Membership v21_016 resta platform-only; account Auth target deve preesistere.
+Smoke live:
+- `/admin-backend-v21.js` HTTP 200, v21.3, nessun MutationObserver, snapshot `admin_dashboard_summary()`;
+- `/sw.js` HTTP 200, cache `safety-training-v21-10`.
 
 ## Advisor Supabase
-Non auto-fixare senza blocco dedicato:
-- SECURITY DEFINER authenticated previsti con authorization server-side
-- warning anon SECURITY DEFINER su `learner_invite_public_info` intenzionale e minimizzato
-- leaked password protection disabilitato
-- `auth_rls_initplan`
-- multiple permissive policies
-- unused indexes
-- FK legacy `training_blueprint_rules` non indicizzata
-
-## Produzione SafetyTraining
-Supabase live fino a `v21_022`.
-SafetyTraining functional commit verificato: `74cbf21fcab2581551f8fa8587474695841f1598`; Actions `SafetyTraining checks` #275 SUCCESS.
-Vercel functional: `dpl_EejAje6W4zzx6RSkYshpeNDNMP6U`, production READY, alias `safety-training-safety-manager.vercel.app`, PWA `safety-training-v21-9`.
+Dopo v21_023 nessun nuovo problema di RLS mancante.
+Restano warning noti da non auto-fixare alla cieca:
+- `learner_invite_public_info` anon SECURITY DEFINER intenzionale/minimizzato;
+- RPC authenticated SECURITY DEFINER con authorization server-side;
+- leaked password protection disabilitato.
 
 ## Prossimi passi esatti
-1. Hardening storico azienda nel bridge importer SafetyTraining: non sovrascrivere impropriamente `learners.company_id` con un'azienda storica.
+1. Verifica browser con sessione admin reale della console dopo aggiornamento PWA v21-10; backend, dati e asset production sono già verificati.
 2. Poi E2E learner non-platform: invito → delivery → Auth → verifica identità → claim → dashboard.
 3. Onboarding/invito dedicato per `organization_admin|training_manager`; membership resta source of truth.
 4. `company_admin` resta disabilitato.
