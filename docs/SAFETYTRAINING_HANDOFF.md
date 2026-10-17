@@ -1,6 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-17
+Stato corrente: **v22 didactic quality / Practice Lab LIVE** sui 65 corsi non congelati; backend admin v21 preservato; PWA `safety-training-v22-02`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -13,195 +14,182 @@ NON sviluppare/modernizzare/finalizzare/pubblicare salvo richiesta esplicita:
 - Segnaletica stradale
 - tutti gli RSPP/ASPP esterni
 
-Freeze DB:
-- 10 RSPP/ASPP esterni: `freeze_scope=external_rspp_aspp`
-- 17 specialistici: `freeze_scope=user_out_of_roadmap_specialist`
+Freeze DB attivo: 27 catalog entry frozen complessive. `mod_cantieri` resta UN corso catalogo con due versioni role-specific. `company_admin` resta NON abilitato.
 
-`mod_cantieri` resta UN corso catalogo con due versioni role-specific. `company_admin` resta NON abilitato.
+## v22 — standard didattico LIVE
+`published` non equivale più a “corso finito”. Ogni corso non frozen deve avere contenuti operativi, scenario, supporto visuale, media/fonti, verifica e almeno un’esperienza specifica della mansione/ruolo/settore/attrezzatura.
 
-## Go-live didattico — COMPLETATO
-- 60 `course_versions`
-- 59 corsi distinti
-- 290 `learning_unit_versions`
-- 60/60 composizioni complete e verification path
-- 36 test attivi
-- 1.450 domande authored
-- 660 test-question links
-- soglia 70%
-- 37 percorsi con gate pratico
-- 73 requirement rows
+Nuovi oggetti:
+- `training_scenarios_v22`
+- `practice_labs_v22`
+- `course_scenarios_v22`
+- `course_practice_labs_v22`
+- `get_course_quality_v22()` per audit platform-admin.
 
-## Amministrazione v21 — LIVE fino a v21_024
-Migration recenti:
-- `20261017052016_v21_019_multichannel_learner_invites`
-- `20261017052054_v21_020_company_bulk_and_registry_import`
-- `20261017052210_v21_021_invite_public_claim_flow`
-- `20261017052954_v21_022_qualify_invite_crypto_extensions`
-- `20261017161000_v21_023_preserve_current_company_training_history`
-- `20261017180000_v21_024_fix_course_readiness_test_gate`
+Tabelle v22 con RLS attiva; nessun accesso anon. Authenticated legge contenuti attivi, mutazione riservata a platform admin. `get_course_quality_v22()` è SECURITY DEFINER ma controlla `private.is_platform_admin()` prima di restituire dati.
 
-Restano attive v21_001–018: service layer admin, guardrail/RLS, evidence, SafetyManager governance, detail, scoped admin, membership e dedupe CF/PIVA.
+### Audit finale DB
+Dopo `v22_009`:
+- non frozen: **65**
+- frozen: **27**
+- 65/65 Safety Scenario specifico
+- 65/65 Practice Lab specifico
+- 65/65 verification path
+- **38** corsi con pratica fisica da validare
+- frozen toccati da v22: **0**
+- 50 Safety Scenario
+- 50 Practice Lab
+- 123 link corso-scenario
+- 123 link corso-lab
+- 23 Practice Lab fisici
+- 0 riferimenti visual errati `idea-safe-moves.svg`.
 
-## Admin UX v21.5 — LIST TOOLS LIVE
-Commit funzionale: `bcfa4c565f0c595da6920a0e170ec69af801ccf3`.
+## Migration v22 LIVE e presenti nel repository
+1. `20261017173942_v22_001_practice_scenarios_quality`
+2. `20261017175140_v22_002_quality_gap_gate_and_profile_practice`
+3. `20261017175534_v22_003_equipment_specific_practice`
+4. `20261017175654_v22_004_emergency_fire_first_aid_specific_practice`
+5. `20261017175827_v22_005_workers_roles_rls_management_specific_practice`
+6. `20261017175941_v22_006_dl_spp_sector_specific_practice`
+7. `20261017180016_v22_007_quality_specificity_gate`
+8. `20261017180645_v22_008_bind_practice_labs_to_requirement_evidence`
+9. `20261017185410_v22_009_fix_safe_moves_visual_and_v22_indexes`
 
-Nuovi asset:
-- `apps/training/admin-list-tools-v21.js`
-- `apps/training/admin-list-tools-v21.css`
+Nota: `v22_002` nel repo conserva dati e legami ma non duplica la definizione intermedia della funzione quality, superseded dalla definizione definitiva in `v22_007`; il replay della catena raggiunge lo stesso stato finale.
 
-Il layer aggiunge senza cambiare schema/DB:
-- ricerca dove non già presente;
-- filtri contestuali;
-- ordinamento per colonne utili;
-- crescente/decrescente;
-- reset;
-- contatore risultati visibili/totali;
-- persistenza dello stato per vista durante la sessione;
-- occultamento delle sole card senza risultati nelle viste editoriali multi-tabella.
+## Copertura v22
+### Profili storici
+`backoffice`, `frontoffice`, `ecologici`, `polizia`, `verde`, `fondamenti`: scenario specifico + lab specifico + verifica competenze tramite simulazione.
 
-Copertura:
-- Organizzazioni: filtro stato; sort nome/codice/stato.
-- Aziende: filtri stato/organizzazione; sort azienda/organizzazione/P.IVA/ATECO/stato.
-- Corsisti: filtri accesso/stato; sort corsista/azienda/organizzazione/mansione/stato.
-- Corsi: filtri famiglia/governance/stato; sort corso/famiglia/durata/versione/stato.
-- Edizioni: filtri stato/azienda; sort edizione/corso/azienda/stato/disponibilità.
-- Iscrizioni: filtro stato; sort corsista/percorso/stato/progresso/ultima attività.
-- Catalogo SafetyManager: ricerca + filtro stato + sort corso/codice/durata/stato.
-- Blueprint/Master Registry: ricerca + filtro sviluppo + sort corso/blueprint-regola/profilo.
-- Readiness: ricerca + filtro stato + sort corso/stato/struttura.
+### Attrezzature
+Esperienze specifiche per CMM, carrelli industriali, telescopici/rotativi, carroponte, gru a torre, gru autocarro, CRF, MMT, escavatore, PLE, pompe calcestruzzo e trattori. Gli aggiornamenti usano il modello della macchina con contesto refresh/near-miss.
 
-Le ricerche core admin esistenti vengono riusate, non duplicate. Nessun MutationObserver globale è stato introdotto: il layer reagisce a eventi espliciti e usa retry temporizzati limitati dopo i rendering.
+### Emergenze
+Antincendio L1/L2/L3 e aggiornamenti; Primo Soccorso B/C e aggiornamento; Primo Soccorso A e aggiornamento; evacuazione con via bloccata + drill specifico.
 
-## Responsive v21.5
-`admin-list-tools-v21.css` integra `admin-responsive-v21.css`:
-- toolbar wrap desktop;
-- stacking a `<=860px`;
-- griglia mobile a `<=560px`;
-- controlli touch da almeno ~42px;
-- tabelle sempre contenute in wrapper scrollabili;
-- restano attivi breakpoints 1100/860/560/390, modali adattive, bottom-sheet mobile e safe-area.
+### Lavoratori / ruoli
+Formazione generale; rischio basso/medio/alto; aggiornamento lavoratori; Datore base/update; Dirigente base/update; specificità anche su `mod_cantieri`, `lav_quota`, RLS e aggiornamenti, Preposto e aggiornamento.
 
-## Smoke v21.5
-### CI
-GitHub Actions:
-- workflow `SafetyTraining checks`
-- run #296 / id `39049749400`
-- SHA `bcfa4c565f0c595da6920a0e170ec69af801ccf3`
-- SUCCESS.
+### DL-SPP
+Laboratori/scenari distinti per comune, aggiornamento, agricoltura, pesca, costruzioni, chimico-petrolchimico.
 
-### Vercel production
-- deployment `dpl_8AzDcSTka84DrZyFkA2YUedd5XwH`
-- target production
-- state READY
-- alias `safety-training-safety-manager.vercel.app`.
+## Quality Score v22.007
+Gold = score >=85 **e zero gap**.
+Gate:
+- LU;
+- contenuto operativo;
+- caso/scenario;
+- supporto visuale;
+- Safety Scenario;
+- Scenario specifico;
+- Practice Lab;
+- Practice Lab specifico;
+- media/demo;
+- fonti;
+- verification path;
+- test bank completo quando richiesto.
 
-### HTTP production smoke
-HTTP 200 confermati per:
-- `/index.html` con `admin-list-tools-v21.css` e `.js` inclusi;
-- `/admin-list-tools-v21.js` v21.5;
-- `/admin-list-tools-v21.css` v21.5;
-- `/sw.js` con `CACHE='safety-training-v21-12'` e nuovi asset nell'app shell.
+UI admin: `apps/training/course-quality-v22.js`, voce **Qualità didattica v22**; ricerca/filtri integrati con `admin-list-tools-v21.js`.
 
-### Smoke strutturale
-Audit su markup/config di:
-- amministrazione core;
-- Catalogo SafetyManager;
-- Blueprint/Master Registry;
-- Readiness;
-- CSS responsive.
-Titoli e header attesi da filtri/sort risultano coerenti con le tabelle renderizzate nei file verificati.
+## Reader / Course Experience
+Asset:
+- `apps/training/course-experience-v22.js`
+- `apps/training/course-experience-v22.css`
 
-Limite: da questa chat non è disponibile un browser interattivo per eseguire realmente click/screenshot a 1440/820/390. È quindi completato lo smoke strutturale + produzione HTTP, ma NON va dichiarato completato il visual smoke reale multi-viewport.
+Mostra Fondamenti vs Specifico, Safety Scenario, tutte le grafiche associate, video/video hub/fonti, Practice Lab, sequenza, checklist, errori critici, stop condition e avviso esplicito quando la pratica manuale richiede validazione docente.
 
-## Admin UX v21.4 — ancora vigente
-### Organizzazioni
-- `+ Nuova organizzazione` per platform admin;
-- creazione/modifica via `admin_save_organization`;
-- edit mostra nome, codice, stato, ID, timestamp.
+## Pratica fisica / evidence
+Riutilizzare sempre:
+- `course_practical_requirements`
+- `enrollment_requirement_evidence`
+- `admin_set_requirement_evidence`
 
-### Aziende
-Edit completo dei campi correnti `companies`; normalizzati e metadata restano read-only.
+NON creare un secondo sottosistema.
 
-### Corsisti
-Campo unico `Cognome/Nome`, coerente con SafetyManager `full_name`:
-- legacy Nome+Cognome riunito;
-- `metadata.source_full_name` prevale se presente;
-- save in `first_name`, `last_name=null` senza migrazione distruttiva.
+`requirement-evidence-admin-v21.js` è ora v22.008:
+- carica il rubric del Practice Lab;
+- mostra checklist/errori/stop prima della validazione;
+- `Valida pratica` registra via RPC;
+- nota evidenza per data/docente/esito/checklist;
+- pratica manuale mai completata automaticamente;
+- rimosso il MutationObserver globale legacy da questo modulo.
 
-### Edizioni
-`Disattiva` archivia via `admin_update_edition(status='archived')`; nessuna cancellazione fisica di iscrizioni/progressi/audit/storico.
+Evacuazione: requisito pratico `v22_evacuation_drill`.
 
-### Guide
-Restano attive spiegazioni contestuali di Catalogo SafetyManager, Percorso SafetyTraining, Learning Unit preview, Master Registry, Blueprint, varianti/regole, libreria/profili, moduli e Readiness.
+## Visual / media / fonti
+Fonti principali: INAIL, Corpo Nazionale Vigili del Fuoco, Croce Rossa Italiana, EU-OSHA/Napo. Distinguere sempre video, video hub e fonte tecnica.
 
-## Readiness v21_024
-Il gate usa test attivi e domande attive collegate; NON il legacy `bank_required`.
+`v22_009`:
+- fix `idea-safe-moves.svg` → `video-safe-moves.svg`;
+- indici `course_scenarios_v22_scenario_idx` e `course_practice_labs_v22_lab_idx`.
 
-Stato verificato:
-- totale 92
-- published 65
-- ready_for_review 22
-- needs_configuration 2
-- ready_for_publish 0
-- blocked 3
+Audit visual v22 pulito.
 
-Blocked intenzionali/frozen:
-1. `amb_confinati` — `user_out_of_roadmap_specialist`
-2. `rspp_aspp_a` — `external_rspp_aspp`
-3. `rspp_aspp_b` — `external_rspp_aspp`
+## Runtime / PWA
+PWA `safety-training-v22-02`.
+`index.html` e service worker includono Quality + Course Experience v22.
 
-Non sbloccarli per portare il contatore a zero.
+## CI
+Latest functional Git HEAD prima dei soli commit handoff:
+- `8597519376cfc7319598b5bc579d6b6d08818b2e`
+- workflow `SafetyTraining checks` #321
+- run `39060240487`
+- **SUCCESS**.
 
-## Storico azienda learner — v21_023 LIVE
-Regola definitiva:
-- `learners.company_id` = azienda corrente;
-- company storica corso/enrollment = `learner_company_training_history`;
-- import SafetyManager storico non deve riassegnare la company corrente.
+## Vercel production
+Alias: `safety-training-safety-manager.vercel.app`.
 
-## Inviti / import — LIVE
-Inviti personali multicanale: email, WhatsApp, SMS, manuale, QR. Token raw solo all'emissione, SHA-256 persistito, monouso, scadenza/revoca, identity verification obbligatoria.
+Deployment production READY osservato:
+- `dpl_APLAbwNW3FbEHoCDw7Ft18xF4RGC`
+- metadata Git SHA `462df67bef8fc356a56b4dc321d5e0c2bc5c9ea2`.
 
-Bulk/import:
-- `admin_company_bulk_context(company_id)`;
-- preview import max 500;
-- `existing_other_company` richiede collegamento esplicito;
-- nessuna riassegnazione nascosta della company corrente.
+HTTP smoke sull’alias conferma però runtime v22 finale:
+- `/course-experience-v22.js` = v22.007, specificità + multi-visual + Practice Lab;
+- `/course-quality-v22.js` = v22.007 specificity gate;
+- `/requirement-evidence-admin-v21.js` = v22.008, rubric pratica + `Valida pratica`, no global MutationObserver;
+- `/sw.js` = `safety-training-v22-02`.
 
-## SafetyManager bridge v1.2 — invariato
-SafetyManager continua a esportare `full_name` unico, azienda/progetto/corso, rischi e iscritti; niente documenti, firme, dati sanitari o credenziali. Mismatch company corrente/progetto resta warning storico, non hard error.
+Tentativo di deploy esplicito del latest functional `8597519...` bloccato da Vercel con `402 api-deployments-free-per-day` (>100 deployment/giorno). Non modificare billing/piano automaticamente. Il blocco riguarda solo il riallineamento metadata SHA: `v22_009` è già LIVE nel DB e non modifica il runtime frontend.
 
-## Sicurezza / invarianti
-- CF/PIVA unique solo tenant-scoped.
-- Non divulgare duplicate identity cross-tenant.
-- service_role solo server-side.
-- Authorization mai da user_metadata.
-- No password su WhatsApp/SMS.
-- Raw invitation token mai persistito/loggato.
-- Identity verification claim obbligatoria.
-- Preservare fix RLS recursion.
-- `learners.company_id` è current company, non storico corso.
-- Nessuna pubblicazione automatica di contenuti/corsi.
-- Non reintrodurre MutationObserver/polling globale nell'admin.
-- `company_admin` resta disabilitato.
+## Smoke completati
+- audit DB/copertura v22;
+- frozen isolation;
+- audit visual asset;
+- CI;
+- HTTP production asset smoke;
+- runtime Practice/Quality/Gate/PWA.
 
-## Produzione corrente
-- PWA `safety-training-v21-12`
-- latest functional: `bcfa4c565f0c595da6920a0e170ec69af801ccf3`
-- GitHub Actions #296 SUCCESS
-- Vercel: `dpl_8AzDcSTka84DrZyFkA2YUedd5XwH`, production READY
-- alias: `safety-training-safety-manager.vercel.app`
+NON completato: visual browser smoke reale interattivo 1440 / 820 / 390 con click/screenshot. Non dichiararlo completato finché non viene eseguito con browser/Computer Use/Work.
 
-I commit successivi di solo handoff/documentazione NON sostituiscono questo SHA come latest functional.
+## Amministrazione v21 — invarianti ancora vigenti
+Backend resta LIVE fino a v21_024, con admin UX/list tools v21.5 integrati dal nuovo Quality v22.
+
+Preservare:
+- readiness usa test attivi + domande attive, non `bank_required`;
+- `learners.company_id` = current company; storico in `learner_company_training_history`;
+- inviti personali multicanale, token hash/monouso/identity verification;
+- CF/PIVA unique tenant-scoped;
+- no disclosure duplicate identity cross-tenant;
+- service_role solo server-side;
+- authorization mai da `user_metadata`;
+- no password WhatsApp/SMS;
+- raw invitation token mai persistito/loggato;
+- fix RLS anti-recursion;
+- nessuna pubblicazione automatica;
+- non reintrodurre MutationObserver/polling globale;
+- `company_admin` disabilitato;
+- SafetyManager bridge v1.2 invariato;
+- Edizione `Disattiva` = archive.
 
 ## Prossimi passi esatti
-1. Visual browser smoke reale a circa 1440 / 820 / 390 px su Dashboard, Organizzazioni, Aziende, Corsisti, Edizioni, Catalogo SafetyManager, Blueprint, Readiness e reader didattico.
-2. Correggere eventuali difetti visuali/interaction e ripetere.
-3. E2E learner non-platform: invito → delivery → Auth → verifica identità → claim → dashboard → replay rejected → cleanup.
+1. Dopo reset limite Vercel, deploy current `main` per riallineare metadata SHA; housekeeping, non modifica funzionale.
+2. Visual browser smoke reale 1440 / 820 / 390 su Quality v22, reader Scenario/Practice, Gate pratica e principali viste admin.
+3. E2E learner non-platform: invito → delivery → Auth → identity verify → claim → dashboard → replay rejected → cleanup.
 4. Onboarding scoped admin `organization_admin|training_manager`.
 5. `company_admin` resta disabilitato.
 
 ## Servizi
-- GitHub SafetyTraining: `SafetyManagerPro/SafetyTraining`
+- GitHub: `SafetyManagerPro/SafetyTraining`
 - Supabase: `ejkwvatmzdqqjozpxntk`
-- Vercel project: `prj_u0IT97WJ3ARGJJUhuYUWA6MyS24U`
-- produzione: `safety-training-safety-manager.vercel.app`
+- Vercel: `prj_u0IT97WJ3ARGJJUhuYUWA6MyS24U`
+- production alias: `safety-training-safety-manager.vercel.app`
