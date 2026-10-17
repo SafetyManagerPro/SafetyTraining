@@ -1,4 +1,4 @@
-/* SafetyTraining v21.5 — lightweight client-side list tools for admin/editorial tables. */
+/* SafetyTraining v21.6 — lightweight client-side list tools for admin/editorial tables. */
 (() => {
   'use strict';
 
@@ -18,7 +18,8 @@
     'Iscrizioni': { filters:['Stato'], sorts:['Corsista','Percorso','Stato','Progresso','Ultima attività'], existingSearch:true },
     'Catalogo corsi SafetyManager': { filters:['Stato'], sorts:['Corso SafetyManager','Codice','Durata','Stato'], search:true },
     'Blueprint corsi e Master Registry': { filters:['Sviluppo'], sorts:['Corso SafetyManager','Blueprint / regola','Profilo'], search:true, multi:true },
-    'Readiness e pubblicabilità corsi': { filters:['Stato'], sorts:['Corso','Stato','Struttura'], search:true, multi:true }
+    'Readiness e pubblicabilità corsi': { filters:['Stato'], sorts:['Corso','Stato','Struttura'], search:true, multi:true },
+    'Qualità didattica v22': { filters:['Famiglia','Livello','Pratica fisica'], sorts:['Corso','Famiglia','Punteggio','Livello'], search:true }
   };
 
   function tableMeta(table) {
@@ -188,13 +189,12 @@
     document.getElementById('adminConsoleBtn')?.addEventListener('click', schedule);
     document.addEventListener('input', event => { if (event.target.closest('[data-admin-search]')) schedule(); }, true);
     document.addEventListener('click', event => {
-      if (event.target.closest('[data-action],[data-sm-course-catalog],[data-blueprint-admin],[data-readiness-admin],[data-save]')) schedule();
+      if (event.target.closest('[data-action],[data-sm-course-catalog],[data-blueprint-admin],[data-readiness-admin],[data-quality-v22],[data-save]')) schedule();
     }, true);
     schedule();
   }
 
-  window.SAFETY_ADMIN_LIST_TOOLS_V21 = { enhance, schedule, version:'21.5' };
+  window.SAFETY_ADMIN_LIST_TOOLS_V21 = { enhance, schedule, version:'21.6' };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true });
   else boot();
 })();
-
