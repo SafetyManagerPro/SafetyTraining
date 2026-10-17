@@ -1,9 +1,9 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-17
-Stato: backend amministrazione live fino a `v21_018`; frontend admin/PWA `safety-training-v21-8` LIVE e smoke-verificato in produzione.
+Stato: backend live fino a `v21_022`; frontend/PWA `safety-training-v21-9` LIVE e smoke-verificato in produzione.
 
-> Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`: lo stato non deve restare soltanto in chat.
+> Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
 ## Vincoli permanenti
 
@@ -16,120 +16,132 @@ NON sviluppare/modernizzare/finalizzare/pubblicare senza richiesta esplicita:
 - tutti gli RSPP/ASPP esterni
 
 Freeze DB:
-- 10 corsi RSPP/ASPP esterni: `freeze_scope=external_rspp_aspp`
-- 17 corsi specialistici: `freeze_scope=user_out_of_roadmap_specialist`
+- 10 RSPP/ASPP esterni: `freeze_scope=external_rspp_aspp`
+- 17 specialistici: `freeze_scope=user_out_of_roadmap_specialist`
 
-`mod_cantieri` resta UN SOLO corso catalogo con due `course_versions` role-specific. Non creare un 93° corso.
-`company_admin` resta NON abilitato.
+`mod_cantieri` resta UN corso catalogo con due versioni role-specific. `company_admin` resta NON abilitato.
 
-## Go-live didattico v20 — completato
+## Go-live didattico
 
-- 60 `course_versions` go-live
-- 59 corsi distinti
-- 290 `learning_unit_versions`
-- 60/60 composizioni complete
-- 60/60 verification path
-- 36 test attivi
-- 1.450 domande authored
-- 660 test-question links
-- soglia 70%
-- 37 percorsi con gate pratico
-- 73 requirement rows
-- v20_097–v20_100 completati
+Completato: 60 versioni / 59 corsi / 290 LU / 36 test / 1.450 domande / 660 link domanda-test / 37 percorsi gate pratico / 73 requirement rows.
 
-## Backend amministrativo v21 — live
+## DB v21 — ultimo blocco live
 
-Migration principali fino all’ultimo blocco:
-- v21_001–014: service layer, core CRUD, guardrail, RLS fixes, evidence service, SafetyManager, Detail, scoped capability/inviti
-- `20261017042729_v21_015_restore_platform_evidence_status_guard`
-- `20261017042912_v21_016_admin_membership_service`
-- `20261017045703_v21_017_registry_identity_deduplication`
-- `20261017045832_v21_018_fix_case_insensitive_registry_normalization`
+Nuove migration:
+- `20261017052016_v21_019_multichannel_learner_invites`
+- `20261017052054_v21_020_company_bulk_and_registry_import`
+- `20261017052210_v21_021_invite_public_claim_flow`
+- `20261017052954_v21_022_qualify_invite_crypto_extensions`
 
-### Nota evidence v21_015
+Repo allineato agli stessi timestamp live.
 
-Una riapplicazione accidentale di v21_007 aveva sovrascritto parte dell’hardening v21_008. v21_015 ha ripristinato status platform solo `completed|failed`, binding test/versione/requisito e coerenza pass/fail. Guard live verificato.
+## Inviti corsisti multicanale — COMPLETATO
 
-## Ultimo blocco: aziende multi-corsista + anti-doppioni
+Canali:
+- Email
+- WhatsApp
+- SMS
+- Copia link
+- QR personale
 
-Il modello esistente supporta già **una azienda con molti corsisti**: ogni learner ha `company_id` e bulk enrollment già lavora sui corsisti dell’azienda dell’edizione. Non è stato necessario rifare il modello.
+### Token
 
-Precisazione: oggi il corsista ha **una azienda corrente**. È possibile riassociarlo a un’altra azienda compatibile della stessa organizzazione, ma non esiste ancora una tabella storica many-company/rapporti di lavoro.
+- 32 byte random = 64 caratteri hex
+- raw token restituito solo all’emissione
+- nel DB resta SHA-256 (`token_hash`)
+- prefix breve solo per audit
+- monouso
+- scadenza 1–720h; UI 72h / 7gg / 30gg
+- revocabile
+- rigenerazione invalida il precedente
+- no DML browser diretto sulla tabella inviti
 
-### Aziende — P.IVA
+Campi aggiunti a `learner_account_invitations`:
+`token_hash`, `token_prefix`, `delivery_channel`, `recipient_phone`, `issued_at`, `expires_at`, `revoked_at`, `consumed_at`.
+`learners` include ora `phone`.
 
-- generated column `companies.vat_number_normalized`
-- unique index tenant-scoped `(organization_id, vat_number_normalized)` quando non-null
-- normalizzazione di spazi/separatori/case
-- il prefisso italiano `IT` viene rimosso quando seguito da 11 cifre, quindi varianti equivalenti collidono
-- il CF aziendale resta separato in `companies.fiscal_code_normalized`
-- `admin_save_company()` solleva `company_vat_duplicate` per un doppione
+RPC admin:
+- `admin_set_learner_contact`
+- `admin_issue_learner_invite`
+- `admin_record_learner_invite_delivery`
+- `admin_revoke_learner_invite`
 
-### Corsisti — Codice Fiscale
+RPC activation:
+- `learner_invite_public_info(token)` anon/authenticated: valida il token e restituisce solo dati minimi mascherati
+- `claim_learner_invite(token, identity_value)` authenticated-only: verifica identità, email Auth/binding, consuma token e collega `auth_user_id`
 
-- generated column `learners.fiscal_code_normalized`
-- unique index tenant-scoped `(organization_id, fiscal_code_normalized)` quando non-null
-- normalizzazione case-insensitive e senza separatori
-- `admin_save_learner()` solleva `learner_fiscal_code_duplicate` per un doppione
+Verifica identità:
+1. CF se presente
+2. altrimenti email
+3. altrimenti ultime 4 cifre telefono
+4. altrimenti manual review
 
-### Preflight amministrativo
+Non è stato introdotto un endpoint pubblico service-role: il design Edge pubblico con privilegi elevati è stato scartato. Attivazione = Supabase Auth + RPC server-side.
 
-Nuova RPC:
-- `admin_registry_conflict(p_entity_type, p_organization_id, p_identifier, p_exclude_id)`
+### Email compatibility
 
-Sicurezza:
-- authenticated only
-- anon/PUBLIC senza EXECUTE
-- company usa `private.can_manage_company_registry()`
-- learner usa `private.can_manage_training_org()`
+Si riusa `invite-learner` Edge Function v2, `verify_jwt=true`.
+È stata ispezionata dopo l’introduzione dei token:
+- supporta `redirect_to`
+- mantiene autorizzazione platform/scoped e cross-tenant denial
+- gli upsert di delivery non scrivono i nuovi campi token, quindi `token_hash`, expiry/revocation restano preservati
 
-Nuovo frontend:
-- `apps/training/admin-registry-dedup-v21.js` v21.1
-- caricato da `apps/training/index.html`
-- intercetta submit Nuova/Modifica azienda e corsista
-- se trova il doppione mostra nome azienda/corsista già presente
-- l’edit esclude il record corrente tramite `p_exclude_id`
-- se il preflight UI fallisce, il DB continua comunque a bloccare i doppioni
+WhatsApp usa `wa.me`, SMS usa `sms:` del dispositivo, QR/copy link non richiedono provider esterni.
 
-### QA v21_017–018
+## Azienda con molti corsisti / bulk — COMPLETATO
 
-VERDE dopo correzione:
-- P.IVA esistente trovata anche con `IT` + spazi
-- CF esistente trovato anche se inserito tutto minuscolo
-- duplicate create company respinta da RPC
-- duplicate create learner respinta da RPC
-- duplicate groups live dopo migration: `company_vat=0`, `learner_fiscal_code=0`
-- privilege RPC: solo authenticated tra i ruoli browser verificati
+Nuova RPC `admin_company_bulk_context(company_id)`.
+Nuova voce admin **Accessi & import**:
+- azienda
+- elenco corsisti
+- stato account/invito
+- select all / selezione parziale
+- edizione compatibile
+- iscrivi selezionati
+- invita selezionati
+- iscrivi + invita
+- scelta canale/scadenza
 
-Bug trovato e corretto durante il QA:
-- v21_017 applicava la regex prima dell’uppercase, quindi lettere minuscole del CF potevano essere rimosse
-- v21_018 ricrea normalizzazione/indici facendo uppercase PRIMA della regex
-- i test case-insensitive passano dopo v21_018
+Il bulk enrollment passa da `admin_bulk_enroll()`; il vecchio submit diretto viene intercettato dal modulo v21.3.
+Limite UI inviti massivi: 100 per operazione.
 
-## Ruoli / membership
+Nota modello: learner ha una sola `company_id` corrente. Non esiste ancora uno storico learner↔aziende.
 
-`platform_admin`: globale.
-`organization_admin`: gestione scoped di aziende/corsisti/edizioni/enrollment/evidence/detail/inviti.
-`training_manager`: scoped, legge aziende e gestisce corsisti/edizioni/enrollment/evidence/detail/inviti.
-`company_admin`: schema-only, NON abilitato.
+## Import CSV / Excel — COMPLETATO
 
-Membership v21_016:
-- `admin_memberships_overview`
-- `admin_set_organization_membership`
-- solo platform admin può assegnare/revocare `organization_admin|training_manager`
-- direct DML browser su `organization_memberships` bloccato
-- account Auth target deve oggi già esistere
+Frontend `admin-access-import-v21.js`:
+- CSV comma/semicolon/tab
+- XLS/XLSX via SheetJS runtime
+- riconosce Nome, Cognome, Email, Telefono/Cellulare, CF/Codice fiscale, Mansione/Ruolo
 
-Ultimo stato Auth conosciuto:
-- 1 Auth user
-- 1 platform admin
-- 0 utenti Auth non-platform
-- 0 membership scoped reali
+Backend:
+- `admin_import_learners_preview(company_id, rows)` max 500
+- `admin_import_learners_apply(company_id, rows, source)`
 
-## Frontend / PWA corrente
+Classificazioni:
+- `create`
+- `existing_same_company`
+- `existing_other_company`
+- `duplicate_in_file`
+- `needs_review`
+- `invalid`
 
-Moduli amministrativi rilevanti:
-- `admin.js`
+Azioni:
+- `create`
+- `create_reviewed`
+- `reuse`
+- `link`
+- `skip`
+
+Dedupe usa il CF normalizzato nell’intera organizzazione. Per un learner già in altra azienda l’operatore deve scegliere esplicitamente `link`.
+
+## Frontend corrente
+
+Nuovi:
+- `apps/training/admin-access-import-v21.js` v21.3
+- `apps/training/learner-invite-activation-v21.js` v21.3
+
+Esistenti rilevanti:
 - `admin-registry-dedup-v21.js`
 - `admin-backend-v21.js`
 - `admin-details-v21.js`
@@ -138,59 +150,87 @@ Moduli amministrativi rilevanti:
 - `admin-memberships-v21.js`
 - `course-catalog-governance-v21.js`
 
-PWA:
-- cache `safety-training-v21-8`
-- `admin-registry-dedup-v21.js` in precache
+PWA `safety-training-v21-9`; i due nuovi moduli sono in `index.html` e precache.
 
-## Altri componenti completati
+### Learner activation UI
 
-- Detail Azienda/Corsista/Edizione server-side
-- evidence gate pratico + Test Builder platform
-- SafetyManager staging/governance con frozen/reference/placeholder esclusi
-- Edge `invite-learner` v2 con scoped authorization e cross-tenant denial
-- RLS recursion enrollments/course_editions risolta: NON ripristinare vecchie policy recursive
+URL: `?learner_invite=<token>`.
+Flusso:
+- inspect pubblico mascherato
+- account esistente: sign-in → identity check → claim
+- nuovo account: sign-up → eventuale conferma email → riapertura stesso link → identity check → claim
+- password signup min 10 caratteri
+- dopo successo token rimosso dalla URL e, se `onboarding=1`, continua il learner onboarding.
 
-## Produzione — ultimo blocco funzionale verificato
+## QA v21_019–022 — VERDE con rollback
 
-Vercel:
-- functional commit: `a142f43c6801ee3d097de3c6f31983f35764edfe`
-- deployment: `dpl_4PuMTDchfaNp1huKhPrhxT31zh85`
-- `READY`, target production
-- alias ufficiale `safety-training-safety-manager.vercel.app`
-- home HTTP 200
-- HTML live contiene `admin-registry-dedup-v21.js`
-- live `sw.js`: `safety-training-v21-8`
-- nuovo modulo presente nella precache
+Verificati:
+- contatto email/telefono
+- token hashato e raw non persistito
+- inspect dati mascherati
+- wrong identity respinta
+- revoca
+- claim corretto
+- consumo / one-time
+- tutte le classi import
+- apply import: created 1 / reused 1 / linked 1 / errori 0
+- bulk enrollment RPC
+- 0 DML grant browser sulla tabella inviti
+- residui finali QA: 0
 
-Supabase:
-- live fino a v21_018
-- 0 gruppi duplicati P.IVA azienda / CF corsista dopo l’applicazione
+Bug trovato in QA:
+- con `search_path=''` pgcrypto non veniva risolto senza schema
+- corretto in `v21_022` con `extensions.gen_random_bytes` e `extensions.digest`
 
-I commit che aggiornano i due handoff dopo `a142f43...` sono docs-only. La verifica funzionale resta riferita al commit/deployment sopra per evitare un loop di handoff che documenta se stesso.
+## Ruoli
 
-## Prossimo blocco esatto
+- platform_admin: globale
+- organization_admin: scoped
+- training_manager: scoped; aziende read-only, resto training gestibile
+- company_admin: NON abilitato
 
-1. **Invito corsista multicanale**: un solo invito server-side sicuro con token monouso/scadenza/revoca/audit; delivery `email | whatsapp | sms | manual | qr`.
-2. **Azienda con molti corsisti**: selezione multipla, iscrizione e invito massivi dalla scheda azienda.
-3. **Import CSV/Excel**: preview e classificazione `già presente / da creare / da verificare`, usando CF/P.IVA normalizzati prima di scrivere.
-4. Mantenere link personali; non usare un unico link che identifichi automaticamente tutti i corsisti. Per QR condiviso aziendale serve una seconda verifica/codice personale.
-5. Successivamente, invito/onboarding dedicato degli admin scoped e QA interattivo con account non-platform reale.
-6. Non abilitare `company_admin`.
-7. Aggiornare sempre entrambi gli handoff.
+Membership admin resta platform-only e oggi richiede che l’Auth account target esista già.
 
-## Advisor noti
+## Advisor
 
-Non auto-fixare senza blocco dedicato:
-- warning SECURITY DEFINER authenticated
+Non auto-fixare in questo blocco:
+- SECURITY DEFINER authenticated: authorization server-side prevista
+- `learner_invite_public_info` segnala anon SECURITY DEFINER: intenzionale, high-entropy token + output mascherato/minimo
 - leaked password protection disabilitato
 - `auth_rls_initplan`
 - multiple permissive policies
 - unused indexes
 - FK legacy `training_blueprint_rules` non indicizzata
 
+## Produzione / CI
+
+Functional HEAD verificato prima dei docs:
+- `74cbf21fcab2581551f8fa8587474695841f1598`
+- GitHub Actions `SafetyTraining checks` #275: SUCCESS
+
+Vercel:
+- deployment `dpl_EejAje6W4zzx6RSkYshpeNDNMP6U`
+- commit `74cbf21fcab2581551f8fa8587474695841f1598`
+- READY / production
+- alias `safety-training-safety-manager.vercel.app`
+- home HTTP 200
+- live HTML include `admin-access-import-v21.js` + `learner-invite-activation-v21.js`
+- live `sw.js` HTTP 200, cache `safety-training-v21-9`, entrambi in precache
+
+I commit handoff successivi sono docs-only: non creare loop di aggiornamento handoff per documentare il commit che aggiorna l’handoff.
+
+## Prossimi passi
+
+1. E2E browser reale con learner di prova non-platform: emissione → delivery → Auth → verifica identità → claim → dashboard.
+2. Onboarding/invito dedicato per `organization_admin|training_manager`; membership resta source of truth.
+3. Eventuale provider SMS reale; attualmente SMS/WhatsApp sono handoff/deep-link.
+4. Eventuale storico rapporti learner↔aziende.
+5. `company_admin` resta disabilitato.
+6. Aggiornare sempre entrambi gli handoff.
+
 ## Servizi
 
 - GitHub: `SafetyManagerPro/SafetyTraining`
 - Supabase: `ejkwvatmzdqqjozpxntk`
-- Vercel project: `safety-training`
+- Vercel: `safety-training`
 - produzione: `safety-training-safety-manager.vercel.app`
