@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-17
-Stato: backend amministrazione live fino a `v21_016`; frontend admin/PWA repository cache `safety-training-v21-7`.
+Stato: backend amministrazione live fino a `v21_016`; frontend admin/PWA `safety-training-v21-7` LIVE in produzione e smoke-verificato.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche il promemoria di progetto: lo stato non deve restare soltanto in chat.
 
@@ -164,7 +164,7 @@ Correzione 17/10:
 - `admin-capabilities-v21.js` esisteva ma NON era realmente caricato da `index.html`
 - `sw.js` era ancora `safety-training-v21-5` nonostante il vecchio handoff dicesse v21-6
 - ora `index.html` carica capability e membership module
-- `sw.js` cache corrente repository: `safety-training-v21-7`
+- `sw.js` cache corrente: `safety-training-v21-7`
 - entrambi i nuovi asset sono nella precache PWA
 
 ### UI Ruoli amministrativi
@@ -219,21 +219,32 @@ Non auto-fixare senza blocco dedicato:
 - unused indexes
 - FK legacy non indicizzata `training_blueprint_rules`
 
-## Produzione / deploy
+## Produzione / CI — verificato 17/10
 
 Supabase è live fino a `v21_016`.
 Edge `invite-learner` v2 è live.
 
-Vercel: negli ultimi controlli noti i deploy erano bloccati da `build-rate-limit / upgradeToPro`, NON da errore di compilazione SafetyTraining. Verificare nuovamente prima di dichiarare frontend v21-7 presente in produzione.
+GitHub:
+- `main` verificato al commit `c2e647dcdb0cd909ff3257d177ad7b2c6429a052`
+- `SafetyTraining checks` run #257 sullo stesso HEAD: `SUCCESS`
+
+Vercel:
+- il precedente `build-rate-limit` è rientrato
+- deployment production HEAD `dpl_3ydRm3ZeBoqyPYAxnnu3DSgNZmyW`: `READY`
+- alias ufficiale `safety-training-safety-manager.vercel.app` assegnato al deployment HEAD
+- smoke HTTP home produzione: `200 OK`
+- `index.html` live carica realmente `admin-capabilities-v21.js` e `admin-memberships-v21.js`
+- `sw.js` live: `safety-training-v21-7` e precache dei due moduli confermata
+
+Questa è una smoke verification statica/HTTP della produzione. Non è ancora un test interattivo logged-in completo della console con un account scoped reale, perché attualmente non esistono utenti Auth non-platform né membership scoped reali.
 
 ## Prossimi passi
 
-1. verificare GitHub Actions sul HEAD contenente v21_015/v21_016 + UI v21-7
-2. verificare se il rate limit Vercel è rientrato; se sì deploy + QA browser reale
-3. creare account Auth scoped reale solo quando serve operativamente, poi assegnare membership dalla nuova schermata
-4. dopo stabilizzazione produzione valutare consolidamento dei bridge legacy dentro `admin.js`
-5. NON abilitare `company_admin` senza blocco di progettazione dedicato
-6. aggiornare SEMPRE entrambi gli handoff dopo modifiche sostanziali
+1. quando serve operativamente, creare/avere un account Auth non-platform e assegnargli `organization_admin` o `training_manager` dalla nuova UI
+2. eseguire QA interattivo logged-in con tale account su console scoped, inviti, Detail, Gate e membership visibility
+3. dopo stabilizzazione produzione valutare consolidamento dei bridge legacy dentro `admin.js`
+4. NON abilitare `company_admin` senza blocco di progettazione dedicato
+5. aggiornare SEMPRE entrambi gli handoff dopo modifiche sostanziali
 
 ## Servizi
 
