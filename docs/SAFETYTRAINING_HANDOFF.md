@@ -150,7 +150,7 @@ Correzione del 17/10:
 - `admin-capabilities-v21.js` esisteva nel repo ma non era caricato da `index.html`
 - `sw.js` era ancora `safety-training-v21-5`, non v21-6 come indicava il vecchio promemoria
 - ora `index.html` carica capability + membership
-- cache repository corrente: `safety-training-v21-7`
+- cache corrente: `safety-training-v21-7`
 - capability e membership sono nella precache
 
 Nuova UI platform-only:
@@ -204,20 +204,31 @@ Non auto-fixare senza blocco dedicato:
 - unused indexes
 - FK legacy `training_blueprint_rules` non indicizzata
 
-## Deploy
+## Produzione / CI — VERIFICATO
 
 Supabase live fino a v21_016; Edge invite v2 live.
 
-Vercel negli ultimi controlli noti era bloccato da `build-rate-limit / upgradeToPro`, NON da errore di compilazione. Non dichiarare frontend v21-7 in produzione finché un deploy non riesce e non viene fatto QA browser.
+GitHub:
+- HEAD verificato prima dell’ultimo aggiornamento handoff: `c2e647dcdb0cd909ff3257d177ad7b2c6429a052`
+- `SafetyTraining checks` run #257 sullo stesso HEAD: `SUCCESS`
+
+Vercel:
+- il precedente `build-rate-limit / upgradeToPro` è rientrato
+- deployment production del commit `c2e647...`: `dpl_3ydRm3ZeBoqyPYAxnnu3DSgNZmyW`, stato `READY`
+- alias `safety-training-safety-manager.vercel.app` confermato sul deployment
+- home produzione risponde `200 OK`
+- `index.html` live contiene `admin-capabilities-v21.js` e `admin-memberships-v21.js`
+- `sw.js` live è `safety-training-v21-7` e precache entrambi i moduli
+
+Questa è una smoke verification HTTP/static asset. Non è ancora un QA interattivo logged-in completo con un account scoped reale, perché al momento del QA non esistevano utenti Auth non-platform né membership scoped reali.
 
 ## Prossimi passi esatti
 
-1. verificare HEAD e GitHub Actions dopo v21_015/v21_016 + frontend v21-7
-2. controllare Vercel; se rate limit rientrato, deploy e QA browser
-3. quando esisteranno utenti Auth scoped reali, assegnare i ruoli dalla nuova UI
-4. non abilitare `company_admin`
-5. dopo stabilizzazione valutare consolidamento dei bridge legacy in `admin.js`
-6. aggiornare SEMPRE entrambi gli handoff
+1. quando serve operativamente, creare/avere un account Auth non-platform e assegnargli `organization_admin` o `training_manager` dalla nuova UI
+2. fare QA interattivo logged-in di console scoped, inviti, Detail, Gate e visibilità membership
+3. non abilitare `company_admin`
+4. dopo stabilizzazione valutare consolidamento dei bridge legacy in `admin.js`
+5. aggiornare SEMPRE entrambi gli handoff
 
 ## Servizi
 
