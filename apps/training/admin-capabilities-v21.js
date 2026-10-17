@@ -88,6 +88,7 @@
     const button = document.getElementById('adminConsoleBtn');
     if (!caps?.admin_console) {
       setHidden(button, true);
+      setHidden(document.getElementById('adminMembershipsNav'), true);
       return;
     }
 
@@ -102,6 +103,7 @@
       setHidden(nav.querySelector('[data-tab="organizations"]'), !cap('manage_organizations'));
       setHidden(nav.querySelector('[data-tab="courses"]'), !cap('manage_courses'));
     }
+    setHidden(document.getElementById('adminMembershipsNav'), !cap('manage_admin_memberships'));
 
     document.querySelectorAll('#adminContent [data-jump="courses"]').forEach(el => setHidden(el, !cap('manage_courses')));
 
@@ -146,6 +148,7 @@
       window.SAFETY_ADMIN_CAPABILITIES_STATE = null;
       console.warn('[Admin capabilities v21]', error?.message || error);
       setHidden(document.getElementById('adminConsoleBtn'), true);
+      setHidden(document.getElementById('adminMembershipsNav'), true);
     }
   }
 
@@ -163,7 +166,7 @@
     refresh,
     get:() => state.capabilities,
     can:key => cap(key),
-    version:'21.1'
+    version:'21.2'
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
