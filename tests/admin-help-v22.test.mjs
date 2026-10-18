@@ -38,3 +38,16 @@ test('help stays nonmodal and wizard retains its own contextual question mark',(
  assert.match(src,/focus\(\)/);
  assert.doesNotMatch(src,/MutationObserver|setInterval/);
 });
+
+test('v22.3.3 deletion procedure is visible in every required admin list',()=>{
+  const source=read('apps/training/admin.js');
+  for(const type of ['company','learner','edition','enrollment']){
+    assert.match(source,new RegExp("btn\\('Elimina…','review-delete-"+type+"'"));
+  }
+  assert.match(source,/a\.startsWith\('review-delete-'\)/);
+  assert.match(source,/async function reviewDeletion\(kind,id\)/);
+  assert.match(source,/eliminazione definitiva non è ancora abilitata/);
+  assert.match(source,/controllo transazionale sul server/);
+  const guide=read('apps/training/admin-guidance-v21.js');
+  assert.doesNotMatch(guide,/addDependencyPreviewButtons|data-preview-dependency/);
+});
