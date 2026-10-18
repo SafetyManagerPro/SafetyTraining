@@ -206,3 +206,6 @@ NON completato: visual browser smoke interattivo reale a 1440 / 820 / 390 con cl
 
 ### Refinement 2026-10-18 — carichi amministrazione
 - Monitoraggio Corsisti: fetch raggruppate in snapshot deduplicato per 30 secondi, evitando cinque nuove query a ogni tasto di ricerca. La cache viene invalidata premendo Aggiorna e al cambiamento dell'autenticazione; dati sempre filtrati dalle RLS del database. Non sono stati toccati corsi o schema.
+
+### Rifinitura cache di sessione v22.1
+- La cache del monitoraggio usa una generation id: su cambio autenticazione/refresh invalida anche la richiesta pendente. Risultati da sessioni precedenti non possono ripopolare la cache della nuova sessione.

@@ -34,8 +34,10 @@
   };
   // Do not refetch 5 progress datasets after every keystroke in the learner search.
   // Never keep a cached learner snapshot across authentication changes.
-  const progressCache={snapshot:null,at:0,pending:null};
-  function invalidateProgress(){progressCache.snapshot=null;progressCache.at=0;}
+  const progressCache={snapshot:null,at:0,pending:null,generation:0};
+  function invalidateProgress(){
+    progressCache.snapshot=null;progressCache.at=0;progressCache.generation+=1;progressCache.pending=null;
+  }
 
   function toast(message, kind='info') {
     let host = document.getElementById('adminToasts');
@@ -228,6 +230,7 @@
   async function loadProgressData(){
     if(progressCache.snapshot&&Date.now()-progressCache.at<30000)return progressCache.snapshot;
     if(!progressCache.pending){
+      const generation=progressCache.generation;
       progressCache.pending=Promise.all([
         db().from('enrollments').select('id,learner_id,edition_id,status,progress_pct,active_seconds,last_activity_at').order('enrolled_at',{ascending:false}),
         db().from('learners').select('id,first_name,last_name,email,company_id'),
@@ -235,9 +238,10 @@
         db().from('course_versions').select('id,course_id'),
         db().from('courses').select('id,title,nominal_minutes')
       ]).then(rows=>{
+        if(generation!==progressCache.generation)throw new Error('Monitoraggio annullato dopo cambio sessione o aggiornamento.');
         if(rows.some(r=>r.error))throw rows.find(r=>r.error).error;
         progressCache.snapshot=rows;progressCache.at=Date.now();return rows;
-      }).finally(()=>{progressCache.pending=null;});
+      }).finally(()=>{if(generation===progressCache.generation)progressCache.pending=null;});
     }
     return progressCache.pending;
   }
