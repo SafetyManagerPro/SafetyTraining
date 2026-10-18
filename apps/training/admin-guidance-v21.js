@@ -14,7 +14,9 @@
     try{const {data,error}=await db().rpc('get_course_readiness');if(error)throw error;const frozen=(data?.courses||[]).filter(x=>x.frozen);const blocked=frozen.filter(x=>x.readiness_state==='blocked');host.innerHTML=`<strong>Governance congelata:</strong> ${frozen.length} corsi risultano congelati/fuori coda di finalizzazione.${blocked.length?` ${blocked.length} di questi sono ancora “Bloccati” (${blocked.map(x=>esc(x.title)).join('; ')}): è intenzionale finché restano fuori roadmap.`:' Nessun corso congelato è attualmente un hard blocker.'}`;}catch(e){host.textContent='Stato dei corsi congelati non disponibile in questo momento.';}
   }
   function inject(){
-    const title=document.getElementById('adminTitle')?.textContent,make=cards[title];if(!make)return;
+    const title=document.getElementById('adminTitle')?.textContent,make=cards[title];
+    window.SAFETY_ADMIN_HELP_V22?.sync?.();
+    if(!make)return;
     const content=document.getElementById('adminContent');if(!content||content.querySelector('.admin-guide-card'))return;
     content.insertAdjacentHTML('afterbegin',make());if(title==='Readiness corsi')fillFrozen();
   }

@@ -78,6 +78,7 @@
     document.getElementById('adminSubtitle').textContent = subtitle;
     document.querySelectorAll('#adminShell .admin-nav nav button').forEach(b => b.classList.remove('active'));
     document.querySelector(`#adminShell .admin-nav [data-tab="${state.tab}"]`)?.classList.add('active');
+    window.SAFETY_ADMIN_HELP_V22?.sync?.();
   }
   function out(html) { const host = document.getElementById('adminContent'); if (host) host.innerHTML = html; }
 
@@ -103,8 +104,9 @@
         <header class="admin-head">
           <button type="button" id="adminMenuBtn" class="admin-menu-btn">☰</button>
           <div class="admin-head-title"><div class="admin-kicker">CONSOLE</div><h1 id="adminTitle">Dashboard</h1><p id="adminSubtitle">Gestione operativa della piattaforma</p></div>
-          <div class="admin-head-actions"><button type="button" id="adminRefresh">↻ Aggiorna</button></div>
+          <div class="admin-head-actions"><button type="button" id="adminHelpToggle" aria-controls="adminHelpPanel" aria-expanded="false" aria-label="Guida in linea per la sezione corrente" title="Apri la guida in linea">?</button><button type="button" id="adminRefresh">↻ Aggiorna</button></div>
         </header>
+        <section id="adminHelpPanel" role="region" aria-labelledby="adminHelpHeading" hidden></section>
         <div id="adminContent"></div>
       </main>`;
     document.body.appendChild(shell);

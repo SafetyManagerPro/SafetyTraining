@@ -1,0 +1,10 @@
+/* SafetyTraining v22.3.2 - Help inline in every admin area; no overlay. */
+#adminHelpToggle{min-width:40px;min-height:40px;border-radius:50%;border:2px solid #7dc9b9;background:#133b35;color:#fff;font-size:21px;font-weight:850;cursor:pointer}
+#adminHelpToggle[hidden],#adminHelpPanel[hidden]{display:none!important}
+#adminHelpToggle:focus-visible,#adminHelpPanel button:focus-visible{outline:3px solid #ffd166;outline-offset:3px}
+#adminHelpPanel{margin:15px 24px 0;max-width:1100px;border:1px solid #4c9b8a;background:#102c2c;border-radius:14px;padding:18px 20px;display:grid;gap:12px;color:#eff8f6}
+#adminHelpPanel h2{margin:0;font-size:18px;line-height:1.3}
+#adminHelpPanel ol{margin:0;padding-left:23px;display:grid;gap:9px;line-height:1.55}
+#adminHelpPanel .admin-help-note{margin:0;padding:12px;border-radius:8px;background:#1a3e3b;color:#e5f5ef;font-size:13px;line-height:1.5}
+#adminHelpPanel button{justify-self:start;border:1px solid #78bfaf;border-radius:8px;background:#1e4d45;color:#fff;padding:9px 13px;cursor:pointer}
+@media(max-width:700px){#adminHelpPanel{margin:12px 12px 0;padding:13px}#adminHelpPanel h2{font-size:16px}#adminHelpToggle{min-width:38px;min-height:38px}}
