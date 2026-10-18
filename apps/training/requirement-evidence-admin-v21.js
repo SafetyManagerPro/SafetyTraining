@@ -19,7 +19,7 @@
     const ov=document.createElement('div');ov.id='gateAdminOverlay';ov.className='gate-admin-overlay hidden';ov.innerHTML=`<section class="gate-admin-modal"><div class="gate-admin-head"><div><div class="admin-kicker">GATE DI COMPLETAMENTO</div><h2 id="gateAdminTitle">Requisiti iscrizione</h2></div><button class="gate-admin-close" type="button">×</button></div><div id="gateAdminBody"></div><div id="gateAdminMessage" class="gate-admin-message"></div></section>`;
     ov.addEventListener('click',e=>{if(e.target===ov)closeModal();});ov.querySelector('.gate-admin-close').onclick=closeModal;document.body.appendChild(ov);
   }
-  function closeModal(){document.getElementById('gateAdminOverlay')?.classList.add('hidden');state.openEnrollmentId=null;}
+  function closeModal(){window.SAFETY_MODAL_ACCESS?.closed(document.getElementById('gateAdminOverlay'));document.getElementById('gateAdminOverlay')?.classList.add('hidden');state.openEnrollmentId=null;}
   function msg(text){const el=document.getElementById('gateAdminMessage');if(el)el.textContent=text||'';}
 
   async function loadEnrollment(id){
@@ -49,7 +49,7 @@
   const statusLabel=e=>e?.status==='completed'?'COMPLETATO':e?.status==='failed'?'NON SUPERATO':e?.status==='revoked'?'REVOCATO':'IN ATTESA';
 
   async function openGate(id){
-    ensureModal();state.openEnrollmentId=id;document.getElementById('gateAdminOverlay').classList.remove('hidden');document.getElementById('gateAdminBody').innerHTML='<div class="admin-loading">Caricamento requisiti…</div>';msg('');
+    ensureModal();state.openEnrollmentId=id;document.getElementById('gateAdminOverlay').classList.remove('hidden');window.SAFETY_MODAL_ACCESS?.opened(document.getElementById('gateAdminOverlay'));document.getElementById('gateAdminBody').innerHTML='<div class="admin-loading">Caricamento requisiti…</div>';msg('');
     try{render(await loadEnrollment(id));}catch(e){document.getElementById('gateAdminBody').innerHTML=`<div class="admin-error">${esc(e.message)}</div>`;}
   }
 

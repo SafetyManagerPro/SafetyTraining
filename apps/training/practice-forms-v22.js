@@ -19,7 +19,7 @@
     root.addEventListener('click',e=>{if(e.target===root)close();});
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!root.classList.contains('hidden'))close();});
   }
-  function close(){document.getElementById(rootId)?.classList.add('hidden');document.body.classList.remove('pf22-open');context=null;}
+  function close(){window.SAFETY_MODAL_ACCESS?.closed(document.getElementById(rootId));document.getElementById(rootId)?.classList.add('hidden');document.body.classList.remove('pf22-open');context=null;}
   const statusOpts=[['pending','Da osservare'],['yes','Eseguito correttamente'],['no','Da correggere'],['na','Non applicabile']];
   function marksHTML(items,kind,values){
     return arr(items).map((item,i)=>'<div class="pf22-line"><label for="pf22-'+kind+'-'+i+'">'+esc(str(item))+'</label><select id="pf22-'+kind+'-'+i+'" data-kind="'+kind+'" data-idx="'+i+'">'+statusOpts.map(([v,label])=>'<option value="'+v+'" '+((values[i]||'pending')===v?'selected':'')+'>'+label+'</option>').join('')+'</select></div>').join('')||'<p>Nessuna voce prevista per questo laboratorio.</p>';
@@ -28,7 +28,7 @@
   function bodyMessage(s,error=false){const el=document.getElementById('pf22Msg');if(el){el.textContent=s;el.className='pf22-message'+(error?' pf22-alert':'');}}
   async function open(enrollmentId,requirementKey,labKey){
     if(!db())return;
-    ensure();const modal=document.getElementById(rootId);modal.classList.remove('hidden');document.body.classList.add('pf22-open');
+    ensure();const modal=document.getElementById(rootId);modal.classList.remove('hidden');document.body.classList.add('pf22-open');window.SAFETY_MODAL_ACCESS?.opened(modal);
     document.getElementById('pf22Body').innerHTML='<p>Caricamento della scheda pratica…</p>';
     context=null;
     try{

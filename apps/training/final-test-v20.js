@@ -89,6 +89,7 @@
     ensureUi();
     const overlay = $('finalTestOverlay');
     overlay?.classList.remove('hidden');
+    window.SAFETY_MODAL_ACCESS?.opened(overlay);
     setMessage('');
     const body = $('finalTestBody');
     if (!body) return;
@@ -109,6 +110,7 @@
   }
 
   function closeTest() {
+    window.SAFETY_MODAL_ACCESS?.closed($('finalTestOverlay'));
     $('finalTestOverlay')?.classList.add('hidden');
     local.current = null;
     setMessage('');

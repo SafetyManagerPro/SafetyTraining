@@ -231,3 +231,7 @@ NON completato: visual browser smoke interattivo reale a 1440 / 820 / 390 con cl
 - Quiz: lock invio risposta contro clic multipli.
 - Storico docente: RPC staff-only `admin_practice_assessment_history_v22` applicata a Supabase; pulsante storico checklist che non modifica la validazione Gate.
 - Cache PWA v22-06. Restano da verificare E2E browser, accessibilità completa e regressioni con account reali. Corsi frozen invariati.
+
+## 2026-10-18 — v22.2 accessibility refinement
+- Aggiunto modulo condiviso per focus iniziale, ritorno al pulsante originario e ciclo di Tab nei dialoghi Gate, quiz e checklist; gestione Escape preesistente preservata.
+- Cache PWA v22-07 e verifica sintattica del nuovo modulo CI. Il collaudo con account reale e screen reader resta separato.
