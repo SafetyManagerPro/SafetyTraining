@@ -17,7 +17,6 @@
     const root=document.createElement('div');root.id=rootId;root.className='pf22-backdrop hidden';root.innerHTML='<section class="pf22-panel" role="dialog" aria-modal="true" aria-labelledby="pf22Title"><header><div><div class="admin-kicker">SCHEDA AGGIUNTIVA DOCENTE</div><h2 id="pf22Title">Procedura e checklist</h2></div><button class="pf22-close" type="button" aria-label="Chiudi">×</button></header><div id="pf22Body"></div></section>';
     document.body.appendChild(root);root.querySelector('.pf22-close').onclick=close;
     root.addEventListener('click',e=>{if(e.target===root)close();});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!root.classList.contains('hidden'))close();});
   }
   function close(){window.SAFETY_MODAL_ACCESS?.closed(document.getElementById(rootId));document.getElementById(rootId)?.classList.add('hidden');document.body.classList.remove('pf22-open');context=null;}
   const statusOpts=[['pending','Da osservare'],['yes','Eseguito correttamente'],['no','Da correggere'],['na','Non applicabile']];
@@ -28,7 +27,7 @@
   function bodyMessage(s,error=false){const el=document.getElementById('pf22Msg');if(el){el.textContent=s;el.className='pf22-message'+(error?' pf22-alert':'');}}
   async function open(enrollmentId,requirementKey,labKey){
     if(!db())return;
-    ensure();const modal=document.getElementById(rootId);modal.classList.remove('hidden');document.body.classList.add('pf22-open');window.SAFETY_MODAL_ACCESS?.opened(modal);
+    ensure();const modal=document.getElementById(rootId);modal.classList.remove('hidden');document.body.classList.add('pf22-open');window.SAFETY_MODAL_ACCESS?.opened(modal,close);
     document.getElementById('pf22Body').innerHTML='<p>Caricamento della scheda pratica…</p>';
     context=null;
     try{

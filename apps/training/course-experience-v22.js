@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const db=()=>window.SAFETY_CLOUD?.state?.client;
+  const userId=()=>window.SAFETY_CLOUD?.state?.user?.id||null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const arr=v=>Array.isArray(v)?v:[];
   let seq=0,timer=null;const cache=new Map();
@@ -15,7 +16,8 @@
   const visuals=items=>arr(items).filter(x=>x?.asset).map(x=>x.asset);
 
   async function loadExperience(key){
-    const c=db(); if(!c)return null;if(cache.has(key))return cache.get(key);
+    const c=db(),account=userId(),cacheKey=`${account||'anon'}:${key}`;
+    if(!c)return null;if(cache.has(cacheKey))return cache.get(cacheKey);
     const {data:course,error}=await c.from('courses').select('id,stable_key,title,metadata').eq('stable_key',key).eq('active',true).maybeSingle();
     if(error||!course||course.metadata?.freeze_scope)return null;
     const [{data:sl,error:se},{data:pl,error:pe}]=await Promise.all([
@@ -35,7 +37,7 @@
       scenarios:(sl||[]).map(link=>sm.has(link.scenario_id)?{...sm.get(link.scenario_id),__link:link}:null).filter(Boolean),
       labs:(pl||[]).map(link=>pm.has(link.practice_lab_id)?{...pm.get(link.practice_lab_id),__link:link}:null).filter(Boolean)
     };
-    cache.set(key,result);return result;
+    if(userId()!==account)return null;cache.set(cacheKey,result);return result;
   }
 
   function visualGallery(items,title){
@@ -72,6 +74,7 @@
   function schedule(){const key=courseKey();clearTimeout(timer);timer=setTimeout(()=>{if(!key){seq++;document.getElementById('v22CourseExperience')?.remove();return;}if(document.getElementById('app')?.querySelector('.agenda-hero'))inject(key);},120);}
   window.addEventListener('hashchange',schedule);
   document.addEventListener('safety:course-rendered',schedule);
+  document.addEventListener('safety:auth-changed',()=>{seq++;cache.clear();document.getElementById('v22CourseExperience')?.remove();schedule();});
   window.SAFETY_COURSE_EXPERIENCE_V22={schedule,version:'22.007'};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
 })();

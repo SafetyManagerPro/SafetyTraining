@@ -3,6 +3,7 @@
   'use strict';
 
   const db = () => window.SAFETY_CLOUD?.state?.client;
+  const user = () => window.SAFETY_CLOUD?.state?.user;
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const state = { companyId:null, context:null, preview:null, generated:[], capabilities:null };
@@ -20,10 +21,9 @@
   const phoneDigits = value => String(value||'').replace(/\D/g,'');
 
   async function capabilities(){
-    if(state.capabilities) return state.capabilities;
-    const {data,error}=await db().rpc('admin_capabilities');
-    if(error) throw error;
-    state.capabilities=data||{}; return state.capabilities;
+    const shared=window.SAFETY_ADMIN_CAPABILITIES_V21?.get?.() || window.SAFETY_ADMIN_CAPABILITIES_STATE || null;
+    state.capabilities=user()?shared:null;
+    return state.capabilities;
   }
 
   function ensureStyles(){
@@ -34,10 +34,15 @@
   }
 
   function modal(title,body){
-    ensureStyles(); document.getElementById('accessImportModal')?.remove();
+    ensureStyles();
+    const prior=document.getElementById('accessImportModal');
+    if(prior){window.SAFETY_MODAL_ACCESS?.closed(prior);prior.remove();}
     const ov=document.createElement('div'); ov.id='accessImportModal'; ov.className='ai-modal';
-    ov.innerHTML=`<section class="ai-modal-card"><div class="ai-modal-head"><div><div class="admin-kicker">ACCESSI SAFETYTRAINING</div><h2>${esc(title)}</h2></div><button type="button" class="ai-close">×</button></div>${body}</section>`;
-    document.body.appendChild(ov); ov.querySelector('.ai-close').onclick=()=>ov.remove(); ov.onclick=e=>{if(e.target===ov)ov.remove();}; return ov;
+    ov.innerHTML=`<section class="ai-modal-card" role="dialog" aria-modal="true"><div class="ai-modal-head"><div><div class="admin-kicker">ACCESSI SAFETYTRAINING</div><h2>${esc(title)}</h2></div><button type="button" class="ai-close" aria-label="Chiudi">×</button></div>${body}</section>`;
+    const close=()=>{window.SAFETY_MODAL_ACCESS?.closed(ov);ov.remove();};
+    document.body.appendChild(ov); ov.querySelector('.ai-close').onclick=close; ov.onclick=e=>{if(e.target===ov)close();};
+    window.SAFETY_MODAL_ACCESS?.opened(ov,close);
+    return ov;
   }
 
   async function saveContact(learnerId,email,phone){
@@ -199,11 +204,20 @@
   }
 
   async function refreshVisibility(){
-    addNav();try{const c=await capabilities();document.getElementById('adminAccessImportNav')?.classList.toggle('hidden',!c?.capabilities?.manage_learners&&!c?.manage_learners);}catch(e){console.warn('[Access/import capabilities]',e?.message||e);}
+    addNav();
+    const c=await capabilities();
+    const allowed=!!user() && !!(c?.capabilities?.manage_learners || c?.manage_learners);
+    document.getElementById('adminAccessImportNav')?.classList.toggle('hidden',!allowed);
   }
 
   function boot(){
-    ensureStyles();const obs=new MutationObserver(()=>{addNav();refreshVisibility();});obs.observe(document.body,{childList:true,subtree:true});addNav();refreshVisibility();
+    ensureStyles();
+    let queued=false;
+    const syncVisibility=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;refreshVisibility().catch(e=>console.warn('[Access/import capabilities]',e?.message||e));});};
+    const obs=new MutationObserver(()=>{addNav();syncVisibility();});obs.observe(document.body,{childList:true,subtree:true});
+    document.addEventListener('safety:admin-capabilities',syncVisibility);
+    document.addEventListener('safety:auth-changed',()=>{state.capabilities=null;syncVisibility();});
+    addNav();syncVisibility();
     document.addEventListener('click',e=>{const action=e.target.closest('[data-action]')?.dataset.action;if(action==='invite-learner'){e.preventDefault();e.stopImmediatePropagation();const id=e.target.closest('[data-action]').dataset.id;openInvite(id).catch(fail);}else if(action==='bulk-submit'){e.preventDefault();e.stopImmediatePropagation();interceptLegacyBulk();}},true);
   }
 

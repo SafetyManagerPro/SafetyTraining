@@ -5,7 +5,7 @@
   const cloud = () => window.SAFETY_CLOUD;
   const db = () => cloud()?.state?.client;
   const user = () => cloud()?.state?.user;
-  const state = { capabilities:null, booted:false, observer:null, authUnsub:null, promoting:false };
+  const state = { capabilities:null, booted:false, observer:null, authUnsub:null, promoting:false, requestId:0 };
 
   const cap = key => !!state.capabilities?.capabilities?.[key];
   const isPlatform = () => !!state.capabilities?.platform_admin;
@@ -17,17 +17,25 @@
     if (hidden) el.setAttribute('aria-hidden', 'true'); else el.removeAttribute('aria-hidden');
   }
 
-  async function fetchCapabilities() {
-    if (!db() || !user()) {
-      state.capabilities = null;
-      window.SAFETY_ADMIN_CAPABILITIES_STATE = null;
-      return null;
-    }
-    const {data,error} = await db().rpc('admin_capabilities');
-    if (error) throw error;
-    state.capabilities = data || null;
+  function publishCapabilities(value) {
+    state.capabilities = value || null;
     window.SAFETY_ADMIN_CAPABILITIES_STATE = state.capabilities;
+    document.dispatchEvent(new CustomEvent('safety:admin-capabilities', {
+      detail:{ userId:user()?.id || null, available:!!state.capabilities }
+    }));
     return state.capabilities;
+  }
+
+  async function fetchCapabilities() {
+    const client = db();
+    const activeUser = user();
+    const requestId = ++state.requestId;
+    if (!client || !activeUser) return publishCapabilities(null);
+    const userId = activeUser.id;
+    const {data,error} = await client.rpc('admin_capabilities');
+    if (requestId !== state.requestId || user()?.id !== userId) return null;
+    if (error) throw error;
+    return publishCapabilities(data || null);
   }
 
   function fakePlatformAdminBuilder() {
@@ -158,7 +166,7 @@
     for (let i=0; i<50 && (!db() || !window.SAFETY_ADMIN); i++) await new Promise(r => setTimeout(r,120));
     await refresh();
     observeUi();
-    const subscription = db()?.auth?.onAuthStateChange(() => setTimeout(refresh,140));
+    const subscription = db()?.auth?.onAuthStateChange(() => { state.requestId += 1; publishCapabilities(null); setTimeout(refresh,140); });
     state.authUnsub = subscription?.data?.subscription || null;
   }
 

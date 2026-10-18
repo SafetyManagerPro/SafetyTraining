@@ -8,7 +8,12 @@
     current: null,
     booted: false,
     refreshTimer: null,
-    sending:false
+    sending:false,
+    opening:false,
+    availabilitySeq:0,
+    openSeq:0,
+    answerSeq:0,
+    resultSeq:0
   };
 
   const $ = (id) => document.getElementById(id);
@@ -54,8 +59,11 @@
 
   async function refreshAvailability() {
     ensureUi();
+    const request=++local.availabilitySeq;
     const st = cloud()?.state;
-    if (!st?.client || !st?.user || !st.assignments?.length) {
+    const userId=st?.user?.id||null;
+    const assignmentKey=(st?.assignments||[]).map(a=>a.id).join(',');
+    if (!st?.client || !userId || !st.assignments?.length) {
       local.tests = [];
       local.testsByCourseVersion = new Map();
       $('finalTestButton')?.classList.add('hidden');
@@ -67,6 +75,8 @@
       .select('id,course_version_id,title,passing_score_pct,max_attempts,test_key,metadata')
       .in('course_version_id', ids).eq('active', true)
       .order('created_at', { ascending:true });
+    const current=cloud()?.state;
+    if(request!==local.availabilitySeq || current?.user?.id!==userId || (current?.assignments||[]).map(a=>a.id).join(',')!==assignmentKey)return;
     if (error) {
       console.warn('[SafetyTraining Final Test] availability:', error.message);
       return;
@@ -89,7 +99,7 @@
     ensureUi();
     const overlay = $('finalTestOverlay');
     overlay?.classList.remove('hidden');
-    window.SAFETY_MODAL_ACCESS?.opened(overlay);
+    window.SAFETY_MODAL_ACCESS?.opened(overlay,closeTest);
     setMessage('');
     const body = $('finalTestBody');
     if (!body) return;
@@ -110,6 +120,11 @@
   }
 
   function closeTest() {
+    local.openSeq += 1;
+    local.answerSeq += 1;
+    local.resultSeq += 1;
+    local.opening=false;
+    local.sending=false;
     window.SAFETY_MODAL_ACCESS?.closed($('finalTestOverlay'));
     $('finalTestOverlay')?.classList.add('hidden');
     local.current = null;
@@ -157,13 +172,20 @@
   }
 
   async function openTest(testId) {
+    if(local.opening)return;
     const test = local.tests.find((x) => x.id === testId);
     if (!test) return;
     const assignment = assignmentForVersion(test.course_version_id);
-    if (!assignment) return;
+    const userId=cloud()?.state?.user?.id||null;
+    if (!assignment || !userId) return;
+    const request=++local.openSeq;
+    const current=()=>request===local.openSeq && cloud()?.state?.user?.id===userId && assignmentForVersion(test.course_version_id)?.id===assignment.id && !$('finalTestOverlay')?.classList.contains('hidden');
+    local.opening=true;
+    $('finalTestBody')?.querySelectorAll('button').forEach(button=>button.disabled=true);
     setMessage('Caricamento verifica…');
     try {
       const attempts = await getAttempts(assignment, test);
+      if(!current())return;
       const latest = attempts[0] || null;
       if (latest?.completed_at && latest.passed === true) {
         renderResult(test, assignment, latest, attempts);
@@ -174,15 +196,22 @@
         return;
       }
       const attempt = latest && !latest.completed_at ? latest : await createAttempt(assignment, test);
+      if(!current())return;
       const questions = await loadQuestions(test);
+      if(!current())return;
       const answers = await loadExistingAnswers(attempt.id);
-      local.current = { test, assignment, attempt, attempts, questions, answers, index:0 };
+      if(!current())return;
+      local.current = { test, assignment, attempt, attempts, questions, answers, index:0, userId };
       const firstOpen = questions.findIndex((row) => !answers.has(row.question_id));
       local.current.index = firstOpen >= 0 ? firstOpen : Math.max(0, questions.length - 1);
       renderQuestion();
     } catch (error) {
-      console.warn('[SafetyTraining Final Test] open:', error?.message || error);
-      setMessage(error?.message || 'Impossibile aprire la verifica.', 'error');
+      if(current()){
+        console.warn('[SafetyTraining Final Test] open:', error?.message || error);
+        setMessage(error?.message || 'Impossibile aprire la verifica.', 'error');
+      }
+    } finally {
+      if(request===local.openSeq)local.opening=false;
     }
   }
 
@@ -219,6 +248,8 @@
     if (!current) return;
     const row = current.questions[current.index];
     if (!row || current.answers.has(row.question_id)||local.sending) return;
+    const request=++local.answerSeq;
+    const valid=()=>request===local.answerSeq && local.current===current && cloud()?.state?.user?.id===current.userId && !$('finalTestOverlay')?.classList.contains('hidden');
     local.sending=true;
     $('finalTestBody')?.querySelectorAll('.final-test-option').forEach(b=>b.disabled=true);
     setMessage('Registrazione risposta…');
@@ -229,6 +260,7 @@
         answer:{ option_id:String(optionId) }
       });
       if (error) throw error;
+      if(!valid())return;
       current.answers.set(row.question_id, { option_id:String(optionId) });
       if (current.answers.size >= current.questions.length) await refreshAttemptResult();
       else {
@@ -237,16 +269,24 @@
         renderQuestion();
       }
     } catch (error) {
-      console.warn('[SafetyTraining Final Test] answer:', error?.message || error);
-      setMessage(error?.message || 'Risposta non registrata.', 'error');
-    }finally{local.sending=false;if(local.current===current&&!current.answers.has(row.question_id))$('finalTestBody')?.querySelectorAll('.final-test-option').forEach(b=>b.disabled=false);}
+      if(valid()){
+        console.warn('[SafetyTraining Final Test] answer:', error?.message || error);
+        setMessage(error?.message || 'Risposta non registrata.', 'error');
+      }
+    }finally{
+      if(request===local.answerSeq)local.sending=false;
+      if(valid()&&!current.answers.has(row.question_id))$('finalTestBody')?.querySelectorAll('.final-test-option').forEach(b=>b.disabled=false);
+    }
   }
 
   async function refreshAttemptResult() {
     const current = local.current;
     if (!current) return;
+    const request=++local.resultSeq;
+    const valid=()=>request===local.resultSeq && local.current===current && cloud()?.state?.user?.id===current.userId && !$('finalTestOverlay')?.classList.contains('hidden');
     const { data, error } = await cloud().state.client.from('test_attempts')
       .select('id,attempt_no,started_at,completed_at,score_pct,passed,metadata').eq('id', current.attempt.id).single();
+    if(!valid())return;
     if (error) { setMessage(error.message, 'error'); return; }
     if (!data.completed_at) {
       const next = current.questions.findIndex((row) => !current.answers.has(row.question_id));
@@ -254,7 +294,7 @@
       return;
     }
     const attempts = await getAttempts(current.assignment, current.test);
-    renderResult(current.test, current.assignment, data, attempts);
+    if(valid())renderResult(current.test, current.assignment, data, attempts);
   }
 
   function renderResult(test, assignment, attempt, attempts) {
@@ -280,15 +320,11 @@
   async function bootstrap() {
     ensureUi();
     if (local.booted) return;
-    if (!cloud()?.state?.client) {
-      window.setTimeout(bootstrap, 300);
-      return;
-    }
     local.booted = true;
     await refreshAvailability();
-    cloud().state.client.auth.onAuthStateChange(() => window.setTimeout(refreshAvailability, 250));
-    window.addEventListener('hashchange', () => window.setTimeout(refreshAvailability, 150));
-    local.refreshTimer = window.setInterval(refreshAvailability, 15000);
+    document.addEventListener('safety:cloud-state-changed',()=>refreshAvailability().catch(()=>{}));
+    document.addEventListener('safety:auth-changed',()=>{closeTest();refreshAvailability().catch(()=>{});});
+    window.addEventListener('hashchange', () => window.setTimeout(refreshAvailability, 0));
   }
 
   window.SAFETY_FINAL_TEST = { refreshAvailability, openPicker, closeTest, openTest, state:local };
