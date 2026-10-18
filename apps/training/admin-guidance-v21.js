@@ -13,15 +13,60 @@
     const host=document.getElementById('readinessFrozenV21');if(!host||host.dataset.done)return;host.dataset.done='1';
     try{const {data,error}=await db().rpc('get_course_readiness');if(error)throw error;const frozen=(data?.courses||[]).filter(x=>x.frozen);const blocked=frozen.filter(x=>x.readiness_state==='blocked');host.innerHTML=`<strong>Governance congelata:</strong> ${frozen.length} corsi risultano congelati/fuori coda di finalizzazione.${blocked.length?` ${blocked.length} di questi sono ancora “Bloccati” (${blocked.map(x=>esc(x.title)).join('; ')}): è intenzionale finché restano fuori roadmap.`:' Nessun corso congelato è attualmente un hard blocker.'}`;}catch(e){host.textContent='Stato dei corsi congelati non disponibile in questo momento.';}
   }
+  /* v22.3.3: read-only dependency preview; never issue DELETE. */
+  const previewTypes={'Aziende':['company','companies',[['learners','company_id'],['course_editions','company_id'],['organization_memberships','company_id'],['learner_company_training_history','company_id'],['integration_training_contexts','local_company_id']]],
+    'Corsisti':['learner','learners',[['enrollments','learner_id'],['learner_account_invitations','learner_id'],['learner_company_training_history','learner_id']]],
+    'Edizioni':['edition','course_editions',[['enrollments','edition_id'],['learner_company_training_history','edition_id'],['integration_training_contexts','local_edition_id']]],
+    'Iscrizioni':['enrollment','enrollments',[['learning_events','enrollment_id'],['learning_sessions','enrollment_id'],['learning_progress','enrollment_id'],['test_attempts','enrollment_id'],['question_attempts','enrollment_id'],['enrollment_requirement_evidence','enrollment_id'],['enrollment_practice_assessments_v22','enrollment_id'],['learner_company_training_history','enrollment_id']]]};
+  function addDependencyPreviewButtons(title,content){
+    const spec=previewTypes[title];if(!spec)return;
+    content.querySelectorAll('td').forEach(td=>{
+      const source=td.querySelector('button[data-action][data-id]');
+      if(!source||td.querySelector('[data-preview-dependency]'))return;
+      const b=document.createElement('button');b.type='button';b.className='admin-row-btn';
+      b.dataset.previewDependency=spec[0];b.dataset.id=source.dataset.id;
+      b.textContent='Verifica eliminazione';b.title='Controllo indicativo delle dipendenze. Non cancella dati.';
+      td.append(' ',b);
+    });
+  }
+  async function openDependencyPreview(type,id){
+    const spec=Object.values(previewTypes).find(x=>x[0]===type),root=document.getElementById('adminContent');
+    if(!spec||!root||!id)return;
+    root.querySelector('#adminDependencyPreview')?.remove();
+    const section=document.createElement('section');section.id='adminDependencyPreview';section.className='admin-card';
+    section.innerHTML='<h2>Verifica eliminazione</h2><p>Controllo dipendenze in corso…</p>';
+    root.prepend(section);
+    try{
+      const client=db();if(!client)throw Error('Sessione non disponibile');
+      const {data:row,error:missing}=await client.from(spec[1]).select('id').eq('id',id).maybeSingle();
+      if(missing)throw missing;if(!row)throw Error('Record non accessibile');
+      const checks=await Promise.all(spec[2].map(async ([table,column])=>{
+        const {count,error}=await client.from(table).select('id',{head:true,count:'exact'}).eq(column,id);
+        return {table,count,error:error?.message};
+      }));
+      const affected=checks.filter(x=>x.error||x.count>0);
+      if(!section.isConnected)return;
+      section.innerHTML='<h2>Verifica eliminazione · '+esc(type)+'</h2><p>'+
+        (affected.length?'Attenzione: presenti dipendenze o verifiche incomplete.':'Nessuna dipendenza rilevata nelle sole letture consentite.')+
+        '</p><ul>'+checks.map(x=>'<li>'+esc(x.table)+': '+(x.error?'non verificabile':esc(x.count))+'</li>').join('')+
+        '</ul><p><strong>Eliminazione definitiva disabilitata.</strong> Questa anteprima non garantisce che il record sia eliminabile: servono controlli transazionali e autorizzazioni server.</p><button type="button" data-close-dependency>Chiudi</button>';
+    }catch(e){if(section.isConnected)section.textContent='Verifica non disponibile: '+(e.message||e);}
+  }
   function inject(){
     const title=document.getElementById('adminTitle')?.textContent,make=cards[title];
     window.SAFETY_ADMIN_HELP_V22?.sync?.();
     if(!make)return;
-    const content=document.getElementById('adminContent');if(!content||content.querySelector('.admin-guide-card'))return;
+    const content=document.getElementById('adminContent');if(!content)return;
+    addDependencyPreviewButtons(title,content);
+    if(content.querySelector('.admin-guide-card'))return;
     content.insertAdjacentHTML('afterbegin',make());if(title==='Readiness corsi')fillFrozen();
   }
   function schedule(){[80,220,500,900,1500,2400].forEach(ms=>setTimeout(inject,ms));}
-  async function boot(){for(let i=0;i<40&&!document.getElementById('adminShell');i++)await new Promise(r=>setTimeout(r,120));document.querySelector('#adminShell .admin-nav')?.addEventListener('click',schedule);document.getElementById('adminRefresh')?.addEventListener('click',schedule);document.addEventListener('click',e=>{if(e.target.closest('[data-sm-course-catalog],#blueprintAdminBtn,#courseReadinessBtn'))schedule();},true);schedule();}
+  async function boot(){document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-preview-dependency]');
+    if(b){e.preventDefault();void openDependencyPreview(b.dataset.previewDependency,b.dataset.id);}
+    if(e.target.closest('[data-close-dependency]'))document.getElementById('adminDependencyPreview')?.remove();
+  });for(let i=0;i<40&&!document.getElementById('adminShell');i++)await new Promise(r=>setTimeout(r,120));document.querySelector('#adminShell .admin-nav')?.addEventListener('click',schedule);document.getElementById('adminRefresh')?.addEventListener('click',schedule);document.addEventListener('click',e=>{if(e.target.closest('[data-sm-course-catalog],#blueprintAdminBtn,#courseReadinessBtn'))schedule();},true);schedule();}
   window.SAFETY_ADMIN_GUIDANCE_V21={inject,version:'21.4'};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
