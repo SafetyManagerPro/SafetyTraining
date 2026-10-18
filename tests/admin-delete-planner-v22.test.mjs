@@ -96,3 +96,70 @@ test('keep blocks main removal and unlink only offered for nullable relations',(
  assert.equal(d.canUnlink('enrollments','learner_id'),false);
  assert.equal(d.intentPlan([{...groups[0],truncated:true}],new Map([['learners:1','delete']]),true,'candidate').rootPossible,false);
 });
+
+
+test('composite primary keys produce unique selectors for related records',()=>{
+ const a=d.recordKey('learning_progress',{enrollment_id:'en-1',unit_version_id:'unit-1'});
+ const b=d.recordKey('learning_progress',{enrollment_id:'en-1',unit_version_id:'unit-2'});
+ assert.notEqual(a,b);
+ assert.equal(d.recordKey('learning_progress',{enrollment_id:'en-1'}),null);
+ const x=d.recordKey('integration_training_contexts',{source_system:'import',external_project_id:'proj:1'});
+ const y=d.recordKey('integration_training_contexts',{source_system:'import',external_project_id:'proj:2'});
+ assert.notEqual(x,y);
+ assert.equal(d.recordKey('integration_training_contexts',{source_system:'import'}),null);
+ assert.ok(!x.includes('undefined'));
+});
+test('the scanner never requests unrestricted fields or invitation token hashes',()=>{
+ for(const [table,columns] of Object.entries(d.projections)){
+  assert.ok(columns&&columns!=='*',table);
+  assert.ok(columns.split(',').every(x=>/^[a-z_]+$/.test(x)),table);
+ }
+ for(const field of ['token_hash','token_prefix','metadata','recipient_phone']){
+  assert.ok(!d.projections.learner_account_invitations.includes(field),field);
+ }
+ const code=read('apps/training/admin-delete-planner-v22.js');
+ assert.doesNotMatch(code,/\.select\('\*'\)/);
+});
+function fakeClient(fixtures,reads=[]){
+ return {from(table){
+  return {select(columns){
+   reads.push({table,columns});
+   return {eq(){
+    return {
+     maybeSingle:async()=>({data:fixtures[table]?.one||null,error:null}),
+     limit:async()=>({data:fixtures[table]?.rows||[],count:(fixtures[table]?.rows||[]).length,error:null})
+    };
+   }};
+  }};
+ }};
+}
+test('edition scan distinguishes integration contexts by their composite primary key',async()=>{
+ const reads=[];
+ const c=fakeClient({
+  course_editions:{one:{id:'ed-1',status:'open'}},
+  integration_training_contexts:{rows:[
+   {source_system:'sync',external_project_id:'one',local_edition_id:'ed-1'},
+   {source_system:'sync',external_project_id:'two',local_edition_id:'ed-1'}
+  ]}
+ },reads);
+ const data=await d.scan(c,'edition','ed-1');
+ const group=data.groups.find(x=>x.table==='integration_training_contexts');
+ assert.equal(group.entries.length,2);
+ assert.notEqual(group.entries[0].key,group.entries[1].key);
+ assert.ok(group.entries.every(x=>x.id===null));
+ assert.ok(reads.every(x=>x.columns!=='*'));
+});
+test('enrollment scan distinguishes learning progress by unit version',async()=>{
+ const c=fakeClient({
+  enrollments:{one:{id:'en-1',status:'in_progress'}},
+  learning_progress:{rows:[
+   {enrollment_id:'en-1',unit_version_id:'unit-1',status:'started'},
+   {enrollment_id:'en-1',unit_version_id:'unit-2',status:'completed'}
+  ]}
+ });
+ const data=await d.scan(c,'enrollment','en-1');
+ const progress=data.groups.find(x=>x.table==='learning_progress');
+ assert.equal(progress.entries.length,2);
+ assert.notEqual(progress.entries[0].key,progress.entries[1].key);
+ assert.ok(progress.entries.every(x=>x.id===null));
+});
