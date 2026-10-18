@@ -67,6 +67,10 @@
       <div class="gate-admin-stat"><strong>${esc(x.en.status)}</strong><span>stato iscrizione</span></div>
     </div>
     <div class="gate-admin-list">${rows.length?rows.map((it,i)=>itemHtml(x,it,i)).join(''):'<div class="admin-note">Nessun gate aggiuntivo richiesto per questa versione corso.</div>'}</div>`;
+    body.querySelectorAll('[data-practice-form]').forEach(b=>b.onclick=()=>{
+      const req=x.practical[Number(b.dataset.practiceForm)],labKey=b.dataset.labKey;
+      if(req&&labKey)window.SAFETY_PRACTICE_FORMS_V22?.open?.(x.en.id,req.requirement_key,labKey);
+    });
     body.querySelectorAll('[data-gate-complete]').forEach(b=>b.onclick=()=>setEvidence(x,Number(b.dataset.gateComplete),'completed'));
     body.querySelectorAll('[data-gate-fail]').forEach(b=>b.onclick=()=>setEvidence(x,Number(b.dataset.gateFail),'failed'));
     body.querySelectorAll('[data-gate-reset]').forEach(b=>b.onclick=()=>resetEvidence(x,Number(b.dataset.gateReset)));
@@ -88,7 +92,10 @@
     if(r.passing_score_pct!=null)meta.push(`soglia ${r.passing_score_pct}%`);
     const note=e?.evidence?.note?`<p class="gate-admin-note">Nota: ${esc(e.evidence.note)}</p>`:'';
     const rubric=it.kind==='practical'?labRubricHtml(x,r):'';
-    return `<article class="gate-admin-item" data-gate-index="${index}"><div class="gate-admin-item-head"><div><span class="gate-admin-meta">${esc(it.label)}</span><h3>${esc(r.title)}</h3><div class="gate-admin-meta">${esc(meta.join(' · ')||r.completion_mode)}</div></div><span class="gate-admin-status ${esc(e?.status||'pending')}">${statusLabel(e)}</span></div>${rubric}${note}${it.external?`<div class="gate-admin-actions">${e?.status==='completed'?`<button class="admin-row-btn danger" type="button" data-gate-reset="${index}">Revoca evidenza</button>`:`<button class="admin-row-btn" type="button" data-gate-complete="${index}">${it.kind==='practical'?'Valida pratica':'Segna completato'}</button>${it.kind==='verification'?`<button class="admin-row-btn danger" type="button" data-gate-fail="${index}">Segna non superato</button>`:''}`}</div>`:`<p class="gate-admin-note">Esito gestito automaticamente dal Test Builder: non è modificabile manualmente da questo pannello.</p>`}</article>`;
+    const labKeys=it.kind==='practical'?[...new Set(arr(r.metadata?.v22_practice_lab_keys).concat(r.metadata?.practice_lab_key?[r.metadata.practice_lab_key]:[]))].filter(key=>x.practiceLabsByKey.has(key)):[];
+    const formActions=labKeys.length?'<div class="gate-admin-actions">'+labKeys.map(key=>'<button class="admin-row-btn" type="button" data-practice-form="'+index+'" data-lab-key="'+esc(key)+'">+ Procedura guidata / checklist compilabile · '+esc(x.practiceLabsByKey.get(key).title)+'</button>').join('')+'</div>':'';
+
+    return `<article class="gate-admin-item" data-gate-index="${index}"><div class="gate-admin-item-head"><div><span class="gate-admin-meta">${esc(it.label)}</span><h3>${esc(r.title)}</h3><div class="gate-admin-meta">${esc(meta.join(' · ')||r.completion_mode)}</div></div><span class="gate-admin-status ${esc(e?.status||'pending')}">${statusLabel(e)}</span></div>${rubric}${formActions}${note}${it.external?`<div class="gate-admin-actions">${e?.status==='completed'?`<button class="admin-row-btn danger" type="button" data-gate-reset="${index}">Revoca evidenza</button>`:`<button class="admin-row-btn" type="button" data-gate-complete="${index}">${it.kind==='practical'?'Valida pratica':'Segna completato'}</button>${it.kind==='verification'?`<button class="admin-row-btn danger" type="button" data-gate-fail="${index}">Segna non superato</button>`:''}`}</div>`:`<p class="gate-admin-note">Esito gestito automaticamente dal Test Builder: non è modificabile manualmente da questo pannello.</p>`}</article>`;
   }
 
   async function saveEvidenceRpc(x,it,status,note){
