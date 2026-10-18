@@ -203,3 +203,6 @@ NON completato: visual browser smoke interattivo reale a 1440 / 820 / 390 con cl
 - Progresso contenuti e tempo nominale sono metriche diverse e non provano da sole validità certificante o obblighi formativi.
 - Cache PWA safety-training-v22-03; npm check include anche learner guard e completion gates.
 - Nessuna modifica Supabase né corsi: 27 frozen immutati, company_admin disabilitato. CI, deploy e browser smoke restano da verificare per questo commit.
+
+### Refinement 2026-10-18 — carichi amministrazione
+- Monitoraggio Corsisti: fetch raggruppate in snapshot deduplicato per 30 secondi, evitando cinque nuove query a ogni tasto di ricerca. La cache viene invalidata premendo Aggiorna e al cambiamento dell'autenticazione; dati sempre filtrati dalle RLS del database. Non sono stati toccati corsi o schema.

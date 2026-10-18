@@ -32,6 +32,10 @@
     open:false, admin:false, tab:'dashboard', filters:{}, renderSeq:0,
     orgs:[], defaultOrgId:null, multiOrg:false, modal:null
   };
+  // Do not refetch 5 progress datasets after every keystroke in the learner search.
+  // Never keep a cached learner snapshot across authentication changes.
+  const progressCache={snapshot:null,at:0,pending:null};
+  function invalidateProgress(){progressCache.snapshot=null;progressCache.at=0;}
 
   function toast(message, kind='info') {
     let host = document.getElementById('adminToasts');
@@ -109,6 +113,7 @@
     shell.querySelector('#adminMenuBtn').onclick = () => shell.classList.toggle('admin-mobile-nav-open');
     shell.querySelector('#adminNavBackdrop').onclick = closeNav;
     shell.querySelector('#adminRefresh').onclick = () => {
+      invalidateProgress();
       const external = shell.querySelector('.admin-nav nav button.active:not([data-tab])');
       if (external) external.click(); else render();
     };
@@ -137,6 +142,7 @@
     if (error) throw error; return !!data;
   }
   async function refreshRole() {
+    invalidateProgress();
     ensureUi();
     try { state.admin = await isAdmin(); if (state.admin) await resolveOrganizations(); }
     catch (e) { state.admin = false; console.warn('[Admin role]', e?.message || e); }
@@ -219,19 +225,30 @@
     void renderLearnerProgress(seq,q);
   }
 
+  async function loadProgressData(){
+    if(progressCache.snapshot&&Date.now()-progressCache.at<30000)return progressCache.snapshot;
+    if(!progressCache.pending){
+      progressCache.pending=Promise.all([
+        db().from('enrollments').select('id,learner_id,edition_id,status,progress_pct,active_seconds,last_activity_at').order('enrolled_at',{ascending:false}),
+        db().from('learners').select('id,first_name,last_name,email,company_id'),
+        db().from('course_editions').select('id,title,course_version_id'),
+        db().from('course_versions').select('id,course_id'),
+        db().from('courses').select('id,title,nominal_minutes')
+      ]).then(rows=>{
+        if(rows.some(r=>r.error))throw rows.find(r=>r.error).error;
+        progressCache.snapshot=rows;progressCache.at=Date.now();return rows;
+      }).finally(()=>{progressCache.pending=null;});
+    }
+    return progressCache.pending;
+  }
+
   async function renderLearnerProgress(seq,query){
     const host=document.getElementById('adminContent');if(!host||seq!==state.renderSeq)return;
     const section=document.createElement('section');section.id='adminLearnerProgress';section.className='admin-card';
     section.innerHTML='<div class="admin-card-head"><div><h2>Avanzamento corsisti per corso</h2><p>Progresso dei contenuti e confronto tra tempo attivo e durata nominale.</p></div></div><div class="admin-loading">Caricamento monitoraggio…</div>';
     host.appendChild(section);
     try{
-      const [{data:en,error:ee},{data:learners,error:le},{data:ed,error:de},{data:versions,error:ve},{data:courses,error:ce}]=await Promise.all([
-        db().from('enrollments').select('id,learner_id,edition_id,status,progress_pct,active_seconds,last_activity_at').order('enrolled_at',{ascending:false}),
-        db().from('learners').select('id,first_name,last_name,email,company_id'),
-        db().from('course_editions').select('id,title,course_version_id'),
-        db().from('course_versions').select('id,course_id'),
-        db().from('courses').select('id,title,nominal_minutes')
-      ]);
+      const [{data:en,error:ee},{data:learners,error:le},{data:ed,error:de},{data:versions,error:ve},{data:courses,error:ce}]=await loadProgressData();
       if(ee||le||de||ve||ce)throw ee||le||de||ve||ce;
       if(seq!==state.renderSeq||!section.isConnected||state.tab!=='learners')return;
       const lm=new Map((learners||[]).map(x=>[x.id,x])),em=new Map((ed||[]).map(x=>[x.id,x])),vm=new Map((versions||[]).map(x=>[x.id,x])),cm=new Map((courses||[]).map(x=>[x.id,x]));
