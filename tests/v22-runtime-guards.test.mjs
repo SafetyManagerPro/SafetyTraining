@@ -48,7 +48,7 @@ test('PWA keeps protected navigation outside the service worker',()=>{
   assert.match(index,/rel="icon" href="icons\/icon-192\.png"/);
   assert.match(worker,/request\.mode==='navigate'\)return/);
   assert.match(worker,/Promise\.allSettled/);
-  assert.match(worker,/safety-training-v22-08/);
+  assert.match(worker,/safety-training-v22-09/);
 });
 
 test('already-applied v22 migrations are tracked locally',()=>{
@@ -58,4 +58,14 @@ test('already-applied v22 migrations are tracked locally',()=>{
   assert.match(first,/does not modify enrollment_requirement_evidence or completion gates/);
   assert.match(second,/admin_practice_assessment_history_v22/);
   assert.match(second,/limit 50/);
+});
+
+test('learner password setup exposes a non-visual authenticated username to password managers',()=>{
+  const onboard=read('apps/training/learner-onboarding-v20.js');
+  assert.match(onboard,/id="learnerOnboardingUsername"/);
+  assert.match(onboard,/autocomplete="username"/);
+  assert.match(onboard,/learner-onboarding-sr-only/);
+  assert.match(onboard,/usernameField\.value = sessionUser\?\.email/);
+  assert.match(onboard,/show\(data\.session\.user\)/);
+  assert.match(onboard,/show\(session\.user\)/);
 });

@@ -18,6 +18,7 @@
         .learner-onboarding{position:fixed;inset:0;z-index:10050;background:rgba(2,6,23,.72);display:grid;place-items:center;padding:20px}.learner-onboarding.hidden{display:none}
         .learner-onboarding-card{width:min(520px,100%);background:#fff;color:#0f172a;border-radius:20px;padding:24px;box-shadow:0 25px 80px rgba(0,0,0,.35)}
         .learner-onboarding-card h2{margin:4px 0 8px}.learner-onboarding-card p{color:#475569;line-height:1.5}.learner-onboarding-card label{display:grid;gap:6px;margin:14px 0;font-weight:700}.learner-onboarding-card input{font:inherit;padding:12px;border:1px solid #cbd5e1;border-radius:10px}.learner-onboarding-card button{font:inherit;padding:11px 16px;border:0;border-radius:10px;background:#0f172a;color:#fff;font-weight:800;cursor:pointer}.learner-onboarding-card button:disabled{opacity:.55;cursor:wait}.learner-onboarding-message{min-height:1.4em;margin-top:10px;font-size:.9rem}.learner-onboarding-message.error{color:#b91c1c}.learner-onboarding-message.ok{color:#166534}
+        .learner-onboarding-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
       `;
       document.head.appendChild(style);
     }
@@ -30,6 +31,7 @@
       <h2 id="learnerOnboardingTitle">Imposta la tua password</h2>
       <p>Completa l'attivazione dell'account. Dopo questo passaggio vedrai esclusivamente i corsi che ti sono stati assegnati.</p>
       <form id="learnerOnboardingForm">
+        <label class="learner-onboarding-sr-only">Email dell'account<input id="learnerOnboardingUsername" type="email" name="username" autocomplete="username" readonly tabindex="-1"></label>
         <label>Nuova password<input id="learnerNewPassword" type="password" autocomplete="new-password" minlength="8" required></label>
         <label>Conferma password<input id="learnerNewPasswordConfirm" type="password" autocomplete="new-password" minlength="8" required></label>
         <button id="learnerPasswordSubmit" type="submit">Attiva account</button>
@@ -47,8 +49,10 @@
     el.className = `learner-onboarding-message ${kind}`.trim();
   }
 
-  function show() {
+  function show(sessionUser = null) {
     ensureUi();
+    const usernameField = document.getElementById('learnerOnboardingUsername');
+    if (usernameField) usernameField.value = sessionUser?.email || cloud()?.state?.user?.email || '';
     state.open = true;
     document.getElementById('learnerOnboarding')?.classList.remove('hidden');
   }
@@ -103,7 +107,7 @@
   async function maybeOpen() {
     if (!db() || !onboardingRequested()) return;
     const { data } = await db().auth.getSession();
-    if (data?.session?.user) show();
+    if (data?.session?.user) show(data.session.user);
   }
 
   async function boot() {
@@ -112,7 +116,7 @@
     await maybeOpen();
     db()?.auth?.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') state.recovery = true;
-      if (session?.user && (event === 'PASSWORD_RECOVERY' || onboardingRequested())) window.setTimeout(show, 100);
+      if (session?.user && (event === 'PASSWORD_RECOVERY' || onboardingRequested())) window.setTimeout(() => show(session.user), 100);
       window.setTimeout(removeRevokedAssignments, 700);
     });
     window.setInterval(removeRevokedAssignments, 5000);
