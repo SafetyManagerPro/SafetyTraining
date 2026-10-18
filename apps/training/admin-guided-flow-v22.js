@@ -130,7 +130,7 @@
     const company=r.companies.find(x=>x.id===st.companyId),edition=r.editions.find(x=>x.id===st.editionId);
     const version=r.versions.find(x=>x.id===edition?.course_version_id),course=r.courses.find(x=>x.id===version?.course_id);
     const existing=st.selectedIds.map(id=>r.learners.find(l=>l.id===id)).filter(Boolean);
-    const newOnes=st.newLearners.filter(l=>!l.createdId),names=existing.concat(newOnes).map(x=>esc((x.first_name||'')+' '+(x.last_name||''))).join(', ');
+    const newOnes=st.newLearners,names=existing.concat(newOnes).map(x=>esc((x.first_name||'')+' '+(x.last_name||''))).join(', ');
     return '<div class="gw-panel"><h3>4. Controlla prima di confermare</h3>'+
       '<dl class="gw-summary"><dt>Azienda</dt><dd>'+esc(company?.name||'—')+'</dd><dt>Corso</dt><dd>'+esc(course?.title||'—')+'</dd>'+
       '<dt>Edizione</dt><dd>'+esc(edition?.title||course?.title||'—')+'</dd><dt>Corsisti</dt><dd>'+esc(String(existing.length+st.newLearners.length))+'</dd></dl>'+
@@ -177,7 +177,7 @@
         const id=await rpc('admin_save_company',{p_company_id:null,p_organization_id:st.organizationId,p_name:st.companyName,p_vat_number:st.vat||null,p_fiscal_code:st.fiscal||null,p_ateco_code:st.ateco||null});
         st.companyId=id;st.companyMode='existing';await load();
       }
-      if(!r.companies.concat(s.records.companies).some(c=>c.id===st.companyId&&c.organization_id===st.organizationId))throw new Error('Seleziona un’azienda valida.');
+      if(!s.records.companies.some(c=>c.id===st.companyId&&c.organization_id===st.organizationId))throw new Error('Seleziona un’azienda valida.');
       st.step=1;
     } else if(st.step===1){
       if(st.editionMode==='new'){
@@ -195,14 +195,15 @@
       const existing=eligibleLearners(r.learners,st.companyId,st.organizationId);
       if(st.selectedIds.some(id=>!existing.some(l=>l.id===id)))throw new Error('Uno dei corsisti selezionati non appartiene all’azienda.');
       if(!st.selectedIds.length&&!st.newLearners.length)throw new Error('Seleziona o aggiungi almeno un corsista.');
-      const used=new Set();
+      const usedCf=new Set(),usedEmail=new Set();
       for(const person of st.newLearners){
         if(!norm(person.first_name)||!norm(person.last_name))throw new Error('Nome e cognome sono obbligatori per i nuovi corsisti.');
         const dup=duplicateLearner(person,r.learners,st.organizationId);
         if(dup)throw new Error('Anagrafica probabilmente già presente ('+(dup.first_name||'')+' '+(dup.last_name||'')+'). Riutilizzala dalla sezione Corsisti oppure verifica l’azienda.');
-        const token=normalizeCf(person.fiscal_code)||norm(person.email);
-        if(token&&used.has(token))throw new Error('Hai inserito due nuovi corsisti con email o codice fiscale uguale.');
-        if(token)used.add(token);
+        const cf=normalizeCf(person.fiscal_code),email=norm(person.email);
+        if(cf&&usedCf.has(cf)||email&&usedEmail.has(email))throw new Error('Hai inserito due nuovi corsisti con email o codice fiscale uguale.');
+        if(cf)usedCf.add(cf);
+        if(email)usedEmail.add(email);
       }
       st.step=3;
     }
@@ -211,6 +212,7 @@
   async function invite(ids){
     const failed=[],sent=[];
     for(const id of ids){
+      if(!ACTIVE())throw new Error('Sessione cambiata prima del completamento degli inviti.');
       const learner=s.records.learners.find(x=>x.id===id);
       if(!learner||learner.auth_user_id)continue;
       if(!learner.email){failed.push(id);continue;}
@@ -305,13 +307,16 @@
         }catch{sessionStorage.removeItem(key);}
       }
       shell();
-      host.addEventListener('input',e=>{if(!host.contains(e.target))return;rememberInput(e.target);});
-      host.addEventListener('change',e=>{if(!host.contains(e.target))return;rememberInput(e.target);});
-      host.addEventListener('click',e=>{
-        const remove=e.target.closest('[data-remove]');
-        if(remove){s.data.newLearners=s.data.newLearners.filter(x=>x.localId!==remove.dataset.remove);draw();return;}
-        const b=e.target.closest('[data-gw]');if(b)action(b.dataset.gw,b);
-      });
+      if(!host.dataset.guidedHandlersBound){
+        host.dataset.guidedHandlersBound='1';
+        host.addEventListener('input',e=>{if(!host.contains(e.target))return;rememberInput(e.target);});
+        host.addEventListener('change',e=>{if(!host.contains(e.target))return;rememberInput(e.target);});
+        host.addEventListener('click',e=>{
+          const remove=e.target.closest('[data-remove]');
+          if(remove){s.data.newLearners=s.data.newLearners.filter(x=>x.localId!==remove.dataset.remove);draw();return;}
+          const b=e.target.closest('[data-gw]');if(b)void action(b.dataset.gw,b);
+        });
+      }
     }catch(e){if(generation===s.rendering)host.innerHTML='<div class="admin-error">'+esc(e.message||e)+'</div>';}
   }
   window.SAFETY_ADMIN_GUIDED_FLOW_V22={render};
