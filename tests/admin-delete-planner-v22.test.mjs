@@ -43,7 +43,7 @@ test('unknown, truncated or inaccessible dependencies always block parent',()=>{
 });
 test('UI supports per-row and select-all with real deletion disabled',()=>{
   const src=read('apps/training/admin-delete-planner-v22.js'),html=read('apps/training/index.html');
-  for(const piece of ['data-plan-item','data-plan-all','data-plan-none','data-plan-parent','data-plan-next','data-plan-back','Conferma eliminazione (non disponibile)'])assert.ok(src.includes(piece),piece);
+  for(const piece of ['data-plan-choice','data-plan-all','data-plan-none','data-plan-parent','data-plan-next','data-plan-back','Conferma eliminazione (non disponibile)'])assert.ok(src.includes(piece),piece);
   assert.match(src,/getActorId\(\)===actorId/);
   assert.doesNotMatch(src,/\.from\([^)]*\)\.delete\s*\(|\.rpc\s*\(|\.from\([^)]*\)\.update\s*\(/);
   assert.match(html,/admin-delete-planner-v22\.js/);assert.match(html,/admin-delete-planner-v22\.css/);
@@ -78,4 +78,21 @@ test('dependency routes distinguish editable entities and retained evidence',()=
   assert.equal(d.managementAction('learner_account_invitations').kind,'invites');
   assert.equal(d.managementAction('learning_events'),null);
   assert.equal(d.managementAction('learner_company_training_history'),null);
+});
+
+test('the admin can explicitly plan action on sensitive records, regardless of course type',()=>{
+ const groups=[{table:'learning_events',column:'enrollment_id',entries:[{key:'events:1',label:'Event',source:'learning_events',category:'protected'}],truncated:false,error:null}];
+ const plan=d.intentPlan(groups,new Map([['events:1','delete']]),true,'protected');
+ assert.equal(plan.remove.length,1);
+ assert.equal(plan.warnings.length,1);
+ assert.equal(plan.rootPossible,true);
+ assert.equal(plan.deleteParent,true);
+});
+test('keep blocks main removal and unlink only offered for nullable relations',()=>{
+ const groups=[{table:'learners',column:'company_id',entries:[{key:'learners:1',label:'A',source:'learners',category:'manual'}],truncated:false,error:null}];
+ assert.equal(d.intentPlan(groups,new Map(),true,'candidate').rootPossible,false);
+ assert.equal(d.intentPlan(groups,new Map([['learners:1','unlink']]),true,'candidate').rootPossible,true);
+ assert.equal(d.canUnlink('learners','company_id'),true);
+ assert.equal(d.canUnlink('enrollments','learner_id'),false);
+ assert.equal(d.intentPlan([{...groups[0],truncated:true}],new Map([['learners:1','delete']]),true,'candidate').rootPossible,false);
 });

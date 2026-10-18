@@ -68,7 +68,7 @@
     if(!main.data)throw Error('Elemento non trovato o non autorizzato.');
     const groups=await Promise.all(spec.links.map(async ([label,table,column,policy])=>{
       const response=await client.from(table).select('*',{count:'exact'}).eq(column,id).limit(MAX_ROWS+1);
-      if(response.error)return {label,table,entries:[],error:response.error.message,truncated:false,count:null};
+      if(response.error)return {label,table,column,entries:[],error:response.error.message,truncated:false,count:null};
       const found=response.data||[],total=response.count;
       const truncated=found.length>MAX_ROWS||total==null||total>MAX_ROWS;
       const entries=found.slice(0,MAX_ROWS).map(row=>({
@@ -76,7 +76,7 @@
         label:recordLabel(row,table),category:truncated?'manual':classify(policy,row),
         details:safeDetails(row),learnerId:row.learner_id||null
       }));
-      return {label,table,entries,error:null,truncated,count:total};
+      return {label,table,column,entries,error:null,truncated,count:total};
     }));
     return {kind,id,spec,main:main.data,groups,parentType:classifyParent(kind,main.data)};
   }
@@ -111,10 +111,42 @@
     };
     return known[table]||null;
   }
-  const categoryText={candidate:'Candidato',manual:'Da verificare / scollegare',protected:'Protetto'};
+
+  /* v22.4.2: decisions are admin intentions, never database authorizations.
+     Explicitly distinguish FK constraints, preserved records, and sensitive cascades. */
+  const nullableKeys=new Set([
+    'learners:company_id','course_editions:company_id',
+    'integration_training_contexts:local_company_id',
+    'integration_training_contexts:local_edition_id'
+  ]);
+  const canUnlink=(table,column)=>nullableKeys.has(table+':'+column);
+  const cascadeWarnings={
+    enrollments:'Possibili presenze, test, progressi e verifiche collegate.',
+    learner_company_training_history:'Storico formativo: ricostruire i riferimenti indiretti prima di eliminare.',
+    learning_events:'Attività formativa registrata.',
+    learning_sessions:'Tempi di frequenza registrati.',
+    test_attempts:'Tentativi di verifica registrati.',
+    question_attempts:'Risposte di verifica registrate.',
+    enrollment_requirement_evidence:'Documentazione di requisiti collegata.',
+    enrollment_practice_assessments_v22:'Valutazioni pratiche registrate.'
+  };
+  function intentPlan(groups,decisions,parentSelected,parentType){
+    const all=groups.flatMap(g=>g.entries.map(e=>({...e,link:g.table,column:g.column})));
+    const incomplete=groups.some(g=>g.error||g.truncated);
+    const intents=all.map(e=>({...e,action:decisions.get(e.key)||'keep'}));
+    const remove=intents.filter(e=>e.action==='delete');
+    const unlink=intents.filter(e=>e.action==='unlink'&&canUnlink(e.link,e.column));
+    const unresolved=intents.filter(e=>e.action==='keep'||(e.action==='unlink'&&!canUnlink(e.link,e.column)));
+    const warnings=remove.filter(e=>e.category!=='candidate');
+    const rootPossible=parentType!=='account-linked'&&!incomplete&&unresolved.length===0;
+    return {remove,unlink,unresolved,warnings,incomplete,
+      accountLinked:parentType==='account-linked',rootPossible,
+      deleteParent:!!parentSelected&&rootPossible};
+  }
+  const categoryText={candidate:'Candidato',manual:'Da verificare / scollegare',protected:'Storico o verifiche: attenzione'};
   function open({kind,id,client,actorId,modal,closeModal,getActorId,openRecord}){
     if(!specs[kind]||!client||!actorId)return;
-    const spec=specs[kind],selected=new Set();
+    const spec=specs[kind],selected=new Set(),decisions=new Map();
     let info=null,stage=0,wantParent=false,locked=false,inspected=null;
     const overlay=modal('Gestione eliminazione · '+spec.title,
       '<div class="admin-delete-v24"><div class="admin-delete-steps">1. Selezione → 2. Riepilogo → 3. Conferma server</div>'+
@@ -125,39 +157,50 @@
     overlay.querySelector('[data-plan-close]').onclick=closeModal;
     const alive=()=>overlay.isConnected && getActorId()===actorId;
     function showSelection(){
-      const p=plan(info.groups,selected,wantParent,info.parentType);
-      if(!p.parentReady)wantParent=false;
-      const list=info.groups.map(g=>{
-        const warning=g.error?'Controllo non riuscito: '+g.error:g.truncated?'Elenco incompleto: selezione bloccata.':'';
+      const effect=intentPlan(info.groups,decisions,wantParent,info.parentType);
+      if(!effect.rootPossible)wantParent=false;
+      const groups=info.groups.map(g=>{
+        const warning=g.error?'Verifica non riuscita: '+g.error:g.truncated?'Record non completamente leggibili: controllo da completare.':'';
+        const canDetach=canUnlink(g.table,g.column);
         return '<section class="admin-delete-group"><header><h3>'+esc(g.label)+'</h3><span>'+
           (g.count==null?'?':esc(g.count))+' record</span></header>'+
           (warning?'<p class="admin-delete-caution">'+esc(warning)+'</p>':'')+
-          (g.entries.length?'<div class="admin-delete-entries">'+g.entries.map(item=>{
-            const check=item.category==='candidate'&&!g.truncated&&!g.error;
-            return '<label class="admin-delete-entry"><input type="checkbox" data-plan-item="'+esc(item.key)+'"'+
-              (selected.has(item.key)&&check?' checked':'')+(check?'':' disabled')+'>'+
-              '<span><strong>'+esc(item.label)+'</strong><small>'+esc(item.source)+'</small></span>'+
-              '<em data-kind="'+esc(item.category)+'">'+esc(categoryText[item.category])+'</em>'+ 
-              '</label><button type="button" class="admin-delete-detail-trigger" data-plan-inspect="'+esc(item.key)+'" aria-label="Apri dettagli: '+esc(item.label)+'">Dettagli / gestisci →</button>';
-          }).join('')+'</div>':'<p class="admin-delete-empty">Nessun elemento collegato.</p>')+
-          '</section>';
+          (cascadeWarnings[g.table]?'<p class="admin-delete-impact">'+esc(cascadeWarnings[g.table])+'</p>':'')+
+          (g.entries.length?'<div class="admin-delete-entries">'+g.entries.map(e=>{
+            const action=decisions.get(e.key)||'keep';
+            return '<div class="admin-delete-decision"><div class="admin-delete-entry">'+
+              '<span><strong>'+esc(e.label)+'</strong><small>'+esc(e.source)+'</small></span>'+
+              '<em data-kind="'+esc(e.category)+'">'+esc(categoryText[e.category])+'</em></div>'+
+              '<label class="admin-delete-choice">Azione desiderata'+
+              '<select data-plan-choice="'+esc(e.key)+'" aria-label="Azione per '+esc(e.label)+'">'+
+              '<option value="keep"'+(action==='keep'?' selected':'')+'>Conserva</option>'+
+              '<option value="delete"'+(action==='delete'?' selected':'')+'>Elimina</option>'+
+              (canDetach?'<option value="unlink"'+(action==='unlink'?' selected':'')+'>Scollega (conserva il record)</option>':'')+
+              '</select></label><button type="button" class="admin-delete-detail-trigger" data-plan-inspect="'+
+              esc(e.key)+'">Apri / modifica / gestisci →</button></div>';
+          }).join('')+'</div>':'<p class="admin-delete-empty">Nessun collegamento diretto.</p>')+'</section>';
       }).join('');
-      holder.innerHTML='<h3>Passaggio 1 · Scegli le voci</h3>'+
-        '<p>Puoi selezionare singoli candidati o tutti quelli consentiti. I dati formativi e i collegamenti non verificati restano protetti.</p>'+
-        '<div class="admin-delete-toolbar"><button data-plan-all type="button">Seleziona tutti i candidati</button>'+
-        '<button data-plan-none type="button">Deseleziona</button></div>'+
-        list+
+      holder.innerHTML='<h3>1 · Scegli l’azione per ogni dipendenza</h3>'+
+        '<p>La decisione spetta all’amministratore, per qualunque corso. Le etichette di rischio non impediscono di pianificare «Elimina»: segnalano gli elementi indiretti da esaminare.</p>'+
+        '<div class="admin-delete-toolbar"><button type="button" data-plan-all>Imposta Elimina per tutte le voci</button>'+
+        '<button type="button" data-plan-none>Imposta Conserva per tutte</button></div>'+groups+
         '<div class="admin-delete-parent"><label><input type="checkbox" data-plan-parent'+
-          (p.parentReady?'':' disabled')+(wantParent&&p.parentReady?' checked':'')+
-          '> Includi anche '+esc(spec.title)+' principale</label>'+
-          '<small>'+(p.parentReady?'Nessun blocco rilevato nella verifica preliminare.':'Prima occorre risolvere le dipendenze o completare le verifiche.')+'</small></div>'+
-        '<p class="admin-delete-totals">Selezionati: <strong>'+p.selectedCount+'</strong> · Blocchi: <strong>'+
-        p.blockers+'</strong> · Verifiche incomplete: <strong>'+(p.incomplete?'Sì':'No')+'</strong></p>'+
-        '<p class="admin-delete-caution">Questi esiti sono indicativi: letture limitate da RLS, dati concorrenti o ulteriori dipendenze possono impedire la cancellazione. La selezione non modifica il database.</p>'+
+        (effect.rootPossible?'':' disabled')+(wantParent&&effect.rootPossible?' checked':'')+
+        '> Includi anche '+esc(spec.title)+' principale</label>'+
+        '<small>'+(effect.accountLinked?'Prima va gestito anche l’account collegato.':
+         effect.incomplete?'Esistono controlli incompleti.':
+         effect.rootPossible?'Tutte le dipendenze visibili hanno un’azione che permetterebbe la rimozione.':
+         'Per rimuovere il record principale devi scegliere cosa eliminare o scollegare per ogni dipendenza.')+
+        '</small></div>'+
+        '<p class="admin-delete-totals">Da eliminare: '+effect.remove.length+
+        ' · Da scollegare: '+effect.unlink.length+
+        ' · Da risolvere: '+effect.unresolved.length+
+        ' · Elementi delicati: '+effect.warnings.length+'</p>'+
+        '<p class="admin-delete-caution">La scelta non effettua nessuna operazione. Prima di una cancellazione reale saranno necessari l’elenco completo degli effetti a cascata, i controlli del server e una conferma esplicita.</p>'+
         '<div class="admin-delete-actions"><button type="button" data-plan-close>Chiudi</button>'+
-        '<button type="button" data-plan-next'+((p.selectedCount||wantParent&&p.parentReady)?'':' disabled')+'>Riepilogo selezione →</button></div>';
+        '<button type="button" data-plan-next'+((effect.remove.length||effect.unlink.length||wantParent&&effect.rootPossible)?'':' disabled')+
+        '>Riepilogo delle scelte →</button></div>';
     }
-
     function showDetails(){
       if(!inspected){stage=0;showSelection();return;}
       const action=managementAction(inspected.source);
@@ -181,18 +224,20 @@
       holder.querySelector('h3')?.focus();
     }
     function showReview(){
-      const p=plan(info.groups,selected,wantParent,info.parentType);
-      holder.innerHTML='<h3>Passaggio 2 · Riepilogo simulato</h3>'+
-        '<p><strong>'+p.selectedCount+'</strong> voci selezionate per la possibile eliminazione.</p>'+
-        (p.choices.length?'<ul class="admin-delete-review">'+p.choices.map(x=>
-          '<li>'+esc(x.label)+' <small>('+esc(x.source)+')</small></li>').join('')+'</ul>':
-          '<p>Nessun record secondario selezionato.</p>')+
-        '<p>Record principale: <strong>'+(p.deleteParent?'Incluso':'Conservato')+'</strong></p>'+
-        '<p>Elementi protetti o da verificare: <strong>'+p.blockers+'</strong>. Controlli incompleti: '+
-        (p.incomplete?'sì':'no')+'.</p>'+
-        '<div class="admin-delete-caution"><strong>Passaggio 3 non abilitato:</strong> il server non espone ancora una transazione autorizzata e auditata per questa selezione. Non verranno eliminati record.</div>'+
-        '<div class="admin-delete-actions"><button type="button" data-plan-close>Chiudi</button>'+
-        '<button type="button" data-plan-back>← Modifica selezione</button>'+
+      const effect=intentPlan(info.groups,decisions,wantParent,info.parentType);
+      const rows=effect.remove.map(e=>({...e,action:'Elimina'}))
+        .concat(effect.unlink.map(e=>({...e,action:'Scollega'})));
+      holder.innerHTML='<h3>2 · Riepilogo dell’intervento</h3>'+
+        '<p>Eliminazioni richieste: <strong>'+effect.remove.length+'</strong> · Scollegamenti richiesti: <strong>'+
+        effect.unlink.length+'</strong> · Da risolvere: <strong>'+effect.unresolved.length+'</strong></p>'+
+        '<ul class="admin-delete-review">'+rows.map(e=>
+          '<li><strong>'+esc(e.action)+'</strong> · '+esc(e.label)+' <small>('+esc(e.source)+')</small></li>').join('')+'</ul>'+
+        '<p>Record principale: <strong>'+(effect.deleteParent?'Incluso nel piano':'Conservato')+'</strong></p>'+
+        '<p>Riferimenti sensibili nella selezione: '+effect.warnings.length+
+        '. Elenco incompleto: '+(effect.incomplete?'sì':'no')+'.</p>'+
+        '<div class="admin-delete-caution"><strong>Operazione finale non attiva.</strong> Il riepilogo è indicativo e non calcola ancora tutti gli effetti indiretti. L’esecuzione dovrà mostrare tali effetti, chiedere una conferma esplicita ed essere effettuata in una transazione server con audit.</div>'+
+        '<div class="admin-delete-actions"><button type="button" data-plan-back>← Modifica scelte</button>'+
+        '<button type="button" data-plan-close>Chiudi</button>'+
         '<button type="button" disabled aria-disabled="true">Conferma eliminazione (non disponibile)</button></div>';
     }
     function redraw(){if(!alive()||!info||locked)return;if(stage===0)showSelection();else if(stage===1)showReview();else showDetails();}
@@ -214,24 +259,28 @@
         return;
       }
       if(e.target.closest('[data-plan-all]')){
-        info.groups.forEach(g=>{if(!g.truncated&&!g.error)g.entries.forEach(x=>{if(x.category==='candidate')selected.add(x.key);});});
-        redraw();
-      }else if(e.target.closest('[data-plan-none]')){selected.clear();wantParent=false;redraw();}
+        info.groups.forEach(g=>g.entries.forEach(x=>decisions.set(x.key,'delete')));
+        wantParent=false;redraw();
+      }else if(e.target.closest('[data-plan-none]')){decisions.clear();wantParent=false;redraw();}
       else if(e.target.closest('[data-plan-next]')){stage=1;redraw();}
       else if(e.target.closest('[data-plan-back]')){stage=0;redraw();}
     });
     overlay.addEventListener('change',e=>{
       if(!info||locked)return;
-      const item=e.target.closest('[data-plan-item]');
-      if(item){
-        const key=item.dataset.planItem;
-        const eligible=info.groups.some(g=>!g.truncated&&!g.error&&g.entries.some(x=>x.key===key&&x.category==='candidate'));
-        if(eligible){if(item.checked)selected.add(key);else selected.delete(key);}
-        redraw();
+      const choice=e.target.closest('[data-plan-choice]');
+      if(choice){
+        const key=choice.dataset.planChoice;
+        const group=info.groups.find(g=>g.entries.some(x=>x.key===key));
+        if(group){
+          if(choice.value==='delete')decisions.set(key,'delete');
+          else if(choice.value==='unlink'&&canUnlink(group.table,group.column))decisions.set(key,'unlink');
+          else decisions.delete(key);
+        }
+        wantParent=false;redraw();return;
       }
       if(e.target.matches('[data-plan-parent]')){
-        const p=plan(info.groups,selected,false,info.parentType);
-        wantParent=p.parentReady&&e.target.checked;redraw();
+        const effect=intentPlan(info.groups,decisions,false,info.parentType);
+        wantParent=effect.rootPossible&&e.target.checked;redraw();
       }
     });
     scan(client,kind,id).then(result=>{
@@ -244,5 +293,5 @@
         '<p>Operazione bloccata senza modifiche al database.</p>';
     });
   }
-  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,scan,classifyParent,safeDetails,managementAction};
+  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,intentPlan,canUnlink,scan,classifyParent,safeDetails,managementAction};
 })();

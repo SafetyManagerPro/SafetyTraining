@@ -37,3 +37,10 @@
 .admin-delete-field dd{margin:4px 0 0;overflow-wrap:anywhere;font-size:13px}
 .admin-table tr.admin-dependency-focus{outline:2px solid #75bdad;outline-offset:-2px}
 @media(max-width:650px){.admin-delete-detail dl{grid-template-columns:1fr}}
+
+.admin-delete-impact{font-size:12px;color:#e8cd8b;margin:6px 0}
+.admin-delete-decision{margin:5px 0;border:1px solid rgba(157,189,202,.25);border-radius:10px;padding:8px}
+.admin-delete-choice{display:flex;justify-content:space-between;gap:9px;align-items:center;padding:6px;font-size:12px;flex-wrap:wrap}
+.admin-delete-choice select{color:#edf5fa;background:#15364e;border:1px solid #8fa5b1;border-radius:8px;padding:9px;min-width:160px;max-width:100%}
+.admin-delete-decision .admin-delete-detail-trigger{margin-bottom:5px}
+@media(max-width:600px){.admin-delete-choice{flex-direction:column;align-items:stretch}.admin-delete-choice select{width:100%}}
