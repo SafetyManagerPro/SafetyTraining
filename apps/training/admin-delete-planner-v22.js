@@ -56,27 +56,63 @@
       incomplete,parentReady,deleteParent:!!withParent&&parentReady,
       choices:chosen.map(x=>({key:x.key,label:x.label,source:x.source}))};
   }
+  // Supabase: not all relations have an "id" primary key.
+  // Explicit column projection avoids fetching invitation secrets.
+  const projections=Object.freeze({
+    companies:'id,organization_id,name,active,created_at',
+    learners:'id,organization_id,company_id,auth_user_id,first_name,last_name,email,active,created_at',
+    course_editions:'id,organization_id,company_id,course_version_id,title,status,learning_mode,created_at',
+    enrollments:'id,edition_id,learner_id,status,progress_pct,active_seconds,final_score_pct,last_activity_at,started_at,completed_at,enrolled_at',
+    organization_memberships:'id,user_id,organization_id,company_id,role,active,updated_at',
+    learner_company_training_history:'id,learner_id,company_id,edition_id,enrollment_id,source_system,created_at',
+    integration_training_contexts:'source_system,external_project_id,local_company_id,local_edition_id,created_at,updated_at',
+    learner_account_invitations:'id,learner_id,email,status,auth_user_id,accepted_at,sent_count,created_at',
+    learning_events:'id,enrollment_id,event_type,occurred_at',
+    learning_progress:'enrollment_id,unit_version_id,status,active_seconds,started_at,completed_at,updated_at',
+    learning_sessions:'id,enrollment_id,started_at,ended_at,active_seconds',
+    test_attempts:'id,enrollment_id,started_at,completed_at,score_pct,passed',
+    question_attempts:'id,enrollment_id,answered_at,is_correct',
+    enrollment_requirement_evidence:'id,enrollment_id,requirement_key,status,updated_at',
+    enrollment_practice_assessments_v22:'id,enrollment_id,requirement_key,lab_key,status,updated_at'
+  });
+  function recordKey(table,row){
+    if(table==='learning_progress'){
+      if(!row.enrollment_id||!row.unit_version_id)return null;
+      return JSON.stringify([table,row.enrollment_id,row.unit_version_id]);
+    }
+    if(table==='integration_training_contexts'){
+      if(!row.source_system||!row.external_project_id)return null;
+      return JSON.stringify([table,row.source_system,row.external_project_id]);
+    }
+    return row.id?JSON.stringify([table,row.id]):null;
+  }
   function recordLabel(row,table){
+    if(table==='learning_progress')return 'Unità '+String(row.unit_version_id||'—').slice(0,14)+' · '+String(row.status||'—');
+    if(table==='integration_training_contexts')return (String(row.source_system||'—')+' · '+String(row.external_project_id||'—')).slice(0,150);
     const name=[row.first_name,row.last_name].filter(Boolean).join(' ');
-    const value=row.name||name||row.title||row.email||row.requirement_key||row.status||row.id;
+    const value=row.name||name||row.title||row.email||row.requirement_key||row.event_type||row.status||row.id;
     return String(value||'Record').slice(0,110)+(row.id?' · '+String(row.id).slice(0,8):'');
   }
   async function scan(client,kind,id){
     const spec=specs[kind];if(!spec||!id)throw Error('Elemento non valido.');
-    const main=await client.from(spec.table).select('*').eq('id',id).maybeSingle();
+    const main=await client.from(spec.table).select(projections[spec.table]).eq('id',id).maybeSingle();
     if(main.error)throw main.error;
     if(!main.data)throw Error('Elemento non trovato o non autorizzato.');
     const groups=await Promise.all(spec.links.map(async ([label,table,column,policy])=>{
-      const response=await client.from(table).select('*',{count:'exact'}).eq(column,id).limit(MAX_ROWS+1);
-      if(response.error)return {label,table,column,entries:[],error:response.error.message,truncated:false,count:null};
+      const columns=projections[table];
+      if(!columns)return {label,table,column,entries:[],error:'Schema non configurato',truncated:true,count:null};
+      const response=await client.from(table).select(columns,{count:'exact'}).eq(column,id).limit(MAX_ROWS+1);
+      if(response.error)return {label,table,column,entries:[],error:response.error.message,truncated:true,count:null};
       const found=response.data||[],total=response.count;
-      const truncated=found.length>MAX_ROWS||total==null||total>MAX_ROWS;
-      const entries=found.slice(0,MAX_ROWS).map(row=>({
-        key:table+':'+row.id,source:table,id:row.id,
-        label:recordLabel(row,table),category:truncated?'manual':classify(policy,row),
-        details:safeDetails(row),learnerId:row.learner_id||null
-      }));
-      return {label,table,column,entries,error:null,truncated,count:total};
+      const badKey=found.some(row=>!recordKey(table,row));
+      const truncated=found.length>MAX_ROWS||total==null||total>MAX_ROWS||badKey;
+      const entries=found.slice(0,MAX_ROWS).flatMap(row=>{
+        const key=recordKey(table,row);
+        return key?[{key,source:table,id:row.id||null,
+          label:recordLabel(row,table),category:truncated?'manual':classify(policy,row),
+          details:safeDetails(row),learnerId:row.learner_id||null}]:[];
+      });
+      return {label,table,column,entries,error:badKey?'Identificativo composto incompleto':null,truncated,count:total};
     }));
     return {kind,id,spec,main:main.data,groups,parentType:classifyParent(kind,main.data)};
   }
@@ -85,6 +121,10 @@
      Never expose invitation hashes, credentials, internal metadata or raw JSON. */
   const detailFields=Object.freeze([
     ['id','Identificativo'],['name','Nome'],['title','Titolo'],
+    ['unit_version_id','Versione unità'],['external_project_id','Progetto esterno'],
+    ['source_system','Sistema origine'],['local_company_id','Azienda locale'],
+    ['local_edition_id','Edizione locale'],['event_type','Tipo evento'],
+    ['occurred_at','Data evento'],['role','Ruolo'],
     ['first_name','Nome'],['last_name','Cognome'],['email','Email'],
     ['status','Stato'],['active','Attivo'],['company_id','Azienda'],
     ['organization_id','Organizzazione'],['learner_id','Corsista'],
@@ -182,7 +222,7 @@
       }).join('');
       holder.innerHTML='<h3>1 · Scegli l’azione per ogni dipendenza</h3>'+
         '<p>La decisione spetta all’amministratore, per qualunque corso. Le etichette di rischio non impediscono di pianificare «Elimina»: segnalano gli elementi indiretti da esaminare.</p>'+
-        '<div class="admin-delete-toolbar"><button type="button" data-plan-all>Imposta Elimina per tutte le voci</button>'+
+        '<div class="admin-delete-toolbar"><button type="button" data-plan-all>Imposta Elimina per tutte le voci caricate</button>'+
         '<button type="button" data-plan-none>Imposta Conserva per tutte</button></div>'+groups+
         '<div class="admin-delete-parent"><label><input type="checkbox" data-plan-parent'+
         (effect.rootPossible?'':' disabled')+(wantParent&&effect.rootPossible?' checked':'')+
@@ -207,7 +247,7 @@
       const rows=(inspected.details||[]).map(x=>
         '<div class="admin-delete-field"><dt>'+esc(x.label)+'</dt><dd>'+esc(x.value)+'</dd></div>').join('');
       const explanation=inspected.category==='protected'?
-        'Questa voce contiene o può rappresentare dati da conservare. Consultala senza rimuovere le evidenze.' :
+        'Questa voce contiene attività o storico: puoi proporne l’eliminazione, ma occorre visualizzare tutti gli effetti indiretti prima della conferma.' :
         inspected.category==='manual'?
         'Il collegamento richiede una verifica. Apri la scheda per modificarlo o scollegarlo con la procedura ordinaria, se prevista.' :
         'La voce è un possibile candidato, non un’autorizzazione alla cancellazione. La verifica definitiva resta server-side.';
@@ -293,5 +333,5 @@
         '<p>Operazione bloccata senza modifiche al database.</p>';
     });
   }
-  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,intentPlan,canUnlink,scan,classifyParent,safeDetails,managementAction};
+  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,intentPlan,canUnlink,scan,classifyParent,safeDetails,managementAction,recordKey,projections};
 })();
