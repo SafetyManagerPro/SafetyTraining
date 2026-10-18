@@ -41,7 +41,7 @@
     return 'manual';
   }
   function classifyParent(kind,record){
-    if(kind==='learner'&&record.auth_user_id)return 'protected';
+    if(kind==='learner'&&record.auth_user_id)return 'account-linked';
     if(kind==='enrollment'&&!unusedEnrollment(record))return 'protected';
     return 'candidate';
   }
