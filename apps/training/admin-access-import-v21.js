@@ -221,6 +221,6 @@
     document.addEventListener('click',e=>{const action=e.target.closest('[data-action]')?.dataset.action;if(action==='invite-learner'){e.preventDefault();e.stopImmediatePropagation();const id=e.target.closest('[data-action]').dataset.id;openInvite(id).catch(fail);}else if(action==='bulk-submit'){e.preventDefault();e.stopImmediatePropagation();interceptLegacyBulk();}},true);
   }
 
-  window.SAFETY_ADMIN_ACCESS_IMPORT_V21={openInvite,renderExternal,version:'21.3'};
+  window.SAFETY_ADMIN_ACCESS_IMPORT_V21={openInvite,openCompany,renderExternal,version:'21.3'};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

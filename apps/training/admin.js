@@ -14,6 +14,7 @@
 
   const TABS = [
     ['dashboard','▦','Dashboard'],
+    ['wizard','✨','Avvia percorso'],
     ['organizations','🏢','Organizzazioni'],
     ['companies','🏭','Aziende'],
     ['learners','👥','Corsisti'],
@@ -182,6 +183,7 @@
     ]);
     current(seq, `
       <div class="admin-stats">${stat(companies,'Aziende attive')}${stat(learners,'Corsisti attivi')}${stat(courses,'Corsi attivi')}${stat(openEditions,'Edizioni aperte')}${stat(inProgress,'Percorsi in corso')}${stat(pendingInvites,'Accessi da gestire')}</div>
+      <div class="admin-guided-cta"><div><h2>Nuovo percorso formativo</h2><p>Da azienda e corso fino a iscrizioni e inviti, senza cambiare sezione.</p></div><button type="button" data-jump="wizard">+ Avvia percorso guidato →</button></div>
       <div class="admin-grid two">
         <section class="admin-card"><div class="admin-card-head"><div><h2>Flusso operativo</h2><p>Dall’anagrafica all’erogazione.</p></div></div><div class="admin-step-list"><button data-jump="companies"><b>1</b><span>Azienda<small>Anagrafica, P.IVA e ATECO</small></span></button><button data-jump="learners"><b>2</b><span>Corsisti<small>Dati, account e inviti</small></span></button><button data-jump="courses"><b>3</b><span>Corsi<small>Catalogo e versioni</small></span></button><button data-jump="editions"><b>4</b><span>Edizioni<small>Versione approvata e disponibilità</small></span></button><button data-jump="enrollments"><b>5</b><span>Iscrizioni<small>Assegnazione, accessi e avanzamento</small></span></button></div></section>
         <section class="admin-card"><div class="admin-card-head"><div><h2>Stato piattaforma</h2><p>Numeri amministrativi correnti.</p></div></div><div class="admin-summary-list"><div><span>Edizioni complessive</span><strong>${editions}</strong></div><div><span>Iscrizioni complessive</span><strong>${enrollments}</strong></div><div><span>Organizzazione</span><strong>${esc(state.multiOrg ? `${state.orgs.filter(x=>x.active).length} attive` : (state.orgs.find(x=>x.id===state.defaultOrgId)?.name || '—'))}</strong></div><div><span>Pubblicazione contenuti</span><strong>Controllata</strong></div></div><p class="admin-note">La console non pubblica automaticamente Learning Unit o nuove versioni corso: le operazioni editoriali restano soggette a revisione.</p></section>
@@ -340,7 +342,11 @@
     current(seq, `<section class="admin-card"><div class="admin-card-head"><div><h2>Eventi recenti</h2><p>Ultimi 200 eventi di apprendimento disponibili.</p></div></div>${searchBox('activity','Tipo evento…')}${table(['Quando','Evento','Corsista','Percorso','Tempo accreditato'],rows)}</section>`);
   }
 
-  const RENDERERS={dashboard,organizations,companies,learners,courses,editions,enrollments,activity};
+  async function wizard(seq){
+    setHeader('Avvia percorso','Iscrivi uno o più corsisti con una procedura guidata');
+    await window.SAFETY_ADMIN_GUIDED_FLOW_V22?.render?.({isCurrent:()=>state.open&&state.admin&&state.tab==='wizard'&&state.renderSeq===seq});
+  }
+  const RENDERERS={dashboard,wizard,organizations,companies,learners,courses,editions,enrollments,activity};
 
   function modal(title, body, {wide=false}={}) {
     closeModal(); const ov=document.createElement('div'); ov.id='adminModal'; ov.className='admin-modal-overlay';
