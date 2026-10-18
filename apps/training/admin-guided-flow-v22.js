@@ -1,4 +1,4 @@
-/* SafetyTraining v22.3 — additive guided enrollment. All mutations use existing audited RPCs. */
+/* SafetyTraining v22.3.1 — hardened additive guided enrollment and contextual help. */
 (() => {
   'use strict';
   const db=()=>window.SAFETY_CLOUD?.state?.client;
@@ -8,7 +8,8 @@
   const normalizeCf=v=>norm(v).replace(/[^a-z0-9]/g,'');
   const steps=['Azienda','Corso ed edizione','Corsisti','Riepilogo'];
   const empty=()=>({step:0,organizationId:'',companyId:'',companyMode:'existing',companyName:'',vat:'',ateco:'',fiscal:'',editionMode:'existing',editionId:'',versionId:'',editionTitle:'',learningMode:'elearning_internal',availableFrom:'',availableUntil:'',selectedIds:[],newLearners:[],sendInvites:true,result:null});
-  const s={data:empty(),userId:null,records:null,busy:false,rendering:0,serial:0,host:null,notice:''};
+  const s={data:empty(),userId:null,records:null,busy:false,rendering:0,serial:0,host:null,notice:'',helpOpen:false,isCurrent:null};
+  const wizardVisible=()=>!s.isCurrent||s.isCurrent();
   const ACTIVE=()=>user()?.id&&user().id===s.userId;
   function readyVersions(courses,versions){
     const cm=new Map(courses.map(c=>[c.id,c]));
@@ -29,7 +30,72 @@
     ))||null;
   }
   function draftSafe(st){return {organizationId:st.organizationId,companyId:st.companyId,editionId:st.editionId,selectedIds:st.selectedIds.slice(0,500)};}
-  window.SAFETY_GUIDED_FLOW_RULES_V22={readyVersions,eligibleEditions,eligibleLearners,duplicateLearner,draftSafe};
+  // All dependent choices become invalid when the organization/company changes.
+  function changeScope(st,field,value){
+    if(field!=='organizationId'&&field!=='companyId')return false;
+    const mode=value==='new'?'new':'existing',chosen=value==='new'?'':value;
+    if(field==='organizationId'){
+      if(st.organizationId===value)return true;
+      st.organizationId=value;st.companyId='';st.companyMode='existing';
+      st.companyName='';st.vat='';st.fiscal='';st.ateco='';
+    }else{
+      if(st.companyId===chosen&&st.companyMode===mode)return true;
+      st.companyId=chosen;st.companyMode=mode;
+    }
+    st.editionId='';st.editionMode='existing';st.versionId='';st.editionTitle='';
+    st.selectedIds=[];st.newLearners=[];st.result=null;
+    return true;
+  }
+  function validateRoster(st,records){
+    const valid=new Set(eligibleLearners(records.learners,st.companyId,st.organizationId).map(x=>x.id));
+    if(st.selectedIds.some(id=>!valid.has(id)))throw new Error('Uno dei corsisti selezionati non appartiene all’azienda.');
+    if(!st.selectedIds.length&&!st.newLearners.length)throw new Error('Seleziona o aggiungi almeno un corsista.');
+    const usedCf=new Set(),usedEmail=new Set();
+    for(const person of st.newLearners){
+      if(!norm(person.first_name)||!norm(person.last_name))throw new Error('Nome e cognome sono obbligatori per i nuovi corsisti.');
+      const dup=duplicateLearner(person,records.learners,st.organizationId);
+      if(dup&&dup.id!==person.createdId)throw new Error('Anagrafica probabilmente già presente ('+(dup.first_name||'')+' '+(dup.last_name||'')+'). Riutilizzala dalla sezione Corsisti oppure verifica l’azienda.');
+      const cf=normalizeCf(person.fiscal_code),email=norm(person.email);
+      if((cf&&usedCf.has(cf))||(email&&usedEmail.has(email)))throw new Error('Hai inserito due nuovi corsisti con email o codice fiscale uguale.');
+      if(cf)usedCf.add(cf);
+      if(email)usedEmail.add(email);
+    }
+    return true;
+  }
+  // Restore only references still visible in the same authorized organization/company.
+  function restoredDraft(saved,records){
+    if(!saved||!records.companies.some(c=>c.id===saved.companyId&&c.organization_id===saved.organizationId))return null;
+    const validVersions=new Set(readyVersions(records.courses,records.versions).map(v=>v.id));
+    const editions=eligibleEditions(records.editions,saved.companyId,saved.organizationId,validVersions);
+    const roster=new Set(eligibleLearners(records.learners,saved.companyId,saved.organizationId).map(l=>l.id));
+    return {organizationId:saved.organizationId,companyId:saved.companyId,
+      editionId:editions.some(e=>e.id===saved.editionId)?saved.editionId:'',
+      selectedIds:Array.isArray(saved.selectedIds)?[...new Set(saved.selectedIds.filter(id=>typeof id==='string'&&roster.has(id)))].slice(0,500):[]};
+  }
+  const GUIDES=[
+    {title:'Guida · Azienda',items:[
+      'Seleziona prima l’organizzazione a cui appartiene l’azienda.',
+      'Scegli un’azienda esistente; se non è presente, scegli «+ Nuova azienda» e compila la ragione sociale.',
+      '«Crea azienda e continua» salva subito la nuova azienda. «Ricomincia» non elimina dati già salvati.']},
+    {title:'Guida · Corso ed edizione',items:[
+      'Un’edizione identifica una specifica erogazione del corso a cui iscrivere i corsisti.',
+      'Preferisci un’edizione aperta compatibile; in alternativa scegli «+ Crea nuova edizione» e una versione approvata del corso.',
+      'La nuova edizione viene registrata appena premi «Crea edizione e continua». I 27 corsi congelati non sono selezionabili.']},
+    {title:'Guida · Corsisti',items:[
+      'Seleziona uno o più corsisti già associati all’azienda, oppure premi «+ Aggiungi corsista».',
+      'Per ogni nuova anagrafica servono nome e cognome; email e codice fiscale aiutano a rilevare duplicati. L’email è necessaria per gli inviti email.',
+      'Le nuove anagrafiche vengono salvate durante la conferma finale. Se una è già stata salvata dopo un tentativo parziale, non viene creata nuovamente.']},
+    {title:'Guida · Riepilogo',items:[
+      'Controlla azienda, corso, edizione e elenco corsisti prima di confermare.',
+      'Se lasci attiva l’opzione email, il sistema proverà a invitare i corsisti senza account collegato.',
+      'Le iscrizioni restano valide anche se qualche invito non riesce. In caso di errore, verifica le operazioni prima di ripetere.']},
+    {title:'Guida · Risultato',items:[
+      'Il riepilogo distingue nuove iscrizioni, iscrizioni già presenti e inviti email riusciti.',
+      'Per inviti falliti puoi riprovare; se manca l’email aggiorna prima l’anagrafica in Corsisti. In caso di esito incerto controlla Accessi & import.',
+      'I pulsanti finali aprono le sezioni esistenti. Il percorso non sostituisce registri cartacei, firme o verifiche.']}
+  ];
+  const helpFor=step=>GUIDES[step]||GUIDES[0];
+  window.SAFETY_GUIDED_FLOW_RULES_V22={readyVersions,eligibleEditions,eligibleLearners,duplicateLearner,draftSafe,changeScope,validateRoster,restoredDraft,helpFor};
   const draftKey=()=>user()?.id?'safety-training-guided-flow-'+user().id:null;
   function toast(msg,type=''){
     s.notice=msg;
@@ -65,8 +131,11 @@
   const info=(message)=>'<p class="gw-note">'+esc(message)+'</p>';
   const btn=(title,action,extra='')=>'<button type="button" data-gw="'+action+'" '+extra+'>'+esc(title)+'</button>';
   function shell(){
+    if(!s.host||!wizardVisible())return; // An in-flight request must not replace another admin tab.
     const tabs=steps.map((label,i)=>'<span class="'+(s.data.step===i?'is-active':s.data.step>i?'is-done':'')+'"><b>'+(i+1)+'</b>'+esc(label)+'</span>').join('');
-    s.host.innerHTML='<section class="gw-shell"><div class="gw-top"><h2>Avvia un percorso formativo</h2><p>Una sola procedura per azienda, corso, corsisti e accessi. Le sezioni amministrative avanzate restano disponibili.</p></div><nav class="gw-steps" aria-label="Passaggi di iscrizione">'+tabs+'</nav><div id="gwNotice" class="gw-notice" role="status" aria-live="polite">'+esc(s.notice)+'</div><div id="gwStage"></div><footer class="gw-footer">'+btn('Salva selezioni come bozza','draft')+btn('Ricomincia','reset')+'</footer></section>';
+    const guide=helpFor(s.data.step);
+    const help='<section class="gw-help" id="gwHelp" aria-labelledby="gwHelpTitle" '+(s.helpOpen?'':'hidden')+'><h3 id="gwHelpTitle" tabindex="-1">'+esc(guide.title)+'</h3><ol>'+guide.items.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ol>'+btn('Chiudi guida','help')+'</section>';
+    s.host.innerHTML='<section class="gw-shell"><div class="gw-top"><div><h2>Avvia un percorso formativo</h2><p>Una sola procedura per azienda, corso, corsisti e accessi. Le sezioni amministrative avanzate restano disponibili.</p></div><button type="button" class="gw-help-trigger" data-gw="help" aria-label="Guida per questo passaggio" aria-controls="gwHelp" aria-expanded="'+s.helpOpen+'" title="Apri o chiudi la guida">?</button></div>'+help+'<nav class="gw-steps" aria-label="Passaggi di iscrizione">'+tabs+'</nav><div id="gwNotice" class="gw-notice" role="status" aria-live="polite">'+esc(s.notice)+'</div><div id="gwStage"></div><footer class="gw-footer">'+btn('Salva selezioni come bozza','draft')+btn('Ricomincia','reset')+'</footer></section>';
     draw();
   }
   function draw(){
@@ -117,8 +186,8 @@
   function stepLearners(r,st){
     const learners=eligibleLearners(r.learners,st.companyId,st.organizationId), selected=new Set(st.selectedIds);
     const cards=learners.map(l=>'<label class="gw-person"><input type="checkbox" data-existing="'+esc(l.id)+'" '+(selected.has(l.id)?'checked':'')+'><span><strong>'+esc((l.first_name||'')+' '+(l.last_name||''))+'</strong><small>'+esc(l.email||'Email non presente')+(l.auth_user_id?' · account attivo':' · da invitare')+'</small></span></label>').join('');
-    const newRows=st.newLearners.map((l,i)=>'<div class="gw-new"><div class="gw-new-head"><strong>Nuovo corsista '+(i+1)+'</strong><button type="button" data-remove="'+esc(l.localId)+'">Rimuovi</button></div><div class="gw-grid">'+
-      ['first_name','last_name','email','fiscal_code','job_title'].map((field,j)=>'<label>'+['Nome *','Cognome *','Email','Codice fiscale','Mansione'][j]+'<input data-person="'+esc(l.localId)+'" data-person-field="'+field+'" '+(field==='email'?'type="email"':'')+' value="'+esc(l[field]||'')+'"></label>').join('')+'</div></div>').join('');
+    const newRows=st.newLearners.map((l,i)=>'<div class="gw-new"><div class="gw-new-head"><strong>Nuovo corsista '+(i+1)+'</strong>'+(l.createdId?'<span class="gw-saved">Anagrafica già salvata</span>':'<button type="button" data-remove="'+esc(l.localId)+'">Rimuovi</button>')+'</div><div class="gw-grid">'+
+      ['first_name','last_name','email','fiscal_code','job_title'].map((field,j)=>'<label>'+['Nome *','Cognome *','Email','Codice fiscale','Mansione'][j]+'<input data-person="'+esc(l.localId)+'" data-person-field="'+field+'" '+(field==='email'?'type="email"':'')+' value="'+esc(l[field]||'')+'" '+(l.createdId?'disabled':'')+'></label>').join('')+'</div></div>').join('');
     return '<div class="gw-panel"><h3>3. Scegli i corsisti</h3><p>Seleziona persone già presenti o aggiungi nuovi corsisti. È possibile iscrivere anche più persone insieme.</p>'+
       '<div class="gw-sub"><div class="gw-sub-head"><h4>Corsisti aziendali ('+learners.length+')</h4>'+btn('Seleziona tutti','select-all')+'</div>'+
       '<div class="gw-persons">'+(cards||'<p>Nessun corsista presente in questa azienda.</p>')+'</div></div>'+
@@ -141,19 +210,26 @@
       '<div class="gw-actions">'+btn('← Indietro','back')+'<button type="button" class="gw-primary" data-gw="submit">Conferma iscrizioni'+(st.sendInvites?' e invia email':'')+'</button></div></div>';
   }
   function stepResult(st){
-    const r=st.result||{},fail=Array.isArray(r.failedIds)?r.failedIds.length:0;
+    const r=st.result||{},fail=Array.isArray(r.failedIds)?r.failedIds.length:0,missing=Array.isArray(r.missingEmailIds)?r.missingEmailIds.length:0;
     return '<div class="gw-panel"><h3>Risultato iscrizioni</h3>'+
       '<div class="gw-summary"><p><b>'+Number(r.inserted||0)+'</b> nuove iscrizioni create</p><p><b>'+Number(r.skipped_existing||0)+'</b> iscrizioni già esistenti, non duplicate</p>'+
-      '<p><b>'+Number(r.invited||0)+'</b> inviti email riusciti</p><p><b>'+fail+'</b> inviti da verificare</p></div>'+
-      (fail?'<p class="gw-warning">Alcuni inviti non sono riusciti. Le iscrizioni restano valide; puoi riprovare senza duplicarle.</p>'+btn('Riprova inviti non riusciti','retry-invites'):'')+
+      '<p><b>'+Number(r.invited||0)+'</b> inviti email riusciti</p><p><b>'+fail+'</b> inviti da verificare</p><p><b>'+missing+'</b> corsisti senza email</p></div>'+
+      (r.inviteNotice?'<p class="gw-warning">'+esc(r.inviteNotice)+'</p>':'')+
+      (fail?'<p class="gw-warning">Le iscrizioni restano valide. Un invito può essere già arrivato anche se non è stato possibile verificarlo: controlla Accessi & import prima di riprovare.</p>'+btn('Riprova inviti da verificare','retry-invites'):'')+
+      (missing?'<p class="gw-warning">Per i corsisti senza email, completa i recapiti in Corsisti e usa Accessi & import.</p>':'')+
       '<div class="gw-actions">'+btn('Apri Iscrizioni','go-enrollments')+btn('Accessi & import / SMS / WhatsApp','go-access')+
       '<button class="gw-primary" type="button" data-gw="reset">Nuovo percorso →</button></div></div>';
   }
   function rememberInput(target){
+    if(s.busy)return; // Do not allow scope changes while mutations are in flight.
     const field=target?.dataset?.field;
     if(field){
-      if(field==='organizationId'){s.data.organizationId=target.value;s.data.companyId='';s.data.companyMode='existing';s.data.editionId='';s.data.editionMode='existing';s.data.selectedIds=[];s.data.newLearners=[];draw();return;}
-      if(field==='companyId'){s.data.companyId=target.value==='new'?'':target.value;s.data.companyMode=target.value==='new'?'new':'existing';draw();return;}
+      if(field==='organizationId'||field==='companyId'){
+        const wasSaved=s.data.newLearners.some(person=>person.createdId);
+        changeScope(s.data,field,target.value);
+        s.notice=wasSaved?'Le anagrafiche già salvate restano nel database. Ricontrolla la nuova azienda.':'';
+        shell();return;
+      }
       if(field==='editionId'){s.data.editionId=target.value==='new'?'':target.value;s.data.editionMode=target.value==='new'?'new':'existing';draw();return;}
       s.data[field]=target.type==='checkbox'?target.checked:target.value;return;
     }
@@ -177,6 +253,7 @@
         const id=await rpc('admin_save_company',{p_company_id:null,p_organization_id:st.organizationId,p_name:st.companyName,p_vat_number:st.vat||null,p_fiscal_code:st.fiscal||null,p_ateco_code:st.ateco||null});
         st.companyId=id;st.companyMode='existing';await load();
       }
+      if(!s.records.companies.some(c=>c.id===st.companyId&&c.organization_id===st.organizationId))await load();
       if(!s.records.companies.some(c=>c.id===st.companyId&&c.organization_id===st.organizationId))throw new Error('Seleziona un’azienda valida.');
       st.step=1;
     } else if(st.step===1){
@@ -187,47 +264,49 @@
         const id=await rpc('admin_create_edition',{p_organization_id:st.organizationId,p_company_id:st.companyId,p_course_version_id:st.versionId,p_title:st.editionTitle||null,p_learning_mode:st.learningMode,p_status:'open',p_available_from:st.availableFrom?new Date(st.availableFrom).toISOString():null,p_available_until:st.availableUntil?new Date(st.availableUntil).toISOString():null});
         st.editionId=id;st.editionMode='existing';await load();
       }
-      const versions=new Set(readyVersions(s.records.courses,s.records.versions).map(x=>x.id));
-      const allowed=eligibleEditions(s.records.editions,st.companyId,st.organizationId,versions);
+      let versions=new Set(readyVersions(s.records.courses,s.records.versions).map(x=>x.id));
+      let allowed=eligibleEditions(s.records.editions,st.companyId,st.organizationId,versions);
+      if(!allowed.some(e=>e.id===st.editionId)){
+        await load();
+        versions=new Set(readyVersions(s.records.courses,s.records.versions).map(x=>x.id));
+        allowed=eligibleEditions(s.records.editions,st.companyId,st.organizationId,versions);
+      }
       if(!allowed.some(e=>e.id===st.editionId))throw new Error('Seleziona un’edizione aperta e compatibile.');
       st.step=2;
     } else if(st.step===2){
-      const existing=eligibleLearners(r.learners,st.companyId,st.organizationId);
-      if(st.selectedIds.some(id=>!existing.some(l=>l.id===id)))throw new Error('Uno dei corsisti selezionati non appartiene all’azienda.');
-      if(!st.selectedIds.length&&!st.newLearners.length)throw new Error('Seleziona o aggiungi almeno un corsista.');
-      const usedCf=new Set(),usedEmail=new Set();
-      for(const person of st.newLearners){
-        if(!norm(person.first_name)||!norm(person.last_name))throw new Error('Nome e cognome sono obbligatori per i nuovi corsisti.');
-        const dup=duplicateLearner(person,r.learners,st.organizationId);
-        if(dup)throw new Error('Anagrafica probabilmente già presente ('+(dup.first_name||'')+' '+(dup.last_name||'')+'). Riutilizzala dalla sezione Corsisti oppure verifica l’azienda.');
-        const cf=normalizeCf(person.fiscal_code),email=norm(person.email);
-        if(cf&&usedCf.has(cf)||email&&usedEmail.has(email))throw new Error('Hai inserito due nuovi corsisti con email o codice fiscale uguale.');
-        if(cf)usedCf.add(cf);
-        if(email)usedEmail.add(email);
-      }
+      validateRoster(st,r);
       st.step=3;
     }
     s.notice='';shell();
   }
   async function invite(ids){
-    const failed=[],sent=[];
+    const failed=[],sent=[],missingEmails=[];
     for(const id of ids){
       if(!ACTIVE())throw new Error('Sessione cambiata prima del completamento degli inviti.');
       const learner=s.records.learners.find(x=>x.id===id);
-      if(!learner||learner.auth_user_id)continue;
-      if(!learner.email){failed.push(id);continue;}
+      if(!learner){failed.push(id);continue;}
+      if(learner.auth_user_id)continue;
+      if(!learner.email){missingEmails.push(id);continue;}
       try{
         const {data,error}=await db().functions.invoke('invite-learner',{body:{learner_id:id,redirect_to:new URL('?onboarding=1',location.href).toString()}});
+        if(!ACTIVE())throw new Error('La sessione amministrativa è cambiata.');
         if(error||data?.error)throw error||new Error(data.message||data.error);
         if(data?.already_linked)continue;
         sent.push(id);
-      }catch(error){failed.push(id);console.warn('[Guided flow invite]',error?.message||error);}
+      }catch(error){
+        if(!ACTIVE())throw error;
+        failed.push(id);console.warn('[Guided flow invite]',error?.message||error);
+      }
     }
-    return {failed,sent};
+    return {failed,sent,missingEmails};
   }
   async function submit(){
     const st=s.data;
-    if(!ACTIVE())throw new Error('Sessione non valida.');
+    if(!ACTIVE()||st.step!==3)throw new Error('Sessione o passaggio non valido.');
+    const versions=new Set(readyVersions(s.records.courses,s.records.versions).map(v=>v.id));
+    if(!eligibleEditions(s.records.editions,st.companyId,st.organizationId,versions).some(e=>e.id===st.editionId))
+      throw new Error('L’edizione non è più disponibile. Ricontrolla il corso.');
+    validateRoster(st,s.records);
     const original=st.selectedIds.slice();
     for(const p of st.newLearners){
       if(!p.createdId){
@@ -238,18 +317,33 @@
     const ids=[...new Set(original)];
     if(!ids.length)throw new Error('Nessun corsista disponibile.');
     const result=await rpc('admin_bulk_enroll',{p_edition_id:st.editionId,p_learner_ids:ids,p_source:'admin_guided_flow_v22'});
-    st.result={...result,invited:0,failedIds:[]};
-    if(st.sendInvites){
-      await load();
-      const invites=await invite(ids);
-      st.result.invited=invites.sent.length;
-      st.result.failedIds=invites.failed;
-    }
+    // Persist success before any independent, fallible email operations.
+    st.result={...(result||{}),invited:0,failedIds:[],missingEmailIds:[],inviteNotice:''};
     st.step=4;
     const key=draftKey();if(key)sessionStorage.removeItem(key);
     shell();
+    if(st.sendInvites){
+      try{
+        await load();
+        const invites=await invite(ids);
+        st.result.invited=invites.sent.length;
+        st.result.failedIds=invites.failed;
+        st.result.missingEmailIds=invites.missingEmails;
+      }catch(error){
+        if(!ACTIVE())return;
+        st.result.failedIds=ids;
+        st.result.inviteNotice='Iscrizioni salvate. Impossibile verificare tutti gli inviti: controlla Accessi & import prima di riprovare.';
+        console.warn('[Guided flow refresh/invites]',error?.message||error);
+      }
+    }
+    shell();
   }
   async function action(type,target){
+    if(type==='help'){
+      s.helpOpen=!s.helpOpen;shell();
+      (s.helpOpen?s.host?.querySelector('#gwHelpTitle'):s.host?.querySelector('.gw-help-trigger'))?.focus();
+      return;
+    }
     if(s.busy)return;
     if(type==='draft'){
       const key=draftKey();if(!key)return;
@@ -279,8 +373,15 @@
       if(type==='next')await next();
       if(type==='submit')await submit();
       if(type==='retry-invites'){
-        const ids=s.data.result?.failedIds||[],inv=await invite(ids);
-        s.data.result.invited+=inv.sent.length;s.data.result.failedIds=inv.failed;shell();
+        const ids=s.data.result?.failedIds||[];
+        if(!ids.length)return;
+        await load();
+        const inv=await invite(ids);
+        s.data.result.invited+=inv.sent.length;
+        s.data.result.failedIds=inv.failed;
+        s.data.result.missingEmailIds=[...new Set((s.data.result.missingEmailIds||[]).concat(inv.missingEmails))];
+        s.data.result.inviteNotice='';
+        shell();
       }
     }catch(e){toast(e?.message||'Operazione non riuscita.','error');}
     finally{s.busy=false;if(button?.isConnected)button.disabled=false;}
@@ -289,8 +390,8 @@
     const host=document.getElementById('adminContent');
     if(!host||!db()||!user())return;
     const generation=++s.rendering,who=user().id;
-    if(s.userId!==who){s.userId=who;s.data=empty();s.records=null;s.notice='';}
-    s.host=host;
+    if(s.userId!==who){s.userId=who;s.data=empty();s.records=null;s.notice='';s.helpOpen=false;}
+    s.host=host;s.isCurrent=isCurrent||null;
     host.innerHTML='<div class="admin-loading">Preparo il percorso guidato…</div>';
     try{
       await load();
@@ -298,10 +399,9 @@
       const key=draftKey(),raw=key&&sessionStorage.getItem(key);
       if(raw&&s.data.step===0&&!s.data.companyId){
         try{const saved=JSON.parse(raw);
-          if(saved.companyId&&s.records.companies.some(x=>x.id===saved.companyId)){
-            s.data.organizationId=saved.organizationId;s.data.companyId=saved.companyId;
-            s.data.editionId=saved.editionId||'';
-            s.data.selectedIds=Array.isArray(saved.selectedIds)?saved.selectedIds.filter(x=>typeof x==='string'):[];
+          const safe=restoredDraft(saved,s.records);
+          if(safe){
+            Object.assign(s.data,safe);
             s.notice='Bozza di selezioni recuperata. Ricontrolla prima di confermare.';
           }
         }catch{sessionStorage.removeItem(key);}
@@ -309,15 +409,16 @@
       shell();
       if(!host.dataset.guidedHandlersBound){
         host.dataset.guidedHandlersBound='1';
-        host.addEventListener('input',e=>{if(!host.contains(e.target))return;rememberInput(e.target);});
-        host.addEventListener('change',e=>{if(!host.contains(e.target))return;rememberInput(e.target);});
+        host.addEventListener('input',e=>{if(!wizardVisible()||!e.target.closest('.gw-shell'))return;rememberInput(e.target);});
+        host.addEventListener('change',e=>{if(!wizardVisible()||!e.target.closest('.gw-shell'))return;rememberInput(e.target);});
         host.addEventListener('click',e=>{
+          if(!wizardVisible()||!e.target.closest('.gw-shell'))return;
           const remove=e.target.closest('[data-remove]');
-          if(remove){s.data.newLearners=s.data.newLearners.filter(x=>x.localId!==remove.dataset.remove);draw();return;}
+          if(remove){if(s.busy)return;s.data.newLearners=s.data.newLearners.filter(x=>x.localId!==remove.dataset.remove||x.createdId);draw();return;}
           const b=e.target.closest('[data-gw]');if(b)void action(b.dataset.gw,b);
         });
       }
-    }catch(e){if(generation===s.rendering)host.innerHTML='<div class="admin-error">'+esc(e.message||e)+'</div>';}
+    }catch(e){if(generation===s.rendering&&wizardVisible())host.innerHTML='<div class="admin-error">'+esc(e.message||e)+'</div>';}
   }
   window.SAFETY_ADMIN_GUIDED_FLOW_V22={render};
 })();
