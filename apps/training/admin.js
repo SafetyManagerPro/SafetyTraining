@@ -428,68 +428,12 @@
   }
 
 
-  // Delete-review v22.3.3: visibly starts the safety checks; it NEVER deletes.
-  // Each foreign-key reference is checked explicitly, including SET NULL relations.
-  const deletionSpecs = {
-    company: {label:'azienda',table:'companies',refs:[
-      ['Corsisti','learners','company_id'],['Edizioni','course_editions','company_id'],
-      ['Appartenenze','organization_memberships','company_id'],
-      ['Storico formativo','learner_company_training_history','company_id'],
-      ['Collegamenti integrazioni','integration_training_contexts','local_company_id']]},
-    learner: {label:'corsista',table:'learners',refs:[
-      ['Iscrizioni','enrollments','learner_id'],['Inviti','learner_account_invitations','learner_id'],
-      ['Storico formativo','learner_company_training_history','learner_id']]},
-    edition: {label:'edizione',table:'course_editions',refs:[
-      ['Iscrizioni','enrollments','edition_id'],
-      ['Storico formativo','learner_company_training_history','edition_id'],
-      ['Collegamenti integrazioni','integration_training_contexts','local_edition_id']]},
-    enrollment: {label:'iscrizione',table:'enrollments',refs:[
-      ['Eventi formativi','learning_events','enrollment_id'],
-      ['Progressi','learning_progress','enrollment_id'],
-      ['Sessioni','learning_sessions','enrollment_id'],
-      ['Tentativi test','test_attempts','enrollment_id'],
-      ['Risposte ai test','question_attempts','enrollment_id'],
-      ['Evidenze requisiti','enrollment_requirement_evidence','enrollment_id'],
-      ['Valutazioni pratiche','enrollment_practice_assessments_v22','enrollment_id'],
-      ['Storico formativo','learner_company_training_history','enrollment_id']]}
-  };
-  async function reviewDeletion(kind,id) {
+  // v22.4: the module builds a selective plan only. No client-side DELETE is permitted.
+  async function reviewDeletion(kind,id){
     if(!state.open||!state.admin||!user()?.id)return toast('Accesso amministrativo richiesto.','error');
-    const spec=deletionSpecs[kind];if(!spec||!id)return;
-    const actor=user().id;
-    const ov=modal('Elimina '+spec.label+' · verifica preventiva',
-      '<div id="adminDeleteCheck" role="status" aria-live="polite"><p>Verifica delle dipendenze in corso…</p></div>'+
-      '<div class="admin-note-block"><b>Attenzione:</b> l’eliminazione definitiva non è ancora abilitata. Questa procedura esamina le dipendenze senza modificare o rimuovere dati. Per record formativi già utilizzati resta disponibile revoca, disattivazione o archiviazione.</div>'+
-      '<div class="admin-form-actions"><button type="button" data-close-delete>Chiudi</button></div>');
-    ov.querySelector('[data-close-delete]').onclick=closeModal;
-    const target=ov.querySelector('#adminDeleteCheck');
-    try {
-      const client=db();
-      const {data:record,error:readError}=await client.from(spec.table).select('*').eq('id',id).maybeSingle();
-      if(readError)throw readError;
-      if(!record)throw new Error('Record non trovato o non visibile.');
-      const refs=await Promise.all(spec.refs.map(async ([label,table,column])=>{
-        const {count,error}=await client.from(table).select('id',{count:'exact',head:true}).eq(column,id);
-        return {label,count,error:error?.message||null};
-      }));
-      if(!ov.isConnected||user()?.id!==actor)return;
-      const blocked=refs.some(x=>x.error||x.count>0)||
-        kind==='learner'&&!!record.auth_user_id||
-        kind==='enrollment'&&(record.status!=='not_started'||
-          Number(record.active_seconds||0)>0||Number(record.progress_pct||0)>0||
-          !!record.started_at||!!record.completed_at||!!record.last_activity_at||
-          record.final_score_pct!=null);
-      const extra=kind==='learner'&&record.auth_user_id?'<p>Account di accesso collegato: eliminazione non consentita.</p>':
-        kind==='enrollment'&&record.status!=='not_started'?'<p>Iscrizione già movimentata o revocata: verifica storico e stato.</p>':'';
-      target.innerHTML='<h3>Esito controllo</h3><p><strong>'+
-        (blocked?'Operazione bloccata o da verificare.':'Nessuna dipendenza rilevata dai dati leggibili.')+
-        '</strong></p><ul>'+refs.map(x=>'<li>'+esc(x.label)+': '+
-        (x.error?'controllo non disponibile':esc(x.count))+'</li>').join('')+
-        '</ul>'+extra+
-        '<p>Le verifiche in lettura possono essere incomplete per via dei permessi. Non autorizzano da sole la cancellazione: serve un controllo transazionale sul server.</p>';
-    } catch(error) {
-      if(ov.isConnected)target.textContent='Non è possibile completare la verifica: '+(error?.message||error);
-    }
+    return window.SAFETY_ADMIN_DELETE_PLANNER_V22?.open?.({
+      kind,id,client:db(),actorId:user().id,modal,closeModal,getActorId:()=>user()?.id
+    });
   }
 
   async function handleAction(e) {

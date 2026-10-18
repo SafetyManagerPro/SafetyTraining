@@ -1,0 +1,26 @@
+/* SafetyTraining v22.4: selective, read-only removal planning */
+.admin-delete-v24{display:grid;gap:15px;min-width:0}
+.admin-delete-steps{font-size:12px;font-weight:750;letter-spacing:.02em;color:#a9d2cf}
+.admin-delete-toolbar,.admin-delete-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-start;align-items:center}
+.admin-delete-toolbar button,.admin-delete-actions button{border:1px solid #63878e;background:#17364a;color:#edf8fc;border-radius:9px;padding:9px 13px;cursor:pointer}
+.admin-delete-actions button:last-child:not(:disabled){background:#235447;border-color:#6eb4a3}
+.admin-delete-actions button:disabled{opacity:.48;cursor:not-allowed}
+.admin-delete-group{border:1px solid rgba(194,223,233,.18);border-radius:12px;padding:12px;margin-bottom:10px}
+.admin-delete-group>header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.admin-delete-group h3{font-size:14px;margin:0}.admin-delete-group header>span{font-size:12px;color:#b3c7d3}
+.admin-delete-entries{display:grid;gap:6px;max-height:240px;overflow-y:auto}
+.admin-delete-entry{display:flex;align-items:center;gap:9px;padding:8px;border-radius:8px;background:rgba(255,255,255,.03);font-size:13px}
+.admin-delete-entry input,.admin-delete-parent input{width:16px;height:16px;accent-color:#6eb4a3;flex-shrink:0}
+.admin-delete-entry span{min-width:0;flex:1;overflow-wrap:anywhere}
+.admin-delete-entry small{display:block;color:#9bb3c1;margin-top:3px}
+.admin-delete-entry em{font-size:11px;font-style:normal;max-width:130px;text-align:right}
+.admin-delete-entry em[data-kind=protected]{color:#ffbba9}
+.admin-delete-entry em[data-kind=manual]{color:#f4d999}
+.admin-delete-entry em[data-kind=candidate]{color:#87ddbc}
+.admin-delete-parent{border-top:1px solid rgba(255,255,255,.16);padding-top:13px;display:grid;gap:5px}
+.admin-delete-parent label{display:flex;align-items:center;gap:8px;font-weight:750}
+.admin-delete-parent small,.admin-delete-empty{color:#a9bfce}
+.admin-delete-caution{background:rgba(244,201,131,.10);border-left:3px solid #e7c47a;padding:10px;border-radius:5px;line-height:1.5}
+.admin-delete-totals{font-size:13px;color:#d8eaf1}.admin-delete-review{max-height:240px;overflow:auto;padding-left:23px;line-height:1.65}
+.admin-delete-actions button:focus-visible,.admin-delete-toolbar button:focus-visible,.admin-delete-entry input:focus-visible{outline:3px solid #ffd166;outline-offset:2px}
+@media(max-width:640px){.admin-delete-entry{align-items:flex-start;flex-wrap:wrap}.admin-delete-entry em{margin-left:26px;max-width:none}.admin-delete-actions button{flex:1}}
