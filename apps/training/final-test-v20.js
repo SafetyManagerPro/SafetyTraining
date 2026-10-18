@@ -7,7 +7,8 @@
     testsByCourseVersion: new Map(),
     current: null,
     booted: false,
-    refreshTimer: null
+    refreshTimer: null,
+    sending:false
   };
 
   const $ = (id) => document.getElementById(id);
@@ -215,7 +216,9 @@
     const current = local.current;
     if (!current) return;
     const row = current.questions[current.index];
-    if (!row || current.answers.has(row.question_id)) return;
+    if (!row || current.answers.has(row.question_id)||local.sending) return;
+    local.sending=true;
+    $('finalTestBody')?.querySelectorAll('.final-test-option').forEach(b=>b.disabled=true);
     setMessage('Registrazione risposta…');
     try {
       const { error } = await cloud().state.client.from('test_answers').insert({
@@ -234,7 +237,7 @@
     } catch (error) {
       console.warn('[SafetyTraining Final Test] answer:', error?.message || error);
       setMessage(error?.message || 'Risposta non registrata.', 'error');
-    }
+    }finally{local.sending=false;if(local.current===current&&!current.answers.has(row.question_id))$('finalTestBody')?.querySelectorAll('.final-test-option').forEach(b=>b.disabled=false);}
   }
 
   async function refreshAttemptResult() {

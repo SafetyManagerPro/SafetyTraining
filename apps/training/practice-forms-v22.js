@@ -51,11 +51,19 @@
         '<label class="pf22-field">Docente / istruttore responsabile<input id="pf22Instructor" maxlength="180" value="'+esc(value.instructor_name||'')+'" placeholder="Nome e cognome"></label>'+
         '<label class="pf22-field">Osservazioni e note integrative<textarea id="pf22Notes" rows="4" maxlength="5000" placeholder="Esito, condizioni, eventuali interventi…">'+esc(value.notes||'')+'</textarea></label>'+
         (lab.requires_physical_validation?'<p class="pf22-alert">La prova manuale richiede osservazione diretta del docente/istruttore; la checklist digitale non sostituisce l’addestramento fisico.</p>':'')+
-        '</section><div class="pf22-actions"><button type="button" id="pf22Draft">Salva bozza</button><button type="button" class="primary" id="pf22Record">Registra osservazione</button><button type="button" id="pf22Dismiss">Chiudi senza salvare</button></div><div id="pf22Msg" class="pf22-message" aria-live="polite">'+(value.status==='recorded'?'Osservazione già registrata: puoi aggiornarla.':value.status==='draft'?'Bozza salvata in precedenza.':'')+'</div>';
+        '</section><div class="pf22-actions"><button type="button" id="pf22History">Storico osservazioni</button><button type="button" id="pf22Draft">Salva bozza</button><button type="button" class="primary" id="pf22Record">Registra osservazione</button><button type="button" id="pf22Dismiss">Chiudi senza salvare</button></div><div id="pf22Msg" class="pf22-message" aria-live="polite">'+(value.status==='recorded'?'Osservazione già registrata: puoi aggiornarla.':value.status==='draft'?'Bozza salvata in precedenza.':'')+'</div>';
+      document.getElementById('pf22History').onclick=showHistory;
       document.getElementById('pf22Draft').onclick=()=>save('draft');
       document.getElementById('pf22Record').onclick=()=>save('recorded');
       document.getElementById('pf22Dismiss').onclick=close;
     }catch(error){document.getElementById('pf22Body').textContent='Impossibile caricare la scheda: '+(error?.message||error);}
+  }
+  async function showHistory(){
+    if(!context)return;
+    document.getElementById('pf22HistoryPanel')?.remove();
+    const c=context,host=document.createElement('section');host.id='pf22HistoryPanel';host.className='pf22-section';host.textContent='Caricamento storico…';
+    document.getElementById('pf22Msg')?.before(host);
+    try{const {data,error}=await db().rpc('admin_practice_assessment_history_v22',{p_enrollment_id:c.enrollmentId,p_requirement_key:c.requirementKey,p_lab_key:c.labKey});if(error)throw error;const rows=Array.isArray(data)?data:[];host.innerHTML='<h3>Storico osservazioni</h3>'+(rows.length?rows.map(x=>'<article class="pf22-field"><strong>'+esc(new Date(x.when).toLocaleString('it-IT'))+' · '+esc(x.status||'')+'</strong><span>Docente: '+esc(x.instructor_name||'—')+'</span><p>'+esc(x.notes||'Nessuna nota')+'</p><small>Passaggi: '+esc(JSON.stringify(x.step_marks||[]))+' · Checklist: '+esc(JSON.stringify(x.checklist_marks||[]))+'</small></article>').join(''):'<p>Nessuna modifica registrata.</p>');}catch(e){host.textContent='Storico non disponibile: '+(e?.message||e);}
   }
   async function save(status){
     if(loading||!context)return;

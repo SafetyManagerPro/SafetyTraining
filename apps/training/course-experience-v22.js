@@ -4,7 +4,7 @@
   const db=()=>window.SAFETY_CLOUD?.state?.client;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const arr=v=>Array.isArray(v)?v:[];
-  let seq=0;
+  let seq=0,timer=null;const cache=new Map();
 
   function courseKey(){
     const p=location.hash.replace(/^#/,'').split('/').filter(Boolean);
@@ -15,7 +15,7 @@
   const visuals=items=>arr(items).filter(x=>x?.asset).map(x=>x.asset);
 
   async function loadExperience(key){
-    const c=db(); if(!c)return null;
+    const c=db(); if(!c)return null;if(cache.has(key))return cache.get(key);
     const {data:course,error}=await c.from('courses').select('id,stable_key,title,metadata').eq('stable_key',key).eq('active',true).maybeSingle();
     if(error||!course||course.metadata?.freeze_scope)return null;
     const [{data:sl,error:se},{data:pl,error:pe}]=await Promise.all([
@@ -30,11 +30,12 @@
     ]);
     if(sce||ple)throw sce||ple;
     const sm=new Map((scenarios||[]).map(x=>[x.id,x])), pm=new Map((labs||[]).map(x=>[x.id,x]));
-    return {
+    const result={
       course,
       scenarios:(sl||[]).map(link=>sm.has(link.scenario_id)?{...sm.get(link.scenario_id),__link:link}:null).filter(Boolean),
       labs:(pl||[]).map(link=>pm.has(link.practice_lab_id)?{...pm.get(link.practice_lab_id),__link:link}:null).filter(Boolean)
     };
+    cache.set(key,result);return result;
   }
 
   function visualGallery(items,title){
@@ -44,7 +45,7 @@
 
   function scenarioCard(s){
     const questions=arr(s.debrief?.questions), decisions=arr(s.decisions), specific=s.__link?.context?.specific===true||s.__link?.context?.specific==='true';
-    return `<article class="v22-card v22-scenario ${specific?'v22-specific':''}"><div class="v22-card-head"><span class="v22-kicker">${specific?'SAFETY SCENARIO · SPECIFICO':'SAFETY SCENARIO · FONDAMENTI'}</span><span class="v22-pill">${esc(s.scenario_type)}</span></div><h3>${esc(s.title)}</h3>${s.intro?`<p>${esc(s.intro)}</p>`:''}<div class="v22-split"><div>${visualGallery(s.visuals,s.title)}</div><div><h4>La sfida</h4><p class="v22-prompt">${esc(s.prompt)}</p>${decisions.length?`<h4>Decisioni da discutere</h4>${list(decisions.map(x=>`${x.choice}${x.effect?` → ${x.effect}`:''}`))}`:''}</div></div>${questions.length?`<details><summary>Debriefing guidato</summary>${list(questions)}</details>`:''}<div class="v22-media">${links(s.media)}${links(s.sources)}</div></article>`;
+    return `<article class="v22-card v22-scenario ${specific?'v22-specific':''}"><div class="v22-card-head"><span class="v22-kicker">${specific?'SAFETY SCENARIO · SPECIFICO':'SAFETY SCENARIO · FONDAMENTI'}</span><span class="v22-pill">${esc(s.scenario_type)}</span></div><h3>${esc(s.title)}</h3>${s.intro?`<p>${esc(s.intro)}</p>`:''}<div class="v22-split"><div>${visualGallery(s.visuals,s.title)}</div><div><h4>La sfida</h4><p class="v22-prompt">${esc(s.prompt)}</p>${decisions.length?`<h4>Decisioni da discutere</h4>${list(decisions.map(x=>`${x.choice}${x.effect?` → ${x.effect}`:''}`))}<div class="v22-interactive"><h4>Prova a decidere</h4>${decisions.map((d,i)=>`<button type="button" class="v22-decision-btn" data-choice="${i}">${esc(d.choice||String(d))}</button>`).join('')}<div class="v22-feedback" role="status" aria-live="polite"></div></div>`:''}</div></div>${questions.length?`<details><summary>Debriefing guidato</summary>${list(questions)}</details>`:''}<div class="v22-media">${links(s.media)}${links(s.sources)}</div></article>`;
   }
 
   function labCard(l){
@@ -64,10 +65,11 @@
       const block=document.createElement('section'); block.id='v22CourseExperience'; block.className='v22-experience';
       block.innerHTML=`<div class="v22-heading"><div><span class="v22-kicker">STANDARD DIDATTICO v22.007</span><h2>Allenati prima di dover decidere davvero</h2><p>Ogni corso non congelato combina fondamenti riusabili con un’esperienza specifica della mansione, ruolo, settore o attrezzatura.</p><div class="v22-coverage"><span>${data.scenarios.length} scenari</span><span>${specificScenarios} specifici</span><span>${data.labs.length} laboratori</span><span>${specificLabs} specifici</span></div></div><span class="v22-version">v22.007</span></div>${data.scenarios.map(scenarioCard).join('')}${data.labs.map(labCard).join('')}`;
       app.appendChild(block);
-    }catch(err){console.warn('[SafetyTraining v22 experience]',err?.message||err);}
+       block.querySelectorAll('.v22-scenario').forEach((card,i)=>{const decisions=arr(data.scenarios[i]?.decisions);card.querySelectorAll('[data-choice]').forEach(btn=>btn.onclick=()=>{const d=decisions[Number(btn.dataset.choice)];if(!d)return;card.querySelectorAll('[data-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));card.querySelector('.v22-feedback').textContent=d.effect||'Confronta con il docente la conseguenza della scelta.';});});
+    }catch(err){console.warn('[SafetyTraining v22 experience]',err?.message||err);if(my!==seq||courseKey()!==key)return;const app=document.getElementById('app');if(!app)return;const block=document.createElement('section');block.id='v22CourseExperience';block.innerHTML='<div class="v22-load-error" role="alert">Scenari non disponibili. <button type="button">Riprova</button></div>';block.querySelector('button').onclick=()=>{cache.delete(key);inject(key);};app.appendChild(block);}
   }
 
-  function schedule(){const key=courseKey();[0,100,300,750,1500].forEach(ms=>setTimeout(()=>inject(key),ms));}
+  function schedule(){const key=courseKey();clearTimeout(timer);timer=setTimeout(()=>{if(!key){seq++;document.getElementById('v22CourseExperience')?.remove();return;}if(document.getElementById('app')?.querySelector('.agenda-hero'))inject(key);},120);}
   window.addEventListener('hashchange',schedule);
   document.addEventListener('safety:course-rendered',schedule);
   window.SAFETY_COURSE_EXPERIENCE_V22={schedule,version:'22.007'};
