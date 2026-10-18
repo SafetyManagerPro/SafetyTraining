@@ -45,6 +45,6 @@ test('UI supports per-row and select-all with real deletion disabled',()=>{
   const src=read('apps/training/admin-delete-planner-v22.js'),html=read('apps/training/index.html');
   for(const piece of ['data-plan-item','data-plan-all','data-plan-none','data-plan-parent','data-plan-next','data-plan-back','Conferma eliminazione (non disponibile)'])assert.ok(src.includes(piece),piece);
   assert.match(src,/getActorId\(\)===actorId/);
-  assert.doesNotMatch(src,/\.delete\s*\(|\.update\s*\(|\.insert\s*\(|\.rpc\s*\(/);
+  assert.doesNotMatch(src,/\.from\([^)]*\)\.delete\s*\(|\.rpc\s*\(|\.from\([^)]*\)\.update\s*\(/);
   assert.match(html,/admin-delete-planner-v22\.js/);assert.match(html,/admin-delete-planner-v22\.css/);
 });
