@@ -2,7 +2,7 @@
 (() => {
   'use strict';
 
-  const state = { open:false, claiming:false };
+  const state = { open:false, claiming:false, openingId:null, menuSignature:'' };
   const cloud = () => window.SAFETY_CLOUD;
   const db = () => cloud()?.state?.client;
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -11,7 +11,9 @@
     return h ? `${h}h ${String(m).padStart(2,'0')}m` : `${m} min`;
   };
   const statusLabel = (value) => ({not_started:'Da iniziare',in_progress:'In corso',completed:'Completato',passed:'Superato',failed:'Non superato',revoked:'Revocato'}[value] || value || '—');
-  const configured = a => !!a?.courseStableKey && !String(a.courseStableKey).startsWith('sm-');
+  const rules = () => window.SAFETY_LEARNER_NAV_V22;
+  const configured = a => !!String(a?.courseStableKey||'').trim();
+  const access = a => rules()?.access(a) || {usable:false,label:'Percorso non disponibile'};
 
   function ensureUi() {
     if (!document.getElementById('learnerHomeBtn')) {
@@ -31,6 +33,7 @@
       root.innerHTML = `<section class="learner-panel" role="dialog" aria-modal="true" aria-labelledby="learnerTitle">
         <header class="learner-head"><div><div class="learner-kicker">AREA CORSISTA</div><h1 id="learnerTitle">I miei corsi</h1><p id="learnerIdentity"></p></div><button id="learnerClose" aria-label="Chiudi">×</button></header>
         <div id="learnerSummary" class="learner-summary"></div>
+        <p id="learnerOpenError" class="learner-open-error" role="alert" aria-live="assertive"></p>
         <div id="learnerCourses" class="learner-courses"></div>
         <footer>Safety Training · percorso formativo interno — non certificante</footer>
       </section>`;
@@ -83,13 +86,88 @@
   }
 
   function availability(a) {
-    const now = Date.now();
-    if (!configured(a)) return { usable:false, label:'Percorso in configurazione' };
-    if (a.status === 'revoked') return { usable:false, label:'Accesso revocato' };
-    if (a.availableFrom && new Date(a.availableFrom).getTime() > now) return { usable:false, label:`Disponibile dal ${new Date(a.availableFrom).toLocaleDateString('it-IT')}` };
-    if (a.availableUntil && new Date(a.availableUntil).getTime() < now) return { usable:false, label:'Periodo di accesso terminato' };
-    if (['completed','passed'].includes(a.status)) return { usable:true, label:'Rivedi percorso' };
-    return { usable:true, label:a.status === 'in_progress' ? 'Continua' : 'Inizia' };
+    return access(a);
+  }
+
+  function updateAssignedSidebar(){
+    const c=cloud()?.state,host=document.getElementById('sideCourses');
+    if(!c?.learner||!host)return;
+    const entries=(c.assignments||[]).filter(a=>configured(a)&&availability(a).usable);
+    const signature=JSON.stringify(entries.map(a=>[a.id,a.courseStableKey,a.courseTitle,a.editionTitle,a.status]));
+    if(host.dataset.learnerSignature!==signature||!host.classList.contains('learner-assigned-nav')){
+      host.replaceChildren();
+      host.classList.remove('course-grouped-nav');
+      host.classList.add('learner-assigned-nav');
+      host.dataset.learnerSignature=signature;
+      if(!entries.length){
+        const note=document.createElement('p');
+        note.className='learner-nav-empty';
+        note.textContent='Nessun corso attualmente accessibile. Controlla I miei corsi.';
+        host.appendChild(note);
+      }
+      entries.forEach(a=>{
+        const b=document.createElement('button');
+        b.type='button';b.className='navbtn learner-course-nav';b.dataset.courseKey=a.courseStableKey;
+        b.dataset.enrollmentId=a.id;
+        b.textContent=a.courseTitle||a.editionTitle||'Corso assegnato';
+        b.addEventListener('click',()=>{void openCourse(a.id);});
+        host.appendChild(b);
+      });
+    }
+    const key=rules()?.route(location.hash).key;
+    host.querySelectorAll('[data-course-key]').forEach(b=>b.classList.toggle('active',b.dataset.courseKey===key));
+  }
+
+  function restoreSidebar(){
+    const host=document.getElementById('sideCourses');
+    if(!host?.classList.contains('learner-assigned-nav'))return;
+    host.classList.remove('learner-assigned-nav');
+    delete host.dataset.learnerSignature;
+    host.replaceChildren();
+    window.SAFETY_SIDEBAR_GROUPS?.loadFull?.();
+  }
+
+  async function openCourse(enrollmentId){
+    const initialUserId=cloud()?.state?.user?.id;
+    const assignment=(cloud()?.state?.assignments||[]).find(a=>a.id===enrollmentId);
+    if(!initialUserId||!assignment||!availability(assignment).usable){
+      if(assignment)open();
+      return false;
+    }
+    if(state.openingId)return false;
+    state.openingId=enrollmentId;
+    const btn=document.querySelector('#learnerCourses [data-enrollment-id="'+CSS.escape(enrollmentId)+'"]');
+    if(btn){btn.disabled=true;btn.textContent='Apertura corso…';}
+    const message=document.getElementById('learnerOpenError');
+    if(message)message.textContent='';
+    try{
+      const key=String(assignment.courseStableKey);
+      const local=(window.SAFETY_DATA||[]).find(c=>c.id===key);
+      if(!local){
+        const adapted=await window.SAFETY_CATALOG?.ensurePresentation?.(key);
+        if(!adapted)throw new Error('Presentazione del corso non disponibile.');
+        if(assignment.versionNumber!=null&&adapted.db_version!=null&&Number(assignment.versionNumber)!==Number(adapted.db_version)){
+          throw new Error('La versione del corso assegnata è diversa da quella disponibile. Contatta il responsabile della formazione.');
+        }
+      }
+      if(cloud()?.state?.user?.id!==initialUserId||!rules()?.assigned(cloud()?.state?.assignments,key)){
+        throw new Error('L’accesso al percorso non è più disponibile.');
+      }
+      close();
+      const hash='course/'+encodeURIComponent(key);
+      if(location.hash==='#'+hash)window.dispatchEvent(new Event('hashchange'));
+      else location.hash=hash;
+      return true;
+    }catch(error){
+      open();
+      const alert=document.getElementById('learnerOpenError');
+      if(alert)alert.textContent=error?.message||'Impossibile aprire il corso.';
+      console.warn('[SafetyTraining learner course]',error?.message||error);
+      return false;
+    }finally{
+      state.openingId=null;
+      if(btn&&btn.isConnected){btn.disabled=false;btn.textContent=availability(assignment).label;}
+    }
   }
 
   async function render() {
@@ -112,13 +190,11 @@
         <div class="learner-course-top"><div><span class="learner-status">${esc(statusLabel(a.status))}</span><h2>${esc(a.courseTitle || a.editionTitle || 'Percorso')}</h2><p>${esc(a.editionTitle && a.editionTitle !== a.courseTitle ? a.editionTitle : '')}</p></div><strong>${pct.toFixed(0)}%</strong></div>
         <div class="learner-progress"><span style="width:${pct}%"></span></div>
         <div class="learner-meta"><span>⏱ ${esc(fmtTime(a.activeSeconds))} attivi</span><span>📅 ${esc(due)}</span>${score}</div>
-        <button class="learner-start" data-course="${esc(a.courseStableKey || '')}" ${!av.usable ? 'disabled' : ''}>${esc(av.label)}</button>
+        <button class="learner-start" data-enrollment-id="${esc(a.id)}" ${!av.usable ? 'disabled' : ''}>${esc(av.label)}</button>
       </article>`;
     }).join('');
-    host.querySelectorAll('[data-course]').forEach(btn => btn.onclick = () => {
-      const key = btn.dataset.course; if (!key || key.startsWith('sm-')) return;
-      close(); location.hash = `course/${key}`;
-    });
+    host.querySelectorAll('[data-enrollment-id]').forEach(btn=>btn.onclick=()=>{void openCourse(btn.dataset.enrollmentId);});
+    updateAssignedSidebar();
   }
 
   function syncLearnerMode() {
@@ -129,20 +205,22 @@
     document.body.classList.toggle('learner-session', learner);
     if (!learner) return;
 
-    const allowed = new Set((c.assignments || []).filter(a => a.status !== 'revoked' && configured(a)).map(a => a.courseStableKey).filter(Boolean));
-    const buttons = [...document.querySelectorAll('#sideCourses .navbtn')];
-    (window.SAFETY_DATA || []).forEach((course, i) => { if (buttons[i]) buttons[i].hidden = !allowed.has(course.id); });
-
-    const route = location.hash.replace(/^#/, '').split('/').filter(Boolean);
-    if ((route[0] === 'course' || route[0] === 'topic') && route[1] && !allowed.has(route[1])) {
-      location.hash = ''; setTimeout(open, 0);
+    updateAssignedSidebar();
+    if(!rules()?.allowedRoute(location.hash,c.assignments)){
+      location.hash='';
+      setTimeout(open,0);
     }
   }
 
   async function sync() {
     const c = cloud()?.state;
-    if (!c?.user) { close(); document.getElementById('learnerHomeBtn')?.classList.add('hidden'); document.body.classList.remove('learner-session'); return; }
+    if (!c?.user) {
+      close();restoreSidebar();
+      document.getElementById('learnerHomeBtn')?.classList.add('hidden');
+      document.body.classList.remove('learner-session');return;
+    }
     if (!c.learner && await claimIfNeeded()) return;
+    if(!c.learner)restoreSidebar();
     syncLearnerMode();
     if (state.open) await render();
   }
@@ -156,6 +234,6 @@
     setInterval(() => { if (state.open) render().catch(() => {}); }, 30000);
   }
 
-  window.SAFETY_LEARNER = { open, close, render, sync };
+  window.SAFETY_LEARNER = { open, close, render, sync, openCourse, syncLearnerMode };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

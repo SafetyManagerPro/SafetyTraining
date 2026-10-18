@@ -403,5 +403,10 @@
     return p;
   }
 
-  window.SAFETY_DB_SLIDES = { adaptBundle, ensureCourse, localCourse };
+  function resetAdapted() {
+    const courses=data();
+    for(let i=courses.length-1;i>=0;i--)if(courses[i]?.presentation_generated_from_db)courses.splice(i,1);
+    cache.clear();
+  }
+  window.SAFETY_DB_SLIDES = { adaptBundle, ensureCourse, localCourse, resetAdapted };
 })();

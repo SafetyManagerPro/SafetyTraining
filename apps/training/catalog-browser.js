@@ -119,16 +119,41 @@
   }
 
   async function route(){
+    const parsed=window.SAFETY_LEARNER_NAV_V22?.route(location.hash);
     const p=location.hash.replace(/^#/,'').split('/').filter(Boolean);
     if(p[0]==='library'&&p[1]){renderLibrary(p[1]);return;}
-    if(p[0]==='course'&&p[1]&&!localCourse(p[1])&&!isLearner()&&isAuthenticated()){
-      try{
-        await ensurePresentation(p[1]);
-        window.dispatchEvent(new Event('hashchange'));
-      }catch(e){console.warn('[Catalog deep-link presentation]',e?.message||e);}
+    if(!parsed?.key||!['course','topic','deck','lab','resources'].includes(parsed.kind)||localCourse(parsed.key)) {
+      if(!p.length)setTimeout(renderHome,0);
       return;
     }
-    if(!p.length)setTimeout(renderHome,0);
+    if(!isAuthenticated())return;
+    const key=parsed.key;
+    const assignment=isLearner()?window.SAFETY_LEARNER_NAV_V22?.assigned(cloud()?.state?.assignments,key):null;
+    if(isLearner()&&!assignment){
+      location.hash='';
+      window.SAFETY_LEARNER?.open?.();
+      return;
+    }
+    if(state.opening.has(key))return;
+    state.opening.add(key);
+    const routeAtStart=location.hash;
+    try{
+      const course=await ensurePresentation(key);
+      if(assignment?.versionNumber!=null&&course?.db_version!=null&&Number(assignment.versionNumber)!==Number(course.db_version)){
+        throw new Error('Versione assegnata non corrispondente al materiale didattico disponibile.');
+      }
+      if(location.hash===routeAtStart&&isAuthenticated()&&(!isLearner()||window.SAFETY_LEARNER_NAV_V22?.assigned(cloud()?.state?.assignments,key))){
+        window.dispatchEvent(new Event('hashchange'));
+      }
+    }catch(e){
+      console.warn('[Catalog deep-link presentation]',key,e?.message||e);
+      if(isLearner()&&location.hash===routeAtStart){
+        const root=document.getElementById('app');
+        if(root){
+          root.innerHTML='<div class="notice"><strong>Impossibile aprire il percorso.</strong> '+esc(e?.message||'Materiale non disponibile.')+'</div>';
+        }
+      }
+    }finally{state.opening.delete(key);}
   }
   function closeMobileMenu(){document.body.classList.remove('mobile-nav-open');document.getElementById('mobileNavBackdrop')?.classList.remove('open');}
   function initMobile(){

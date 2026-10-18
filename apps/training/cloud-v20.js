@@ -121,7 +121,13 @@
     await state.client?.auth.signOut();
   }
 
+  let lastUserId=null;
   async function syncIdentity() {
+    const currentUserId=state.user?.id||null;
+    if(lastUserId!==currentUserId){
+      window.SAFETY_DB_SLIDES?.resetAdapted?.();
+      lastUserId=currentUserId;
+    }
     if (!state.user) {
       state.learner = null;
       state.assignments = [];
@@ -177,7 +183,12 @@
 
   function parseRoute() {
     const parts = location.hash.replace(/^#/, '').split('/').filter(Boolean);
-    if (parts[0] === 'topic' && parts.length >= 3) return { type:'topic', courseKey:parts[1], topicKey:parts[2], unitStableKey:`${parts[1]}:${parts[2]}` };
+    if (parts[0] === 'topic' && parts.length >= 3) {
+      const key=parts[1],topicKey=parts[2];
+      const course=(window.SAFETY_DATA||[]).find(c=>c.id===key);
+      const topic=course?.topics?.find(t=>t.id===topicKey);
+      return {type:'topic',courseKey:key,topicKey,unitStableKey:topic?.source_stable_key||`${key}:${topicKey}`};
+    }
     if (parts[0] === 'course' && parts.length >= 2) return { type:'course', courseKey:parts[1] };
     return { type:'other' };
   }
