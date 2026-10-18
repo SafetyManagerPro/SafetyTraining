@@ -20,7 +20,7 @@
       if (h.textContent?.trim() === 'Strumenti') h.hidden = true;
     });
     const sub = document.querySelector('.brandsub');
-    if (sub) sub.textContent = 'portale corsista · corsi assegnati';
+    if (sub && sub.textContent !== 'portale corsista · corsi assegnati') sub.textContent = 'portale corsista · corsi assegnati';
   }
 
   function assignedOnlyHome() {
@@ -66,12 +66,12 @@
     window.addEventListener('hashchange', guardRoute);
     window.addEventListener('focus', () => { hideLearnerOnlyUi(); if (isLearner() && !location.hash) assignedOnlyHome(); });
 
-    const observer = new MutationObserver(() => {
-      if (!isLearner()) return;
-      hideLearnerOnlyUi();
-      if (!location.hash && document.getElementById('catalogBrowserRoot')) assignedOnlyHome();
-    });
-    observer.observe(document.body, {childList:true,subtree:true});
+    // Only sidebar replacements are observed; our own UI changes are attribute-only.
+    const sidebar = document.getElementById('sideCourses');
+    if (sidebar) new MutationObserver(mutations => {
+      if (isLearner() && mutations.some(m => m.addedNodes.length)) guardRoute();
+    }).observe(sidebar,{childList:true});
+    document.addEventListener('safety:cloud-panel-rendered',guardRoute);
   }
 
   window.SAFETY_LEARNER_ACCESS = { refresh:guardRoute, openHome:assignedOnlyHome };

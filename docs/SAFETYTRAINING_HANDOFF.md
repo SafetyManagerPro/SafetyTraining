@@ -1,6 +1,6 @@
 # SafetyTraining — stato progetto / hand-off
 
-Ultimo aggiornamento: 2026-10-17
+Ultimo aggiornamento: 2026-10-18
 Stato corrente: **v22 didactic quality / Practice Lab LIVE** sui 65 corsi non congelati; backend admin v21 preservato; PWA `safety-training-v22-02`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
@@ -193,3 +193,11 @@ Preservare:
 - Supabase: `ejkwvatmzdqqjozpxntk`
 - Vercel: `prj_u0IT97WJ3ARGJJUhuYUWA6MyS24U`
 - production alias: `safety-training-safety-manager.vercel.app`
+
+## 2026-10-18 — SafetyTraining v22.1: stabilizzazione e monitoraggio
+- Rimosso l'osservatore del DOM globale in learner-access-guard: ora osserva solo i figli diretti di #sideCourses, evita riscritture non necessarie e ascolta il rendering del pannello cloud.
+- Rimosso MutationObserver da completion-gates-learner: rendering dei gate con id iscrizione stabile, aggiornamento solo quando cambiano i requisiti, refresh a pannello visibile (30 s), evento safety:cloud-panel-rendered generato da cloud-v20.
+- Amministrazione > Corsisti: pannello di monitoraggio per iscrizione con corso, stato, barra del progresso contenuti (% da enrollments.progress_pct), minuti/ore attivi (active_seconds), durata nominale (courses.nominal_minutes), ultima attività; riepilogo aggregato. In Iscrizioni aggiunta barra percentuale.
+- Progresso contenuti e tempo nominale sono metriche diverse e non provano da sole validità certificante o obblighi formativi.
+- Cache PWA safety-training-v22-03; npm check include anche learner guard e completion gates.
+- Nessuna modifica Supabase né corsi: 27 frozen immutati, company_admin disabilitato. CI, deploy e browser smoke restano da verificare per questo commit.

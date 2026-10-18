@@ -53,6 +53,15 @@
   function badge(text, kind='muted') { return `<span class="admin-badge ${kind}">${esc(text)}</span>`; }
   function btn(label, action, id='', kind='') { return `<button type="button" class="admin-row-btn ${kind}" data-action="${esc(action)}" data-id="${esc(id)}">${esc(label)}</button>`; }
   function stat(value, label, detail='') { return `<article class="admin-stat"><strong>${esc(value)}</strong><span>${esc(label)}</span>${detail ? `<small>${esc(detail)}</small>` : ''}</article>`; }
+  const clampPct = v => Math.max(0,Math.min(100,Number.isFinite(Number(v))?Number(v):0));
+  const fmtActiveTime = seconds => {
+    const total=Math.floor(Math.max(0,Number(seconds)||0)/60),h=Math.floor(total/60),m=total%60;
+    return h?`${h} h ${m.toString().padStart(2,'0')} min`:`${m} min`;
+  };
+  const progressBar = (value,label='Avanzamento contenuti') => {
+    const pct=clampPct(value);
+    return `<div class="admin-progress-wrap"><progress class="admin-course-progress" value="${pct}" max="100" aria-label="${esc(label)}"></progress><strong>${Math.round(pct)}%</strong></div>`;
+  };
   function searchBox(tab, placeholder) { return `<label class="admin-search"><span>⌕</span><input data-admin-search="${tab}" value="${esc(state.filters[tab] || '')}" placeholder="${esc(placeholder)}"></label>`; }
   function table(headers, rows, empty='Nessun dato disponibile.') {
     return `<div class="admin-table-wrap"><table class="admin-table"><thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.length ? rows.map(r => `<tr>${r.map(c => `<td>${c ?? '—'}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${headers.length}" class="admin-empty">${esc(empty)}</td></tr>`}</tbody></table></div>`;
@@ -207,6 +216,39 @@
     const q = state.filters.learners || '', rows = (l||[]).filter(x => match(q,x.first_name,x.last_name,x.email,x.fiscal_code,x.job_title,cm.get(x.company_id)));
     const missing = (l||[]).filter(x=>x.active&&!x.email).length;
     current(seq, `${missing?`<div class="admin-warning">${missing} corsist${missing===1?'a attivo non ha':'i attivi non hanno'} un indirizzo email e non può ricevere l’invito di accesso.</div>`:''}<section class="admin-card"><div class="admin-card-head"><div><h2>Corsisti</h2><p>Gestione anagrafica e accesso piattaforma.</p></div><button class="admin-primary" data-action="new-learner">+ Nuovo corsista</button></div>${searchBox('learners','Nome, email, CF, azienda, mansione…')}${table(['Corsista','Email','Azienda',...(state.multiOrg?['Organizzazione']:[]),'Mansione','Accesso','Stato','Azioni'], rows.map(x => { const inv=im.get(x.id), [s,k]=inviteState(x,inv); return [esc(`${x.first_name||''} ${x.last_name||''}`.trim()||'—'),esc(x.email||'—'),esc(cm.get(x.company_id)||'—'),...(state.multiOrg?[esc(om.get(x.organization_id)||'—')]:[]),esc(x.job_title||'—'),`${badge(s,k)}${inv?.last_sent_at?`<small class="admin-cell-note">${fmtDateTime(inv.last_sent_at)}</small>`:''}`,badge(x.active?'Attivo':'Disattivo',x.active?'ok':'muted'),`${btn('Modifica','edit-learner',x.id)} ${x.email&&!x.auth_user_id?btn(inv?'Reinvia':'Invita','invite-learner',x.id):''} ${btn(x.active?'Disattiva':'Riattiva','toggle-learner',x.id,x.active?'danger':'')}`]; }))}</section>`);
+    void renderLearnerProgress(seq,q);
+  }
+
+  async function renderLearnerProgress(seq,query){
+    const host=document.getElementById('adminContent');if(!host||seq!==state.renderSeq)return;
+    const section=document.createElement('section');section.id='adminLearnerProgress';section.className='admin-card';
+    section.innerHTML='<div class="admin-card-head"><div><h2>Avanzamento corsisti per corso</h2><p>Progresso dei contenuti e confronto tra tempo attivo e durata nominale.</p></div></div><div class="admin-loading">Caricamento monitoraggio…</div>';
+    host.appendChild(section);
+    try{
+      const [{data:en,error:ee},{data:learners,error:le},{data:ed,error:de},{data:versions,error:ve},{data:courses,error:ce}]=await Promise.all([
+        db().from('enrollments').select('id,learner_id,edition_id,status,progress_pct,active_seconds,last_activity_at').order('enrolled_at',{ascending:false}),
+        db().from('learners').select('id,first_name,last_name,email,company_id'),
+        db().from('course_editions').select('id,title,course_version_id'),
+        db().from('course_versions').select('id,course_id'),
+        db().from('courses').select('id,title,nominal_minutes')
+      ]);
+      if(ee||le||de||ve||ce)throw ee||le||de||ve||ce;
+      if(seq!==state.renderSeq||!section.isConnected||state.tab!=='learners')return;
+      const lm=new Map((learners||[]).map(x=>[x.id,x])),em=new Map((ed||[]).map(x=>[x.id,x])),vm=new Map((versions||[]).map(x=>[x.id,x])),cm=new Map((courses||[]).map(x=>[x.id,x]));
+      const rows=(en||[]).map(item=>{
+        const learner=lm.get(item.learner_id),edition=em.get(item.edition_id),course=cm.get(vm.get(edition?.course_version_id)?.course_id);
+        return {item,learner,edition,course,name:`${learner?.first_name||''} ${learner?.last_name||''}`.trim()||learner?.email||'Corsista'};
+      }).filter(r=>r.learner&&match(query,r.name,r.learner.email,r.edition?.title,r.course?.title,r.item.status));
+      const valid=rows.filter(r=>r.item.status!=='revoked'),done=valid.filter(r=>['passed','completed'].includes(r.item.status)).length;
+      const average=valid.length?Math.round(valid.reduce((sum,r)=>sum+clampPct(r.item.progress_pct),0)/valid.length):0;
+      const list=rows.map(({item,edition,course,name})=>{
+        const nominal=Math.max(0,Number(course?.nominal_minutes)||0),active=Math.max(0,Number(item.active_seconds)||0);
+        const target=nominal?fmtActiveTime(nominal*60):'non indicata';
+        const ratio=nominal?Math.min(100,Math.round(active/(nominal*60)*100)):null;
+        return `<tr><td><strong>${esc(name)}</strong></td><td>${esc(course?.title||edition?.title||'Corso non disponibile')}<small class="admin-cell-note">${esc(edition?.title&&edition?.title!==course?.title?edition.title:'')}</small></td><td>${badge(LABEL[item.status]||item.status,item.status==='revoked'?'danger':['completed','passed'].includes(item.status)?'ok':'info')}</td><td>${progressBar(item.progress_pct,'Avanzamento contenuti di '+name)}</td><td><strong>${esc(fmtActiveTime(active))}</strong><small class="admin-cell-note">Durata prevista: ${esc(target)}${ratio!==null?` · ${ratio}% del tempo nominale`:''}</small></td><td>${fmtDateTime(item.last_activity_at)}</td></tr>`;
+      }).join('');
+      section.innerHTML=`<div class="admin-card-head"><div><h2>Avanzamento corsisti per corso</h2><p>La percentuale indica il completamento dei contenuti; il tempo attivo è separato e non certifica da solo la frequenza.</p></div></div><div class="admin-stats">${stat(valid.length,'Iscrizioni attive')}${stat(done,'Percorsi completati')}${stat(average+'%','Progresso medio dei contenuti')}</div><div class="admin-table-wrap"><table class="admin-table admin-learner-progress-table"><thead><tr><th>Corsista</th><th>Corso / edizione</th><th>Stato</th><th>Contenuti</th><th>Tempo seguito / previsto</th><th>Ultima attività</th></tr></thead><tbody>${list||'<tr><td colspan="6" class="admin-empty">Nessun percorso assegnato per la ricerca corrente.</td></tr>'}</tbody></table></div>`;
+    }catch(error){if(seq===state.renderSeq&&section.isConnected)section.innerHTML=`<div class="admin-error">Impossibile caricare l’avanzamento: ${esc(error?.message||error)}</div>`;}
   }
 
   async function courses(seq) {
@@ -260,7 +302,7 @@
     const em=new Map((ed||[]).map(x=>[x.id,x])), lm=new Map((learners||[]).map(x=>[x.id,x])), vm=new Map((versions||[]).map(x=>[x.id,x])), cm=new Map((courses||[]).map(x=>[x.id,x.title])), im=new Map((invites||[]).map(x=>[x.learner_id,x]));
     const open=(ed||[]).filter(x=>x.status==='open'); const q=state.filters.enrollments||'';
     const rows=(en||[]).filter(x=>{const l=lm.get(x.learner_id),edition=em.get(x.edition_id),v=vm.get(edition?.course_version_id);return match(q,l?.first_name,l?.last_name,l?.email,edition?.title,cm.get(v?.course_id),x.status);});
-    current(seq, `<section class="admin-card"><div class="admin-card-head"><div><h2>Iscrizione multipla</h2><p>Assegna un’edizione e, se necessario, invia gli accessi.</p></div></div><div class="admin-bulk-grid"><div><label>Edizione<select id="bulkEdition"><option value="">Seleziona edizione…</option>${open.map(x=>{const v=vm.get(x.course_version_id);return `<option value="${x.id}">${esc(x.title||cm.get(v?.course_id)||'Edizione')}</option>`;}).join('')}</select></label><div id="bulkSummary" class="admin-note-block">Seleziona un’edizione.</div><label class="inline-check"><input type="checkbox" id="bulkInvite" checked> Invita gli account non ancora attivi</label><div class="admin-bulk-actions"><button type="button" data-action="bulk-select-all">Seleziona tutti</button><button type="button" data-action="bulk-clear">Deseleziona</button><button type="button" class="admin-primary" data-action="bulk-submit">Iscrivi selezionati</button></div></div><div id="bulkLearners" class="admin-check-list"><div class="admin-empty">Nessuna edizione selezionata.</div></div></div></section><section class="admin-card"><div class="admin-card-head"><div><h2>Iscrizioni</h2><p>Avanzamento e stato operativo.</p></div></div>${searchBox('enrollments','Corsista, corso, edizione, stato…')}${table(['Corsista','Percorso','Stato','Progresso','Tempo','Punteggio','Ultima attività','Azioni'], rows.map(x=>{const l=lm.get(x.learner_id),edition=em.get(x.edition_id),v=vm.get(edition?.course_version_id),[access,kind]=inviteState(l,im.get(x.learner_id));return [`<strong>${esc(`${l?.first_name||''} ${l?.last_name||''}`.trim()||l?.email||'—')}</strong><small class="admin-cell-note">${badge(access,kind)}</small>`,esc(edition?.title||cm.get(v?.course_id)||'—'),badge(LABEL[x.status]||x.status,['completed','passed'].includes(x.status)?'ok':x.status==='in_progress'?'info':x.status==='revoked'?'danger':'muted'),`${Number(x.progress_pct||0).toFixed(0)}%`,`${Math.floor(Number(x.active_seconds||0)/60)} min`,x.final_score_pct==null?'—':`${x.final_score_pct}%`,fmtDateTime(x.last_activity_at),x.status==='revoked'?btn('Riattiva','restore',x.id):btn('Revoca','revoke',x.id,'danger')];}))}</section>`);
+    current(seq, `<section class="admin-card"><div class="admin-card-head"><div><h2>Iscrizione multipla</h2><p>Assegna un’edizione e, se necessario, invia gli accessi.</p></div></div><div class="admin-bulk-grid"><div><label>Edizione<select id="bulkEdition"><option value="">Seleziona edizione…</option>${open.map(x=>{const v=vm.get(x.course_version_id);return `<option value="${x.id}">${esc(x.title||cm.get(v?.course_id)||'Edizione')}</option>`;}).join('')}</select></label><div id="bulkSummary" class="admin-note-block">Seleziona un’edizione.</div><label class="inline-check"><input type="checkbox" id="bulkInvite" checked> Invita gli account non ancora attivi</label><div class="admin-bulk-actions"><button type="button" data-action="bulk-select-all">Seleziona tutti</button><button type="button" data-action="bulk-clear">Deseleziona</button><button type="button" class="admin-primary" data-action="bulk-submit">Iscrivi selezionati</button></div></div><div id="bulkLearners" class="admin-check-list"><div class="admin-empty">Nessuna edizione selezionata.</div></div></div></section><section class="admin-card"><div class="admin-card-head"><div><h2>Iscrizioni</h2><p>Avanzamento e stato operativo.</p></div></div>${searchBox('enrollments','Corsista, corso, edizione, stato…')}${table(['Corsista','Percorso','Stato','Progresso','Tempo','Punteggio','Ultima attività','Azioni'], rows.map(x=>{const l=lm.get(x.learner_id),edition=em.get(x.edition_id),v=vm.get(edition?.course_version_id),[access,kind]=inviteState(l,im.get(x.learner_id));return [`<strong>${esc(`${l?.first_name||''} ${l?.last_name||''}`.trim()||l?.email||'—')}</strong><small class="admin-cell-note">${badge(access,kind)}</small>`,esc(edition?.title||cm.get(v?.course_id)||'—'),badge(LABEL[x.status]||x.status,['completed','passed'].includes(x.status)?'ok':x.status==='in_progress'?'info':x.status==='revoked'?'danger':'muted'),`${progressBar(x.progress_pct,'Avanzamento contenuti')}`,`${Math.floor(Number(x.active_seconds||0)/60)} min`,x.final_score_pct==null?'—':`${x.final_score_pct}%`,fmtDateTime(x.last_activity_at),x.status==='revoked'?btn('Riattiva','restore',x.id):btn('Revoca','revoke',x.id,'danger')];}))}</section>`);
     setupBulk({open,learners:learners||[],enrollments:en||[],invites:im});
   }
 

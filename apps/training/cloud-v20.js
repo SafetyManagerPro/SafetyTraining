@@ -94,13 +94,14 @@
       $('cloudLoginForm')?.addEventListener('submit', signIn);
       return;
     }
-    const cards = state.assignments.length ? state.assignments.map((a) => `<article class="cloud-assignment ${state.activeAssignment?.id === a.id ? 'active' : ''}">
+    const cards = state.assignments.length ? state.assignments.map((a) => `<article class="cloud-assignment ${state.activeAssignment?.id === a.id ? 'active' : ''}" data-enrollment-id="${esc(a.id)}">
       <div><strong>${esc(a.courseTitle || a.editionTitle || 'Percorso')}</strong><span>v${esc(a.versionNumber || 1)} · ${esc(a.status)}</span></div>
       <div class="cloud-progress"><span style="width:${Math.max(0, Math.min(100, Number(a.progressPct || 0)))}%"></span></div>
       <small>${Number(a.progressPct || 0).toFixed(0)}% · ${formatSeconds(a.activeSeconds || 0)} attivi</small></article>`).join('') : '<div class="cloud-state">Account attivo, ma non risultano ancora percorsi assegnati.</div>';
     body.innerHTML = `<div class="cloud-user-row"><div><strong>${esc(state.user.email || '')}</strong><span>${esc(state.learner ? 'Corsista collegato' : 'Account senza profilo corsista')}</span></div><button id="cloudLogout" class="ghost" type="button">Esci</button></div>
       <div class="cloud-summary"><span>${state.assignments.length}</span> percorsi assegnati</div><div class="cloud-assignments">${cards}</div>`;
     $('cloudLogout')?.addEventListener('click', signOut);
+    document.dispatchEvent(new Event('safety:cloud-panel-rendered'));
   }
 
   async function signIn(event) {
