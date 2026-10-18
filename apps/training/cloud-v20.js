@@ -19,7 +19,10 @@
     currentUnitStableKey: null,
     heartbeatTimer: null,
     lastInteractionAt: Date.now(),
-    online: navigator.onLine
+    online: navigator.onLine,
+    identityRequestId: 0,
+    quizBindingId: 0,
+    pendingQuizSubmissions: new Set()
   };
 
   const $ = (id) => document.getElementById(id);
@@ -121,9 +124,19 @@
     await state.client?.auth.signOut();
   }
 
+  function notifyAuthChanged() {
+    document.dispatchEvent(new CustomEvent('safety:auth-changed', { detail:{ userId:state.user?.id || null } }));
+  }
+  function notifyCloudState() {
+    document.dispatchEvent(new CustomEvent('safety:cloud-state-changed', { detail:{ userId:state.user?.id || null } }));
+  }
+  const identityCurrent=(requestId,userId)=>requestId===state.identityRequestId && (state.user?.id||null)===userId;
+
   let lastUserId=null;
   async function syncIdentity() {
-    const currentUserId=state.user?.id||null;
+    const requestId=++state.identityRequestId;
+    const currentUser=state.user;
+    const currentUserId=currentUser?.id||null;
     if(lastUserId!==currentUserId){
       window.SAFETY_DB_SLIDES?.resetAdapted?.();
       lastUserId=currentUserId;
@@ -135,28 +148,34 @@
       state.learningSession = null;
       updateBadge();
       renderPanel();
+      notifyCloudState();
       return;
     }
     try {
       await state.client.from('profiles').upsert({
-        user_id: state.user.id,
-        display_name: state.user.user_metadata?.display_name || state.user.email || null,
+        user_id: currentUser.id,
+        display_name: currentUser.user_metadata?.display_name || currentUser.email || null,
         locale: 'it-IT',
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
     } catch (error) {
       console.warn('[SafetyTraining Cloud] profile sync:', error?.message || error);
     }
+    if(!identityCurrent(requestId,currentUserId))return;
 
     const { data: learner, error } = await state.client.from('learners')
       .select('id,organization_id,company_id,auth_user_id,first_name,last_name,email,job_title')
-      .eq('auth_user_id', state.user.id).eq('active', true).maybeSingle();
+      .eq('auth_user_id', currentUserId).eq('active', true).maybeSingle();
     if (error) console.warn('[SafetyTraining Cloud] learner lookup:', error.message);
+    if(!identityCurrent(requestId,currentUserId))return;
+    const assignments=learner ? await loadAssignments(learner.id) : [];
+    if(!identityCurrent(requestId,currentUserId))return;
     state.learner = learner || null;
-    state.assignments = state.learner ? await loadAssignments(state.learner.id) : [];
+    state.assignments = assignments;
     updateBadge();
     renderPanel();
     await syncRouteContext();
+    if(identityCurrent(requestId,currentUserId))notifyCloudState();
   }
 
   async function loadAssignments(learnerId) {
@@ -301,10 +320,19 @@
     return data || null;
   }
 
-  async function submitAnswer({ questionId, optionId }) {
-    if (!state.user || !state.activeAssignment) throw new Error('Autenticazione e percorso assegnato richiesti');
-    const { count } = await state.client.from('question_attempts').select('id', { count:'exact', head:true }).eq('enrollment_id', state.activeAssignment.id).eq('question_id', questionId);
-    const { data, error } = await state.client.from('question_attempts').insert({ enrollment_id:state.activeAssignment.id, question_id:questionId, session_id:state.learningSession?.id || null, answer:{ option_id:String(optionId) }, attempt_no:Number(count || 0) + 1, metadata:{ client:'SafetyTraining Cloud v20' } }).select('id,is_correct,metadata,attempt_no,answered_at').single();
+  const quizContextCurrent=context=>
+    !!context &&
+    state.user?.id===context.userId &&
+    state.activeAssignment?.id===context.enrollmentId &&
+    parseRoute().type==='topic' &&
+    parseRoute().unitStableKey===context.unitStableKey;
+
+  async function submitAnswer({ questionId, optionId, context }) {
+    if (!quizContextCurrent(context)) throw new Error('Contesto verifica cambiato');
+    const { count, error:countError } = await state.client.from('question_attempts').select('id', { count:'exact', head:true }).eq('enrollment_id', context.enrollmentId).eq('question_id', questionId);
+    if(countError)throw countError;
+    if (!quizContextCurrent(context)) throw new Error('Contesto verifica cambiato');
+    const { data, error } = await state.client.from('question_attempts').insert({ enrollment_id:context.enrollmentId, question_id:questionId, session_id:state.learningSession?.id || null, answer:{ option_id:String(optionId) }, attempt_no:Number(count || 0) + 1, metadata:{ client:'SafetyTraining Cloud v20' } }).select('id,is_correct,metadata,attempt_no,answered_at').single();
     if (error) throw error;
     return data;
   }
@@ -312,10 +340,13 @@
   async function enhanceVisibleQuiz() {
     const route = parseRoute();
     const box = document.querySelector('.detail-quiz-options');
-    if (!box || box.dataset.cloudBound === '1' || route.type !== 'topic' || !state.user || !state.activeAssignment) return;
+    if (!box || box.dataset.cloudBound === '1' || box.dataset.cloudBinding === '1' || route.type !== 'topic' || !state.user || !state.activeAssignment) return;
+    const bindingId=++state.quizBindingId;
+    const context={userId:state.user.id,enrollmentId:state.activeAssignment.id,unitStableKey:route.unitStableKey,box};
+    box.dataset.cloudBinding='1';
     try {
       const question = await getQuestionForUnit(route.unitStableKey);
-      if (!question) return;
+      if (!question || bindingId!==state.quizBindingId || !box.isConnected || !quizContextCurrent(context)) return;
       box.dataset.cloudBound = '1';
       const options = [...box.children];
       options.forEach((el, index) => {
@@ -323,11 +354,14 @@
         el.tabIndex = 0;
         el.setAttribute('role', 'button');
         const choose = async () => {
-          if (box.dataset.submitting === '1') return;
+          const submissionKey=`${context.userId}:${context.enrollmentId}:${question.id}`;
+          if (box.dataset.submitting === '1' || state.pendingQuizSubmissions.has(submissionKey) || !quizContextCurrent(context)) return;
           box.dataset.submitting = '1';
+          state.pendingQuizSubmissions.add(submissionKey);
           options.forEach((node) => node.classList.remove('cloud-answer-ok','cloud-answer-no'));
           try {
-            const result = await submitAnswer({ questionId:question.id, optionId:index });
+            const result = await submitAnswer({ questionId:question.id, optionId:index, context });
+            if(!box.isConnected || !quizContextCurrent(context))return;
             el.classList.add(result.is_correct ? 'cloud-answer-ok' : 'cloud-answer-no');
             let feedback = box.parentElement?.querySelector('.cloud-quiz-feedback');
             if (!feedback) {
@@ -338,13 +372,20 @@
             const explanation = result.metadata?.feedback?.explanation || '';
             feedback.innerHTML = `<strong>${result.is_correct ? '✅ Risposta corretta' : '❌ Risposta non corretta'}</strong>${explanation ? `<p>${esc(explanation)}</p>` : ''}<small>Tentativo ${result.attempt_no} registrato nel percorso.</small>`;
           } catch (error) {
-            console.warn('[SafetyTraining Cloud] answer:', error?.message || error);
-          } finally { box.dataset.submitting = '0'; }
+            if(quizContextCurrent(context))console.warn('[SafetyTraining Cloud] answer:', error?.message || error);
+          } finally {
+            state.pendingQuizSubmissions.delete(submissionKey);
+            if(box.isConnected)box.dataset.submitting = '0';
+          }
         };
         el.addEventListener('click', choose);
         el.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(); } });
       });
-    } catch (error) { console.warn('[SafetyTraining Cloud] quiz bind:', error?.message || error); }
+    } catch (error) {
+      if(quizContextCurrent(context))console.warn('[SafetyTraining Cloud] quiz bind:', error?.message || error);
+    } finally {
+      if(box.isConnected)delete box.dataset.cloudBinding;
+    }
   }
 
   async function init() {
@@ -354,10 +395,16 @@
     const { data } = await state.client.auth.getSession();
     state.session = data?.session || null;
     state.user = state.session?.user || null;
+    notifyAuthChanged();
     await syncIdentity();
     state.client.auth.onAuthStateChange((_event, session) => {
       state.session = session || null;
       state.user = session?.user || null;
+      state.identityRequestId += 1;
+      state.quizBindingId += 1;
+      state.pendingQuizSubmissions.clear();
+      document.querySelectorAll('.detail-quiz-options').forEach(box=>{if(box.dataset.cloudBound==='1')box.replaceWith(box.cloneNode(true));});
+      notifyAuthChanged();
       window.setTimeout(() => { syncIdentity().catch((error) => console.warn('[SafetyTraining Cloud] auth sync:', error?.message || error)); }, 0);
     });
     const app = document.getElementById('app');
