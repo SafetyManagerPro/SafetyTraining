@@ -24,3 +24,16 @@
 .admin-delete-totals{font-size:13px;color:#d8eaf1}.admin-delete-review{max-height:240px;overflow:auto;padding-left:23px;line-height:1.65}
 .admin-delete-actions button:focus-visible,.admin-delete-toolbar button:focus-visible,.admin-delete-entry input:focus-visible{outline:3px solid #ffd166;outline-offset:2px}
 @media(max-width:640px){.admin-delete-entry{align-items:flex-start;flex-wrap:wrap}.admin-delete-entry em{margin-left:26px;max-width:none}.admin-delete-actions button{flex:1}}
+
+
+/* v22.4.1: inspect one dependency and continue to an existing admin record editor */
+.admin-delete-detail-trigger{border:1px solid #668b9a;background:#17374a;color:#ebf7fc;border-radius:8px;padding:7px 10px;cursor:pointer;margin:4px 4px 10px 26px;font-size:12px}
+.admin-delete-detail-trigger:focus-visible{outline:3px solid #ffd166;outline-offset:2px}
+.admin-delete-detail{display:grid;gap:12px}
+.admin-delete-detail h3{margin:0;font-size:17px}
+.admin-delete-detail dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+.admin-delete-field{padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:9px;min-width:0}
+.admin-delete-field dt{font-size:11px;color:#a3c4d3}
+.admin-delete-field dd{margin:4px 0 0;overflow-wrap:anywhere;font-size:13px}
+.admin-table tr.admin-dependency-focus{outline:2px solid #75bdad;outline-offset:-2px}
+@media(max-width:650px){.admin-delete-detail dl{grid-template-columns:1fr}}

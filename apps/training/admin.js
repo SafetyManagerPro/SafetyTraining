@@ -428,11 +428,51 @@
   }
 
 
+
+  // Reuse the existing, permission-checked admin editors instead of allowing ad-hoc edits to FK data.
+  async function openDependencyRecord(kind,id,learnerId){
+    if(!state.open||!state.admin||!user()?.id)throw new Error('Sessione amministrativa necessaria.');
+    if(kind==='memberships'){
+      closeModal();
+      const target=window.SAFETY_ADMIN_MEMBERSHIPS_V21;
+      if(!target?.render)throw new Error('Gestione ruoli non disponibile.');
+      return target.render();
+    }
+    if(kind==='invites'){
+      if(!learnerId)throw new Error('Il corsista collegato non è disponibile.');
+      const target=window.SAFETY_ADMIN_ACCESS_IMPORT_V21;
+      if(!target?.openInvite)throw new Error('Gestione inviti non disponibile.');
+      closeModal();
+      return target.openInvite(learnerId);
+    }
+    const routes={
+      company:['companies','edit-company'],
+      learner:['learners','edit-learner'],
+      edition:['editions','edit-edition'],
+      enrollment:['enrollments',null]
+    };
+    const route=routes[kind];
+    if(!route||!id||!/^[-a-f0-9]{36}$/i.test(id))throw new Error('Tipo o record non riconosciuto.');
+    closeModal();
+    const [tab,action]=route;
+    state.tab=tab;
+    state.filters[tab]='';
+    await render();
+    if(!state.open||!state.admin||state.tab!==tab)return;
+    const list=Array.from(document.querySelectorAll('#adminContent button[data-id]'));
+    const found=list.find(x=>x.dataset.id===id&&(action?x.dataset.action===action:
+      ['revoke','restore'].includes(x.dataset.action)));
+    if(!found)throw new Error('Record non visibile nell’elenco: controlla ricerca, organizzazione e autorizzazioni.');
+    found.closest('tr')?.scrollIntoView({behavior:'smooth',block:'center'});
+    found.closest('tr')?.classList.add('admin-dependency-focus');
+    if(action)found.click();else found.focus();
+  }
   // v22.4: the module builds a selective plan only. No client-side DELETE is permitted.
   async function reviewDeletion(kind,id){
     if(!state.open||!state.admin||!user()?.id)return toast('Accesso amministrativo richiesto.','error');
     return window.SAFETY_ADMIN_DELETE_PLANNER_V22?.open?.({
-      kind,id,client:db(),actorId:user().id,modal,closeModal,getActorId:()=>user()?.id
+      kind,id,client:db(),actorId:user().id,modal,closeModal,getActorId:()=>user()?.id,
+      openRecord:openDependencyRecord
     });
   }
 

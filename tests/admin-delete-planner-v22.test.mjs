@@ -48,3 +48,34 @@ test('UI supports per-row and select-all with real deletion disabled',()=>{
   assert.doesNotMatch(src,/\.from\([^)]*\)\.delete\s*\(|\.rpc\s*\(|\.from\([^)]*\)\.update\s*\(/);
   assert.match(html,/admin-delete-planner-v22\.js/);assert.match(html,/admin-delete-planner-v22\.css/);
 });
+
+
+test('each dependency has safe detail view and an existing admin navigation route where applicable',()=>{
+  const src=read('apps/training/admin-delete-planner-v22.js');
+  const admin=read('apps/training/admin.js');
+  assert.match(src,/data-plan-inspect/);
+  assert.match(src,/data-plan-manage/);
+  assert.match(src,/data-plan-detail-back/);
+  assert.match(src,/openRecord\(action\.kind,inspected\.id,inspected\.learnerId\)/);
+  assert.match(admin,/async function openDependencyRecord/);
+  for(const x of ['edit-company','edit-learner','edit-edition','revoke','restore'])
+    assert.match(admin,new RegExp(x));
+});
+test('sensitive invitation credentials and metadata never appear in record detail',()=>{
+  const detail=d.safeDetails({id:'abc',status:'failed',email:'demo@example.org',
+    token_hash:'SECRET_TOKEN',token_prefix:'SECRET_PREFIX',
+    metadata:{password:'SECRET_PASSWORD'},recipient_phone:'PRIVATE_PHONE'});
+  const display=JSON.stringify(detail);
+  assert.match(display,/demo@example\.org/);
+  for(const secret of ['SECRET_TOKEN','SECRET_PREFIX','SECRET_PASSWORD','PRIVATE_PHONE'])assert.ok(!display.includes(secret),secret);
+});
+test('dependency routes distinguish editable entities and retained evidence',()=>{
+  assert.equal(d.managementAction('learners').kind,'learner');
+  assert.equal(d.managementAction('companies').kind,'company');
+  assert.equal(d.managementAction('course_editions').kind,'edition');
+  assert.equal(d.managementAction('enrollments').kind,'enrollment');
+  assert.equal(d.managementAction('organization_memberships').kind,'memberships');
+  assert.equal(d.managementAction('learner_account_invitations').kind,'invites');
+  assert.equal(d.managementAction('learning_events'),null);
+  assert.equal(d.managementAction('learner_company_training_history'),null);
+});
