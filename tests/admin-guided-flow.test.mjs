@@ -34,7 +34,7 @@ test('switching company clears stale edition, roster and incomplete people',()=>
  const s={organizationId:'o1',companyId:'c1',companyMode:'existing',editionId:'e1',editionMode:'new',versionId:'v1',editionTitle:'Titolo',selectedIds:['a'],newLearners:[{email:'a@b.it'}],result:{inserted:1}};
  assert.equal(u.changeScope(s,'companyId','c2'),true);
  assert.equal(s.companyId,'c2');assert.equal(s.editionId,'');assert.equal(s.editionMode,'existing');
- assert.deepEqual(s.selectedIds,[]);assert.deepEqual(s.newLearners,[]);assert.equal(s.result,null);
+ assert.deepEqual([...s.selectedIds],[]);assert.deepEqual([...s.newLearners],[]);assert.equal(s.result,null);
  assert.equal(s.versionId,'');assert.equal(s.editionTitle,'');
 });
 test('switching organization clears the company form and downstream state',()=>{
@@ -42,7 +42,7 @@ test('switching organization clears the company form and downstream state',()=>{
  u.changeScope(s,'organizationId','o2');
  assert.equal(s.companyId,'');assert.equal(s.companyMode,'existing');assert.equal(s.companyName,'');
  assert.equal(s.vat,'');assert.equal(s.fiscal,'');assert.equal(s.ateco,'');
- assert.equal(s.editionId,'');assert.deepEqual(s.selectedIds,[]);assert.deepEqual(s.newLearners,[]);
+ assert.equal(s.editionId,'');assert.deepEqual([...s.selectedIds],[]);assert.deepEqual([...s.newLearners],[]);
 });
 test('draft restoration cannot import company, edition or learner from other scopes',()=>{
  const r={companies:[{id:'c1',organization_id:'o1'}],courses:[{id:'course',active:true,metadata:{}}],versions:[{id:'v1',course_id:'course',status:'published',syllabus_snapshot:{go_live_ready:true,finalization_candidate:true}}],editions:[{id:'e1',organization_id:'o1',company_id:'c1',course_version_id:'v1',status:'open'}],learners:[{id:'a',organization_id:'o1',company_id:'c1',active:true},{id:'b',organization_id:'o2',company_id:'c2',active:true}]};
