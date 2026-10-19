@@ -504,3 +504,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-19 — v22.17.1 correzione test GP03
 - Il workflow #387 è fallito per un'espressione regolare non valida introdotta nella nuova suite GP03 (non è un errore di runtime). Corrette le asserzioni su riuso della stampa e sulla sola lettura tramite confronti testuali. Gli SVG, i dati, la stampa A4 2-up, la PWA, i 27 corsi frozen e i gate didattici restano immutati; verificare il nuovo CI prima del rilascio.
+
+## 2026-10-19 — v22.17.2 CI verificata e deploy visual
+- `Graphic Pack 03` con 12 nuovi SVG (80 totali) e test corretto: GitHub Actions **SafetyTraining checks #388**, run `39331549235`, commit `f63e5b859a14e6f0711e8e21751d314fc4b82409`, stato **SUCCESS**.
+- Check Vercel del medesimo commit: **success**, riferimento `https://vercel.com/safety-manager/safety-training/8iUnRqps2xNyaguyYHeJRoSWKpKB`. Il check non costituisce da solo prova di resa visiva sul browser o di controllo reale stampa A4.
+- Da eseguire: QA visivo dei 12 diagrammi con schermate a 1440/820/390 px, leggibilità delle tre azioni, proiezione e stampa A4 reale, controllo eventuali testi troppo lunghi. Non dichiarare questa verifica completata finché non avviene.
+- Nessuna modifica al runtime, a Supabase, ai 27 corsi frozen, a presenze/attestati o al percorso di eliminazione.
