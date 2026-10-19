@@ -526,3 +526,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.18.3 CI handoff cache allineata
 - I test sorgenti/media del run #392 sono riusciti; unico errore: intestazioni dei due registri ancora con cache v22-44, nonostante PWA v22-46 già corretta. Intestazioni e nuova nota sincronizzate; nessuna modifica di runtime/DB. Ricontrollare CI sul commit corrente.
+
+## 2026-10-20 — v22.18.4 test cache di GP03 reso evolutivo
+- CI #393: unico errore residuo, asserzione GP03 con numero cache v22-44 hardcoded. Il test ora controlla il formato della chiave corrente invece di imporre una sottoversione superata. Gli altri test importer e regressioni precedenti hanno superato le rispettive verifiche; correzione solo test, nessun runtime alterato.

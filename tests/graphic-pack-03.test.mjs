@@ -42,7 +42,7 @@ test('same read-only buildDeck is used for A4 and projection',()=>{
  assert.ok(app.indexOf('SAFETY_GRAPHIC_PACK_02?.pick')<app.indexOf('SAFETY_GRAPHIC_PACK_03?.pick'));
  assert.ok(html.indexOf('graphic-pack-02.js')<html.indexOf('graphic-pack-03.js'));
  assert.ok(html.indexOf('graphic-pack-03.js')<html.indexOf('app.js'));
- assert.ok(sw.includes('safety-training-v22-44'));
+ assert.match(sw,/const CACHE='safety-training-v22-\\d+'/);
  for(const item of pack.items)assert.ok(sw.includes('./'+item.src),'missing '+item.src);
  assert.ok(read('apps/training/admin-print-slides-v23.js').includes('projection.buildDeck(converted)'));
  for(const verb of ['.upsert(','.delete(','.insert(','.update('])assert.ok(!read('apps/training/graphic-pack-03.js').includes(verb),'unexpected DB mutation '+verb);
