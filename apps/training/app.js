@@ -333,6 +333,8 @@ function deckSlideBody(s,index){
  }
  return '';
 }
+// Read-only access to the exact presentation builders for visual printing.
+window.SAFETY_DECK_RENDER={buildDeck,deckSlideBody};
 function deckView(c,index=0){
  const deck=buildDeck(c);
  index=Math.min(Math.max(0,Number(index)||0),deck.length-1);
