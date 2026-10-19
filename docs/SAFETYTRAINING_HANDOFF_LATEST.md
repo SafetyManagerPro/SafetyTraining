@@ -320,3 +320,10 @@ NON completato: visual browser smoke interattivo reale a 1440 / 820 / 390 con cl
 - Installata e verificata su Supabase migrazione `v22_014_admin_deletion_indirect_read_only_preview`. Conteggi informativi RLS-visible di iscrizioni, sessioni, test, risposte, eventi, progressi, evidenze, valutazioni e storico nelle cascades raggiungibili dalle selezioni esplicite. Distingue `SET NULL` di question_attempts da CASCADE. Conteggi non equivalgono a certezza transazionale o copertura di ogni vincolo.
 - Funzione `admin_execute_deletion_v25` assente; capability `ready:false`, `execution_enabled:false`. Nessun record modificato. Il frontend ora mostra warnings server. PWA `safety-training-v22-20`.
 - Nota sicurezza: sulle tabelle aziende, corsisti, edizioni, iscrizioni sono esistenti GRANT DELETE a authenticated/anon e policy RLS che possono consentire delete ad alcuni ruoli. Prima di abilitare esecuzione RPC, effettuare audit completo e rimuovere eventuali bypass senza rompere flussi autorizzati.
+
+## 2026-10-19 — v22.5.3 client DELETE privilege closure
+- Audit production: 13/16 relevant tables initially exposed DELETE privilege to anon/authenticated, subject to RLS. The remaining 3 were already restricted.
+- Applied Supabase migration `v22_015_revoke_direct_delete_client_roles` on 16 named public tables. Verified `client_delete_remaining=0`, `service_role_delete_available=16`. SELECT / INSERT / UPDATE not intentionally changed; zero row modifications.
+- No currently inspected app modules issue direct database `.delete()` on protected records. All destructive procedures remain disabled. `admin_execute_deletion_v25` not installed.
+- Future server transaction MUST implement explicit audit, whitelist, relationship re-evaluation, strong admin auth, policy-scoped permissions and dry-run testing on separate database before enabling. No production delete tests.
+- PWA `safety-training-v22-21`; all follow-up modifications require updating both handoffs.
