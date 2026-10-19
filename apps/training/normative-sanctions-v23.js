@@ -3,7 +3,7 @@
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
   const SOURCE='https://www.normattiva.it/eli/id/2008/04/30/008G0104/CONSOLIDATED';
-  const SOURCEINL='https://www.ispettorato.gov.it/files/2026/01/TU-81-08-Ed.-Gennaio-2026.pdf';
+  const SOURCEINL='https://www.ispettorato.gov.it/documenti-e-normativa/normativa-di-interesse/salute-e-sicurezza-nei-luoghi-di-lavoro/';
   const updated='19/10/2026';
   const cases=[
     {id:'dvr',pattern:/\bDVR\b|valutazione (?:di|dei) rischi|documento di valutazione/i,
@@ -53,12 +53,70 @@
       scenario:'Un autonomo che opera nei contesti assoggettati alla normativa trascura obblighi di sicurezza propri.',
       roles:[['Lavoratori autonomi / componenti dell’impresa familiare','Osservare i doveri che il decreto assegna al proprio status, ad esempio art. 21.','Gli artt. 60 e, nei cantieri, 160 disciplinano fattispecie specifiche. Non applicare indistintamente le sanzioni previste per lavoratori subordinati.']],
       references:'Artt. 21, 60 e 160, D.Lgs. 81/2008.'},
+
+    {id:'interference',pattern:/\bDUVRI\b|rischi interferenzial|\bappalt[oi]\b|cooperazione e coordinamento/i,
+      scenario:'Due imprese lavorano nella stessa area senza organizzare correttamente le interferenze tra attività.',
+      roles:[['Datore di lavoro committente e altri datori coinvolti','Accertare obblighi di verifica, informazione, cooperazione, coordinamento e documento per i rischi interferenziali nei casi previsti dall’art. 26.','Art. 55, c. 5, lett. d, per specifiche violazioni dell’art. 26, commi 2 e 3, primo periodo: arresto o ammenda; le esenzioni e le responsabilità degli altri soggetti vanno verificate.']],
+      references:'Artt. 26 e 55, c. 5, lett. d, D.Lgs. 81/2008.'},
+    {id:'emergencies',pattern:/gestione (?:delle )?emergenz|\bpiano di emergenza\b|\bevacuazione\b|\besodo\b/i,
+      scenario:'In presenza di un allarme i lavoratori non sanno a chi segnalare, come evacuare né chi coordina.',
+      roles:[['Datore di lavoro / dirigente','Organizzare rapporti con servizi, designazioni, istruzioni, misure e formazione per le emergenze secondo i requisiti concretamente applicabili.','Art. 55, c. 5, lett. a, per le specifiche ipotesi dell’art. 43, c. 1 e c. 4 richiamate: arresto o ammenda.'],
+        ['Lavoratore','Rispettare le istruzioni operative ricevute e avvisare delle condizioni di pericolo, nei limiti delle attribuzioni.','Art. 59 può riguardare violazioni degli obblighi specificamente indicati nell’art. 20; non sostituisce il dovere organizzativo del datore.']],
+      references:'Artt. 18, 20, 43, 44, 55 e 59, D.Lgs. 81/2008.'},
+    {id:'first-aid',pattern:/primo soccorso|cassetta di pronto soccorso|addett[oi] al primo soccorso/i,
+      scenario:'Non sono organizzati addetti, presidi e modalità per chiamare i soccorsi secondo il rischio aziendale.',
+      roles:[['Datore di lavoro / dirigente','Adottare i provvedimenti necessari per primo soccorso e assistenza medica di emergenza in relazione alla natura delle attività.','Art. 55, c. 5, lett. a, per violazione dell’art. 45, c. 1: arresto o ammenda.'],
+        ['Addetti al primo soccorso','Intervenire nei limiti di formazione, procedure e condizioni effettive, senza improvvisare prestazioni sanitarie.','La sola qualifica di addetto non attribuisce automaticamente la sanzione prevista per l’omissione organizzativa del datore.']],
+      references:'Artt. 18, 43, 45 e 55, D.Lgs. 81/2008.'},
+    {id:'fire',pattern:/prevenzione incend|\bantincendio\b|rischio incendio|addett[oi] antincendio/i,
+      scenario:'I presidi antincendio o le misure organizzative non sono gestiti come richiesto nel contesto dell’attività.',
+      roles:[['Datore di lavoro / dirigente','Applicare le misure di prevenzione incendi e gestione delle emergenze richieste dal tipo di attività e dalla valutazione dei rischi.','Art. 55, c. 5, lett. c, per le ipotesi richiamate dell’art. 46, c. 2: arresto o ammenda. Altri obblighi sono sanzionati da norme specifiche.']],
+      references:'Artt. 18, 43, 46 e 55, D.Lgs. 81/2008.'},
+    {id:'signs',pattern:/segnaletica di sicurezza|segnali di sicurezza|cartellonistica di sicurezza/i,
+      scenario:'In un reparto il pericolo rimane non segnalato o il personale non comprende il significato dei segnali.',
+      roles:[['Datore di lavoro / dirigente','Adottare segnaletica quando i rischi non sono evitabili o sufficientemente limitabili con altre misure; informare i lavoratori sui segnali.','Art. 165, c. 1, lett. a, per le violazioni dell’art. 163, e lett. b per l’art. 164: arresto o ammenda; non considerare la segnaletica un sostituto delle misure tecniche.']],
+      references:'Artt. 163, 164 e 165, D.Lgs. 81/2008.'},
+    {id:'confined',pattern:/\bspazi confinati\b|ambienti sospetti di inquinamento|ambienti confinati|accesso in cisterna|lavori in silos/i,
+      scenario:'È previsto l’accesso a un ambiente con possibile carenza di ossigeno o sostanze pericolose senza verifiche preliminari.',
+      roles:[['Datore di lavoro / dirigente','Valutare i rischi e rispettare divieti, condizioni e misure specifiche previste per ambienti sospetti di inquinamento.','Art. 68, c. 1, lett. a, per violazione dell’art. 66: arresto o ammenda. Gli ulteriori obblighi del contesto e la disciplina speciale vanno verificati.']],
+      references:'Artt. 66 e 68, D.Lgs. 81/2008; D.P.R. 177/2011 nei casi applicabili.'},
+    {id:'pos',pattern:/\bPOS\b|piano operativo di sicurezza|obblighi impresa affidataria|documenti di cantiere/i,
+      scenario:'L’impresa esecutrice avvia attività in cantiere senza il POS previsto o con un documento privo degli elementi richiesti.',
+      roles:[['Datore di lavoro dell’impresa esecutrice','Redigere il POS per lo specifico cantiere nei casi previsti e con i contenuti applicabili.','Art. 159, c. 1, per violazione dell’art. 96, c. 1, lett. g: arresto o ammenda; sono previste discipline differenti per omissione, rischi particolari e carenze degli elementi del documento.']],
+      references:'Artt. 96, 97 e 159, D.Lgs. 81/2008.'},
+    {id:'height',pattern:/\blavori? in quota\b|cadut[ae] dall.alt[oa]|protezioni contro le cadute|pontegg[io]/i,
+      scenario:'Lavorazioni in quota si svolgono con protezioni collettive mancanti o accessi non adeguati.',
+      roles:[['Datore di lavoro / dirigente','Scegliere sistemi di accesso e protezioni pertinenti, garantendo sicurezza delle opere e dei posti di lavoro.','Art. 159, c. 2, lett. a o b a seconda della violazione degli articoli del Titolo IV, tra cui art. 122; arresto o ammenda.'],
+        ['Preposto','Vigilare sul rispetto delle protezioni e intervenire nei limiti dell’art. 19 e del ruolo realmente svolto.','Le specifiche violazioni del Titolo IV possono coinvolgere l’art. 159 e quelle generali l’art. 56: non applicare entrambe automaticamente.']],
+      references:'Artt. 19, 111, 115, 122, 159 e 56, D.Lgs. 81/2008.'},
     {id:'rls',pattern:/\bRLS\b|rappresentante dei lavoratori per la sicurezza/i,
       scenario:'La consultazione e la partecipazione del rappresentante sono organizzate in modo inadeguato.',
       roles:[['Datore di lavoro / dirigente','Rispettare consultazione e informazione dove previste (artt. 18, 47–50).','Verificare la specifica omissione e disposizione sanzionatoria applicabile al soggetto obbligato.'],
         ['RLS','Il ruolo rappresentativo non costituisce di per sé una qualifica con una sanzione penale generalizzata per le attribuzioni dell’art. 50.','Restano distinti gli eventuali obblighi e responsabilità della persona in altri ruoli effettivamente ricoperti.']],
       references:'Artt. 18, 47–50 e 55, D.Lgs. 81/2008.'}
   ];
+  // Operational prompts are educational checks, not a substitute for factual legal assessment.
+  const practical={
+    dvr:['Verificare attività, rischi reali, lavoratori esposti, misure e aggiornamento del DVR.','Controllare presenza della valutazione e ruolo non delegabile del datore.'],
+    rspp:['Verificare la designazione formale e la disponibilità del servizio prevenzione.','Distinguere compiti tecnici RSPP dalle decisioni che restano in capo al datore.'],
+    training:['Verificare mansioni, rischi, formazione iniziale, aggiornamenti e addestramento ove necessari.','Non attribuire ore o abilità tramite semplice lettura digitale.'],
+    dpi:['Controllare scelta, consegna, istruzioni, uso effettivo dei DPI e intervento del preposto.','Separare mancata fornitura da mancato uso del lavoratore.'],
+    preposto:['Definire chi deve vigilare e quali anomalie richiedono interruzione e segnalazione.','Registrare fatti osservabili, interventi e comunicazioni.'],
+    health:['Verificare se il rischio richiede sorveglianza sanitaria e chi ha il compito di organizzarla.','Separare omissioni del datore da obblighi clinico-professionali del medico.'],
+    equipment:['Controllare idoneità macchina, verifiche, istruzioni d’uso, manutenzioni, formazione e addestramento.','Non equiparare presenza online ad abilitazione per attrezzature.'],
+    site:['Controllare designazioni, PSC, coordinamento, verifiche e condizioni di applicabilità degli obblighi.','Distinguere CSP, CSE, committente e responsabile lavori.'],
+    supply:['Verificare provenienza, documenti e conformità delle attrezzature rispetto al ruolo effettivo.','Non confondere la responsabilità del fornitore con gli obblighi dell’utilizzatore.'],
+    autonomo:['Accertare se il soggetto rientra nell’art. 21 o opera in un cantiere ai sensi del Titolo IV.','Controllare equipaggiamenti, DPI e obblighi applicabili in concreto.'],
+    rls:['Verificare consultazioni e accesso alle informazioni dovute.','Non trasformare l’RLS in un preposto o datore di lavoro.'],
+    interference:['Individuare compresenze, interferenze concrete, misure comuni e obblighi di coordinamento.','Verificare condizioni di applicabilità e casi di esclusione del DUVRI.'],
+    emergencies:['Verificare ruoli, comunicazioni, percorsi di esodo e prove in rapporto ai rischi.','Riconoscere quando interrompere l’attività e chiamare i soccorsi.'],
+    'first-aid':['Verificare addetti, materiale di soccorso, recapiti, accessibilità e organizzazione.','Assicurare che le manovre siano svolte da personale preparato nei limiti del proprio ruolo.'],
+    fire:['Controllare valutazione rischio incendio, addetti, istruzioni, presidi e manutenzioni.','Non usare estintori o evacuazione improvvisando se manca addestramento adeguato.'],
+    signs:['Verificare che il rischio residuo richieda segnaletica e che i segnali siano visibili e comprensibili.','Ricordare che cartelli da soli non eliminano il pericolo.'],
+    confined:['Valutare atmosfera, accessi, emergenza e requisiti specialistici prima di qualsiasi ingresso.','Sospendere attività se non sono chiarite condizioni e misure di sicurezza.'],
+    pos:['Verificare che POS e PSC, ove dovuti, siano specifici per il cantiere e coerenti con l’attività.','Controllare la differenza fra assenza, incompletezza e verifica dei documenti.'],
+    height:['Valutare accesso, protezioni collettive, protezione individuale, condizioni ambientali e vigilanza.','Sospendere l’attività se caduta dall’alto o interferenze non sono controllate.']
+  };
   function matches(context){
     // Match the subject taught, not generic statutory references listed in a note.
     // A catch-all reference to art. 37 or DVR must not insert penalties in every lesson.
@@ -69,14 +127,16 @@
   function renderFor(context){
     const found=matches(context);if(!found.length)return '';
     return '<section class="section print-lesson-section normative-sanctions" aria-label="Sanzioni e responsabilità">'+
-      '<h3>⚖️ Inadempienze e sanzioni: esempi collegati alla lezione</h3>'+
-      '<p>Riferimenti didattici, non attribuzioni automatiche di colpa: verificare ruolo, obbligo, circostanze, testo vigente e importi aggiornati. Ammenda penale e sanzione amministrativa non sono sinonimi. Verifica fonti: '+updated+'.</p>'+
+      '<h3>⚖️ Inadempienze, ruoli e sanzioni: casi pratici</h3>'+
+      '<p>Riferimenti didattici, non attribuzioni automatiche di colpa: verificare ruolo, obbligo, circostanze, testo vigente e importi aggiornati. Ammenda penale e sanzione amministrativa non sono sinonimi. Revisione didattica: '+updated+'. La versione INL di gennaio 2026 può non includere modifiche successive.</p>'+
       found.map(x=>'<article class="normative-sanction-case"><h4>'+esc(x.id.toUpperCase())+' · '+esc(x.scenario)+'</h4>'+
         '<dl>'+x.roles.map(([role,obligation,consequence])=>'<dt><strong>'+esc(role)+'</strong></dt><dd><p>'+esc(obligation)+'</p><p><strong>Conseguenze:</strong> '+esc(consequence)+'</p></dd>').join('')+'</dl>'+
-        '<p><strong>Norma:</strong> '+esc(x.references)+'</p></article>').join('')+
-      '<p><a href="'+SOURCE+'" target="_blank" rel="noopener noreferrer">Testo vigente D.Lgs. 81/2008 – fonte MEF</a> · '+
-      '<a href="'+SOURCEINL+'" target="_blank" rel="noopener noreferrer">Testo coordinato INL (gennaio 2026)</a>.</p>'+
+        '<p><strong>Norma:</strong> '+esc(x.references)+'</p>'+ 
+        '<div class="normative-sanction-actions"><strong>Cosa verificare / come procedere</strong><ul>'+
+        (practical[x.id]||[]).map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul></div></article>').join('')+
+      '<p><a href="'+SOURCE+'" target="_blank" rel="noopener noreferrer">D.Lgs. 81/2008 vigente — Normattiva</a> · '+
+      '<a href="'+SOURCEINL+'" target="_blank" rel="noopener noreferrer">Raccolta testo coordinato INL (verificare edizione)</a>.</p>'+
       '<p>Importi omessi volutamente: controllare gli aggiornamenti monetari e le disposizioni in vigore alla data della violazione.</p></section>';
   }
-  window.SAFETY_NORMATIVE_SANCTIONS_V23={matches,renderFor,cases};
+  window.SAFETY_NORMATIVE_SANCTIONS_V23={matches,renderFor,cases,practical};
 })();

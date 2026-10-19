@@ -55,3 +55,40 @@ test('legal references point to canonical, public official sources',()=>{
   assert.match(html,/normattiva\.it/);
   assert.match(html,/ispettorato\.gov\.it/);
 });
+
+test('new casebook includes eight distinct workplace hazard scenarios and precise role references',()=>{
+ const examples=[
+  ['DUVRI',/Art\. 55, c\. 5, lett\. d/],
+  ['Gestione delle emergenze e evacuazione',/Art\. 43/],
+  ['Primo soccorso',/Art\. 45/],
+  ['Antincendio',/Art\. 46/],
+  ['Segnaletica di sicurezza',/Art\. 165/],
+  ['Spazi confinati',/Art\. 68/],
+  ['POS',/Art\. 159/],
+  ['Cadute dall’alto',/Art\. 159/]
+ ];
+ for(const [title,ref] of examples){
+  const html=sanctions.renderFor({title});
+  assert.match(html,ref,title);
+  assert.match(html,/Cosa verificare \/ come procedere/);
+  assert.match(html,/<ul>/);
+ }
+});
+test('inappropriate generic references do not add sanctions without subject matter',()=>{
+ assert.equal(sanctions.renderFor({title:'Lavoro ordinario',summary:'Routine in ufficio',norm:'DUVRI, POS, incendio, art. 55'}),'');
+});
+test('casebook links current Normattiva and INL landing, not an outdated 2026 January PDF',()=>{
+ const html=sanctions.renderFor({title:'Primo soccorso'});
+ assert.match(html,/normattiva\.it/);
+ assert.match(html,/ispettorato\.gov\.it\/documenti-e-normativa\//);
+ assert.match(html,/gennaio 2026 può non includere modifiche successive/);
+ assert.doesNotMatch(html,/TU-81-08-Ed\.-Gennaio-2026\.pdf/);
+});
+test('role-aware casebook remains read-only and has actions for all scenarios',()=>{
+ assert.ok(sanctions.cases.length>=19);
+ for(const item of sanctions.cases){
+  assert.ok(Array.isArray(sanctions.practical[item.id]),item.id);
+  assert.ok(sanctions.practical[item.id].length>=2,item.id);
+  assert.ok(item.references.includes('D.Lgs. 81/2008')||item.references.includes('D.Lgs. 81/2008;'));
+ }
+});
