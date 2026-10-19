@@ -467,12 +467,13 @@
     found.closest('tr')?.classList.add('admin-dependency-focus');
     if(action)found.click();else found.focus();
   }
-  // v22.4: the module builds a selective plan only. No client-side DELETE is permitted.
+  // v22.5: server-only execution after capability probe, impact preview and typed confirmation.
   async function reviewDeletion(kind,id){
     if(!state.open||!state.admin||!user()?.id)return toast('Accesso amministrativo richiesto.','error');
     return window.SAFETY_ADMIN_DELETE_PLANNER_V22?.open?.({
       kind,id,client:db(),actorId:user().id,modal,closeModal,getActorId:()=>user()?.id,
-      openRecord:openDependencyRecord
+      openRecord:openDependencyRecord,
+      onDeleted:async ()=>{await render();toast('Eliminazione confermata dal server.','success');}
     });
   }
 

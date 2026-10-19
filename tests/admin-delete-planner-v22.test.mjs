@@ -43,9 +43,9 @@ test('unknown, truncated or inaccessible dependencies always block parent',()=>{
 });
 test('UI supports per-row and select-all with real deletion disabled',()=>{
   const src=read('apps/training/admin-delete-planner-v22.js'),html=read('apps/training/index.html');
-  for(const piece of ['data-plan-choice','data-plan-all','data-plan-none','data-plan-parent','data-plan-next','data-plan-back','Conferma eliminazione (non disponibile)'])assert.ok(src.includes(piece),piece);
+  for(const piece of ['data-plan-choice','data-plan-all','data-plan-none','data-plan-parent','data-plan-next','data-plan-back','Conferma eliminazione definitiva'])assert.ok(src.includes(piece),piece);
   assert.match(src,/getActorId\(\)===actorId/);
-  assert.doesNotMatch(src,/\.from\([^)]*\)\.delete\s*\(|\.rpc\s*\(|\.from\([^)]*\)\.update\s*\(/);
+  assert.doesNotMatch(src,/\.from\([^)]*\)\.delete\s*\(|\.from\([^)]*\)\.update\s*\(/);
   assert.match(html,/admin-delete-planner-v22\.js/);assert.match(html,/admin-delete-planner-v22\.css/);
 });
 
@@ -162,4 +162,39 @@ test('enrollment scan distinguishes learning progress by unit version',async()=>
  assert.equal(progress.entries.length,2);
  assert.notEqual(progress.entries[0].key,progress.entries[1].key);
  assert.ok(progress.entries.every(x=>x.id===null));
+});
+
+test('server is mandatory and a missing backend fails closed before mutation',async()=>{
+  const groups=[{table:'learning_events',column:'enrollment_id',entries:[{key:'[\"learning_events\",123]',source:'learning_events',category:'protected'}],error:null,truncated:false}];
+  const info={kind:'enrollment',id:'123',spec:{table:'enrollments'},groups,parentType:'protected'};
+  const effect=d.intentPlan(groups,new Map([['[\"learning_events\",123]','delete']]),true,info.parentType);
+  let count=0;
+  const client={rpc:async name=>{count++;return {error:{message:'function does not exist'}};}};
+  await assert.rejects(d.verifiedServerPreview(client,info,effect),/non è ancora installato/);
+  assert.equal(count,1);
+});
+test('server confirmation is exact and payload includes only consciously selected links',()=>{
+  const info={kind:'edition',id:'ed-id',spec:{table:'course_editions'}};
+  const effect={incomplete:false,accountLinked:false,remove:[{key:'[\"enrollments\",\"en-id\"]',source:'enrollments'}],unlink:[],deleteParent:true};
+  const payload=d.executionPayload(info,effect);
+  assert.equal(payload.p_actions.length,1);
+  assert.equal(payload.p_actions[0].action,'delete');
+  assert.equal(payload.p_delete_parent,true);
+  assert.equal(d.exactConfirmation('ed-id'),'ELIMINA ed-id');
+});
+test('impact preview warns about nested deletions including test answers',()=>{
+ const info={spec:{table:'enrollments'}};
+ const effect={remove:[{source:'test_attempts'}],deleteParent:true};
+ const warnings=d.effectWarnings(info,effect);
+ assert.ok(warnings.some(x=>x.table==='test_attempts'&&x.note.includes('test_answers')));
+ assert.ok(warnings.some(x=>x.table==='enrollments'));
+});
+test('frontend executes only via guarded server RPC and never client-side DELETE',()=>{
+ const src=read('apps/training/admin-delete-planner-v22.js');
+ assert.match(src,/admin_delete_capabilities_v25/);
+ assert.match(src,/admin_preview_deletion_v25/);
+ assert.match(src,/admin_execute_deletion_v25/);
+ assert.match(src,/preview_token/);
+ assert.match(src,/data-plan-confirm/);
+ assert.doesNotMatch(src,/\.from\([^)]*\)\.delete\s*\(/);
 });

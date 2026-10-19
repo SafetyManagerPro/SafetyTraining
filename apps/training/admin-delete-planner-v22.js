@@ -183,11 +183,52 @@
       accountLinked:parentType==='account-linked',rootPossible,
       deleteParent:!!parentSelected&&rootPossible};
   }
+
+  // An administrative plan is not authority to remove records. Only a versioned,
+  // independently authorized server preview can authorize the final confirmation.
+  const secondaryImpacts=Object.freeze({
+    companies:'Le appartenenze organizzative possono essere eliminate in cascata.',
+    learners:'Le iscrizioni e gli inviti collegati possono essere eliminati in cascata.',
+    course_editions:'Le iscrizioni e lo storico collegati possono essere eliminati in cascata.',
+    enrollments:'Possono essere eliminate presenze, eventi, progressi, test, risposte, documenti e storico.',
+    learning_sessions:'Gli eventi della sessione possono essere eliminati; alcune risposte perdono il collegamento alla sessione.',
+    test_attempts:'Le risposte in test_answers possono essere eliminate in cascata.'
+  });
+  function effectWarnings(info,effect){
+    const targets=new Set(effect.remove.map(x=>x.source));
+    if(effect.deleteParent)targets.add(info.spec.table);
+    return [...targets].filter(table=>secondaryImpacts[table])
+      .map(table=>({table,note:secondaryImpacts[table]}));
+  }
+  function executionPayload(info,effect){
+    if(effect.incomplete||effect.accountLinked&&effect.deleteParent)throw Error('Controlli incompleti o account ancora collegato.');
+    if(!effect.remove.length&&!effect.unlink.length&&!effect.deleteParent)throw Error('Non ci sono azioni da eseguire.');
+    const actions=effect.remove.map(x=>({key:x.key,action:'delete'}))
+      .concat(effect.unlink.map(x=>({key:x.key,action:'unlink'})));
+    if(new Set(actions.map(x=>x.key)).size!==actions.length)throw Error('Selezione ambigua.');
+    return {p_kind:info.kind,p_root_id:info.id,p_actions:actions,p_delete_parent:effect.deleteParent};
+  }
+  async function verifiedServerPreview(client,info,effect){
+    const payload=executionPayload(info,effect);
+    const capability=await client.rpc('admin_delete_capabilities_v25');
+    if(capability.error||!capability.data||capability.data.version!=='v25'||capability.data.ready!==true){
+      throw Error('Il servizio server di eliminazione non è ancora installato o non è pronto. Nessun dato è stato modificato.');
+    }
+    const response=await client.rpc('admin_preview_deletion_v25',payload);
+    if(response.error)throw Error('Verifica server non riuscita: '+response.error.message);
+    const data=response.data;
+    if(!data||data.safe!==true||typeof data.preview_token!=='string'||
+       !data.preview_token||!Array.isArray(data.impact)){
+      throw Error('Il server non ha autorizzato un riepilogo completo. Nessun dato è stato modificato.');
+    }
+    return {payload,token:data.preview_token,impact:data.impact};
+  }
+  function exactConfirmation(rootId){return 'ELIMINA '+rootId;}
   const categoryText={candidate:'Candidato',manual:'Da verificare / scollegare',protected:'Storico o verifiche: attenzione'};
-  function open({kind,id,client,actorId,modal,closeModal,getActorId,openRecord}){
+  function open({kind,id,client,actorId,modal,closeModal,getActorId,openRecord,onDeleted}){
     if(!specs[kind]||!client||!actorId)return;
     const spec=specs[kind],selected=new Set(),decisions=new Map();
-    let info=null,stage=0,wantParent=false,locked=false,inspected=null;
+    let info=null,stage=0,wantParent=false,locked=false,inspected=null,serverPreview=null,previewError='';
     const overlay=modal('Gestione eliminazione · '+spec.title,
       '<div class="admin-delete-v24"><div class="admin-delete-steps">1. Selezione → 2. Riepilogo → 3. Conferma server</div>'+
       '<div id="adminDeletePlan" role="status" aria-live="polite">Analisi delle dipendenze…</div>'+
@@ -267,20 +308,82 @@
       const effect=intentPlan(info.groups,decisions,wantParent,info.parentType);
       const rows=effect.remove.map(e=>({...e,action:'Elimina'}))
         .concat(effect.unlink.map(e=>({...e,action:'Scollega'})));
-      holder.innerHTML='<h3>2 · Riepilogo dell’intervento</h3>'+
+      const impacts=effectWarnings(info,effect);
+      const canReview=!effect.incomplete&&!effect.accountLinked&&
+        (effect.remove.length||effect.unlink.length||effect.deleteParent);
+      holder.innerHTML='<h3>2 · Riepilogo prima della verifica server</h3>'+
         '<p>Eliminazioni richieste: <strong>'+effect.remove.length+'</strong> · Scollegamenti richiesti: <strong>'+
-        effect.unlink.length+'</strong> · Da risolvere: <strong>'+effect.unresolved.length+'</strong></p>'+
+        effect.unlink.length+'</strong> · Dipendenze conservate: <strong>'+effect.unresolved.length+'</strong></p>'+
         '<ul class="admin-delete-review">'+rows.map(e=>
           '<li><strong>'+esc(e.action)+'</strong> · '+esc(e.label)+' <small>('+esc(e.source)+')</small></li>').join('')+'</ul>'+
         '<p>Record principale: <strong>'+(effect.deleteParent?'Incluso nel piano':'Conservato')+'</strong></p>'+
-        '<p>Riferimenti sensibili nella selezione: '+effect.warnings.length+
-        '. Elenco incompleto: '+(effect.incomplete?'sì':'no')+'.</p>'+
-        '<div class="admin-delete-caution"><strong>Operazione finale non attiva.</strong> Il riepilogo è indicativo e non calcola ancora tutti gli effetti indiretti. L’esecuzione dovrà mostrare tali effetti, chiedere una conferma esplicita ed essere effettuata in una transazione server con audit.</div>'+
+        '<p>Voci delicate selezionate: '+effect.warnings.length+'; verifiche incomplete: '+(effect.incomplete?'sì':'no')+'.</p>'+
+        (impacts.length?'<div class="admin-delete-caution"><strong>Ulteriori effetti possibili (ancora da verificare dal server)</strong>'+
+          '<ul>'+impacts.map(x=>'<li>'+esc(x.table)+': '+esc(x.note)+'</li>').join('')+'</ul></div>':'')+
+        '<p>Il backup locale è stato generato, ma non ne è stato collaudato il ripristino. Una cancellazione può essere irreversibile.</p>'+
+        '<div class="admin-delete-caution">La conferma richiede un controllo aggiuntivo direttamente sul server: autorizzazioni, selezione, relazioni indirette ed effetti a cascata. La disponibilità di questo servizio non viene presunta.</div>'+
+        (previewError?'<p class="admin-delete-caution" role="alert">'+esc(previewError)+'</p>':'')+
         '<div class="admin-delete-actions"><button type="button" data-plan-back>← Modifica scelte</button>'+
-        '<button type="button" data-plan-close>Chiudi</button>'+
-        '<button type="button" disabled aria-disabled="true">Conferma eliminazione (non disponibile)</button></div>';
+        '<button type="button" data-plan-server-review'+(canReview?'':' disabled')+'>Verifica eliminazione sul server →</button>'+
+        '<button type="button" data-plan-close>Chiudi</button></div>';
     }
-    function redraw(){if(!alive()||!info||locked)return;if(stage===0)showSelection();else if(stage===1)showReview();else showDetails();}
+    function showServerConfirmation(){
+      if(!serverPreview){stage=1;showReview();return;}
+      holder.innerHTML='<h3>3 · Conferma definitiva</h3>'+
+        '<p>Il server ha verificato l’operazione. Controlla anche le conseguenze indirette:</p>'+
+        '<ul class="admin-delete-review">'+serverPreview.impact.map(x=>
+          '<li>'+esc(x.label||x.table||'Dipendenza')+' · '+esc(x.action||'Da eliminare')+
+          ' · '+esc(x.count??'Numero non disponibile')+'</li>').join('')+'</ul>'+
+        '<p><strong>Questa operazione non è annullabile.</strong></p>'+
+        '<label class="admin-delete-confirm">Per confermare scrivi esattamente '+
+        '<code>'+esc(exactConfirmation(info.id))+'</code>'+
+        '<input type="text" data-plan-confirm autocomplete="off" spellcheck="false" aria-label="Conferma eliminazione"></label>'+
+        (previewError?'<p role="alert" class="admin-delete-caution">'+esc(previewError)+'</p>':'')+
+        '<div class="admin-delete-actions"><button type="button" data-plan-back>← Torna al riepilogo</button>'+
+        '<button type="button" data-plan-execute disabled>Conferma eliminazione definitiva</button>'+
+        '<button type="button" data-plan-close>Chiudi</button></div>';
+    }
+    async function verifyServer(){
+      if(locked||!info||!alive())return;
+      const effect=intentPlan(info.groups,decisions,wantParent,info.parentType);
+      serverPreview=null;previewError='';locked=true;
+      holder.innerHTML='<p role="status">Verifica dei permessi e delle dipendenze sul server…</p>';
+      try {
+        const result=await verifiedServerPreview(client,info,effect);
+        if(!alive())return;
+        serverPreview=result;stage=3;
+      } catch(error){
+        if(!alive())return;
+        stage=1;previewError=error?.message||String(error);
+      } finally {
+        locked=false;
+        if(alive())redraw();
+      }
+    }
+    async function executeConfirmed(){
+      if(!serverPreview||!alive()||locked)return;
+      const input=holder.querySelector('[data-plan-confirm]');
+      if(input?.value!==exactConfirmation(info.id))return;
+      const snapshot=serverPreview;locked=true;
+      holder.innerHTML='<p role="status">Richiesta di eliminazione in corso. Non chiudere questa finestra.</p>';
+      try {
+        if(!alive())return;
+        const reply=await client.rpc('admin_execute_deletion_v25',{
+          ...snapshot.payload,p_preview_token:snapshot.token,p_confirmation:exactConfirmation(info.id)
+        });
+        if(reply.error)throw reply.error;
+        if(!reply.data||reply.data.executed!==true)throw Error('Il server non ha attestato il completamento.');
+        if(!alive())return;
+        closeModal();
+        if(typeof onDeleted==='function')await onDeleted(reply.data);
+      } catch(error){
+        if(!alive())return;
+        previewError='Operazione non confermata: '+(error?.message||String(error))+
+          '. Verifica lo stato prima di riprovare.';
+        serverPreview=null;stage=1;locked=false;redraw();
+      }
+    }
+    function redraw(){if(!alive()||!info||locked)return;if(stage===0)showSelection();else if(stage===1)showReview();else if(stage===3)showServerConfirmation();else showDetails();}
     overlay.addEventListener('click',e=>{
       if(e.target.closest('[data-plan-close]')){closeModal();return;}
       if(!info||locked)return;
@@ -290,6 +393,8 @@
         if(inspected){stage=2;redraw();}return;
       }
       if(e.target.closest('[data-plan-detail-back]')){inspected=null;stage=0;redraw();return;}
+      if(e.target.closest('[data-plan-server-review]')){void verifyServer();return;}
+      if(e.target.closest('[data-plan-execute]')){void executeConfirmed();return;}
       if(e.target.closest('[data-plan-manage]')){
         if(!inspected||typeof openRecord!=='function')return;
         const action=managementAction(inspected.source);
@@ -303,10 +408,12 @@
         wantParent=false;redraw();
       }else if(e.target.closest('[data-plan-none]')){decisions.clear();wantParent=false;redraw();}
       else if(e.target.closest('[data-plan-next]')){stage=1;redraw();}
-      else if(e.target.closest('[data-plan-back]')){stage=0;redraw();}
+      else if(e.target.closest('[data-plan-back]')){serverPreview=null;previewError='';stage=stage===3?1:0;redraw();}
     });
     overlay.addEventListener('change',e=>{
       if(!info||locked)return;
+      const confirmation=e.target.closest('[data-plan-confirm]');
+      if(confirmation){const submit=holder.querySelector('[data-plan-execute]');if(submit)submit.disabled=confirmation.value!==exactConfirmation(info.id);return;}
       const choice=e.target.closest('[data-plan-choice]');
       if(choice){
         const key=choice.dataset.planChoice;
@@ -316,11 +423,11 @@
           else if(choice.value==='unlink'&&canUnlink(group.table,group.column))decisions.set(key,'unlink');
           else decisions.delete(key);
         }
-        wantParent=false;redraw();return;
+        wantParent=false;serverPreview=null;previewError='';redraw();return;
       }
       if(e.target.matches('[data-plan-parent]')){
         const effect=intentPlan(info.groups,decisions,false,info.parentType);
-        wantParent=effect.rootPossible&&e.target.checked;redraw();
+        wantParent=effect.rootPossible&&e.target.checked;serverPreview=null;previewError='';redraw();
       }
     });
     scan(client,kind,id).then(result=>{
@@ -333,5 +440,5 @@
         '<p>Operazione bloccata senza modifiche al database.</p>';
     });
   }
-  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,intentPlan,canUnlink,scan,classifyParent,safeDetails,managementAction,recordKey,projections};
+  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,intentPlan,canUnlink,scan,classifyParent,safeDetails,managementAction,recordKey,projections,effectWarnings,executionPayload,verifiedServerPreview,exactConfirmation};
 })();

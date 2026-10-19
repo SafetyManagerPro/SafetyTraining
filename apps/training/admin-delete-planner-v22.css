@@ -44,3 +44,9 @@
 .admin-delete-choice select{color:#edf5fa;background:#15364e;border:1px solid #8fa5b1;border-radius:8px;padding:9px;min-width:160px;max-width:100%}
 .admin-delete-decision .admin-delete-detail-trigger{margin-bottom:5px}
 @media(max-width:600px){.admin-delete-choice{flex-direction:column;align-items:stretch}.admin-delete-choice select{width:100%}}
+
+/* v22.5: server-confirmed deletion UX; no client-side direct DELETE */
+.admin-delete-confirm{display:grid;gap:10px;margin-top:12px;font-weight:650}
+.admin-delete-confirm input{padding:12px;color:#f4fbff;background:#143549;border:1px solid #96b2bd;border-radius:9px;max-width:100%}
+.admin-delete-confirm code{word-break:break-word}
+.admin-delete-confirm input:focus-visible{outline:3px solid #ffd166;outline-offset:2px}
