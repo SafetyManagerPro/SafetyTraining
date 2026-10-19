@@ -49,40 +49,66 @@
 #adminPrintableSlides .slide-print-projector button{display:none!important;}
 #safetySlidePrintStage{display:none;}
 @media print{
-  @page{size:A4 portrait;margin:11mm 12mm;}
-  html,body.admin-slides-print{height:auto!important;overflow:visible!important;background:#fff!important;margin:0!important;padding:0!important;}
+  /* A4: printable area 182 x 269 mm after 14 mm margins.
+     180 mm sheets contain two 172 x 96.75 mm 16:9 slides with room to spare. */
+  @page{size:A4 portrait;margin:14mm;}
+  html,body.admin-slides-print{
+    height:auto!important;overflow:visible!important;background:#fff!important;
+    margin:0!important;padding:0!important;
+  }
   body.admin-slides-print > :not(#safetySlidePrintStage){display:none!important;}
-  body.admin-slides-print #safetySlidePrintStage{display:block!important;position:static!important;
-    width:100%!important;height:auto!important;max-width:none!important;overflow:visible!important;
-    margin:0!important;padding:0!important;background:#fff!important;color:#111!important;}
+  body.admin-slides-print #safetySlidePrintStage{
+    display:block!important;position:static!important;
+    width:180mm!important;max-width:180mm!important;height:auto!important;
+    overflow:visible!important;margin:0 auto!important;padding:0!important;
+    background:#fff!important;color:#111!important;
+  }
   body.admin-slides-print #safetySlidePrintStage #adminPrintableSlides{
-    display:block!important;max-width:none!important;margin:0!important;padding:0!important;
-    width:100%!important;background:#fff!important;color:#111!important;
+    display:block!important;width:180mm!important;max-width:180mm!important;
+    margin:0!important;padding:0!important;background:#fff!important;color:#111!important;
     -webkit-print-color-adjust:exact;print-color-adjust:exact;
   }
   body.admin-slides-print #adminPrintableSlides .slide-print-disclaimer{display:none!important;}
+  /* Exactly two fixed-height slots, well below the A4 269mm printable height. */
   body.admin-slides-print #adminPrintableSlides .slide-print-sheet{
-    box-sizing:border-box!important;
-    display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
-    gap:9mm!important;width:100%!important;height:272mm!important;max-height:272mm!important;
-    margin:0!important;padding:4mm 2mm!important;border:0!important;border-radius:0!important;
+    box-sizing:border-box!important;display:grid!important;grid-template-columns:172mm!important;
+    grid-template-rows:112mm 112mm!important;align-content:start!important;justify-content:center!important;
+    row-gap:10mm!important;column-gap:0!important;
+    width:180mm!important;min-width:180mm!important;max-width:180mm!important;
+    height:250mm!important;min-height:250mm!important;max-height:250mm!important;
+    margin:0!important;padding:0 4mm!important;border:0!important;border-radius:0!important;
     box-shadow:none!important;break-after:page!important;page-break-after:always!important;
-    break-inside:avoid!important;page-break-inside:avoid!important;background:white!important;
+    break-inside:avoid!important;page-break-inside:avoid!important;
+    background:#fff!important;overflow:hidden!important;
   }
   body.admin-slides-print #adminPrintableSlides .slide-print-sheet:last-child{
     break-after:auto!important;page-break-after:auto!important;
   }
   body.admin-slides-print #adminPrintableSlides .slide-print-tile{
-    flex:0 0 auto!important;break-inside:avoid!important;page-break-inside:avoid!important;
+    box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
+    gap:2mm!important;width:172mm!important;min-width:0!important;
+    height:112mm!important;min-height:112mm!important;max-height:112mm!important;
+    margin:0!important;padding:0!important;overflow:hidden!important;
+    break-inside:avoid!important;page-break-inside:avoid!important;
   }
   body.admin-slides-print #adminPrintableSlides .slide-print-caption{
-    font-size:9pt!important;margin:0 0 3mm!important;color:#334155!important;
+    flex:0 0 4mm!important;display:flex!important;justify-content:space-between!important;
+    align-items:center!important;font-size:8.5pt!important;line-height:4mm!important;
+    height:4mm!important;margin:0!important;overflow:hidden!important;color:#334155!important;
   }
   body.admin-slides-print #adminPrintableSlides .slide-print-frame{
-    width:100%!important;border-radius:2mm!important;aspect-ratio:16/9!important;
-    border:0.35mm solid #cad7e2!important;background:#fff!important;overflow:hidden!important;
+    box-sizing:border-box!important;flex:0 0 96.75mm!important;
+    width:172mm!important;min-width:172mm!important;max-width:172mm!important;
+    height:96.75mm!important;min-height:96.75mm!important;max-height:96.75mm!important;
+    aspect-ratio:16/9!important;
+    border:0.3mm solid #cad7e2!important;border-radius:2mm!important;
+    background:#fff!important;position:relative!important;overflow:hidden!important;
   }
+  /* 1600x900 logical projector: 0.40 => 169.3x95.25mm (96 CSS px/in);
+     smaller than 172x96.75mm frame. Print scale never depends on screen/JS. */
   body.admin-slides-print #adminPrintableSlides .slide-print-projector{
+    transform:scale(0.40)!important;transform-origin:top left!important;
+    width:1600px!important;height:900px!important;min-width:1600px!important;min-height:900px!important;
     box-shadow:none!important;overflow:hidden!important;
   }
   body.admin-slides-print #adminPrintableSlides img{

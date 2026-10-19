@@ -73,6 +73,9 @@
     }));
   }
   function scaleSlides(preview){
+    // CSS controls print scale with physical A4 dimensions. Never overwrite it
+    // with a screen-calculated transform during beforeprint/startPrint.
+    if(document.body?.classList?.contains('admin-slides-print'))return;
     const frames=Array.from(preview?.querySelectorAll?.('.slide-print-frame')||[]);
     for(const frame of frames){
       const slide=frame.querySelector('.slide-print-projector');

@@ -108,3 +108,35 @@ test('CLI check workflow runs the print-slide regression tests',()=>{
  assert.match(pkg.scripts.check,/node --test tests\/admin-print-slides-v23\.test\.mjs/);
  assert.match(pkg.scripts.check,/node --check apps\/training\/admin-print-slides-v23\.js/);
 });
+
+test('A4 print geometry fits exactly two 16:9 slides strictly within margins',()=>{
+ const css=read('apps/training/admin-print-slides-v23.css');
+ const print=css.slice(css.indexOf('@media print{'));
+ const value=(pattern)=>{const match=pattern.exec(print);assert.ok(match,'missing print geometry: '+pattern);return Number(match[1]);};
+ const margin=value(/@page\{size:A4 portrait;margin:([\d.]+)mm/);
+ const sheetW=value(/#safetySlidePrintStage\{[\s\S]*?width:([\d.]+)mm!important/);
+ const sheetH=value(/\.slide-print-sheet\{[\s\S]*?height:([\d.]+)mm!important/);
+ const width=value(/\.slide-print-frame\{[\s\S]*?width:([\d.]+)mm!important/);
+ const height=value(/\.slide-print-frame\{[\s\S]*?height:([\d.]+)mm!important/);
+ const rows=/grid-template-rows:([\d.]+)mm ([\d.]+)mm!important/.exec(print);
+ assert.ok(rows);
+ const gap=value(/row-gap:([\d.]+)mm!important/);
+ const scale=value(/\.slide-print-projector\{[\s\S]*?transform:scale\(([\d.]+)\)!important/);
+ assert.ok(sheetW<=210-2*margin,'sheet exceeds horizontal printable region');
+ assert.ok(sheetH<=297-2*margin-4,'sheet needs a positive vertical safety margin');
+ assert.ok(Number(rows[1])+Number(rows[2])+gap<=sheetH,'two slots and gap exceed sheet');
+ assert.ok(Math.abs(width/height-16/9)<0.001,'slide is not 16:9');
+ assert.ok(width<sheetW,'frames need lateral margins');
+ assert.ok(scale*1600*25.4/96<width-1,'scaled projector exceeds frame width');
+ assert.ok(scale*900*25.4/96<height-1,'scaled projector exceeds frame height');
+ assert.match(print,/break-after:page!important/);
+});
+test('printing uses physical CSS scale, never last preview screen transform',()=>{
+ const js=read('apps/training/admin-print-slides-v23.js');
+ const css=read('apps/training/admin-print-slides-v23.css');
+ assert.match(js,/if\(document\.body\?\.classList\?\.contains\('admin-slides-print'\)\)return;/);
+ assert.match(js,/window\.addEventListener\('beforeprint'/);
+ assert.match(css,/transform:scale\(0\.40\)!important/);
+ assert.match(css,/height:250mm!important/);
+ assert.doesNotMatch(css,/#adminPrintableSlides .slide-print-sheet\{[\s\S]*?height:272mm!important/);
+});
