@@ -64,7 +64,9 @@
     height:auto;
     object-fit:contain;
   }
-  body.admin-course-print #adminPrintableLessons .print-toc li{break-inside:avoid;}
+  /* Parent module items may span pages; short individual lesson links stay together. */
+  body.admin-course-print #adminPrintableLessons .print-toc > ol > li{break-inside:auto;}
+  body.admin-course-print #adminPrintableLessons .print-toc > ol > li > ol > li{break-inside:avoid;}
   body.admin-course-print #adminPrintableLessons .print-lesson-section > h3{
     break-after:avoid;
     page-break-after:avoid;

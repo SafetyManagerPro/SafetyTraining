@@ -132,4 +132,6 @@ test('A4 layout supports multi-page index, chapter breaks, long list items and p
  assert.match(css,/\.print-lesson,\s*\n\s*body\.admin-course-print #adminPrintableLessons li\{break-inside:auto/);
  assert.match(css,/a\[href\^="#"\]:after\{content:none/);
  assert.match(css,/max-height:95mm/);
+ assert.match(css,/print-toc > ol > li\{break-inside:auto/);
+ assert.match(css,/print-toc > ol > li > ol > li\{break-inside:avoid/);
 });

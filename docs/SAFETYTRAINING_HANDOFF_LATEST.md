@@ -421,3 +421,7 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - **CSS A4:** margini di 17/14/18 mm; numero di pagina nel margine tramite CSS `@bottom-right` dove supportato dal browser; moduli su pagina nuova, indice libero di estendersi su più pagine, schemi ridimensionati a 95 mm, capitoli/elenchi lunghi spezzabili senza tagliare testo, nessuna stampa di `(#anchor)` dopo i link interni.
 - **Test automatici:** dispensa sintetica lunga (7 moduli, 126 LU), unicità degli ancoraggi, nessuna fuga di risposte dei test, controllo di immagini mancanti e verifica strutturale delle regole CSS. Restano necessari controllo visivo della stampa A4 su Chrome/Edge e Firefox e controllo di immagini reali; i test non costituiscono prova grafica.
 - Cache PWA `safety-training-v22-36`. Nessuna scrittura DB e nessuna modifica a corsi frozen (27), iscrizioni, presenze, attestati o backend cancellazione (sospeso).
+
+## 2026-10-19 — v22.11.1 indice multipagina robusto
+- Rifinita la regola A4 degli indici lunghi: una voce modulo con molte lezioni può attraversare una interruzione di pagina (`break-inside:auto` sul contenitore), mentre i singoli collegamenti brevi delle LU restano uniti (`break-inside:avoid`). Evitato l'effetto di blocchi di indice troppo alti per una pagina.
+- Aggiunto test CSS dedicato. Rimangono da collaudare visivamente browser/stampanti; il test strutturale non simula un motore di impaginazione. Invariati DB, PWA cache `safety-training-v22-36`, dati formativi e corsi congelati.
