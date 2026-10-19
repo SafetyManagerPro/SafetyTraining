@@ -343,3 +343,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Nessuna riga in `public.audit_log` reperita usando ID eliminati o action contenente delete/elimin. Non dichiarare che esista audit dell'eliminazione; verificare se esiste audit in altra sede prima di concludere assenza assoluta.
 - Nel progetto `ejkwvatmzdqqjozpxntk` risultano solo RPC `admin_delete_capabilities_v25` e `admin_preview_deletion_v25`; nessuna RPC server di esecuzione reale installata. Non abilitare il pulsante eliminazione definitiva sulla base del test manuale.
 - Il ripristino del backup .stbackup locale non è stato collaudato. L'utente ha richiesto di proseguire con i controlli e con il completamento del modulo amministrativo.
+
+## 2026-10-19 — v22.6 Controllo percorsi / quadro trasversale (frontend read-only)
+- Nuova scheda amministrativa `Controllo percorsi` (file `admin-path-audit-v23.js`), visibile nella navigazione. Seleziona una edizione e riunisce iscrizioni, anagrafica, avanzamento Learning Unit, frequenza/sessioni/tempi, test, evidenze requisiti e valutazioni pratiche. Link alle viste qualità didattica e readiness già operative.
+- Nessuna emissione attestato automatica: sempre `Da verificare manualmente`, con avviso su formazione pratica, firme, registri cartacei e requisiti normativi. I tempi attivi non certificano le presenze. Le iscrizioni revocate restano identificabili. Sessioni non concluse, anagrafica assente e anomalie tra somma sessioni e tempo iscrizione vengono segnalate senza alterare dati.
+- Query RLS lato client, limitate a 100 edizioni, 100 iscrizioni per edizione e 1000 righe per tipo di dipendenza; dati parziali segnalati e nessuna decisione di completamento. L'utente deve poter verificare il percorso senza modifiche DB.
+- Aggiunti test unitari di diagnosi e guardie anti-mutazione, guida contestuale, asset PWA `safety-training-v22-23`. Non toccati catalogo frozen, Supabase o cancellazione definitiva.
+- Backlog residuo: approfondimenti LU nei corsi non congelati, validazione fisica/frequenza, firme/registri duali cartaceo-digitale, generatore attestati con regole; ancora non dichiarati implementati.

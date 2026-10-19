@@ -3,6 +3,7 @@
   'use strict';
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const guides={
+    'Controllo percorsi':{title:'Guida · Controllo percorsi',steps:['Seleziona l’edizione da esaminare.','Controlla iscrizioni, qualità didattica, frequenze, test ed evidenze.','Riconcilia anomalie e documenti con docente e registri prima di emettere un attestato.'],note:'I dati sono indicativi e limitati dall’accesso RLS. Nessun rilascio automatico di attestati.'},
     'Dashboard':{
       title:'Guida · Dashboard amministrativa',
       steps:['Consulta i contatori di aziende, corsisti, edizioni e iscrizioni.','Per una nuova formazione usa «Avvia percorso»: seleziona azienda, corso, edizione e corsisti senza passare da più sezioni.','Usa le sezioni laterali per manutenzione puntuale, controlli e monitoraggio.'],
