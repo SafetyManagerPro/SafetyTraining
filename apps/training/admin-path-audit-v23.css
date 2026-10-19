@@ -34,3 +34,8 @@
   }
   body.admin-attendance-print #adminContent .admin-attendance-register tr {break-inside:avoid;}
 }
+
+/* Keep the blank signature register off the separate document-review printout. */
+@media print {
+  body.admin-path-print #adminContent .admin-attendance-register {display:none!important;}
+}

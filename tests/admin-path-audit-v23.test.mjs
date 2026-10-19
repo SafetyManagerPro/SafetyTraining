@@ -96,3 +96,9 @@ test('attendance register escapes user-supplied names and edition titles',()=>{
  assert.match(html,/&lt;script&gt;/);
  assert.match(html,/&lt;img/);
 });
+
+test('print modes keep review and blank attendance register separate',()=>{
+ const css=read('apps/training/admin-path-audit-v23.css');
+ assert.match(css,/admin-path-print #adminContent \.admin-attendance-register \{display:none!important/);
+ assert.match(css,/admin-attendance-print #adminContent \.admin-card:not\(\.admin-attendance-register\)/);
+});
