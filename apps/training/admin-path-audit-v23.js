@@ -20,6 +20,8 @@
     const evidence=related.evidence.get(enrollment.id)||[];
     const practice=related.practice.get(enrollment.id)||[];
     const openSessions=sessions.filter(s=>!s.ended_at).length;
+    const staleSessions=sessions.filter(s=>!s.ended_at&&s.last_heartbeat_at&&Date.now()-Date.parse(s.last_heartbeat_at)>15*60*1000).length;
+    const missingHeartbeat=sessions.filter(s=>!s.ended_at&&!s.last_heartbeat_at).length;
     const sessionSeconds=sessions.reduce((sum,s)=>sum+Math.max(0,Number(s.active_seconds)||0),0);
     const reportedSeconds=Math.max(0,Number(enrollment.active_seconds)||0);
     const inconsistentTime=(sessions.length===0&&reportedSeconds>0) ||
@@ -37,7 +39,7 @@
       tests:finishedTests.length?passed+'/'+finishedTests.length+' superati':'Nessun test concluso registrato',
       evidence:evidence.length+' evidenze'+(evidence.length?' ('+countStatus(evidence)+')':''),
       practice:practice.length+' valutazioni pratiche'+(practice.length?' ('+countStatus(practice)+')':''),
-      alerts:[...(!learner?['anagrafica']:[]),...(openSessions?['sessioni aperte']:[]),
+      alerts:[...(!learner?['anagrafica']:[]),...(openSessions?['sessioni aperte']:[]),...(staleSessions?['heartbeat scaduto']:[]),...(missingHeartbeat?['heartbeat assente']:[]),
         ...(inconsistentTime?['tempi non allineati']:[])],
       documentDecision:'Da verificare manualmente',
       hasSessions:sessions.length>0,hasTests:finishedTests.length>0,hasEvidence:evidence.length>0
@@ -68,7 +70,7 @@
     const learnerIds=[...new Set(assignments.rows.map(x=>x.learner_id).filter(Boolean))];
     const queries=[
       ['learners','id,first_name,last_name','id',learnerIds],
-      ['learning_sessions','id,enrollment_id,started_at,ended_at,active_seconds','enrollment_id',ids],
+      ['learning_sessions','id,enrollment_id,started_at,ended_at,last_heartbeat_at,active_seconds','enrollment_id',ids],
       ['learning_progress','enrollment_id,unit_version_id,status','enrollment_id',ids],
       ['test_attempts','id,enrollment_id,completed_at,passed','enrollment_id',ids],
       ['enrollment_requirement_evidence','id,enrollment_id,requirement_key,status','enrollment_id',ids],
@@ -102,7 +104,7 @@
       stat(activeRows.filter(x=>x.hasTests).length,'Con test conclusi')+
       stat(activeRows.filter(x=>x.hasEvidence).length,'Con evidenze inserite')+
       stat(activeRows.filter(x=>x.alerts.length).length,'Da riconciliare')+'</div>'+warn+
-      '<p class="admin-note">I tempi sono registrazioni tecniche, non certificazioni di presenza. Il completamento dei contenuti, i test e le evidenze NON autorizzano automaticamente attestati. Verificare requisiti, modalità, firme, eventuale formazione pratica e registri cartacei prima di qualsiasi rilascio.</p>'+
+      '<p class="admin-note">Sessioni ancora aperte, heartbeat assente o vecchio e contatori divergenti richiedono riconciliazione con il registro di presenza. I tempi sono registrazioni tecniche, non certificazioni di presenza. Il completamento dei contenuti, i test e le evidenze NON autorizzano automaticamente attestati. Verificare requisiti, modalità, firme, eventuale formazione pratica e registri cartacei prima di qualsiasi rilascio.</p>'+
       '<p><button type="button" data-path-quality>Apri qualità didattica</button> <button type="button" data-path-readiness>Apri readiness corsi</button> <button type="button" data-path-print>Stampa scheda istruttoria</button></p></section>'+
       '<section class="admin-card"><h2>Verifica per iscrizione</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr>'+
       '<th>Corsista / gestione</th><th>Didattica</th><th>Frequenza registrata</th><th>Verifiche</th>'+

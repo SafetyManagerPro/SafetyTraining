@@ -360,3 +360,7 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Nel nuovo Controllo percorsi aggiunto comando utente `Stampa scheda istruttoria`: stampa per edizione il quadro didattica/frequenza/verifiche/documentazione e una checklist cartacea con firme responsabile/docente. CSS di stampa separa contenuto dal menu; PWA safety-training-v22-25.
 - La scheda è chiaramente marcata NON È UN ATTESTATO e non conferisce validità legale né sostituisce registro/firme effettivi. Nessuna scrittura DB, firma digitale o emissione automatica.
 - Proseguire in fasi successive con registro cartaceo+digitale, regole normative per durata/verifica/attestato e approvazione umana; evitare qualsiasi autocertificazione basata solo su cronometro online.
+
+## 2026-10-19 — v22.6.3 attenzione heartbeat frequenze
+- Controllo percorsi: lettura del campo `learning_sessions.last_heartbeat_at` e nuovi avvisi per sessioni aperte senza heartbeat o con heartbeat oltre 15 minuti; queste segnalazioni sono informative e richiedono riconciliazione manuale. Test di regressione aggiunto. PWA `safety-training-v22-26`.
+- Audit del catalogo read-only: diversi aggiornamenti attrezzature (4h) hanno una sola LU pubblicata. Prima di ampliare contenuti o dichiarare un percorso conforme va verificata struttura, ripartizione teorico/pratica e fonti applicabili; nessuna modifica dei corsi congelati o dei contenuti formativi in produzione in questa fase.

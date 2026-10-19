@@ -62,3 +62,8 @@ test('print-only review is explicitly not a certificate and does not write recor
  assert.match(index,/admin-path-audit-v23\.css/);
  assert.doesNotMatch(js,/\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/);
 });
+
+test('open sessions with no heartbeat are flagged for review',()=>{
+ const row=audit.inspect({id:'en',learner_id:'learner',status:'in_progress',progress_pct:0,active_seconds:0},related({sessions:new Map([['en',[{active_seconds:0,ended_at:null,last_heartbeat_at:null}]]])}));
+ assert.ok(row.alerts.includes('heartbeat assente'));
+});
