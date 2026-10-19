@@ -11,7 +11,7 @@
   const PHOTO=/^(?:\.\/)?assets\/[a-zA-Z0-9_/-]+\.(?:svg|png|jpe?g|webp)$/i;
   function safeSlideImage(src){
     const value=String(src||'');
-    if(['assets/undefined','assets/null','assets/NaN'].includes(value))return null;
+    if(/^(?:\.\/)?assets\/(?:undefined|null|nan)(?:\.[a-z0-9]+)?$/i.test(value))return null;
     return PHOTO.test(value)&&!value.includes('..')?value.replace(/^\.\//,''):null;
   }
   function isUnassignedImage(src){

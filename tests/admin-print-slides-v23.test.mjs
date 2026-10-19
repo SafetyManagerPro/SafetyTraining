@@ -102,3 +102,9 @@ test('the source deck never constructs an undefined graphic-card visual',()=>{
  assert.doesNotMatch(src,/src:\`assets\/\$\{g\.image\}\`/);
  assert.match(src,/const valid=arr\.find/);
 });
+
+test('CLI check workflow runs the print-slide regression tests',()=>{
+ const pkg=JSON.parse(read('package.json'));
+ assert.match(pkg.scripts.check,/node --test tests\/admin-print-slides-v23\.test\.mjs/);
+ assert.match(pkg.scripts.check,/node --check apps\/training\/admin-print-slides-v23\.js/);
+});
