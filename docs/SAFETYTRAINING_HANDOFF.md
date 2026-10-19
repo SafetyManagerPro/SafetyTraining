@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-19
-Stato corrente: **v22.17 Graphic Pack 03 (80 SVG originali totali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-44`.
+Stato corrente: **v22.18 PDF source figure staging (169 JPEG da 14 PDF + 80 SVG)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-44`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -508,3 +508,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Check Vercel del medesimo commit: **success**, riferimento `https://vercel.com/safety-manager/safety-training/8iUnRqps2xNyaguyYHeJRoSWKpKB`. Il check non costituisce da solo prova di resa visiva sul browser o di controllo reale stampa A4.
 - Da eseguire: QA visivo dei 12 diagrammi con schermate a 1440/820/390 px, leggibilità delle tre azioni, proiezione e stampa A4 reale, controllo eventuali testi troppo lunghi. Non dichiarare questa verifica completata finché non avviene.
 - Nessuna modifica al runtime, a Supabase, ai 27 corsi frozen, a presenze/attestati o al percorso di eliminazione.
+
+## 2026-10-20 — v22.18 libreria immagini PDF originali in revisione amministrativa
+- Recuperati 14 PDF caricati nella chat del 18/10; creato pacchetto di **169 JPEG** fra figure e anteprime, ciascuno con fonte, pagina, SHA-256, categoria, diritto/validità in stato `review_required`. ZIP consegnato in ChatGPT, **non** presente nel repository e non ancora importato in produzione.
+- Nuova importazione amministrativa **Immagini PDF** dalla console platform-admin: un unico ZIP, controllo manifest/path/JPEG/SHA e caricamento idempotente su Supabase Storage privato più indice `training_source_figures_v23` con RLS platform-admin; nessun accesso anon o corsista.
+- Dopo importazione, in modalità di anteprima admin le slide DB-backed non congelate possono associare una figura contestuale con didascalia esplicita «RIFERIMENTO PDF NON VALIDATO», senza modificare i testi/versioni/durata o le Learning Unit. I Graphic Pack 01-03 restano e integrano, non sono sostituiti. L'importazione delle immagini non equivale a autorizzazione di pubblicazione o certificazione.
+- Per visualizzare figure **condivise** e non locali, l'admin deve importare lo ZIP nel nuovo pannello; fino ad allora il pack non comparirà nelle slide. Il file ZIP non è direttamente accessibile al deployment da allegati ChatGPT. Sono esclusi 27 corsi frozen, learner anonimo e lu authored; tutta la fonte è soggetta a revisione licenza, vigenza normativa e contenuto medico.
+- PWA `safety-training-v22-46`. Aggiunta migration SQL `v22_017_private_source_figures`, UI, CSS e suite test. Verificare CI, applicazione migration, import con admin reale, browser smoke prima di considerare l'integrazione completata.
