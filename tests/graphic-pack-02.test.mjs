@@ -28,13 +28,13 @@ test('48 original SVG diagrams: 16 general and eight in each equipment family',(
 test('equipment family selection requires subject and relevant lesson keyword',()=>{
  const cases=[
   ['Carrelli elevatori','Controlli preuso del carrello','forklift-preuse'],
-  ['Carrelli elevatori','Viabilità: punti ciechi','forklift-blind'],
+  ['Carrelli elevatori','Viabilità: punti ciechi','forklift-blindspot'],
   ['Corso PLE','Ispezione della PLE','ple-preuse'],
-  ['Corso PLE','Linee elettriche aeree','ple-electric'],
-  ['Gru su autocarro','Segnali gestuali','crane-signal'],
+  ['Corso PLE','Linee elettriche aeree','ple-power-lines'],
+  ['Gru su autocarro','Segnali gestuali','crane-signaller'],
   ['Gru su autocarro','Diagramma di carico','crane-capacity'],
-  ['MMT macchine movimento terra','Rischio al ciglio dello scavo','mmt-edge'],
-  ['MMT macchine movimento terra','Sottoservizi','mmt-pipes'],
+  ['MMT macchine movimento terra','Rischio al ciglio dello scavo','mmt-excavation-edge'],
+  ['MMT macchine movimento terra','Sottoservizi','mmt-underground'],
   ['DPI lavoratori','Casco: controllo visivo','ppe-helmet-check'],
   ['Lavoratori - emergenze','Uscita di emergenza','exit-obstructed']
  ];
@@ -65,4 +65,24 @@ test('projector and A4 print reuse identical deck overlay without new course con
  assert.match(read('apps/training/admin-print-slides-v23.js'),/projection\.buildDeck\(converted\)/);
  const reg=read('apps/training/graphic-pack-02.js');
  assert.doesNotMatch(reg,/\.upsert\(|\.delete\(|\.insert\(|\.update\(/);
+});
+
+test('every equipment scenario ID resolves to an actual illustrated asset',()=>{
+ const variants={
+  forklift:['preuse','blind','pedestrian','load','high','slope','battery','park'],
+  ple:['preuse','stabilizers','pinch','electric','wind','harness','rescue','zone'],
+  crane:['preuse','stabilizers','load','swing','signal','pinch','electric','capacity'],
+  mmt:['preuse','access','swing','edge','slope','pipes','maintenance','blind']
+ };
+ const ids=new Set(pack.items.map(x=>x.id));
+ const resolved=[];
+ for(const [family,names] of Object.entries(variants)){
+  for(const variant of names){
+   const id=pack.resolveVariant(family,variant);
+   assert.ok(ids.has(id),'unresolved '+family+'/'+variant+' -> '+id);
+   resolved.push(id);
+  }
+ }
+ assert.equal(resolved.length,32);
+ assert.equal(new Set(resolved).size,32);
 });

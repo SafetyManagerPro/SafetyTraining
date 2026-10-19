@@ -29,6 +29,14 @@ const equipmentRules={
  crane:[['preuse',/pre.?uso|ispezione|controlli? (?:prima|giornalier)/i],['stabilizers',/stabilizzator[ei]|appoggi|suolo|terreno|piazzament/i],['load',/caric[ho] sospes|carico sospeso|sollevamento del carico/i],['swing',/rotazion[ei]|oscillazion[ei]|raggio|traiettoria/i],['signal',/segnalator[ei]|gesti convenzionali|segnali gestuali/i],['pinch',/schiacciament|intrappolament/i],['electric',/linee elettriche|elettrocuzion|conduttori aerei/i],['capacity',/diagramma di carico|sbraccio|portat[ae]|configurazion/i]],
  mmt:[['preuse',/pre.?uso|ispezione|controlli? (?:prima|giornalier)/i],['access',/accesso|salita|discesa/i],['swing',/rotazion[ei]|oscillazion[ei]|raggio|traiettoria/i],['edge',/ciglio|scav[oi]|cediment/i],['slope',/pendenz[ae]|ribaltament|stabilit[àa]|baricentro/i],['pipes',/sottoserviz[io]|reti interrate|linee interrate/i],['maintenance',/manutenzion|isolamento|energia residua/i],['blind',/angoli? morti|punti ciechi|visibilit[àa] ridotta|retromarcia/i]]
 };
+// Canonical published filenames. Rule names are internal semantic variants.
+const variantIds={
+ forklift:{blind:'forklift-blindspot',pedestrian:'forklift-pedestrians',high:'forklift-forks',slope:'forklift-ramp'},
+ ple:{pinch:'ple-overhead-pinch',electric:'ple-power-lines',wind:'ple-weather',rescue:'ple-emergency',zone:'ple-exclusion'},
+ crane:{stabilizers:'crane-outriggers',load:'crane-suspended',signal:'crane-signaller',pinch:'crane-crushing'},
+ mmt:{access:'mmt-three-points',swing:'mmt-swing-zone',edge:'mmt-excavation-edge',pipes:'mmt-underground',blind:'mmt-reversing'}
+};
+const resolveVariant=(family,variant)=>variantIds[family]?.[variant]||family+'-'+variant;
 const lookup=new Map(items.map(item=>[item.id,item]));
 const isFrozen=course=>window.SAFETY_GRAPHIC_PACK_01?.isFrozen?.(course)!==false;
 function pick(course,topic){
@@ -40,8 +48,8 @@ function pick(course,topic){
  const candidate=[];
  if(family){
   const rules=equipmentRules[family]||[];
-  for(const [variant,regex] of rules)if(regex.test(title))candidate.push(family+'-'+variant);
-  for(const [variant,regex] of rules)if(regex.test(summary))candidate.push(family+'-'+variant);
+  for(const [variant,regex] of rules)if(regex.test(title))candidate.push(resolveVariant(family,variant));
+  for(const [variant,regex] of rules)if(regex.test(summary))candidate.push(resolveVariant(family,variant));
  }
  for(const [id,regex] of generalRules)if(regex.test(title))candidate.push(id);
  for(const [id,regex] of generalRules)if(regex.test(summary))candidate.push(id);
@@ -49,5 +57,5 @@ function pick(course,topic){
     src:item.src,caption:item.caption,graphic_pack_id:item.id
  }));
 }
-window.SAFETY_GRAPHIC_PACK_02={items,pick,isFrozen};
+window.SAFETY_GRAPHIC_PACK_02={items,pick,isFrozen,resolveVariant};
 })();
