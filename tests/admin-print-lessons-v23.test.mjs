@@ -94,3 +94,42 @@ test('print selection stays available after a failed course load',()=>{
   assert.match(source,/let selectors='';/);
   assert.match(source,/host\(\)\.innerHTML=selectors\+'<section class="admin-card"><p role="alert"/);
 });
+
+test('long A4 booklet has a navigable module and every-lesson index without duplicate anchors',()=>{
+ const modules=Array.from({length:7},(_,mi)=>({
+  title:'Modulo '+(mi+1),minutes:180,
+  units:Array.from({length:18},(_,ui)=>({
+   title:'Lezione '+(mi+1)+'-'+(ui+1),unitVersion:2,unitStatus:'published',
+   minutes:10,content:{summary:'Testo del modulo '+(mi+1)+' lezione '+(ui+1),quiz:{answer:'SEGRETO'}}
+  }))
+ }));
+ const html=book.documentHtml({course:{title:'Corso lungo',description:'Percorso formativo',nominal_minutes:1260},
+  version:{version_number:2,status:'published'},modules});
+ assert.equal((html.match(/class="print-lesson" id="print-unit-/g)||[]).length,126);
+ assert.equal((html.match(/href="#print-unit-/g)||[]).length,126);
+ assert.equal((html.match(/class="print-module" id="print-module-/g)||[]).length,7);
+ assert.equal((html.match(/href="#print-module-/g)||[]).length,7);
+ assert.match(html,/id="print-unit-126"/);
+ assert.doesNotMatch(html,/SEGRETO/);
+ assert.equal(book.inspectBook({modules}).ready,true);
+});
+test('image preflight detects failed images and accepts loaded local assets',async()=>{
+ const loaded={complete:true,naturalWidth:640,getAttribute:()=> 'assets/diagram.svg'};
+ const broken={complete:true,naturalWidth:0,getAttribute:()=> 'assets/missing.svg'};
+ const all=await book.verifyPrintImages({querySelectorAll:()=>[loaded,broken]});
+ assert.equal(all.ready,false);
+ assert.equal(all.checked,2);
+ assert.deepEqual(Array.from(all.missing),['assets/missing.svg']);
+ const ok=await book.verifyPrintImages({querySelectorAll:()=>[loaded]});
+ assert.equal(ok.ready,true);
+});
+test('A4 layout supports multi-page index, chapter breaks, long list items and page margin number',()=>{
+ const css=read('apps/training/admin-print-lessons-v23.css');
+ assert.match(css,/@page\s*\{/);
+ assert.match(css,/counter\(page\)/);
+ assert.match(css,/\.print-module\{break-before:page/);
+ assert.match(css,/\.print-toc\{break-after:page/);
+ assert.match(css,/\.print-lesson,\s*\n\s*body\.admin-course-print #adminPrintableLessons li\{break-inside:auto/);
+ assert.match(css,/a\[href\^="#"\]:after\{content:none/);
+ assert.match(css,/max-height:95mm/);
+});

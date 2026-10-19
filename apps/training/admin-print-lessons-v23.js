@@ -119,11 +119,16 @@
       sanction+'</article>';
   }
   function documentHtml(book){
-    const moduleRows=book.modules.map((m,i)=>'<li>Modulo '+(i+1)+': '+asText(m.title)+
-      ' ('+m.units.length+' unità)</li>').join('');
+    let tocIndex=0;
+    const moduleRows=book.modules.map((m,i)=>{
+      const lessonRows=m.units.map(u=>'<li><a href="#print-unit-'+(++tocIndex)+'">'+
+        asText(u.content?.title||u.title||'Learning Unit')+'</a></li>').join('');
+      return '<li><a href="#print-module-'+(i+1)+'">Modulo '+(i+1)+': '+asText(m.title)+
+        '</a> ('+m.units.length+' unità)<ol>'+lessonRows+'</ol></li>';
+    }).join('');
     let i=0;
     const modules=book.modules.map((m,index)=>
-      '<section class="print-module"><h2>Modulo '+(index+1)+': '+asText(m.title)+'</h2>'+
+      '<section class="print-module" id="print-module-'+(index+1)+'"><h2>Modulo '+(index+1)+': '+asText(m.title)+'</h2>'+
       '<p>Durata nominale modulo: '+asText(m.minutes??'—')+' minuti</p>'+
       m.units.map(u=>lessonHtml(u,i++)).join('')+'</section>').join('');
     return '<section id="adminPrintableLessons" class="admin-card" aria-label="Dispensa del singolo percorso formativo">'+
@@ -142,6 +147,31 @@
     if(r.error)throw new Error(label+': '+r.error.message);
     if(r.count==null||r.count>max||(r.data||[]).length>max)throw new Error(label+': risultato incompleto, stampa bloccata.');
     return r.data||[];
+  }
+  // Image preflight prevents silently missing diagrams in an otherwise complete booklet.
+  // The browser remains responsible for the final physical pagination.
+  async function verifyPrintImages(rootNode,timeoutMs=7000){
+    const imgs=Array.from(rootNode?.querySelectorAll?.('img')||[]);
+    const missing=await Promise.all(imgs.map(img=>new Promise(resolve=>{
+      const path=img.getAttribute?.('src')||'schema senza percorso';
+      if(img.complete)return resolve(img.naturalWidth>0?null:path);
+      let done=false,timer;
+      const finish=ok=>{
+        if(done)return;
+        done=true;
+        clearTimeout(timer);
+        img.removeEventListener('load',onLoad);
+        img.removeEventListener('error',onError);
+        resolve(ok?null:path);
+      };
+      const onLoad=()=>finish(img.naturalWidth>0);
+      const onError=()=>finish(false);
+      img.addEventListener('load',onLoad,{once:true});
+      img.addEventListener('error',onError,{once:true});
+      timer=setTimeout(()=>finish(false),timeoutMs);
+      if(img.complete)finish(img.naturalWidth>0);
+    })));
+    return {ready:missing.every(x=>x===null),checked:imgs.length,missing:missing.filter(Boolean)};
   }
   async function loadBook(client,course,version){
     if(version.course_id!==course.id||version.status!=='published')throw Error('Versione non pubblicata o non appartenente al corso.');
@@ -211,7 +241,8 @@
         '</select></label> <label>Versione <select id="printLessonVersion">'+versions.map(v=>
           '<option value="'+esc(v.id)+'"'+(v.id===state.versionId?' selected':'')+'>v'+esc(v.version_number)+' · pubblicata</option>').join('')+
         '</select></label> <button type="button" data-print-lessons-refresh>Ricarica</button>'+
-        '<button type="button" data-print-lessons disabled>Stampa lezioni / salva PDF</button></section>';
+        '<button type="button" data-print-lessons disabled>Stampa lezioni / salva PDF</button>'+
+        '<p id="printLessonImageStatus" class="admin-note" role="status">Verifica caricamento immagini richiesta prima della stampa.</p></section>';
       if(!course||!version){host().innerHTML=selectors+'<div class="admin-error">Nessuna versione pubblicata stampabile per questa scelta.</div>';return;}
       host().innerHTML=selectors+'<p class="admin-loading">Preparazione moduli e Learning Unit…</p>';
       const book=await loadBook(client,course,version);
@@ -225,7 +256,19 @@
             report.issues.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>')+
         '<p class="admin-note">Controllo della completezza tecnica del materiale, non certificazione della conformità normativa.</p></section>';
       host().innerHTML=selectors+summary+documentHtml(book);
-      if(report.ready)host().querySelector('[data-print-lessons]')?.removeAttribute('disabled');
+      if(report.ready){
+        const images=await verifyPrintImages(host().querySelector('#adminPrintableLessons'));
+        if(!current(seq,who))return;
+        const status=host().querySelector('#printLessonImageStatus');
+        if(images.ready){
+          if(status)status.textContent='Schemi verificati: '+images.checked+'. Pronto per stampare o salvare in PDF.';
+          host().querySelector('[data-print-lessons]')?.removeAttribute('disabled');
+        }else if(status){
+          status.className='admin-error';
+          status.textContent='Stampa bloccata: '+images.missing.length+' immagini non disponibili ('+
+            images.missing.slice(0,4).join(', ')+'). Correggere i riferimenti agli asset prima della stampa.';
+        }
+      }
     }catch(error){if(current(seq,who))host().innerHTML=selectors+'<section class="admin-card"><p role="alert" class="admin-error">'+
       esc(error?.message||error)+'</p><button type="button" data-print-lessons-refresh>Riprova</button></section>';}
   }
@@ -251,6 +294,6 @@
     for(let i=0;i<40&&!root();i++)await new Promise(r=>setTimeout(r,150));
     ensureNav();bind();
   }
-  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,inspectBook,loadBook,render};
+  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,inspectBook,verifyPrintImages,loadBook,render};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
