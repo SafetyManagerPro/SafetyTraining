@@ -211,17 +211,16 @@
   async function verifiedServerPreview(client,info,effect){
     const payload=executionPayload(info,effect);
     const capability=await client.rpc('admin_delete_capabilities_v25');
-    if(capability.error||!capability.data||capability.data.version!=='v25'||capability.data.ready!==true){
+    if(capability.error||!capability.data||capability.data.version!=='v25'||capability.data.preview_ready!==true){
       throw Error('Il servizio server di eliminazione non è ancora installato o non è pronto. Nessun dato è stato modificato.');
     }
     const response=await client.rpc('admin_preview_deletion_v25',payload);
     if(response.error)throw Error('Verifica server non riuscita: '+response.error.message);
     const data=response.data;
-    if(!data||data.safe!==true||typeof data.preview_token!=='string'||
-       !data.preview_token||!Array.isArray(data.impact)){
+    if(!data||data.version!=='v25'||!Array.isArray(data.impact)){
       throw Error('Il server non ha autorizzato un riepilogo completo. Nessun dato è stato modificato.');
     }
-    return {payload,token:data.preview_token,impact:data.impact};
+    return {payload,token:data.preview_token||null,impact:data.impact,ready:data.safe===true&&capability.data.ready===true&&data.execution_ready===true,warnings:data.warnings||[]};
   }
   function exactConfirmation(rootId){return 'ELIMINA '+rootId;}
   const categoryText={candidate:'Candidato',manual:'Da verificare / scollegare',protected:'Storico o verifiche: attenzione'};
@@ -329,18 +328,18 @@
     }
     function showServerConfirmation(){
       if(!serverPreview){stage=1;showReview();return;}
-      holder.innerHTML='<h3>3 · Conferma definitiva</h3>'+
-        '<p>Il server ha verificato l’operazione. Controlla anche le conseguenze indirette:</p>'+
+      holder.innerHTML='<h3>3 · Verifica server delle dipendenze</h3>'+
+        '<p>Supabase ha controllato le voci selezionate e le relazioni dirette visibili. I conteggi sono indicativi; le dipendenze a più livelli devono ancora essere validate per un’eliminazione definitiva.</p>'+
         '<ul class="admin-delete-review">'+serverPreview.impact.map(x=>
           '<li>'+esc(x.label||x.table||'Dipendenza')+' · '+esc(x.action||'Da eliminare')+
           ' · '+esc(x.count??'Numero non disponibile')+'</li>').join('')+'</ul>'+
-        '<p><strong>Questa operazione non è annullabile.</strong></p>'+
-        '<label class="admin-delete-confirm">Per confermare scrivi esattamente '+
+        '<p><strong>'+(serverPreview.ready?'Operazione irreversibile: conferma richiesta.':'Solo anteprima: la cancellazione definitiva non è installata.')+'</strong></p>'+
+        (serverPreview.ready?'<label class="admin-delete-confirm">Per confermare scrivi esattamente '+
         '<code>'+esc(exactConfirmation(info.id))+'</code>'+
-        '<input type="text" data-plan-confirm autocomplete="off" spellcheck="false" aria-label="Conferma eliminazione"></label>'+
+        '<input type="text" data-plan-confirm autocomplete="off" spellcheck="false" aria-label="Conferma eliminazione"></label>':'')+
         (previewError?'<p role="alert" class="admin-delete-caution">'+esc(previewError)+'</p>':'')+
         '<div class="admin-delete-actions"><button type="button" data-plan-back>← Torna al riepilogo</button>'+
-        '<button type="button" data-plan-execute disabled>Conferma eliminazione definitiva</button>'+
+        (serverPreview.ready?'<button type="button" data-plan-execute disabled>Conferma eliminazione definitiva</button>':'')+
         '<button type="button" data-plan-close>Chiudi</button></div>';
     }
     async function verifyServer(){
@@ -361,7 +360,7 @@
       }
     }
     async function executeConfirmed(){
-      if(!serverPreview||!alive()||locked)return;
+      if(!serverPreview?.ready||!serverPreview.token||!alive()||locked)return;
       const input=holder.querySelector('[data-plan-confirm]');
       if(input?.value!==exactConfirmation(info.id))return;
       const snapshot=serverPreview;locked=true;
