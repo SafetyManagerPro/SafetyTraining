@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-19
-Stato: **v22.16 Graphic Pack 02 (68 SVG originali totali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-43`.
+Stato: **v22.17 Graphic Pack 03 (80 SVG originali totali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-44`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -494,3 +494,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Primo check CI ha trovato una mappatura errata: alcune regole semantiche (es. `blind`) costruivano l'ID `forklift-blind` mentre l'asset effettivo si chiama `forklift-blindspot`. Aggiunta tabella canonica `resolveVariant(family,variant)`, per rispettare nomi file senza rinominarli o modificare il contenuto. Corrette anche le attese del test di riconoscimento (elettricità PLE, segnalatore gru, cigli/sottoservizi MMT).
 - Nuovo test di copertura per **32/32 scenari macchina**, richiedendo che ogni variante si risolva a un SVG esistente, senza duplicati. Il gate frozen, originalità di 48 SVG e stampa A4 rimangono inalterati; nessuna modifica Supabase.
 - CI finale da ricontrollare prima del rilascio v22.16.1.
+
+## 2026-10-19 — v22.17 Graphic Pack 03: prevenzione e rischi trasversali (80 SVG)
+- Aggiunte 12 illustrazioni SVG originali `gp03-*.svg` per: gerarchia della prevenzione, valutazione qualitativa del rischio, mancato infortunio/near miss, rischio elettrico, scivolamento/inciampo, movimentazione manuale, VDT, rumore, aspirazione polveri, microclima/calore, etichetta-SDS, interferenze tra lavorazioni. Ogni scena integra un diagramma specifico e tre azioni osservabili, leggibili in proiezione e in stampa.
+- `graphic-pack-03.js` seleziona solo argomenti pertinenti dal titolo/riassunto delle lezioni DB-backed. Nessuna selezione sui corsi frozen (27 voci), sui corsi locali o su visual authored; GP02 resta prioritario per gli scenari attrezzature e GP01 resta fallback.
+- Integrazione nella pipeline `buildDeck` comune a proiettore e stampa già funzionante (2 slide/A4), senza cambiare geometrie di stampa, testo/ore/numero delle Learning Unit, database, versioni pubblicate, presenze, attestati, ruoli o soft-delete. Asset e modulo nel precache PWA `safety-training-v22-44`.
+- Il contenuto è illustrativo, **non** una prescrizione tecnica o un modello quantitativo legale universale: valgono DVR, procedure applicabili e verifica del docente. Originale, senza immagini copiate dai PDF dell'utente.
+- Nuova suite statica di selezione, blocchi frozen/authored, asset SVG, SW, stampa e assenza di DB write aggiunta a `npm run check`. CI e deploy devono essere ricontrollati sul commit; collaudo visivo 1440/820/390 e con stampa reale ancora non eseguito su questo pack.
