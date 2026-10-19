@@ -208,6 +208,22 @@
     if(new Set(actions.map(x=>x.key)).size!==actions.length)throw Error('Selezione ambigua.');
     return {p_kind:info.kind,p_root_id:info.id,p_actions:actions,p_delete_parent:effect.deleteParent};
   }
+
+  // A preview is not permission to destroy data. Require a complete,
+  // individually acknowledged graph and an audited server transaction.
+  function canExecuteApprovedPreview(capability,preview){
+    if(!capability||capability.version!=='v25'||capability.execution_enabled!==true||
+       capability.ready!==true||!preview||preview.version!=='v25'||
+       preview.safe!==true||preview.execution_ready!==true||
+       preview.graph_complete!==true||preview.audit_ready!==true||
+       typeof preview.preview_token!=='string'||preview.preview_token.length<32||
+       !Array.isArray(preview.impact)||!Array.isArray(preview.warnings)||
+       preview.warnings.length!==0)return false;
+    return preview.impact.every(row=>
+      row&&row.selected===true&&row.acknowledged===true&&
+      (row.action==='delete'||row.action==='unlink')&&
+      Number.isSafeInteger(row.count)&&row.count>=0);
+  }
   async function verifiedServerPreview(client,info,effect){
     const payload=executionPayload(info,effect);
     const capability=await client.rpc('admin_delete_capabilities_v25');
@@ -220,7 +236,11 @@
     if(!data||data.version!=='v25'||!Array.isArray(data.impact)){
       throw Error('Il server non ha autorizzato un riepilogo completo. Nessun dato è stato modificato.');
     }
-    return {payload,token:data.preview_token||null,impact:data.impact,ready:data.safe===true&&capability.data.ready===true&&data.execution_ready===true,warnings:data.warnings||[]};
+    return {
+      payload,token:typeof data.preview_token==='string'?data.preview_token:null,
+      impact:data.impact,ready:canExecuteApprovedPreview(capability.data,data),
+      warnings:Array.isArray(data.warnings)?data.warnings:[]
+    };
   }
   function exactConfirmation(rootId){return 'ELIMINA '+rootId;}
   const categoryText={candidate:'Candidato',manual:'Da verificare / scollegare',protected:'Storico o verifiche: attenzione'};
@@ -334,7 +354,7 @@
           '<li>'+esc(x.label||x.table||'Dipendenza')+' · '+esc(x.action||'Da eliminare')+
           ' · '+esc(x.count??'Numero non disponibile')+'</li>').join('')+'</ul>'+
         (serverPreview.warnings?.length?'<div class="admin-delete-caution"><strong>Avvisi del server</strong><ul>'+serverPreview.warnings.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul></div>':'')+
-        '<p><strong>'+(serverPreview.ready?'Operazione irreversibile: conferma richiesta.':'Solo anteprima: la cancellazione definitiva non è installata.')+'</strong></p>'+
+        '<p><strong>'+(serverPreview.ready?'Operazione irreversibile: conferma richiesta.':'Solo anteprima: il servizio transazionale non ha ancora verificato tutti i requisiti di sicurezza.')+'</strong></p>'+
         (serverPreview.ready?'<label class="admin-delete-confirm">Per confermare scrivi esattamente '+
         '<code>'+esc(exactConfirmation(info.id))+'</code>'+
         '<input type="text" data-plan-confirm autocomplete="off" spellcheck="false" aria-label="Conferma eliminazione"></label>':'')+
@@ -445,5 +465,5 @@
         '<p>Operazione bloccata senza modifiche al database.</p>';
     });
   }
-  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,intentPlan,canUnlink,scan,classifyParent,safeDetails,managementAction,recordKey,projections,effectWarnings,executionPayload,verifiedServerPreview,exactConfirmation};
+  window.SAFETY_ADMIN_DELETE_PLANNER_V22={open,specs,classify,unusedEnrollment,plan,intentPlan,canUnlink,scan,classifyParent,safeDetails,managementAction,recordKey,projections,effectWarnings,executionPayload,verifiedServerPreview,canExecuteApprovedPreview,exactConfirmation};
 })();

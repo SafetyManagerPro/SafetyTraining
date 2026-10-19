@@ -325,3 +325,9 @@ Preservare:
 - No currently inspected app modules issue direct database `.delete()` on protected records. All destructive procedures remain disabled. `admin_execute_deletion_v25` not installed.
 - Future server transaction MUST implement explicit audit, whitelist, relationship re-evaluation, strong admin auth, policy-scoped permissions and dry-run testing on separate database before enabling. No production delete tests.
 - PWA `safety-training-v22-21`; all follow-up modifications require updating both handoffs.
+
+## 2026-10-19 — v22.5.4 blocked transactional backend / fail-closed client
+- Privileged DB function inspection was blocked by platform security controls; do not retry through alternative channels or paths. No destructive backend RPC installed or executed.
+- Client now requires server execution_enabled true, ready true, complete impact graph, confirmed audit, a sufficiently long preview token, and every impacted row acknowledged individually. Warnings, hidden cascades, missing token and incomplete data disable execution.
+- Server preview remains informational and no execution RPC exists. CI tests cover read-only response and contract failures.
+- PWA safety-training-v22-22. Final step requires authorized isolated database validation and release review.

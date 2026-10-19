@@ -215,3 +215,39 @@ test('read-only server preview exposes explicit indirect counts and safety warni
  for(const phrase of ['test_answers','learning_sessions','SET NULL','indirect_rls_visible'])assert.ok(migration.includes(phrase));
  assert.doesNotMatch(migration,/\bDELETE\s+FROM\b|\bTRUNCATE\s+TABLE\b/i);
 });
+
+test('backend readiness alone cannot activate destructive UI without full contract',()=>{
+ const cap={version:'v25',preview_ready:true,ready:true,execution_enabled:true};
+ const pre={version:'v25',safe:true,execution_ready:true,graph_complete:true,
+ audit_ready:true,preview_token:'q'.repeat(64),
+ impact:[{selected:true,acknowledged:true,count:1,action:'delete'}],warnings:[]};
+ assert.equal(d.canExecuteApprovedPreview(cap,pre),true);
+ const rejected=[
+  [{...cap,execution_enabled:false},pre],
+  [cap,{...pre,graph_complete:false}],
+  [cap,{...pre,audit_ready:false}],
+  [cap,{...pre,preview_token:null}],
+  [cap,{...pre,impact:[{selected:false,acknowledged:false,count:1,action:'CASCADE'}]}],
+  [cap,{...pre,impact:[{selected:true,acknowledged:false,count:1,action:'delete'}]}],
+  [cap,{...pre,warnings:['uncertain dependency']}],
+  [cap,{...pre,impact:[{selected:true,acknowledged:true,count:Infinity,action:'delete'}]}]
+ ];
+ for(const [c,p] of rejected)assert.equal(d.canExecuteApprovedPreview(c,p),false);
+});
+test('installed read-only preview cannot enable destructive confirmation',async()=>{
+ const info={kind:'enrollment',id:'enrollment-id',spec:{table:'enrollments'}};
+ const effect={remove:[],unlink:[],deleteParent:true,incomplete:false,accountLinked:false};
+ const calls=[];
+ const client={rpc:async(name)=>{
+  calls.push(name);
+  if(name==='admin_delete_capabilities_v25')return {data:{
+   version:'v25',preview_ready:true,ready:false,execution_enabled:false},error:null};
+  if(name==='admin_preview_deletion_v25')return {data:{
+   version:'v25',safe:false,execution_ready:false,impact:[],warnings:[]},error:null};
+  throw Error('Unexpected execution request');
+ }};
+ const got=await d.verifiedServerPreview(client,info,effect);
+ assert.equal(got.ready,false);
+ assert.equal(got.token,null);
+ assert.deepEqual(calls,['admin_delete_capabilities_v25','admin_preview_deletion_v25']);
+});
