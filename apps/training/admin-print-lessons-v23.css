@@ -1,0 +1,45 @@
+/* A4 course booklet; not a register, attestation or printed quiz solution set. */
+#adminPrintableLessons{font-family:Georgia,"Times New Roman",serif;line-height:1.55;max-width:900px;margin:20px auto;}
+#adminPrintableLessons h1{font-size:2rem;line-height:1.18;}
+#adminPrintableLessons h2{font-size:1.38rem;line-height:1.25;margin:1.6rem 0 .7rem;}
+#adminPrintableLessons h3{font-size:1.05rem;margin:1.1rem 0 .3rem;}
+#adminPrintableLessons h4{font-size:1rem;margin:.8rem 0 .2rem;}
+#adminPrintableLessons h5{font-size:.9rem;margin:.5rem 0 .1rem;}
+#adminPrintableLessons p,#adminPrintableLessons li{overflow-wrap:anywhere;}
+#adminPrintableLessons li{margin-bottom:.3rem;}
+#adminPrintableLessons .print-caution{border-left:3px solid #555;padding:.6rem 1rem;}
+#adminPrintableLessons .print-unit-meta{font-family:system-ui,sans-serif;font-size:.84rem;opacity:.8;}
+#adminPrintableLessons .print-cover{padding-bottom:2rem;}
+#adminPrintableLessons figure{max-width:650px;margin:1rem auto;text-align:center;}
+#adminPrintableLessons figure img{display:block;max-width:100%;max-height:380px;object-fit:contain;margin:auto;}
+#adminPrintableLessons figcaption{font-size:.8rem;}
+#adminPrintableLessons .print-lesson{border-top:1px solid #ccc;margin-top:1rem;padding-top:.65rem;}
+#adminPrintableLessons .print-lesson-section{margin-bottom:1rem;}
+@media print{
+  @page{size:A4 portrait;margin:14mm 13mm;}
+  body.admin-course-print{background:#fff!important;color:#111!important;overflow:visible!important;}
+  body.admin-course-print > *{visibility:hidden!important;}
+  body.admin-course-print #adminShell,
+  body.admin-course-print #adminShell #adminContent,
+  body.admin-course-print #adminShell #adminContent #adminPrintableLessons,
+  body.admin-course-print #adminShell #adminContent #adminPrintableLessons *{visibility:visible!important;}
+  body.admin-course-print #adminShell{display:block!important;position:static!important;height:auto!important;width:100%!important;overflow:visible!important;transform:none!important;background:#fff!important;box-shadow:none!important;color:#111!important;}
+  body.admin-course-print #adminShell .admin-nav,
+  body.admin-course-print #adminShell .admin-head,
+  body.admin-course-print #adminContent > :not(#adminPrintableLessons){display:none!important;}
+  body.admin-course-print #adminShell .admin-main,
+  body.admin-course-print #adminContent,
+  body.admin-course-print #adminPrintableLessons{display:block!important;position:static!important;width:100%!important;max-width:none!important;overflow:visible!important;box-shadow:none!important;background:#fff!important;color:#111!important;margin:0!important;padding:0!important;border:0!important;}
+  body.admin-course-print #adminPrintableLessons .print-cover{break-after:page;}
+  body.admin-course-print #adminPrintableLessons .print-toc{break-after:page;}
+  body.admin-course-print #adminPrintableLessons .print-module{break-before:page;}
+  body.admin-course-print #adminPrintableLessons h2,
+  body.admin-course-print #adminPrintableLessons h3,
+  body.admin-course-print #adminPrintableLessons h4,
+  body.admin-course-print #adminPrintableLessons h5{break-after:avoid;page-break-after:avoid;}
+  body.admin-course-print #adminPrintableLessons figure,
+  body.admin-course-print #adminPrintableLessons li{break-inside:avoid;}
+  body.admin-course-print #adminPrintableLessons a{color:#111;text-decoration:underline;}
+  body.admin-course-print #adminPrintableLessons a:after{content:" (" attr(href) ")";font-size:8pt;overflow-wrap:anywhere;}
+  body.admin-course-print #adminPrintableLessons p{orphans:3;widows:3;}
+}

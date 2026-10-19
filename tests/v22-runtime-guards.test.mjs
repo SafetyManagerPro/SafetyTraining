@@ -48,7 +48,7 @@ test('PWA keeps protected navigation outside the service worker',()=>{
   assert.match(index,/rel="icon" href="icons\/icon-192\.png"/);
   assert.match(worker,/request\.mode==='navigate'\)return/);
   assert.match(worker,/Promise\.allSettled/);
-  assert.match(worker,/safety-training-v22-30/);
+  assert.match(worker,/safety-training-v22-31/);
 });
 
 test('already-applied v22 migrations are tracked locally',()=>{
