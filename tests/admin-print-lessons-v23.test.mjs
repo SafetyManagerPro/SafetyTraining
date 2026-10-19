@@ -81,3 +81,16 @@ test('print preflight rejects a wholly empty course and an empty module',()=>{
  const empty=book.inspectBook({modules:[{title:'Senza lezioni',units:[]}]});
  assert.equal(empty.ready,false);
 });
+
+test('printable preflight rejects empty section titles and empty arrays',()=>{
+  const report=book.inspectBook({modules:[{title:'Modulo',units:[
+    {unitStatus:'published',content:{sections:[{title:'Titolo soltanto',steps:[]}],objectives:[]}}
+  ]}]});
+  assert.equal(report.ready,false);
+  assert.ok(report.issues.some(x=>/nessun contenuto didattico stampabile/.test(x)));
+});
+test('print selection stays available after a failed course load',()=>{
+  const source=read('apps/training/admin-print-lessons-v23.js');
+  assert.match(source,/let selectors='';/);
+  assert.match(source,/host\(\)\.innerHTML=selectors\+'<section class="admin-card"><p role="alert"/);
+});

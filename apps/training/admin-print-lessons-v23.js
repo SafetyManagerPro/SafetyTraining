@@ -73,9 +73,12 @@
     const title=asText(v.title||v.heading||v.name||'');
     const children=Object.entries(v).filter(([k])=>!['title','heading','name'].includes(k)&&
       Object.prototype.hasOwnProperty.call(nestedLabels,k)&&!filteredKeys.test(k)).slice(0,35);
-    return '<div class="print-unit-detail">'+(title?'<h4>'+title+'</h4>':'')+
-      children.map(([k,val])=>'<section>'+(nestedLabels[k]?'<h5>'+esc(nestedLabels[k])+'</h5>':'')+
-        renderValue(val,depth+1)+'</section>').join('')+'</div>';
+    const printable=children.map(([k,val])=>{
+      const body=renderValue(val,depth+1);
+      return body?'<section>'+(nestedLabels[k]?'<h5>'+esc(nestedLabels[k])+'</h5>':'')+body+'</section>':'';
+    }).filter(Boolean);
+    if(!printable.length)return '';
+    return '<div class="print-unit-detail">'+(title?'<h4>'+title+'</h4>':'')+printable.join('')+'</div>';
   }
   // One shared whitelist is used for output and its completeness preflight.
   function printableBody(content){
@@ -186,6 +189,7 @@
     document.getElementById('adminTitle').textContent='Stampa lezioni';
     document.getElementById('adminSubtitle').textContent='Dispensa completa per corso e versione pubblicata';
     host().innerHTML='<div class="admin-loading">Caricamento contenuti della versione…</div>';
+    let selectors='';
     try{
       const auth=await client.from('platform_admins').select('user_id').eq('user_id',who).maybeSingle();
       if(auth.error||!auth.data)throw Error('Richiesta non autorizzata come amministratore di piattaforma.');
@@ -200,7 +204,7 @@
       if(!current(seq,who))return;
       if(!versions.some(x=>x.id===state.versionId))state.versionId=versions[0]?.id||'';
       const version=versions.find(v=>v.id===state.versionId);
-      const selectors='<section class="admin-card print-selector"><h2>Dispensa del singolo corso</h2>'+
+      selectors='<section class="admin-card print-selector"><h2>Dispensa del singolo corso</h2>'+
         '<p>Seleziona il corso e la versione pubblicata. Stampa o salva in PDF dal browser: niente test riservati, presenze o attestati.</p>'+
         '<label>Corso <select id="printLessonCourse">'+courses.map(c=>
           '<option value="'+esc(c.id)+'"'+(c.id===state.courseId?' selected':'')+'>'+esc(c.title)+'</option>').join('')+
@@ -222,7 +226,7 @@
         '<p class="admin-note">Controllo della completezza tecnica del materiale, non certificazione della conformità normativa.</p></section>';
       host().innerHTML=selectors+summary+documentHtml(book);
       if(report.ready)host().querySelector('[data-print-lessons]')?.removeAttribute('disabled');
-    }catch(error){if(current(seq,who))host().innerHTML='<section class="admin-card"><p role="alert" class="admin-error">'+
+    }catch(error){if(current(seq,who))host().innerHTML=selectors+'<section class="admin-card"><p role="alert" class="admin-error">'+
       esc(error?.message||error)+'</p><button type="button" data-print-lessons-refresh>Riprova</button></section>';}
   }
   function bind(){

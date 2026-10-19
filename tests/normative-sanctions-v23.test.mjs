@@ -38,3 +38,20 @@ test('no database writes or automatic penalty amounts and sanitation preserved',
  assert.match(app,/SAFETY_NORMATIVE_SANCTIONS_V23/);
  assert.match(app,/t\.db_backed/);
 });
+
+test('sanctions are not attached solely because a legal bibliography contains an article',()=>{
+  const html=sanctions.renderFor({title:'La corretta manutenzione quotidiana',
+    summary:'Controllare pulizia e ordine della postazione.',
+    norm:'Articoli 17, 19, 20, 37, 55 e 59; DVR'});
+  assert.equal(html,'');
+});
+test('topic summary can trigger applicable sanctions without requiring a title keyword',()=>{
+  const html=sanctions.renderFor({title:'Le responsabilità individuali',
+    summary:'I DPI devono essere impiegati correttamente.'});
+  assert.match(html,/Art\. 59/);
+});
+test('legal references point to canonical, public official sources',()=>{
+  const html=sanctions.renderFor({title:'La valutazione dei rischi e DVR'});
+  assert.match(html,/normattiva\.it/);
+  assert.match(html,/ispettorato\.gov\.it/);
+});

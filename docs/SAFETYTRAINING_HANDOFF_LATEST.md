@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-19
-Stato: **v22.9 controllo completezza dispense** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-34`.
+Stato: **v22.10 qualità stampa e sanzioni contestuali** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-35`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -404,4 +404,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - **Stampa lezioni / singolo corso:** ora esegue un preflight esplicito prima di abilitare la stampa: contatori visibili di moduli e Learning Unit, controllo che ogni modulo contenga unità, che ogni versione LU collegata sia pubblicata e che ogni unità contenga sezioni realmente stampabili secondo la whitelist sicura. Se manca anche un requisito, **stampa bloccata**, senza creare una dispensa apparentemente completa. Il preflight è tecnico, non verifica conformità giuridica o qualità didattica.
 - **Integrità contenuti e permessi:** nessuna modifica DB; continuano le verifiche platform-admin, RLS, limiti query e omissione di quiz/soluzioni/informazioni riservate. Ricognizione read-only: tutte le **455** associazioni LU di versioni corso pubblicate puntano a versioni LU pubblicate (al momento del controllo); in produzione esistono **69** versioni corso pubblicate. Restano da verificare su browser reale resa di dispense molto lunghe ed immagini.
 - **Tracciabilità:** aggiornate in testa data, stato e cache PWA in entrambi gli handoff. Aggiunto test CI `handoff-sync-v23.test.mjs`: impedisce cambi di versione PWA senza aggiornare i due promemoria e assicura che l'ultima voce cronologica coincida nei due documenti.
-- PWA `safety-training-v22-34`. Cancellazione effettiva rimane sospesa. Restano frozen 27 corsi; nessuna modifica alle loro lezioni. 
+- PWA `safety-training-v22-35`. Cancellazione effettiva rimane sospesa. Restano frozen 27 corsi; nessuna modifica alle loro lezioni. 
+
+## 2026-10-19 — v22.10 riscontro dispense e pertinenza sanzioni
+- **Stampa lezioni, affidabilità:** corretto `renderValue` affinché i titoli senza testo o liste vuote non contino come materiale didattico stampabile; il preflight blocca la dispensa se una LU manca di contenuto realmente renderizzabile. Se il caricamento di una versione fallisce, restano visibili i selettori corso/versione (possibile scegliere un altro corso anziché restare intrappolati su Riprova).
+- **Sanzioni contestuali:** attivazione delle schede solo sui temi effettivamente insegnati in titolo/sommario, non sui richiami generici di bibliografia o negli approfondimenti: niente blocco sanzioni spurio nelle lezioni non pertinenti. Link stabili a Normattiva D.Lgs. 81/2008 e testo coordinato INL gennaio 2026. L'informazione è didattica, non un'attribuzione di responsabilità; per importi e norme applicabili si controlla sempre la versione vigente alla data dei fatti.
+- **Test aggiunti:** blocco sezioni vuote, ripresa selezione dopo errore, filtro bibliografico e fonti ufficiali, più test handoff allineato alla nuova voce v22.10. Cache PWA `safety-training-v22-35`. Nessuna modifica a Supabase, corsi congelati, presenze o attestati. Resta il collaudo grafico di stampa A4 con browser e una revisione periodica delle fattispecie sanzionatorie.

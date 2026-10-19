@@ -2,8 +2,8 @@
 (() => {
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-  const SOURCE='https://def.finanze.it/DocTribFrontend/getAttoNormativoDetail.do?ACTION=getSommario&id=%7BCC095CBD-459C-48AE-9744-550ABA5865E4%7D';
-  const SOURCE55='https://def.finanze.it/DocTribFrontend/getAttoNormativoDetail.do?ACTION=getArticolo&codiceOrdinamento=0000000000000550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000&id=%7BCC095CBD-459C-48AE-9744-550ABA5865E4%7D';
+  const SOURCE='https://www.normattiva.it/eli/id/2008/04/30/008G0104/CONSOLIDATED';
+  const SOURCEINL='https://www.ispettorato.gov.it/files/2026/01/TU-81-08-Ed.-Gennaio-2026.pdf';
   const updated='19/10/2026';
   const cases=[
     {id:'dvr',pattern:/\bDVR\b|valutazione (?:di|dei) rischi|documento di valutazione/i,
@@ -60,9 +60,11 @@
       references:'Artt. 18, 47–50 e 55, D.Lgs. 81/2008.'}
   ];
   function matches(context){
-    const text=[context?.title,context?.summary,context?.detail,context?.norm].filter(x=>typeof x==='string').join(' ').slice(0,20000);
-    if(!text.trim())return [];
-    return cases.filter(x=>x.pattern.test(text)).slice(0,5);
+    // Match the subject taught, not generic statutory references listed in a note.
+    // A catch-all reference to art. 37 or DVR must not insert penalties in every lesson.
+    const focus=[context?.title,context?.summary].filter(x=>typeof x==='string').join(' ').slice(0,7000);
+    if(!focus.trim())return [];
+    return cases.filter(x=>x.pattern.test(focus)).slice(0,5);
   }
   function renderFor(context){
     const found=matches(context);if(!found.length)return '';
@@ -73,7 +75,7 @@
         '<dl>'+x.roles.map(([role,obligation,consequence])=>'<dt><strong>'+esc(role)+'</strong></dt><dd><p>'+esc(obligation)+'</p><p><strong>Conseguenze:</strong> '+esc(consequence)+'</p></dd>').join('')+'</dl>'+
         '<p><strong>Norma:</strong> '+esc(x.references)+'</p></article>').join('')+
       '<p><a href="'+SOURCE+'" target="_blank" rel="noopener noreferrer">Testo vigente D.Lgs. 81/2008 – fonte MEF</a> · '+
-      '<a href="'+SOURCE55+'" target="_blank" rel="noopener noreferrer">Articolo 55 aggiornato nel 2026</a>.</p>'+
+      '<a href="'+SOURCEINL+'" target="_blank" rel="noopener noreferrer">Testo coordinato INL (gennaio 2026)</a>.</p>'+
       '<p>Importi omessi volutamente: controllare gli aggiornamenti monetari e le disposizioni in vigore alla data della violazione.</p></section>';
   }
   window.SAFETY_NORMATIVE_SANCTIONS_V23={matches,renderFor,cases};
