@@ -20,8 +20,10 @@
 #adminPrintableLessons .print-toc li{margin:.15rem 0;}
 #adminPrintableLessons .print-toc a{text-decoration:none;color:inherit;}
 #adminPrintableLessons .print-lesson-section > h3{margin-bottom:.3rem;}
+/* Printed pages are detached from the fixed admin console before print().
+   Never use visibility:hidden on the ancestor of printable content. */
+#safetyPrintStage{display:none;}
 @media print{
-  /* Margin-box page number is supported by current Chromium; other engines may omit it. */
   @page{
     size:A4 portrait;
     margin:17mm 14mm 18mm;
@@ -31,52 +33,85 @@
       font:8pt system-ui,sans-serif;
     }
   }
-  body.admin-course-print{background:#fff!important;color:#111!important;overflow:visible!important;}
-  body.admin-course-print > *{visibility:hidden!important;}
-  body.admin-course-print #adminShell,
-  body.admin-course-print #adminShell #adminContent,
-  body.admin-course-print #adminShell #adminContent #adminPrintableLessons,
-  body.admin-course-print #adminShell #adminContent #adminPrintableLessons *{visibility:visible!important;}
-  body.admin-course-print #adminShell{display:block!important;position:static!important;height:auto!important;width:100%!important;overflow:visible!important;transform:none!important;background:#fff!important;box-shadow:none!important;color:#111!important;}
-  body.admin-course-print #adminShell .admin-nav,
-  body.admin-course-print #adminShell .admin-head,
-  body.admin-course-print #adminContent > :not(#adminPrintableLessons){display:none!important;}
-  body.admin-course-print #adminShell .admin-main,
-  body.admin-course-print #adminContent,
-  body.admin-course-print #adminPrintableLessons{display:block!important;position:static!important;width:100%!important;max-width:none!important;overflow:visible!important;box-shadow:none!important;background:#fff!important;color:#111!important;margin:0!important;padding:0!important;border:0!important;}
-  body.admin-course-print #adminPrintableLessons .print-cover{break-after:page;}
-  body.admin-course-print #adminPrintableLessons .print-toc{break-after:page;}
-  body.admin-course-print #adminPrintableLessons .print-module{break-before:page;}
-  body.admin-course-print #adminPrintableLessons h2,
-  body.admin-course-print #adminPrintableLessons h3,
-  body.admin-course-print #adminPrintableLessons h4,
-  body.admin-course-print #adminPrintableLessons h5{break-after:avoid;page-break-after:avoid;}
-  body.admin-course-print #adminPrintableLessons figure{
+  html,body.admin-course-print{margin:0!important;padding:0!important;height:auto!important;overflow:visible!important;background:#fff!important;color:#111!important;}
+  body.admin-course-print > :not(#safetyPrintStage){display:none!important;}
+  body.admin-course-print #safetyPrintStage{
+    display:block!important;
+    position:static!important;
+    visibility:visible!important;
+    width:100%!important;
+    height:auto!important;
+    max-width:none!important;
+    min-height:0!important;
+    overflow:visible!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+    color:#111!important;
+    box-shadow:none!important;
+  }
+  body.admin-course-print #safetyPrintStage #adminPrintableLessons{
+    display:block!important;
+    visibility:visible!important;
+    width:100%!important;
+    height:auto!important;
+    max-width:none!important;
+    overflow:visible!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    background:#fff!important;
+    color:#111!important;
+    font-size:10.5pt;
+    line-height:1.45;
+  }
+  body.admin-course-print #safetyPrintStage #adminPrintableLessons *{
+    visibility:visible!important;
+    color:#111!important;
+    text-shadow:none!important;
+    box-shadow:none!important;
+  }
+  body.admin-course-print #safetyPrintStage #adminPrintableLessons p{
+    font-size:inherit!important;
+    line-height:1.45!important;
+    margin:.35rem 0!important;
+  }
+  body.admin-course-print #safetyPrintStage .print-cover{break-after:page;}
+  body.admin-course-print #safetyPrintStage .print-toc{break-after:page;}
+  body.admin-course-print #safetyPrintStage .print-module{break-before:page;break-inside:auto;}
+  body.admin-course-print #safetyPrintStage h2,
+  body.admin-course-print #safetyPrintStage h3,
+  body.admin-course-print #safetyPrintStage h4,
+  body.admin-course-print #safetyPrintStage h5{
+    break-after:avoid;
+    page-break-after:avoid;
+  }
+  body.admin-course-print #safetyPrintStage figure{
     break-inside:avoid;
     page-break-inside:avoid;
   }
-  /* Do not force an unusually long list item or lesson to fit one page. */
-  body.admin-course-print #adminPrintableLessons .print-lesson,
-  body.admin-course-print #adminPrintableLessons li{break-inside:auto;}
-  body.admin-course-print #adminPrintableLessons figure img{
+  body.admin-course-print #safetyPrintStage .print-lesson,
+  body.admin-course-print #safetyPrintStage li{break-inside:auto;}
+  body.admin-course-print #safetyPrintStage figure img{
     max-width:100%;
     max-height:95mm;
     height:auto;
     object-fit:contain;
   }
-  /* Parent module items may span pages; short individual lesson links stay together. */
-  body.admin-course-print #adminPrintableLessons .print-toc > ol > li{break-inside:auto;}
-  body.admin-course-print #adminPrintableLessons .print-toc > ol > li > ol > li{break-inside:avoid;}
-  body.admin-course-print #adminPrintableLessons .print-lesson-section > h3{
+  body.admin-course-print #safetyPrintStage .print-toc > ol > li{break-inside:auto;}
+  body.admin-course-print #safetyPrintStage .print-toc > ol > li > ol > li{break-inside:avoid;}
+  body.admin-course-print #safetyPrintStage .print-lesson-section > h3{
     break-after:avoid;
     page-break-after:avoid;
   }
-  body.admin-course-print #adminPrintableLessons a{color:#111;text-decoration:underline;}
-  body.admin-course-print #adminPrintableLessons a[href^="#"]:after{content:none;}
-  body.admin-course-print #adminPrintableLessons a[href^="http"]:after{
+  body.admin-course-print #safetyPrintStage a{color:#111;text-decoration:underline;}
+  body.admin-course-print #safetyPrintStage a[href^="#"]:after{content:none;}
+  body.admin-course-print #safetyPrintStage a[href^="http"]:after{
     content:" (" attr(href) ")";
     font-size:8pt;
     overflow-wrap:anywhere;
   }
-  body.admin-course-print #adminPrintableLessons p{orphans:3;widows:3;}
+  body.admin-course-print #safetyPrintStage p{orphans:3;widows:3;}
 }

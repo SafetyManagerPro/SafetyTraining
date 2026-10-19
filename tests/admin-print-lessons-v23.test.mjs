@@ -129,9 +129,65 @@ test('A4 layout supports multi-page index, chapter breaks, long list items and p
  assert.match(css,/counter\(page\)/);
  assert.match(css,/\.print-module\{break-before:page/);
  assert.match(css,/\.print-toc\{break-after:page/);
- assert.match(css,/\.print-lesson,\s*\n\s*body\.admin-course-print #adminPrintableLessons li\{break-inside:auto/);
+ assert.match(css,/body\.admin-course-print #safetyPrintStage \.print-lesson,/);
  assert.match(css,/a\[href\^="#"\]:after\{content:none/);
  assert.match(css,/max-height:95mm/);
  assert.match(css,/print-toc > ol > li\{break-inside:auto/);
  assert.match(css,/print-toc > ol > li > ol > li\{break-inside:avoid/);
+ assert.match(css,/body\.admin-course-print > :not\(#safetyPrintStage\)\{display:none!important/);
+ assert.doesNotMatch(css,/body\.admin-course-print > \*\{visibility:hidden/);
+});
+
+test('the booklet is moved outside the scrollable admin shell and restored after printing',()=>{
+ const page={id:'adminPrintableLessons',parentNode:null};
+ const source={children:[],insertBefore(n,ref){
+   const idx=this.children.indexOf(ref);
+   if(idx<0)throw Error('missing reference');
+   if(n.parentNode){const from=n.parentNode.children;from.splice(from.indexOf(n),1);}
+   this.children.splice(idx,0,n);n.parentNode=this;
+ },querySelector(s){return s==='#adminPrintableLessons'&&this.children.includes(page)?page:null;}};
+ source.children.push(page);page.parentNode=source;
+ const body={children:[],classList:{active:new Set(),add(v){this.active.add(v);},remove(v){this.active.delete(v);}},
+   appendChild(n){
+     if(n.parentNode){const a=n.parentNode.children;a.splice(a.indexOf(n),1);}
+     this.children.push(n);n.parentNode=this;return n;
+   }};
+ function element(){return {id:'',children:[],parentNode:null,appendChild(n){
+     if(n.parentNode){const a=n.parentNode.children;a.splice(a.indexOf(n),1);}
+     this.children.push(n);n.parentNode=this;return n;
+   },remove(){
+     if(this.parentNode){const a=this.parentNode.children;a.splice(a.indexOf(this),1);this.parentNode=null;}
+   }};}
+ const doc=context.document;
+ const previous={body:doc.body,getElementById:doc.getElementById,createElement:doc.createElement,createComment:doc.createComment};
+ doc.body=body;
+ doc.getElementById=id=>id==='adminContent'?source:null;
+ doc.createElement=()=>element();
+ doc.createComment=()=>element();
+ try{
+  assert.equal(book.beginPrintStage(),true);
+  assert.equal(book.beginPrintStage(),false);
+  assert.equal(source.children.includes(page),false);
+  const stage=body.children.find(x=>x.id==='safetyPrintStage');
+  assert.ok(stage);
+  assert.equal(stage.children[0],page);
+  assert.ok(body.classList.active.has('admin-course-print'));
+  book.finishPrintStage();
+  assert.equal(source.children.includes(page),true);
+  assert.equal(body.children.length,0);
+  assert.equal(body.classList.active.has('admin-course-print'),false);
+  book.finishPrintStage(); // cleanup is idempotent
+ }finally{
+  book.finishPrintStage();
+  Object.assign(doc,previous);
+ }
+});
+test('print CSS keeps black ink and page content in a standalone, non-scrollable surface',()=>{
+ const css=read('apps/training/admin-print-lessons-v23.css');
+ assert.match(css,/#safetyPrintStage\{display:none;\}/);
+ assert.match(css,/body\.admin-course-print #safetyPrintStage\{\s*display:block!important/);
+ assert.match(css,/body\.admin-course-print #safetyPrintStage #adminPrintableLessons\{/);
+ assert.match(css,/height:auto!important/);
+ assert.match(css,/color:#111!important/);
+ assert.doesNotMatch(css,/body\.admin-course-print #adminShell #adminContent/);
 });

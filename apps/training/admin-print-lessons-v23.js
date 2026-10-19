@@ -272,6 +272,33 @@
     }catch(error){if(current(seq,who))host().innerHTML=selectors+'<section class="admin-card"><p role="alert" class="admin-error">'+
       esc(error?.message||error)+'</p><button type="button" data-print-lessons-refresh>Riprova</button></section>';}
   }
+  // Move the already-loaded booklet into its own body-level print surface.
+  // Printing from the fixed, internally scrolling administration shell can
+  // produce empty pages in Chrome/Edge. No data or markup is regenerated here.
+  function beginPrintStage(){
+    if(state.printing)return false;
+    const booklet=host()?.querySelector('#adminPrintableLessons');
+    if(!booklet?.parentNode)return false;
+    const source=booklet.parentNode;
+    const marker=document.createComment('SafetyTraining: restore printable lessons here');
+    const stage=document.createElement('div');
+    stage.id='safetyPrintStage';
+    source.insertBefore(marker,booklet);
+    stage.appendChild(booklet);
+    document.body.appendChild(stage);
+    state.printing={booklet,marker,stage};
+    document.body.classList.add('admin-course-print');
+    return true;
+  }
+  function finishPrintStage(){
+    const current=state.printing;
+    if(!current)return;
+    state.printing=false;
+    if(current.marker.parentNode)current.marker.parentNode.insertBefore(current.booklet,current.marker);
+    current.marker.remove();
+    current.stage.remove();
+    document.body.classList.remove('admin-course-print');
+  }
   function bind(){
     if(state.bound)return;state.bound=true;
     document.getElementById('adminConsoleBtn')?.addEventListener('click',()=>setTimeout(ensureNav,60));
@@ -284,16 +311,16 @@
       if(!root()?.querySelector('[data-print-lessons-nav].active'))return;
       if(e.target.closest('[data-print-lessons-refresh]')){void render();return;}
       const b=e.target.closest('[data-print-lessons]');
-      if(b&&!b.disabled&&host()?.querySelector('#adminPrintableLessons')){
-        document.body.classList.add('admin-course-print');window.print();
+      if(b&&!b.disabled&&beginPrintStage()){
+        try{window.print();}catch(error){finishPrintStage();throw error;}
       }
     });
-    window.addEventListener('afterprint',()=>document.body.classList.remove('admin-course-print'));
+    window.addEventListener('afterprint',finishPrintStage);
   }
   async function boot(){
     for(let i=0;i<40&&!root();i++)await new Promise(r=>setTimeout(r,150));
     ensureNav();bind();
   }
-  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,inspectBook,verifyPrintImages,loadBook,render};
+  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,inspectBook,verifyPrintImages,loadBook,beginPrintStage,finishPrintStage,render};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
