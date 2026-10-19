@@ -1,0 +1,10 @@
+-- Applied on production as v22_016_equipment_in_person_refresher_instructor_workshops.
+-- The transaction added two new practice_labs_v22 records (not modifications to published learning units)
+-- with stable keys 'v23:agg_attr_carrelli_ind_4h:workshop-docente' and
+-- 'v23:agg_attr_ple_4h:workshop-docente', and linked each at position 3,
+-- required=false, context specific=true, instructor_led=true,
+-- training_mode='in_person_practice_only'.
+-- The complete source of the applied migration is in Supabase migration history.
+-- This file is a descriptive manifest and MUST NOT be applied as an implementation.
+-- Prerequisites for future modifications: preserve two original labs per course,
+-- do not claim online attendance or publish altered Learning Unit versions.

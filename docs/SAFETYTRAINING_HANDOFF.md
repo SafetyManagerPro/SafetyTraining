@@ -375,3 +375,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-19 — v22.6.6 separazione stampe
 - I due flussi di stampa ora sono distinti anche a livello CSS: `Stampa scheda istruttoria` non allega il registro firme vuoto, `Stampa registro presenze` non stampa altri cruscotti. Test di regressione aggiunto. Cache PWA safety-training-v22-29. Nessuna modifica database.
+
+## 2026-10-19 — v22.7 laboratori didattici integrati (due corsi attrezzature)
+- Applicata migrazione Supabase `v22_016_equipment_in_person_refresher_instructor_workshops`: creati 2 laboratori pratici specifici in `practice_labs_v22`, collegati con `course_practice_labs_v22` a `agg_attr_carrelli_ind_4h` e `agg_attr_ple_4h` come terzo laboratorio, `required=false`, `requires_physical_validation=true`, `training_mode=in_person_practice_only`. Contenuti: quattro stazioni di esercitazione per ciascun corso, con sequenza operativa, checklist, errori critici e condizioni di fermo. Questi due corsi risultavano già con due laboratori preesistenti, mantenuti.
+- Verifica read-only post migrazione: entrambi i link presenti e ogni nuovo laboratorio ha 4 fasi; nessuna iscrizione, LU pubblicata o corso frozen modificato.
+- Frontend Course Experience mostra avviso specifico 'Aggiornamento attrezzature: presenza fisica obbligatoria' per i due laboratori. Il digitale non sostituisce il programma pratico. Fonte di riferimento ministeriale: FAQ accordo 2025 su aggiornamento attrezzature.
+- Migrazione SQL integrale recuperabile da cronologia Supabase; manifest descrittivo in `supabase/migrations/20261019202500_v22_016_equipment_workshops_record.sql` NON eseguibile.
+- PWA `safety-training-v22-30` e test anti-autocertificazione. Revisioni istruttore e conformità per uso nel mondo reale restano necessarie, ma non blocco editoriale per materiale di supporto.
