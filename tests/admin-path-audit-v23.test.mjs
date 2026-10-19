@@ -67,3 +67,32 @@ test('open sessions with no heartbeat are flagged for review',()=>{
  const row=audit.inspect({id:'en',learner_id:'learner',status:'in_progress',progress_pct:0,active_seconds:0},related({sessions:new Map([['en',[{active_seconds:0,ended_at:null,last_heartbeat_at:null}]]])}));
  assert.ok(row.alerts.includes('heartbeat assente'));
 });
+
+test('paper attendance register contains blank signature cells, never invented attendance',()=>{
+ const html=audit.attendanceRegister({id:'ed-1',title:'Formazione carrellisti'},
+ {incomplete:false,diagnostics:[
+  {name:'Persona attiva',enrollmentStatus:'in_progress',frequency:'2h registrate'},
+  {name:'Persona revocata',enrollmentStatus:'revoked',frequency:'0h'}
+ ]});
+ assert.match(html,/REGISTRO PRESENZE/);
+ assert.match(html,/Firma corsista/);
+ assert.match(html,/Firma docente/);
+ assert.match(html,/NON È ATTESTATO/);
+ assert.match(html,/Persona attiva/);
+ assert.doesNotMatch(html,/Persona revocata/);
+ assert.doesNotMatch(html,/2h registrate/);
+ assert.match(html,/Iscrizioni revocate escluse: 1/);
+});
+test('attendance register is blocked if any dependent query was incomplete',()=>{
+ const html=audit.attendanceRegister({id:'ed-1',title:'Corso'},
+   {incomplete:true,diagnostics:[{name:'Persona',enrollmentStatus:'in_progress'}]});
+ assert.match(html,/Registro non disponibile/);
+ assert.doesNotMatch(html,/Firma corsista/);
+});
+test('attendance register escapes user-supplied names and edition titles',()=>{
+ const html=audit.attendanceRegister({id:'ed',title:'<script>evil</script>'},
+ {incomplete:false,diagnostics:[{name:'<img src=x onerror=evil()>',enrollmentStatus:'in_progress'}]});
+ assert.doesNotMatch(html,/<script>|<img/);
+ assert.match(html,/&lt;script&gt;/);
+ assert.match(html,/&lt;img/);
+});

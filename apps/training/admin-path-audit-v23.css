@@ -1,23 +1,36 @@
 /* SafetyTraining v22.6.2 — printed review sheet, NEVER a certificate. */
 @media print {
   @page { size: A4 landscape; margin: 12mm; }
-  body.admin-path-print { overflow:visible!important; background:white!important; }
-  body.admin-path-print > * { visibility:hidden!important; }
-  body.admin-path-print #adminShell,
-  body.admin-path-print #adminShell #adminContent,
-  body.admin-path-print #adminShell #adminContent * { visibility:visible!important; }
-  body.admin-path-print #adminShell { position:static!important; height:auto!important; width:100%!important; display:block!important; overflow:visible!important; background:white!important; color:black!important; }
-  body.admin-path-print #adminShell .admin-nav,
-  body.admin-path-print #adminShell .admin-head,
-  body.admin-path-print #adminShell #adminHelpPanel { display:none!important; }
-  body.admin-path-print #adminShell .admin-main,
-  body.admin-path-print #adminContent { position:static!important; width:100%!important; height:auto!important; max-width:none!important; padding:0!important; margin:0!important; overflow:visible!important; display:block!important; }
-  body.admin-path-print #adminContent button,
-  body.admin-path-print #adminContent select,
-  body.admin-path-print #adminContent label { display:none!important; }
-  body.admin-path-print #adminContent .admin-card { display:block!important; break-inside:avoid; box-shadow:none!important; background:white!important; border:1px solid #888!important; color:black!important; }
-  body.admin-path-print #adminContent .admin-table { color:black!important; font-size:9pt!important; }
-  body.admin-path-print #adminContent .admin-table tr { break-inside:avoid; }
-  body.admin-path-print #adminContent .admin-note,
-  body.admin-path-print #adminContent .admin-path-review { color:black!important; }
+  body:is(.admin-path-print,.admin-attendance-print) { overflow:visible!important; background:white!important; }
+  body:is(.admin-path-print,.admin-attendance-print) > * { visibility:hidden!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell,
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell #adminContent,
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell #adminContent * { visibility:visible!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell { position:static!important; height:auto!important; width:100%!important; display:block!important; overflow:visible!important; background:white!important; color:black!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell .admin-nav,
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell .admin-head,
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell #adminHelpPanel { display:none!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminShell .admin-main,
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent { position:static!important; width:100%!important; height:auto!important; max-width:none!important; padding:0!important; margin:0!important; overflow:visible!important; display:block!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent button,
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent select,
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent label { display:none!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent .admin-card { display:block!important; break-inside:avoid; box-shadow:none!important; background:white!important; border:1px solid #888!important; color:black!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent .admin-table { color:black!important; font-size:9pt!important; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent .admin-table tr { break-inside:avoid; }
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent .admin-note,
+  body:is(.admin-path-print,.admin-attendance-print) #adminContent .admin-path-review { color:black!important; }
+}
+
+/* The register is printable but not part of the normal admin dashboard. */
+.admin-attendance-register { display:none; }
+@media print {
+  body.admin-attendance-print #adminContent .admin-card:not(.admin-attendance-register) {display:none!important;}
+  body.admin-attendance-print #adminContent .admin-attendance-register {display:block!important;break-inside:auto!important;}
+  body.admin-attendance-print #adminContent .admin-attendance-register table {width:100%;border-collapse:collapse;}
+  body.admin-attendance-print #adminContent .admin-attendance-register th,
+  body.admin-attendance-print #adminContent .admin-attendance-register td {
+    border:1px solid #333!important;padding:8px 5px!important;color:black!important;
+  }
+  body.admin-attendance-print #adminContent .admin-attendance-register tr {break-inside:avoid;}
 }

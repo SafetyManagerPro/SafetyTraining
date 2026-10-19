@@ -362,3 +362,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-19 — v22.6.3 attenzione heartbeat frequenze
 - Controllo percorsi: lettura del campo `learning_sessions.last_heartbeat_at` e nuovi avvisi per sessioni aperte senza heartbeat o con heartbeat oltre 15 minuti; queste segnalazioni sono informative e richiedono riconciliazione manuale. Test di regressione aggiunto. PWA `safety-training-v22-26`.
 - Audit del catalogo read-only: diversi aggiornamenti attrezzature (4h) hanno una sola LU pubblicata. Prima di ampliare contenuti o dichiarare un percorso conforme va verificata struttura, ripartizione teorico/pratica e fonti applicabili; nessuna modifica dei corsi congelati o dei contenuti formativi in produzione in questa fase.
+
+## 2026-10-19 — v22.6.4 registro presenze cartaceo da iscrizioni
+- Aggiunta a Controllo percorsi l'azione `Stampa registro presenze`: foglio stampabile per la specifica edizione, con elenco corsisti non revocati, campi VUOTI per data/sede/docente/orari entrata/uscita/ore convalidate/firme corsista-docente e annotazione anomalie. Esclude le iscrizioni revocate dal prospetto; non usa le ore tecniche come ore convalidate. Lo stampa solo se i dati letti sono completi e c'è almeno una iscrizione attiva.
+- Registro chiaramente NON È ATTESTATO né prova di presenza già verificata; non scrive né valida automaticamente dati nel database. La scheda istruttoria precedente rimane separata. Aggiornato CSS stampa, test su firme vuote, esclusioni, dati parziali e escaping.
+- PWA safety-training-v22-27. Sviluppo rimasto: validazione digitale delle presenze, eventuale firma elettronica a norma e gestione attestati.

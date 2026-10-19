@@ -90,6 +90,30 @@
     };
     return {assignments,diagnostics:assignments.rows.map(e=>inspect(e,related)),incomplete};
   }
+  // A paper register is a blank attendance form sourced only from visible,
+  // non-revoked enrollment identities, not an attendance or certificate claim.
+  function attendanceRegister(edition,details){
+    if(details.incomplete)return '<p role="alert" class="admin-error">Registro non disponibile: elenco parziale. Risolvere i limiti di lettura prima della stampa.</p>';
+    const active=details.diagnostics.filter(x=>x.enrollmentStatus!=='revoked');
+    if(!active.length)return '<p class="admin-note">Nessuna iscrizione attiva per compilare un registro.</p>';
+    const rows=active.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(x.name)+'</td>'+
+      '<td>__________</td><td>__________</td><td>__________</td>'+
+      '<td>________________</td><td>________________</td></tr>').join('');
+    return '<section class="admin-card admin-attendance-register" aria-label="Registro cartaceo presenze non compilato">'+
+      '<h2>REGISTRO PRESENZE — DA COMPILARE E VALIDARE</h2>'+
+      '<p>Edizione: <strong>'+esc(edition.title||'Senza titolo')+'</strong> · ID: '+esc(edition.id||'—')+'</p>'+
+      '<p>Data: __________________ Sede: __________________ Modalità: __________________</p>'+
+      '<p>Sessione / argomento: _______________________________________ Docente: _______________________</p>'+
+      '<p>Orario previsto: da __________ a __________ Orario effettivo da convalidare: __________</p>'+
+      '<table class="admin-table"><thead><tr><th>N.</th><th>Corsista iscritto</th>'+
+      '<th>Entrata</th><th>Uscita</th><th>Ore convalidate</th><th>Firma corsista</th>'+
+      '<th>Firma docente / riscontro</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<p>Interruzioni, assenze, recuperi e anomalie: ______________________________________________________________</p>'+
+      '<p>Firma docente ______________________ Firma responsabile ______________________ Data ______________</p>'+
+      '<p><strong>NON È ATTESTATO NÉ PROVA DI PRESENZA GIÀ VALIDATA.</strong> Le colonne sono vuote: compilarle sulla base della presenza reale, riconciliare con eventuali tracciati digitali e conservare il registro secondo la procedura applicabile.</p>'+
+      '<p class="admin-note">Iscrizioni revocate escluse: '+esc(details.diagnostics.length-active.length)+
+      ' · Nessuna presenza, ora convalidata o firma viene precompilata.</p></section>';
+  }
   function renderReport(edition,metadata,data){
     const all=data.diagnostics,activeRows=all.filter(x=>x.enrollmentStatus!=='revoked');
     const stat=(v,label)=>'<article class="admin-stat"><strong>'+esc(v)+'</strong><span>'+esc(label)+'</span></article>';
@@ -105,7 +129,7 @@
       stat(activeRows.filter(x=>x.hasEvidence).length,'Con evidenze inserite')+
       stat(activeRows.filter(x=>x.alerts.length).length,'Da riconciliare')+'</div>'+warn+
       '<p class="admin-note">Sessioni ancora aperte, heartbeat assente o vecchio e contatori divergenti richiedono riconciliazione con il registro di presenza. I tempi sono registrazioni tecniche, non certificazioni di presenza. Il completamento dei contenuti, i test e le evidenze NON autorizzano automaticamente attestati. Verificare requisiti, modalità, firme, eventuale formazione pratica e registri cartacei prima di qualsiasi rilascio.</p>'+
-      '<p><button type="button" data-path-quality>Apri qualità didattica</button> <button type="button" data-path-readiness>Apri readiness corsi</button> <button type="button" data-path-print>Stampa scheda istruttoria</button></p></section>'+
+      '<p><button type="button" data-path-quality>Apri qualità didattica</button> <button type="button" data-path-readiness>Apri readiness corsi</button> <button type="button" data-path-print>Stampa scheda istruttoria</button> <button type="button" data-path-register'+(data.incomplete||!activeRows.length?' disabled':'')+'>Stampa registro presenze</button></p></section>'+
       '<section class="admin-card"><h2>Verifica per iscrizione</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr>'+
       '<th>Corsista / gestione</th><th>Didattica</th><th>Frequenza registrata</th><th>Verifiche</th>'+
       '<th>Documentazione</th><th>Attestato</th></tr></thead><tbody>'+
@@ -115,7 +139,7 @@
          '<td>'+esc(x.evidence)+'<small class="admin-cell-note">'+esc(x.practice)+'</small></td>'+
          '<td><strong>Da verificare</strong>'+ (x.alerts.length?'<small class="admin-cell-note">'+esc(x.alerts.join(', '))+'</small>':'')+
          '</td></tr>').join(''):'<tr><td colspan="6">Nessuna iscrizione per questa edizione.</td></tr>')+
-      '</tbody></table></div></section>'+ 
+      '</tbody></table></div></section>'+ attendanceRegister(edition,data)+
       '<section class="admin-card admin-path-review"><h2>Scheda di controllo documentale — NON È UN ATTESTATO</h2>'+ 
       '<p>□ Anagrafica e collegamento all’edizione verificati · □ Frequenza e registri cartacei verificati</p>'+ 
       '<p>□ Test/colloqui e relative firme verificati · □ Esercitazioni pratiche e valutazione docente verificate</p>'+ 
@@ -173,11 +197,12 @@
     document.addEventListener('change',e=>{if(e.target?.id==='adminPathEdition'){
       state.editionId=e.target.value;void render();
     }});
-    window.addEventListener('afterprint',()=>document.body.classList.remove('admin-path-print'));
+    window.addEventListener('afterprint',()=>{document.body.classList.remove('admin-path-print','admin-attendance-print');});
     document.addEventListener('click',e=>{
       if(!root()?.querySelector('[data-path-audit].active'))return;
       if(e.target.closest('[data-path-refresh]')){void render();return;}
       if(e.target.closest('[data-path-print]')){document.body.classList.add('admin-path-print');window.print();return;}
+      if(e.target.closest('[data-path-register]')){if(e.target.closest('[disabled]'))return;document.body.classList.add('admin-attendance-print');window.print();return;}
       if(e.target.closest('[data-path-quality]'))root()?.querySelector('[data-quality-v22]')?.click();
       if(e.target.closest('[data-path-readiness]'))root()?.querySelector('[data-readiness-admin]')?.click();
     });
@@ -186,6 +211,6 @@
     for(let i=0;i<40&&!root();i++)await new Promise(r=>setTimeout(r,150));
     ensureNav();bind();
   }
-  window.SAFETY_ADMIN_PATH_AUDIT_V23={inspect,renderReport,loadEdition,ensureNav,render};
+  window.SAFETY_ADMIN_PATH_AUDIT_V23={inspect,renderReport,attendanceRegister,loadEdition,ensureNav,render};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
