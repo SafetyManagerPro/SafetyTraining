@@ -1,0 +1,8 @@
+.normative-sanctions{margin:1.5rem 0;padding:1rem;border-left:3px solid #6b7280;background:rgba(100,116,139,.07);font-size:.94rem}
+.normative-sanctions h3{margin:.1rem 0 .7rem}
+.normative-sanction-case{margin:.8rem 0;border-top:1px solid #bbb;padding-top:.65rem}
+.normative-sanction-case h4{margin:.2rem 0 .5rem}
+.normative-sanction-case dt{margin:.5rem 0 .1rem}
+.normative-sanction-case dd{margin:0 0 .5rem .6rem}
+.normative-sanction-case dd p{margin:.2rem 0}
+@media print {.normative-sanctions{background:#fff;border:1px solid #aaa!important;color:#111!important;break-inside:auto}.normative-sanction-case{break-inside:avoid}}

@@ -550,6 +550,7 @@ function topicView(c,t){
  <div class="section"><h3>🔗 Fonti ufficiali collegate</h3>${resourceCards(t.resources||c.resources||[])}</div>
  <div class="section teacher detail-only"><h3>👨‍🏫 Note docente</h3><p>${esc(t.teacher)}</p></div>
  <div class="section norm detail-only"><h3>📚 Riferimenti normativi</h3><p>${esc(t.norm)}</p></div>
+ ${t.db_backed&&!c.metadata?.freeze_scope&&!c.metadata?.frozen?(window.SAFETY_NORMATIVE_SANCTIONS_V23?.renderFor?.({title:t.title,summary:t.summary,detail:t.detail,norm:t.norm})||''):''}
  <div class="section detail-only disclaimer"><h3>🔎 Personalizzazione ente</h3><p>${esc(c.disclaimer||'Verificare sempre il DVR e le procedure effettive.')}</p></div>
  <div class="toolbar">${prev?`<button class="ghost" onclick="setHash('topic/${c.id}/${prev.id}')">← ${esc(prev.title)}</button>`:''}${next?`<button class="openbtn" onclick="setHash('topic/${c.id}/${next.id}')">${esc(next.title)} →</button>`:''}</div>`;
 }
