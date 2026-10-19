@@ -49,3 +49,16 @@ test('file is read-only, uses bounded queries, and links existing readiness and 
  assert.match(src,/Dati parziali/);
  assert.doesNotMatch(src,/\.delete\s*\(|\.update\s*\(|\.insert\s*\(|\.upsert\s*\(/);
 });
+
+test('print-only review is explicitly not a certificate and does not write records',()=>{
+ const js=read('apps/training/admin-path-audit-v23.js');
+ const css=read('apps/training/admin-path-audit-v23.css');
+ const index=read('apps/training/index.html');
+ assert.match(js,/Stampa scheda istruttoria/);
+ assert.match(js,/NON È UN ATTESTATO/);
+ assert.match(js,/Firma docente/);
+ assert.match(js,/admin-path-print/);
+ assert.match(css,/@media print/);
+ assert.match(index,/admin-path-audit-v23\.css/);
+ assert.doesNotMatch(js,/\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/);
+});

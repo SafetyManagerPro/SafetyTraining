@@ -103,7 +103,7 @@
       stat(activeRows.filter(x=>x.hasEvidence).length,'Con evidenze inserite')+
       stat(activeRows.filter(x=>x.alerts.length).length,'Da riconciliare')+'</div>'+warn+
       '<p class="admin-note">I tempi sono registrazioni tecniche, non certificazioni di presenza. Il completamento dei contenuti, i test e le evidenze NON autorizzano automaticamente attestati. Verificare requisiti, modalità, firme, eventuale formazione pratica e registri cartacei prima di qualsiasi rilascio.</p>'+
-      '<p><button type="button" data-path-quality>Apri qualità didattica</button> <button type="button" data-path-readiness>Apri readiness corsi</button></p></section>'+
+      '<p><button type="button" data-path-quality>Apri qualità didattica</button> <button type="button" data-path-readiness>Apri readiness corsi</button> <button type="button" data-path-print>Stampa scheda istruttoria</button></p></section>'+
       '<section class="admin-card"><h2>Verifica per iscrizione</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr>'+
       '<th>Corsista / gestione</th><th>Didattica</th><th>Frequenza registrata</th><th>Verifiche</th>'+
       '<th>Documentazione</th><th>Attestato</th></tr></thead><tbody>'+
@@ -113,7 +113,13 @@
          '<td>'+esc(x.evidence)+'<small class="admin-cell-note">'+esc(x.practice)+'</small></td>'+
          '<td><strong>Da verificare</strong>'+ (x.alerts.length?'<small class="admin-cell-note">'+esc(x.alerts.join(', '))+'</small>':'')+
          '</td></tr>').join(''):'<tr><td colspan="6">Nessuna iscrizione per questa edizione.</td></tr>')+
-      '</tbody></table></div></section>';
+      '</tbody></table></div></section>'+ 
+      '<section class="admin-card admin-path-review"><h2>Scheda di controllo documentale — NON È UN ATTESTATO</h2>'+ 
+      '<p>□ Anagrafica e collegamento all’edizione verificati · □ Frequenza e registri cartacei verificati</p>'+ 
+      '<p>□ Test/colloqui e relative firme verificati · □ Esercitazioni pratiche e valutazione docente verificate</p>'+ 
+      '<p>□ Requisiti applicabili e documentazione controllati · □ Emissione attestato autorizzata separatamente</p>'+ 
+      '<p>Firma responsabile ________________________ Data ______________ · Firma docente ________________________</p>'+ 
+      '<p class="admin-note">Questa scheda è un promemoria istruttorio e non prova da sola la frequenza né conferisce validità legale alla formazione.</p></section>';
   }
   async function render(){
     ensureNav();if(!db()||!host()||!actor())return;
@@ -165,9 +171,11 @@
     document.addEventListener('change',e=>{if(e.target?.id==='adminPathEdition'){
       state.editionId=e.target.value;void render();
     }});
+    window.addEventListener('afterprint',()=>document.body.classList.remove('admin-path-print'));
     document.addEventListener('click',e=>{
       if(!root()?.querySelector('[data-path-audit].active'))return;
       if(e.target.closest('[data-path-refresh]')){void render();return;}
+      if(e.target.closest('[data-path-print]')){document.body.classList.add('admin-path-print');window.print();return;}
       if(e.target.closest('[data-path-quality]'))root()?.querySelector('[data-quality-v22]')?.click();
       if(e.target.closest('[data-path-readiness]'))root()?.querySelector('[data-readiness-admin]')?.click();
     });
