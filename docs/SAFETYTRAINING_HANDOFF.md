@@ -393,3 +393,7 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Fonti pubbliche MEF D.Lgs. 81/2008 testo vigente e art. 55 modificato 2026; riferimenti specifici agli articoli 55–60, 87, 157, 158, 160 quando pertinenti. Non riportati importi in euro: richiedono verifica per fattispecie e rivalutazione alla data della violazione. Il testo è esplicitamente didattico e non attribuisce automaticamente colpa.
 - App desktop presenta schede normative soltanto per topic DB-backed di corsi non frozen; il modulo stampa lezioni include le medesime schede per le unità pertinenti. Nessuna modifica dei contenuti o degli status nel database.
 - CSS stampa e visualizzazione, test contestuali, PWA safety-training-v22-32. Revisione periodica normativa e ampliamento delle fattispecie specifiche rimangono nel backlog.
+
+## 2026-10-19 — v22.8.2 contenuti operativi completi nella stampa
+- Esteso il render sicuro delle dispense per leggere anche `operational.before`, `during`, `after`, `step_by_step`, `if_problem`, `who_to_involve`, `remember`, `adaptation`, la guida `guided.observe/importance/apply`, `deepdetail`, e schemi locali `idea_images` tramite whitelist asset. Continua l'esclusione di quiz, risposte e metadati riservati.
+- Test stampa casi complessi aggiunto. PWA `safety-training-v22-33`, entrambe le consegne aggiornate.

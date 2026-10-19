@@ -44,3 +44,14 @@ test('no browser-side mutations or certificate claims appear in print pipeline',
  assert.match(src,/Stampa lezioni/);
  assert.doesNotMatch(src,/\.insert\s*\(|\.upsert\s*\(|\.update\s*\(|\.delete\s*\(/);
 });
+
+test('operational content is retained for printed before-during-after sequences',()=>{
+ const html=book.lessonHtml({title:'Unità operativa',minutes:45,unitVersion:1,content:{
+  guided:{observe:['Guarda prima'],importance:['Perché'],apply:['Prova']},
+  operational:{before:['Verifica area'],during:['Procedi con cautela'],after:['Registra esito'],
+    if_problem:['Arresta la macchina'],who_to_involve:['Preposto']},
+  deepdetail:['Analisi aggiuntiva']
+ }},0);
+ for(const expected of ['Guarda prima','Verifica area','Procedi con cautela','Registra esito',
+   'Arresta la macchina','Preposto','Analisi aggiuntiva'])assert.match(html,new RegExp(expected));
+});

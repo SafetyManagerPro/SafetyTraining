@@ -15,7 +15,8 @@
     operational:'Come procedere',sections:'Svolgimento della lezione',case:'Caso pratico',
     example_story:'Esempio',common_errors:'Errori da evitare',learner_takeaway:'Da ricordare',
     norm:'Norme richiamate',delivery_note:'Modalità e vincoli di erogazione',
-    evidence_sources:'Fonti e approfondimenti',visuals:'Schemi didattici'
+    evidence_sources:'Fonti e approfondimenti',visuals:'Schemi didattici',
+    guided:'Esercitazione guidata',deepdetail:'Approfondimenti',good:'Comportamenti corretti',bad:'Errori da evitare',idea_images:'Schemi aggiuntivi'
   };
   const nestedLabels={title:'',heading:'',name:'',minutes:'Durata indicativa (min)',procedure:'Procedura',
     procedures:'Procedure',steps:'Passaggi',checklist:'Checklist',risks:'Rischi',prevention:'Prevenzione',
@@ -23,7 +24,11 @@
     objectives:'Obiettivi',summary:'Sintesi',detail:'Approfondimento',description:'Descrizione',
     context:'Contesto',example:'Esempio',examples:'Esempi',case:'Caso pratico',note:'Nota',
     notes:'Note',warning:'Attenzione',caution:'Precauzioni',stop_conditions:'Condizioni di arresto',
-    common_errors:'Errori da evitare',good:'Comportamenti corretti',bad:'Errori',materials:'Materiali',
+    common_errors:'Errori da evitare',good:'Comportamenti corretti',bad:'Errori',
+    before:'Prima dell’attività',during:'Durante',after:'Dopo',step_by_step:'Passaggi operativi',
+    if_problem:'Se si presenta un problema',who_to_involve:'Chi coinvolgere',remember:'Da ricordare',
+    adaptation:'Adattamento al contesto',observe:'Osserva',importance:'Perché è importante',apply:'Applica',
+    materials:'Materiali',
     demonstrations:'Dimostrazioni',scenario:'Scenario',question:'Domanda di riflessione'};
   const isPlain=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
   const asText=v=>typeof v==='string'||typeof v==='number'?esc(String(v).slice(0,6500)):'';
@@ -77,7 +82,7 @@
     const title=asText(content.title||unit.title||'Learning Unit '+(i+1));
     const body=Object.entries(sectionLabels).map(([k,label])=>{
       const v=content[k];if(v==null)return '';
-      const html=k==='visuals'?renderVisuals(v):k==='evidence_sources'?renderSources(v):renderValue(v);
+      const html=(k==='visuals'||k==='idea_images')?renderVisuals(v):k==='evidence_sources'?renderSources(v):renderValue(v);
       return html?'<section class="print-lesson-section"><h3>'+esc(label)+'</h3>'+html+'</section>':'';
     }).join('');
     const sanction=window.SAFETY_NORMATIVE_SANCTIONS_V23?.renderFor?.({
