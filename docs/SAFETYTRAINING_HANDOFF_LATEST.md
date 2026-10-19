@@ -350,3 +350,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Query RLS lato client, limitate a 100 edizioni, 100 iscrizioni per edizione e 1000 righe per tipo di dipendenza; dati parziali segnalati e nessuna decisione di completamento. L'utente deve poter verificare il percorso senza modifiche DB.
 - Aggiunti test unitari di diagnosi e guardie anti-mutazione, guida contestuale, asset PWA `safety-training-v22-23`. Non toccati catalogo frozen, Supabase o cancellazione definitiva.
 - Backlog residuo: approfondimenti LU nei corsi non congelati, validazione fisica/frequenza, firme/registri duali cartaceo-digitale, generatore attestati con regole; ancora non dichiarati implementati.
+
+## 2026-10-19 — v22.6.1 backlog didattico operativo
+- Quality dashboard ordina i corsi non frozen per priorità dei gap (prima Learning Unit e verifiche, quindi specificità scenari/pratica, poi fonti/media/visual). Per ogni corso visualizza una prossima azione didattica concreta, senza variare quality score o stato di pubblicazione. I 27 frozen rimangono esclusi dall'RPC esistente. Test su ordinamento e suggerimenti.
+- Verifica read-only catalogo Supabase: 92 corsi, 27 congelati; 1 edizione, 2 iscrizioni revocate, 0 sessioni, 0 tentativi test, 0 evidenze requisiti e 0 valutazioni pratiche. Non produrre completamenti artificiali.
+- PWA safety-training-v22-24. Attestati, registri di frequenza legale e nuove Learning Unit richiedono ulteriori implementazioni e convalida; nessuna automazione di rilascio.
