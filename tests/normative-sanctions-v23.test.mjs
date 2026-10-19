@@ -22,9 +22,15 @@ test('DPI links sanctions for worker, employer and preposto, without blanket att
  assert.match(html,/Art. 56/);
 });
 test('medical, self-employed, coordinators and project roles have distinct statutory articles',()=>{
- for(const [q,re] of [['Medico competente',/Art. 58/],['Coordinatore per l’esecuzione',/Art. 158/],
-   ['Lavoratori autonomi',/Art. 160/],['Progettisti e fabbricanti',/Art. 57/]]){
-   assert.match(sanctions.renderFor({title:q}),re);
+ for(const [title,id,number] of [
+   ['Medico competente','health','58'],
+   ['Coordinatore per l’esecuzione','site','158'],
+   ['Lavoratori autonomi','autonomo','160'],
+   ['Progettisti e fabbricanti','supply','57']]){
+   const found=Array.from(sanctions.matches({title}),x=>x.id);
+   assert.ok(found.includes(id),title);
+   const record=sanctions.cases.find(x=>x.id===id);
+   assert.match(record.references,new RegExp('\\b'+number+'\\b'),title);
  }
 });
 test('unrelated lesson does not receive generic or invented penalties',()=>{
@@ -58,20 +64,23 @@ test('legal references point to canonical, public official sources',()=>{
 
 test('new casebook includes eight distinct workplace hazard scenarios and precise role references',()=>{
  const examples=[
-  ['DUVRI',/Art\. 55, c\. 5, lett\. d/],
-  ['Gestione delle emergenze e evacuazione',/Art\. 43/],
-  ['Primo soccorso',/Art\. 45/],
-  ['Antincendio',/Art\. 46/],
-  ['Segnaletica di sicurezza',/Art\. 165/],
-  ['Spazi confinati',/Art\. 68/],
-  ['POS',/Art\. 159/],
-  ['Cadute dall’alto',/Art\. 159/]
+  ['DUVRI','interference','55'],
+  ['Gestione delle emergenze e evacuazione','emergencies','43'],
+  ['Primo soccorso','first-aid','45'],
+  ['Antincendio','fire','46'],
+  ['Segnaletica di sicurezza','signs','165'],
+  ['Spazi confinati','confined','68'],
+  ['POS','pos','159'],
+  ['Cadute dall’alto','height','159']
  ];
- for(const [title,ref] of examples){
+ for(const [title,id,article] of examples){
+  const selected=Array.from(sanctions.matches({title}),x=>x.id);
+  assert.ok(selected.includes(id),'missing '+id+' for '+title);
   const html=sanctions.renderFor({title});
-  assert.match(html,ref,title);
   assert.match(html,/Cosa verificare \/ come procedere/);
   assert.match(html,/<ul>/);
+  const record=sanctions.cases.find(x=>x.id===id);
+  assert.match(record.references,new RegExp('\\b'+article+'\\b'),title);
  }
 });
 test('inappropriate generic references do not add sanctions without subject matter',()=>{
