@@ -55,3 +55,29 @@ test('operational content is retained for printed before-during-after sequences'
  for(const expected of ['Guarda prima','Verifica area','Procedi con cautela','Registra esito',
    'Arresta la macchina','Preposto','Analisi aggiuntiva'])assert.match(html,new RegExp(expected));
 });
+
+test('print preflight counts all modules and refuses empty or draft learning units',()=>{
+ const report=book.inspectBook({modules:[
+   {title:'Modulo 1',units:[{title:'U1',unitStatus:'published',content:{summary:'Spiegazione'}}]},
+   {title:'Modulo 2',units:[{title:'U2',unitStatus:'draft',content:{summary:'Non pronta'}},
+      {title:'U3',unitStatus:'published',content:{quiz:{answer:'RISERVATO'}}}]}
+ ]});
+ assert.equal(report.moduleCount,2);
+ assert.equal(report.unitCount,3);
+ assert.equal(report.ready,false);
+ assert.ok(report.issues.some(x=>/versione LU non pubblicata/.test(x)));
+ assert.ok(report.issues.some(x=>/nessun contenuto didattico stampabile/.test(x)));
+});
+test('print preflight accepts real authored explanatory sections without quiz solutions',()=>{
+ const report=book.inspectBook({modules:[{title:'Modulo',units:[
+   {unitStatus:'published',content:{sections:[{title:'Avvio',procedures:['Controllo iniziale']}]}}
+ ]}]});
+ assert.equal(report.ready,true);
+ assert.equal(report.unitCount,1);
+});
+test('print preflight rejects a wholly empty course and an empty module',()=>{
+ const no=book.inspectBook({modules:[]});
+ assert.equal(no.ready,false);
+ const empty=book.inspectBook({modules:[{title:'Senza lezioni',units:[]}]});
+ assert.equal(empty.ready,false);
+});

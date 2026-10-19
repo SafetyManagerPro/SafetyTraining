@@ -77,14 +77,32 @@
       children.map(([k,val])=>'<section>'+(nestedLabels[k]?'<h5>'+esc(nestedLabels[k])+'</h5>':'')+
         renderValue(val,depth+1)+'</section>').join('')+'</div>';
   }
-  function lessonHtml(unit,i){
-    const content=isPlain(unit.content)?unit.content:{};
-    const title=asText(content.title||unit.title||'Learning Unit '+(i+1));
-    const body=Object.entries(sectionLabels).map(([k,label])=>{
-      const v=content[k];if(v==null)return '';
+  // One shared whitelist is used for output and its completeness preflight.
+  function printableBody(content){
+    const value=isPlain(content)?content:{};
+    return Object.entries(sectionLabels).map(([k,label])=>{
+      const v=value[k];if(v==null)return '';
       const html=(k==='visuals'||k==='idea_images')?renderVisuals(v):k==='evidence_sources'?renderSources(v):renderValue(v);
       return html?'<section class="print-lesson-section"><h3>'+esc(label)+'</h3>'+html+'</section>':'';
     }).join('');
+  }
+  function inspectBook(book){
+    const modules=Array.isArray(book?.modules)?book.modules:[];
+    const failures=[],units=modules.flatMap((m,mi)=>{
+      if(!Array.isArray(m.units)||!m.units.length)failures.push('Modulo '+(mi+1)+' senza Learning Unit.');
+      return Array.isArray(m.units)?m.units:[];
+    });
+    units.forEach((u,i)=>{
+      if(u.unitStatus!=='published')failures.push('Unità '+(i+1)+': versione LU non pubblicata.');
+      if(!printableBody(u.content))failures.push('Unità '+(i+1)+': nessun contenuto didattico stampabile.');
+    });
+    if(!modules.length||!units.length)failures.push('Percorso senza moduli o lezioni.');
+    return {moduleCount:modules.length,unitCount:units.length,issues:failures,ready:failures.length===0};
+  }
+  function lessonHtml(unit,i){
+    const content=isPlain(unit.content)?unit.content:{};
+    const title=asText(content.title||unit.title||'Learning Unit '+(i+1));
+    const body=printableBody(content);
     const sanction=window.SAFETY_NORMATIVE_SANCTIONS_V23?.renderFor?.({
       title:String(content.title||unit.title||''),
       summary:String(content.summary||''),
@@ -141,8 +159,9 @@
     for(const link of links){
       const v=textMap.get(link.unit_version_id);const base=v&&labelMap.get(v.learning_unit_id);
       if(!v||!base||!linksByModule.has(link.module_id))throw Error('Unità non visibile o incompleta. Stampa bloccata.');
+      if(v.status!=='published')throw Error('La versione di una Learning Unit non è pubblicata. Stampa bloccata.');
       linksByModule.get(link.module_id).push({...link,title:base.title,content:v.content,
-        minutes:v.content?.minutes??base.default_minutes,unitVersion:v.version_number});
+        minutes:v.content?.minutes??base.default_minutes,unitVersion:v.version_number,unitStatus:v.status});
     }
     return {course,version,modules:modules.map(m=>({...m,minutes:m.nominal_minutes,
       units:linksByModule.get(m.id).sort((a,b)=>a.position-b.position)}))};
@@ -193,8 +212,16 @@
       host().innerHTML=selectors+'<p class="admin-loading">Preparazione moduli e Learning Unit…</p>';
       const book=await loadBook(client,course,version);
       if(!current(seq,who))return;
-      host().innerHTML=selectors+documentHtml(book);
-      host().querySelector('[data-print-lessons]')?.removeAttribute('disabled');
+      const report=inspectBook(book);
+      const summary='<section class="admin-card" role="status"><h2>Verifica dispensa</h2>'+
+        '<p><strong>'+report.moduleCount+' moduli · '+report.unitCount+' Learning Unit</strong> · corso v'+
+        esc(version.version_number)+'</p>'+
+        (report.ready?'<p class="admin-ok">Tutte le unità della versione selezionata hanno contenuti didattici stampabili.</p>':
+          '<div class="admin-error"><strong>Stampa bloccata: contenuti incompleti</strong><ul>'+
+            report.issues.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>')+
+        '<p class="admin-note">Controllo della completezza tecnica del materiale, non certificazione della conformità normativa.</p></section>';
+      host().innerHTML=selectors+summary+documentHtml(book);
+      if(report.ready)host().querySelector('[data-print-lessons]')?.removeAttribute('disabled');
     }catch(error){if(current(seq,who))host().innerHTML='<section class="admin-card"><p role="alert" class="admin-error">'+
       esc(error?.message||error)+'</p><button type="button" data-print-lessons-refresh>Riprova</button></section>';}
   }
@@ -220,6 +247,6 @@
     for(let i=0;i<40&&!root();i++)await new Promise(r=>setTimeout(r,150));
     ensureNav();bind();
   }
-  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,loadBook,render};
+  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,inspectBook,loadBook,render};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

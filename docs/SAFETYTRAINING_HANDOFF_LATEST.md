@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
-Ultimo aggiornamento: 2026-10-18
-Stato: **v22 didactic quality / Practice Lab LIVE** sui 65 corsi non congelati; backend admin v21 invariato e preservato; PWA `safety-training-v22-18`.
+Ultimo aggiornamento: 2026-10-19
+Stato: **v22.9 controllo completezza dispense** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-34`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -399,3 +399,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-19 — v22.8.2 contenuti operativi completi nella stampa
 - Esteso il render sicuro delle dispense per leggere anche `operational.before`, `during`, `after`, `step_by_step`, `if_problem`, `who_to_involve`, `remember`, `adaptation`, la guida `guided.observe/importance/apply`, `deepdetail`, e schemi locali `idea_images` tramite whitelist asset. Continua l'esclusione di quiz, risposte e metadati riservati.
 - Test stampa casi complessi aggiunto. PWA `safety-training-v22-33`, entrambe le consegne aggiornate.
+
+## 2026-10-19 — v22.9 controllo completezza della dispensa e tracciabilità del progetto
+- **Stampa lezioni / singolo corso:** ora esegue un preflight esplicito prima di abilitare la stampa: contatori visibili di moduli e Learning Unit, controllo che ogni modulo contenga unità, che ogni versione LU collegata sia pubblicata e che ogni unità contenga sezioni realmente stampabili secondo la whitelist sicura. Se manca anche un requisito, **stampa bloccata**, senza creare una dispensa apparentemente completa. Il preflight è tecnico, non verifica conformità giuridica o qualità didattica.
+- **Integrità contenuti e permessi:** nessuna modifica DB; continuano le verifiche platform-admin, RLS, limiti query e omissione di quiz/soluzioni/informazioni riservate. Ricognizione read-only: tutte le **455** associazioni LU di versioni corso pubblicate puntano a versioni LU pubblicate (al momento del controllo); in produzione esistono **69** versioni corso pubblicate. Restano da verificare su browser reale resa di dispense molto lunghe ed immagini.
+- **Tracciabilità:** aggiornate in testa data, stato e cache PWA in entrambi gli handoff. Aggiunto test CI `handoff-sync-v23.test.mjs`: impedisce cambi di versione PWA senza aggiornare i due promemoria e assicura che l'ultima voce cronologica coincida nei due documenti.
+- PWA `safety-training-v22-34`. Cancellazione effettiva rimane sospesa. Restano frozen 27 corsi; nessuna modifica alle loro lezioni. 
