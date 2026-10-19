@@ -334,3 +334,10 @@ Preservare:
 
 ## v22.5.4 release gate
 Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release gate: full graph, scoped actor, token, locking, server audit, isolated synthetic tests, no privileged-function inspection bypass. The real deletion RPC remains absent. See document before any request to enable hard delete.
+
+## 2026-10-19 — audit post eliminazione prova
+- Confermato con query di sola lettura su Supabase produzione: azienda prova `183de1f8-49a2-4fe3-88fa-a9fd244ffa94`, corsista prova `c80bd514-c2e3-4ab3-8634-c474247dfa7a`, iscrizione prova `7f9829dc-9571-451b-b930-6da7ab15f0fc`: zero record rimanenti.
+- Edizione condivisa `e6d93a54-d652-4990-98ee-3c06bd2e80c4`: 1 presente; altre iscrizioni `35c35f90-fdbd-478a-b428-65d25c85ca8d` e `d1f404cf-2ba8-4c87-a4fe-a3f71b9289d5`: 2 presenti; rispettivi storici: 2 presenti.
+- Nessuna riga in `public.audit_log` reperita usando ID eliminati o action contenente delete/elimin. Non dichiarare che esista audit dell'eliminazione; verificare se esiste audit in altra sede prima di concludere assenza assoluta.
+- Nel progetto `ejkwvatmzdqqjozpxntk` risultano solo RPC `admin_delete_capabilities_v25` e `admin_preview_deletion_v25`; nessuna RPC server di esecuzione reale installata. Non abilitare il pulsante eliminazione definitiva sulla base del test manuale.
+- Il ripristino del backup .stbackup locale non è stato collaudato. L'utente ha richiesto di proseguire con i controlli e con il completamento del modulo amministrativo.
