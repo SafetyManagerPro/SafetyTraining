@@ -4,9 +4,9 @@ const TABLE='training_source_figures_v23',BUCKET='training-source-figures';
 const cloud=()=>window.SAFETY_CLOUD,c=()=>cloud()?.state?.client;
 const admin=()=>!!(cloud()?.state?.user?.id&&window.SAFETY_ADMIN_CAPABILITIES_STATE?.platform_admin);
 const esc=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
-const families=[['carrelli',/carrell|muletto|forch[ea]/i],['ple',/\\bple\\b|piattaform.{0,24}elevabil/i],['gru',/gru|autogru/i],['mmt',/\\bmmt\\b|movimento terra|escavat|pala caricatrice/i],['antincendio',/antincendio|incendio|estintor|evacuaz|esodo|fumo/i],['soccorso',/primo soccorso|rianimaz|emorrag|ferit|trauma/i],['quota',/lavori in quota|caduta dall.alto|anticadut|ancoragg|imbracatur/i],['meccanico',/meccanic|ripari|cesoiam|schiacciament/i],['dpi',/\\bdpi\\b|protezione individuale|guant|mascher|respirator|elmett|visier/i],['attrezzature',/brache|sollevament|carico sospeso|attrezzature di lavoro/i]];
+const families=[['carrelli',/carrell|muletto|forch[ea]/i],['ple',/\bple\b|piattaform.{0,24}elevabil/i],['gru',/gru|autogru/i],['mmt',/\bmmt\b|movimento terra|escavat|pala caricatrice/i],['antincendio',/antincendio|incendio|estintor|evacuaz|esodo|fumo/i],['soccorso',/primo soccorso|rianimaz|emorrag|ferit|trauma/i],['quota',/lavori in quota|caduta dall.alto|anticadut|ancoragg|imbracatur/i],['meccanico',/meccanic|ripari|cesoiam|schiacciament/i],['dpi',/\bdpi\b|protezione individuale|guant|mascher|respirator|elmett|visier/i],['attrezzature',/brache|sollevament|carico sospeso|attrezzature di lavoro/i]];
 const junk=new Set(['della','delle','dello','degli','nelle','nella','nelle','sulla','delle','come','quando','dopo','prima','dell','alla','dalla','anche','nella','per','con','dei','del','gli','una','nel','non','che','uno','tra','sono','caso','cosa','fare','sicurezza','lavoro','rischio','rischi','operatore','operatori','lavoratori','formazione']);
-const tokens=s=>new Set(String(s||'').toLocaleLowerCase('it').replace(/[^a-zà-ÿ0-9 ]/gi,' ').split(/\\s+/).filter(x=>x.length>4&&!junk.has(x)).slice(0,90));
+const tokens=s=>new Set(String(s||'').toLocaleLowerCase('it').replace(/[^a-zà-ÿ0-9 ]/gi,' ').split(/\s+/).filter(x=>x.length>4&&!junk.has(x)).slice(0,90));
 function type(a){const n=String(a.source_document||'').toLowerCase();if(n.includes('carrell'))return'carrelli';if(n.includes('ple'))return'ple';if(n.includes('gru-'))return'gru';if(n.includes('mmt'))return'mmt';if(n.includes('quota')||n.includes('iii-categoria'))return'quota';if(n.includes('antincendio'))return'antincendio';if(n.includes('soccorso'))return'soccorso';if(n.includes('meccanic'))return'meccanico';if(n.includes('attrezzature'))return'attrezzature';if(n.includes('dpi')||String(a.category).toLowerCase().includes('dpi'))return'dpi';return'other';}
 let pictures=[],loaded=0,pending=null,overlay=null;
 async function reload(force=false){
@@ -51,7 +51,7 @@ async function importPack(file){
  for(const a of manifest.assets){
   if(!admin())throw Error('Sessione amministrativa scaduta.');
   const key=String(a.id||''),filePath=String(a.file||'');
-  if(!/^[a-z0-9_-]{3,96}$/.test(key)||!/^assets\\/source-pdf\\/[a-z0-9_-]+\\.jpg$/.test(filePath)||!Number.isInteger(a.source_page)||a.source_page<1){fail.push(key+': metadati non validi');continue;}
+  if(!/^[a-z0-9_-]{3,96}$/.test(key)||!/^assets\/source-pdf\/[a-z0-9_-]+\.jpg$/.test(filePath)||!Number.isInteger(a.source_page)||a.source_page<1){fail.push(key+': metadati non validi');continue;}
   const f=z.file(filePath);if(!f){fail.push(key+': file mancante');continue;}
   const b=await f.async('uint8array');
   if(b.length<500||b.length>5*1024*1024||b[0]!==255||b[1]!==216||b[b.length-2]!==255||b[b.length-1]!==217){fail.push(key+': JPEG non valido');continue;}
