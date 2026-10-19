@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-19
-Stato corrente: **v22.18 PDF source figure staging (169 JPEG da 14 PDF + 80 SVG)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-44`.
+Stato corrente: **v22.18 PDF source figure staging (169 JPEG da 14 PDF + 80 SVG)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-46`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -521,3 +521,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.18.2 cache PWA allineata
 - La CI #391 ha superato la sintassi e i primi tre test importer; unico errore: `sw.js` conservava `safety-training-v22-44` mentre i test, gli handoff e i nuovi asset richiedevano `v22-46`. Bump del cache key; nessuna modifica alle policy, ai corsi o al codice funzionale. CI da verificare.
+
+## 2026-10-20 — v22.18.3 CI handoff cache allineata
+- I test sorgenti/media del run #392 sono riusciti; unico errore: intestazioni dei due registri ancora con cache v22-44, nonostante PWA v22-46 già corretta. Intestazioni e nuova nota sincronizzate; nessuna modifica di runtime/DB. Ricontrollare CI sul commit corrente.
