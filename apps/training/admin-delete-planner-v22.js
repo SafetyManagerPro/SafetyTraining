@@ -309,7 +309,7 @@
       const rows=effect.remove.map(e=>({...e,action:'Elimina'}))
         .concat(effect.unlink.map(e=>({...e,action:'Scollega'})));
       const impacts=effectWarnings(info,effect);
-      const canReview=!effect.incomplete&&!effect.accountLinked&&
+      const canReview=!effect.incomplete&&!(effect.accountLinked&&effect.deleteParent)&&
         (effect.remove.length||effect.unlink.length||effect.deleteParent);
       holder.innerHTML='<h3>2 · Riepilogo prima della verifica server</h3>'+
         '<p>Eliminazioni richieste: <strong>'+effect.remove.length+'</strong> · Scollegamenti richiesti: <strong>'+
@@ -409,6 +409,11 @@
       }else if(e.target.closest('[data-plan-none]')){decisions.clear();wantParent=false;redraw();}
       else if(e.target.closest('[data-plan-next]')){stage=1;redraw();}
       else if(e.target.closest('[data-plan-back]')){serverPreview=null;previewError='';stage=stage===3?1:0;redraw();}
+    });
+    overlay.addEventListener('input',e=>{
+      if(!info||locked)return;
+      const confirmation=e.target.closest('[data-plan-confirm]');
+      if(confirmation){const submit=holder.querySelector('[data-plan-execute]');if(submit)submit.disabled=confirmation.value!==exactConfirmation(info.id);}
     });
     overlay.addEventListener('change',e=>{
       if(!info||locked)return;

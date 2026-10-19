@@ -47,7 +47,7 @@ test('v22.3.3 deletion procedure is visible in every required admin list',()=>{
   assert.match(source,/a\.startsWith\('review-delete-'\)/);
   assert.match(source,/async function reviewDeletion\(kind,id\)/);
   assert.match(source,/SAFETY_ADMIN_DELETE_PLANNER_V22/);
-  assert.match(read('apps/training/admin-delete-planner-v22.js'),/transazione server con audit/);
+  assert.match(read('apps/training/admin-delete-planner-v22.js'),/admin_delete_capabilities_v25/);
   const guide=read('apps/training/admin-guidance-v21.js');
   assert.doesNotMatch(guide,/addDependencyPreviewButtons|data-preview-dependency/);
 });

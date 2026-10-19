@@ -198,3 +198,12 @@ test('frontend executes only via guarded server RPC and never client-side DELETE
  assert.match(src,/data-plan-confirm/);
  assert.doesNotMatch(src,/\.from\([^)]*\)\.delete\s*\(/);
 });
+
+test('confirmation responds while typing; linked login only blocks root deletion',()=>{
+ const source=read('apps/training/admin-delete-planner-v22.js');
+ assert.match(source,/addEventListener\('input'/);
+ assert.match(source,/effect.accountLinked&&effect.deleteParent/);
+ const effect={remove:[{key:'[\"learner_account_invitations\",\"inv\"]',source:'learner_account_invitations'}],unlink:[],incomplete:false,accountLinked:true,deleteParent:false};
+ const request=d.executionPayload({kind:'learner',id:'learner-1'},effect);
+ assert.equal(request.p_delete_parent,false);
+});
