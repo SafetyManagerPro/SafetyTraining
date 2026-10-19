@@ -329,10 +329,11 @@
     function showServerConfirmation(){
       if(!serverPreview){stage=1;showReview();return;}
       holder.innerHTML='<h3>3 · Verifica server delle dipendenze</h3>'+
-        '<p>Supabase ha controllato le voci selezionate e le relazioni dirette visibili. I conteggi sono indicativi; le dipendenze a più livelli devono ancora essere validate per un’eliminazione definitiva.</p>'+
+        '<p>Supabase ha controllato le voci selezionate e le relazioni dirette visibili. I conteggi diretti e indiretti sono indicativi e limitati ai record visibili dalle policy RLS. Non autorizzano una cancellazione definitiva.</p>'+
         '<ul class="admin-delete-review">'+serverPreview.impact.map(x=>
           '<li>'+esc(x.label||x.table||'Dipendenza')+' · '+esc(x.action||'Da eliminare')+
           ' · '+esc(x.count??'Numero non disponibile')+'</li>').join('')+'</ul>'+
+        (serverPreview.warnings?.length?'<div class="admin-delete-caution"><strong>Avvisi del server</strong><ul>'+serverPreview.warnings.map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul></div>':'')+
         '<p><strong>'+(serverPreview.ready?'Operazione irreversibile: conferma richiesta.':'Solo anteprima: la cancellazione definitiva non è installata.')+'</strong></p>'+
         (serverPreview.ready?'<label class="admin-delete-confirm">Per confermare scrivi esattamente '+
         '<code>'+esc(exactConfirmation(info.id))+'</code>'+
