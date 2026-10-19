@@ -501,3 +501,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Integrazione nella pipeline `buildDeck` comune a proiettore e stampa già funzionante (2 slide/A4), senza cambiare geometrie di stampa, testo/ore/numero delle Learning Unit, database, versioni pubblicate, presenze, attestati, ruoli o soft-delete. Asset e modulo nel precache PWA `safety-training-v22-44`.
 - Il contenuto è illustrativo, **non** una prescrizione tecnica o un modello quantitativo legale universale: valgono DVR, procedure applicabili e verifica del docente. Originale, senza immagini copiate dai PDF dell'utente.
 - Nuova suite statica di selezione, blocchi frozen/authored, asset SVG, SW, stampa e assenza di DB write aggiunta a `npm run check`. CI e deploy devono essere ricontrollati sul commit; collaudo visivo 1440/820/390 e con stampa reale ancora non eseguito su questo pack.
+
+## 2026-10-19 — v22.17.1 correzione test GP03
+- Il workflow #387 è fallito per un'espressione regolare non valida introdotta nella nuova suite GP03 (non è un errore di runtime). Corrette le asserzioni su riuso della stampa e sulla sola lettura tramite confronti testuali. Gli SVG, i dati, la stampa A4 2-up, la PWA, i 27 corsi frozen e i gate didattici restano immutati; verificare il nuovo CI prima del rilascio.
