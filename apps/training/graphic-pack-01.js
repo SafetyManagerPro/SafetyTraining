@@ -21,7 +21,7 @@ const rules=[
 ['rischio-schiacciamento',/schiacciament\w*|cesoiament\w*|organi in movimento|rischio meccanico/i],
 ['rischio-investimento',/investiment\w*|pedoni e carrelli|punti ciechi|viabilit[àa] aziendale/i],
 ['rischio-ribaltamento',/ribaltament\w*|stabilit[àa] (?:del|della|dei|delle|macchine|mezzi)|baricentro/i],
-['procedura-preuso',/controlli? pre.uso|ispezione prima|verifiche? prima dell.uso|checklist preuso/i],
+['procedura-preuso',/controlli? pre.?uso|ispezione prima|verifiche? prima dell.uso|checklist preuso/i],
 ['procedura-emergenza',/gestione emergenz\w*|piano di emergenza|procedure? di emergenza|evacuazion\w*|primo soccorso/i]
 ];
 const lookup=new Map(items.map(item=>[item.id,item]));

@@ -17,7 +17,7 @@ test('Graphic Pack 01 contains 20 original printable SVG illustrations',()=>{
   assert.match(svg,/<title id="title">/);
   assert.match(svg,/<desc id="desc">/);
   assert.match(svg,/SAFETYTRAINING/);
-  assert.doesNotMatch(svg,/<script|<foreignObject|<image |onload=|https?:\/\//i);
+  assert.doesNotMatch(svg,/<script|<foreignObject|<image |onload=|href=|xlink:href=|<use\b/i);
   assert.match(svg,/<\/svg>$/);
  }
 });
