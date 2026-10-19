@@ -11,15 +11,24 @@
   const PHOTO=/^(?:\.\/)?assets\/[a-zA-Z0-9_/-]+\.(?:svg|png|jpe?g|webp)$/i;
   function safeSlideImage(src){
     const value=String(src||'');
+    if(['assets/undefined','assets/null','assets/NaN'].includes(value))return null;
     return PHOTO.test(value)&&!value.includes('..')?value.replace(/^\.\//,''):null;
   }
+  function isUnassignedImage(src){
+    // Legacy course graphics can reference a missing image key. Recover only
+    // these exact absent-value placeholders, never an arbitrary malformed URL.
+    return /^(?:\.\/)?assets\/(?:undefined|null|NaN)?$/i.test(String(src||''));
+  }
   function slideMarkup(slide,index,deckRenderer){
-    if(slide.img?.src&&!safeSlideImage(slide.img.src)){
-      throw Error('Immagine della slide '+(index+1)+' non ammessa per stampa: '+String(slide.img.src).slice(0,140));
+    const src=slide.img?.src;
+    let image=src?safeSlideImage(src):null;
+    if(src&&!image){
+      if(isUnassignedImage(src)) image='assets/general.svg';
+      else throw Error('Immagine della slide '+(index+1)+' non ammessa per stampa: '+String(src).slice(0,140));
     }
-    const safe=slide.img?.src?{...slide,img:{...slide.img,src:safeSlideImage(slide.img.src)}}:slide;
+    const safe=image?{...slide,img:{...(slide.img||{}),src:image,caption:slide.img?.caption||'Schema visuale di supporto'}}:slide;
     // The SAME HTML generator used by the screen projector, not a text summary.
-    // Buttons are removed from the detached DOM by buildSheets.
+    // Buttons are removed from the detached DOM by removeInteraction.
     return deckRenderer(safe,index);
   }
   function sheetData(slides){

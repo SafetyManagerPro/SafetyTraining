@@ -72,3 +72,33 @@ test('projector reveal controls are removed while a video poster illustration su
  printer.removeInteraction(dom);
  assert.ok(replaced);
 });
+
+test('missing graphic-card image is safely replaced without dropping the projected slide',()=>{
+ const html=printer.createSheets({title:'Sicurezza'},
+   {version_number:2},[
+     {type:'graphic',moduleIndex:0,title:'Schema dei rischi',img:{src:'assets/undefined'}}
+   ],(slide)=>'<h1>'+slide.title+'</h1><img src="'+slide.img.src+'">');
+ assert.match(html,/Schema dei rischi/);
+ assert.match(html,/assets\/general\.svg/);
+ assert.doesNotMatch(html,/assets\/undefined/);
+});
+test('only absent image-key placeholders are recovered, not unsafe URLs',()=>{
+ for(const placeholder of ['assets/undefined','assets/null','assets/NaN','assets/']){
+  const html=printer.createSheets({title:'Corso'},{version_number:1},
+     [{type:'concept',moduleIndex:0,title:'Titolo',img:{src:placeholder}}],
+     slide=>'<img src="'+slide.img.src+'">');
+  assert.match(html,/assets\/general\.svg/);
+ }
+ for(const bad of ['assets/undefined.svg','assets/..%2fsecret.svg','https://evil.test/x.svg']){
+  assert.throws(()=>printer.createSheets({title:'Corso'},{version_number:1},
+    [{type:'concept',moduleIndex:0,title:'Titolo',img:{src:bad}}],
+    slide=>'<img src="'+slide.img.src+'">'),/non ammessa/);
+ }
+});
+test('the source deck never constructs an undefined graphic-card visual',()=>{
+ const src=read('apps/training/app.js');
+ assert.match(src,/const graphicImage=/);
+ assert.match(src,/img:graphicImage/);
+ assert.doesNotMatch(src,/src:\`assets\/\$\{g\.image\}\`/);
+ assert.match(src,/const valid=arr\.find/);
+});

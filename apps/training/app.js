@@ -59,7 +59,9 @@ function clockMin(m){
 }
 function getTopicImage(t){
  const arr=t.idea_images||[];
- if(arr.length) return {src:`assets/${arr[0].file}`,caption:arr[0].caption||''};
+ const valid=arr.find(item=>item&&typeof item.file==='string'&&item.file.trim()&&
+   !['undefined','null'].includes(item.file.trim().toLowerCase()));
+ if(valid) return {src:`assets/${valid.file}`,caption:valid.caption||''};
  return {src:`assets/${t.visual||'general'}.svg`,caption:'Schema visuale di supporto'};
 }
 function concise(arr,n=4){return (arr||[]).slice(0,n)}
@@ -229,7 +231,15 @@ function buildDeck(c){
      if(!deeper.length && t.example_story) topicSlides.push({type:'deep',weight:.9,img:img2,paragraph:'Vediamo come questo principio si applica a una situazione concreta di lavoro.',story:t.example_story,errors:concise(t.common_errors,3),partIndex:0,title});
 
      if(t.guided) topicSlides.push({type:'guided',weight:.85,img:img3,observe:concise(t.guided.observe,3),importance:concise(t.guided.importance,3),apply:concise(t.guided.apply,3),title});
-     (t.graphic_cards||[]).slice(0,2).forEach((g,gi)=>topicSlides.push({type:'graphic',weight:.86,img:{src:`assets/${g.image}`,caption:g.caption||''},graphic:g,partIndex:gi,title:g.title||title}));
+     (t.graphic_cards||[]).slice(0,2).filter(g=>g&&typeof g==='object').forEach((g,gi)=>{
+       // Some authored graphic cards supply text/points without their own image.
+       // Reuse the topic's available visual rather than emitting "assets/undefined".
+       const file=typeof g.image==='string'?g.image.trim():'';
+       const graphicImage=(file&&!['undefined','null'].includes(file.toLowerCase()))
+         ?{src:`assets/${file}`,caption:g.caption||''}
+         :{...img2,caption:g.caption||img2.caption||''};
+       topicSlides.push({type:'graphic',weight:.86,img:graphicImage,graphic:g,partIndex:gi,title:g.title||title});
+     });
      if(t.operational){const o=t.operational; topicSlides.push({type:'actionPlan',weight:1.05,img:{src:'assets/procedura-operativa-5-fasi.svg',caption:'Prima, durante e dopo: la sequenza operativa.'},before:concise(o.before,4),during:concise(o.during,4),after:concise(o.after,4),remember:o.remember||'',title}); topicSlides.push({type:'howTo',weight:1.05,img:{src:'assets/procedura-operativa-5-fasi.svg',caption:'Procedura operativa in passi successivi.'},steps:concise(o.step_by_step,6),objective:o.objective||'',title}); topicSlides.push({type:'escalation',weight:.95,img:{src:'assets/stop-segnala-ripristina.svg',caption:'Se cambia la condizione: fermare, segnalare, ripristinare.'},problem:concise(o.if_problem,4),stop:concise(o.stop_conditions,4),who:concise(o.who_to_involve,3),remember:o.remember||'',title});}
 
      // Lists are split instead of shrinking the font.
