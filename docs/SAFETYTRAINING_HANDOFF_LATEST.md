@@ -529,3 +529,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.18.4 test cache di GP03 reso evolutivo
 - CI #393: unico errore residuo, asserzione GP03 con numero cache v22-44 hardcoded. Il test ora controlla il formato della chiave corrente invece di imporre una sottoversione superata. Gli altri test importer e regressioni precedenti hanno superato le rispettive verifiche; correzione solo test, nessun runtime alterato.
+
+## 2026-10-20 — v22.18.5 string-match cache test
+- Sostituito l'ultimo controllo GP03 con ricerca testuale del prefisso cache (senza regex suscettibili a doppio escaping nelle tool-call), preservando il check di asset PWA. Nessuna modifica funzionale; CI da ricontrollare.
