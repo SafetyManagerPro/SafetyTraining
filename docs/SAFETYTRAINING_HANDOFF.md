@@ -331,3 +331,6 @@ Preservare:
 - Client now requires server execution_enabled true, ready true, complete impact graph, confirmed audit, a sufficiently long preview token, and every impacted row acknowledged individually. Warnings, hidden cascades, missing token and incomplete data disable execution.
 - Server preview remains informational and no execution RPC exists. CI tests cover read-only response and contract failures.
 - PWA safety-training-v22-22. Final step requires authorized isolated database validation and release review.
+
+## v22.5.4 release gate
+Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release gate: full graph, scoped actor, token, locking, server audit, isolated synthetic tests, no privileged-function inspection bypass. The real deletion RPC remains absent. See document before any request to enable hard delete.
