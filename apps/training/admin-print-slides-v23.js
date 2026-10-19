@@ -141,7 +141,7 @@
       const authorized=await client.from('platform_admins').select('user_id').eq('user_id',who).maybeSingle();
       if(authorized.error||!authorized.data)throw Error('Accesso consentito solo agli amministratori della piattaforma.');
       const courses=await limited(client.from('courses')
-        .select('id,title,stable_key,description,nominal_minutes',{count:'exact'})
+        .select('id,title,stable_key,description,nominal_minutes,metadata',{count:'exact'})
         .eq('active',true).order('title'),MAX_COURSES,'Catalogo corsi');
       if(!current(seq,who))return;
       if(!courses.some(c=>c.id===state.courseId)){state.courseId=courses[0]?.id||'';state.versionId='';}

@@ -212,7 +212,12 @@ function buildDeck(c){
    let cur=m.start_minute;
    topics.forEach((t,ti)=>{
      const title=slideTitle(t);
-     const img=getTopicImage(t), img2=topicSecondImage(t), img3=topicThirdImage(t);
+     // Original Graphic Pack 01: only unfrozen DB-backed lessons without authored visuals.
+     // A view-layer choice; does not change the source LU or its published version.
+     const packVisuals=window.SAFETY_GRAPHIC_PACK_01?.pick?.(c,t)||[];
+     const img=packVisuals[0]||getTopicImage(t);
+     const img2=packVisuals[1]||topicSecondImage(t);
+     const img3=packVisuals[2]||topicThirdImage(t);
      const topicSlides=[];
      // Opening = one message + large image. No long explanation on the first slide.
      topicSlides.push({type:'concept',weight:.8,img,summary:t.summary,title});

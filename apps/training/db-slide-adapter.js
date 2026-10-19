@@ -344,6 +344,8 @@
     const authoredVisualTopics = topics.filter(t => t.presentation_quality?.visual_mode === 'authored').length;
     const autoVisualTopics = topics.filter(t => t.presentation_quality?.visual_mode === 'auto-themed').length;
     const course = {
+      // Preserve freeze metadata for downstream presentation overlays and audits.
+      metadata: (c.metadata && typeof c.metadata==='object' && !Array.isArray(c.metadata)) ? {...c.metadata} : {},
       id: firstText(c.stable_key),
       title: firstText(c.title, c.stable_key, 'Corso'),
       duration: `${Math.round(cursor / 60 * 10) / 10} h`,
