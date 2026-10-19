@@ -518,3 +518,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.18.1 correzione escape regex importatore immagini PDF
 - Prima CI #390 fallita per escape eccessivi nelle regex del nuovo modulo `source-figures-v23.js`: `assets/source-pdf/*.jpg` interpretato come flag invalidi. Normalizzate le doppie barre di escape nelle espressioni regolari JS (selezione famiglie, tokenizzazione, validazione JPEG), senza alterare autorizzazioni o dati. Ricontrollare CI del nuovo commit.
+
+## 2026-10-20 — v22.18.2 cache PWA allineata
+- La CI #391 ha superato la sintassi e i primi tre test importer; unico errore: `sw.js` conservava `safety-training-v22-44` mentre i test, gli handoff e i nuovi asset richiedevano `v22-46`. Bump del cache key; nessuna modifica alle policy, ai corsi o al codice funzionale. CI da verificare.
