@@ -632,3 +632,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v24.1.2 compatibilità titolo dei handoff
 - CI #418 unica regressione prima dei nuovi test: la forma titolo v24.1 non era accettata dal controllo v22.xx. Ampliato regex a v22.xx o v24.xx, mantenendo il requisito di identico heading più recente fra i due registri. Nessuna modifica funzionale/DB.
+
+## 2026-10-20 — v24.1.3 correzione definizione PDF privato nell'atlante
+- CI #419: `privatePdf` veniva richiamato nell'array di media ma non definito nel contesto di `collect`. Dichiarata la variabile locale con optional-chain sul nuovo archivio, che è vuota in assenza del modulo o prima dell'importazione; ripristinati i test esistenti e la compatibilità con 134 schemi SVG originali.

@@ -26,6 +26,7 @@ function collect(course,topic){
  const subject=String(topic.slide_title||topic.title||'')+' '+String(topic.summary||'');
  const legacy=legacyRules.filter(x=>x.re.test(subject)).map(x=>({src:'assets/'+x.filename,caption:x.filename.replace(/^(?:idea-)/,'').replace(/\.svg$/,'').replace(/-/g,' ')}));
  const placed=window.SAFETY_VISUAL_COVERAGE_V23?.forTopic?.(course,topic)||[];
+ const privatePdf=window.SAFETY_INTEGRAL_PDF_V24?.pick?.(course,topic)||[];
  const authored=[
   ...Array.isArray(topic.idea_images)?topic.idea_images:[],
   ...Array.isArray(topic.visuals)?topic.visuals:[],
