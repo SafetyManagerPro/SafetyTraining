@@ -550,3 +550,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.19.1 correzione XML SVG (lotto 1/5)
 - Corrette 11 illustrazioni GP04 rimuovendo tag `</rect>` superflui dopo elementi autoconclusivi; nessun cambio alle istruzioni o immagini di riferimento di terzi. Rimanenti gruppi in lavorazione.
+
+## 2026-10-20 — v22.19.2 correzione XML SVG (lotto 2/5)
+- Corrette altre 11 illustrazioni GP04 rimuovendo tag rettangolo superflui. Asset di terzi non caricati. Nessun cambio alle unità didattiche.
