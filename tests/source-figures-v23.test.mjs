@@ -9,6 +9,8 @@ test('import checks staff identity, MIME and sha before private upload',()=>{
  const js=rd('apps/training/source-figures-v23.js');assert.match(js,/admin=\(\)=>/);
  for(const token of ['SHA-256','image\/jpeg','manifest.json','rights_status:\x27review_required\x27','upsert(row','source_document','source_page'])assert.ok(js.includes(token),token);
  assert.doesNotMatch(js,/getPublicUrl\(/);
+ assert.ok(js.includes("review_class:a.review_class==='GIALLO'?'GIALLO':'ROSSO'"));
+ assert.ok(js.includes("filter(p=>p.review_class==='GIALLO')"));
 });
 test('instructor PDF preview never overrides frozen or authored LU',()=>{
  const js=rd('apps/training/source-figures-v23.js');
@@ -23,6 +25,6 @@ assert.ok(js.includes("presentation_generated_from_db"));assert.ok(js.includes("
 test('script and CSS loaded; print geometry unchanged',()=>{
  const index=rd('apps/training/index.html'),sw=rd('apps/training/sw.js');
  assert.match(index,/source-figures-v23\.js/);assert.match(index,/source-figures-v23\.css/);
- assert.match(sw,/source-figures-v23\.js/);assert.match(sw,/safety-training-v22-46/);
+ assert.match(sw,/source-figures-v23\.js/);assert.match(sw,/safety-training-v22-49/);
  assert.match(rd('apps/training/admin-print-slides-v23.js'),/projection\.buildDeck\(converted\)/);
 });

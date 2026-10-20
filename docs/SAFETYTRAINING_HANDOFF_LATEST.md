@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
-Ultimo aggiornamento: 2026-10-19
-Stato: **v22.19 Graphic Pack 04 (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-48`.
+Ultimo aggiornamento: 2026-10-20
+Stato: **v22.20 PDF review class + GP04 (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-49`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -563,3 +563,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-20 — v22.19.5 correzione XML SVG (lotto 5/5)
 - Completata correzione di **tutti i 54 SVG GP04**, eliminati tag di chiusura rettangolo ridondanti. Nuovo test su assenza `</rect>` superflui, PWA cache **safety-training-v22-48** per ricaricare il pacchetto corretto.
 - Invariate tabelle e materiali pubblicati a livello di database, geometria A4 e corsi frozen. Verificare CI e deploy; audit diritti 26/143 da importare separatamente come ZIP privato.
+
+## 2026-10-20 — v22.20 gestione prudenziale immagini PDF per uso interno CNA Avellino
+- Audit 169 estratti: 0 VERDE verificati, 26 GIALLO per valutazione uso didattico limitato e 143 ROSSO da rifare/aggiornare. Archivio ZIP 169 con review_class e review_reason e CSV in ChatGPT, non committati nel repository.
+- Aggiunta migrazione `v22_018_review_private_source_figures` con classe ROSSO/GIALLO e motivo, default **ROSSO** per import vecchi e nessun valore VERDE/approved. Il pannello carica classe e motivazione e le mostra in anteprima, ma **solo GIALLO** può essere proposto nelle slide viste dal platform-admin; ROSSO mai nelle slide. Nessuna immagine di terzi consegnata ai corsisti e nessuna copia nel GitHub repository.
+- Corretti test cache e handoff per **PWA safety-training-v22-49**. Graphic Pack 04: **54 SVG originali**, totale **134 SVG originali**, soggetti a QA didattica; 27 corsi congelati preservati, nessuna modifica a LU, certificati, tempi, presenze, stampa 2/A4.
+- Applicare/verificare migrazione Supabase, verificare CI e Vercel, import tramite account platform-admin reale dello ZIP classificato e ispezione visuale browser; una classificazione GIALLO non sostituisce le necessarie verifiche di licenza/attualità.

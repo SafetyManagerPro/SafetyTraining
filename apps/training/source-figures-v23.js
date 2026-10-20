@@ -14,7 +14,7 @@ async function reload(force=false){
  if(pending&&!force)return pending;
  if(!force&&Date.now()-loaded<8*60*1000)return pictures;
  pending=(async()=>{
- const {data,error}=await c().from(TABLE).select('id,storage_path,source_document,source_page,category,excerpt,tags,rights_status').eq('rights_status','review_required').order('source_document').order('source_page').limit(400);if(error)throw error;
+ const {data,error}=await c().from(TABLE).select('id,storage_path,source_document,source_page,category,excerpt,tags,rights_status,review_class,review_reason').eq('rights_status','review_required').order('source_document').order('source_page').limit(400);if(error)throw error;
  const a=data||[];for(let i=0;i<a.length;i+=50){
   const group=a.slice(i,i+50),res=await c().storage.from(BUCKET).createSignedUrls(group.map(x=>x.storage_path),1200);if(res.error)throw res.error;
   (res.data||[]).forEach((u,j)=>group[j].url=u.error?'':u.signedUrl);
@@ -29,7 +29,7 @@ function pick(course,topic){
  const title=String(topic.slide_title||topic.title||''),name=String(course.title||'');
  const family=families.find(x=>x[1].test(name))?.[0]||families.find(x=>x[1].test(title))?.[0];if(!family)return[];
  const terms=tokens(title+' '+String(topic.summary||''));
- const scored=pictures.map(p=>{const t=type(p);if(!(family===t||(family==='dpi'&&t==='quota'&&/imbracatur|anticadut/i.test(title))))return null;
+ const scored=pictures.filter(p=>p.review_class==='GIALLO').map(p=>{const t=type(p);if(!(family===t||(family==='dpi'&&t==='quota'&&/imbracatur|anticadut/i.test(title))))return null;
  const ref=tokens(p.excerpt);let score=8;for(const word of terms)if(ref.has(word))score+=3;
  return {...p,score};}).filter(Boolean).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
  if(!scored.length)return[];
@@ -45,8 +45,8 @@ function pick(course,topic){
 function msg(s,bad=false){const el=document.getElementById('sourcePdfStatus');if(el){el.textContent=s;el.style.color=bad?'#bd4646':'';}}
 function grid(q=''){const el=document.getElementById('sourcePdfGallery');if(!el)return;
  const arr=pictures.filter(x=>!q||String(x.category+' '+x.source_document+' '+x.excerpt).toLowerCase().includes(q.toLowerCase()));
- document.getElementById('sourcePdfCount').textContent=arr.length+' riferimenti in revisione (prime 36 anteprime)';
- el.innerHTML=arr.slice(0,36).map(x=>'<article class="source-pdf-card"><img loading="lazy" alt="Anteprima fonte PDF" src="'+esc(x.url)+'"><strong>'+esc(x.category)+'</strong><small>'+esc(x.source_document)+' · pag. '+x.source_page+'</small><span>Diritti e aggiornamento da verificare</span></article>').join('')||'<p>Importa il pacchetto ZIP per iniziare.</p>';
+ document.getElementById('sourcePdfCount').textContent=arr.length+' immagini in revisione · '+arr.filter(x=>x.review_class==='GIALLO').length+' GIALLE · '+arr.filter(x=>x.review_class==='ROSSO').length+' ROSSE (prime 36 anteprime)';
+ el.innerHTML=arr.slice(0,36).map(x=>'<article class="source-pdf-card"><img loading="lazy" alt="Anteprima fonte PDF" src="'+esc(x.url)+'"><strong>'+esc(x.category)+'</strong><small>'+esc(x.source_document)+' · pag. '+x.source_page+'</small><span>'+esc(x.review_class||'ROSSO')+' · '+esc(x.review_reason||'Licenza e contenuto da verificare')+'</span></article>').join('')||'<p>Importa il pacchetto ZIP per iniziare.</p>';
 }
 async function importPack(file){
  if(!admin())throw Error('Permessi di amministratore richiesti.');
@@ -67,7 +67,7 @@ async function importPack(file){
   const path='references/v1/'+key+'.jpg';
   const up=await c().storage.from(BUCKET).upload(path,new Blob([b],{type:'image/jpeg'}),{contentType:'image/jpeg',upsert:true});
   if(up.error){fail.push(key+': '+up.error.message);continue;}
-  const row={id:key,storage_path:path,source_document:String(a.source_document||'').slice(0,300),source_page:a.source_page,category:String(a.category||'').slice(0,120),excerpt:String(a.excerpt||'').slice(0,600),tags:(a.tags||[]).filter(t=>typeof t==='string').slice(0,20),image_type:String(a.image_type||'page_preview'),sha256:sha,rights_status:'review_required'};
+  const row={id:key,storage_path:path,source_document:String(a.source_document||'').slice(0,300),source_page:a.source_page,category:String(a.category||'').slice(0,120),excerpt:String(a.excerpt||'').slice(0,600),tags:(a.tags||[]).filter(t=>typeof t==='string').slice(0,20),image_type:String(a.image_type||'page_preview'),sha256:sha,rights_status:'review_required',review_class:a.review_class==='GIALLO'?'GIALLO':'ROSSO',review_reason:String(a.review_reason||'Fonte non ancora verificata; ridisegnare').slice(0,900)};
   const save=await c().from(TABLE).upsert(row,{onConflict:'id'});
   if(save.error)fail.push(key+': '+save.error.message);else ok++;
   if((ok+fail.length)%5===0)msg('Importazione '+(ok+fail.length)+'/'+manifest.assets.length+' · riuscite '+ok+' · errori '+fail.length);
@@ -78,7 +78,7 @@ function close(){overlay?.remove();overlay=null;}
 async function open(){
  if(!admin())return alert('Accesso riservato al platform admin.');
  close();overlay=document.createElement('div');overlay.id='sourcePdfOverlay';overlay.className='admin-modal-overlay';
- overlay.innerHTML='<section class="admin-modal wide source-pdf-modal" role="dialog" aria-modal="true" aria-labelledby="sourcePdfTitle"><header><div><div class="admin-kicker">BIBLIOTECA FONTI</div><h2 id="sourcePdfTitle">Immagini dai PDF</h2></div><button id="sourcePdfClose" class="admin-modal-close" aria-label="Chiudi">×</button></header><div class="admin-modal-body"><p><strong>Solo revisione amministrativa.</strong> Queste immagini non sono pubblicate ai corsisti: occorre verificare diritti di riuso e aggiornamento normativo/tecnico prima di approvarle.</p><div class="source-pdf-upload"><label>Pacchetto ZIP<input id="sourcePdfZip" type="file" accept=".zip,application/zip"></label><label><input type="checkbox" id="sourcePdfConsent"> Importo esclusivamente per revisione interna, non per la pubblicazione.</label><button type="button" id="sourcePdfImport" class="admin-primary">Importa 169 immagini</button></div><p role="status" id="sourcePdfStatus">Libreria in caricamento...</p><label>Cerca per tema<input type="search" id="sourcePdfSearch" placeholder="DPI, PLE, carrelli, rischio..."></label><p id="sourcePdfCount"></p><div id="sourcePdfGallery" class="source-pdf-gallery"></div></div></section>';
+ overlay.innerHTML='<section class="admin-modal wide source-pdf-modal" role="dialog" aria-modal="true" aria-labelledby="sourcePdfTitle"><header><div><div class="admin-kicker">BIBLIOTECA FONTI</div><h2 id="sourcePdfTitle">Immagini dai PDF</h2></div><button id="sourcePdfClose" class="admin-modal-close" aria-label="Chiudi">×</button></header><div class="admin-modal-body"><p><strong>Solo revisione amministrativa.</strong> Queste immagini non sono pubblicate ai corsisti. GIALLO = potenziale estratto didattico limitato, solo anteprima amministrativa. ROSSO = da ridisegnare o rivalutare, escluso dalle slide. Nessuna classe implica autorizzazione o aggiornamento medico-normativo.</p><div class="source-pdf-upload"><label>Pacchetto ZIP<input id="sourcePdfZip" type="file" accept=".zip,application/zip"></label><label><input type="checkbox" id="sourcePdfConsent"> Importo esclusivamente per revisione interna, non per la pubblicazione.</label><button type="button" id="sourcePdfImport" class="admin-primary">Importa 169 immagini</button></div><p role="status" id="sourcePdfStatus">Libreria in caricamento...</p><label>Cerca per tema<input type="search" id="sourcePdfSearch" placeholder="DPI, PLE, carrelli, rischio..."></label><p id="sourcePdfCount"></p><div id="sourcePdfGallery" class="source-pdf-gallery"></div></div></section>';
  document.body.appendChild(overlay);document.getElementById('sourcePdfClose').onclick=close;
  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
  document.getElementById('sourcePdfSearch').oninput=e=>grid(e.target.value);
@@ -89,7 +89,7 @@ async function open(){
   try{const result=await importPack(file);msg(result.ok+' di '+result.total+' immagini importate; errori: '+result.fail.length+(result.fail.length?' ('+result.fail.slice(0,2).join('; ')+')':''),!!result.fail.length);grid();}
   catch(e){msg(e.message,true);}finally{button.disabled=false;}
  };
- try{await reload(true);if(!overlay)return;msg(pictures.length+' immagini in revisione; nessuna pubblicazione automatica.');grid();}
+ try{await reload(true);if(!overlay)return;msg(pictures.length+' immagini in revisione; nessuna pubblicazione automatica. Solo i GIALLO possono comparire nelle anteprime admin; i ROSSO restano esclusi dalle slide.');grid();}
  catch(e){msg('Libreria non disponibile: '+e.message,true);}
 }
 function boot(){
