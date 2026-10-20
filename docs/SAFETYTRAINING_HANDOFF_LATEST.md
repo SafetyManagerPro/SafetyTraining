@@ -556,3 +556,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.19.3 correzione XML SVG (lotto 3/5)
 - Corrette 11 illustrazioni GP04 nel terzo lotto. Eliminati soltanto i tag `</rect>` ridondanti negli SVG; nessuna variazione di contenuto o metadati didattici.
+
+## 2026-10-20 — v22.19.4 correzione XML SVG (lotto 4/5)
+- Corrette 11 illustrazioni GP04 nel quarto lotto, senza modifiche ai contenuti didattici, al catalogo o alle policy.
