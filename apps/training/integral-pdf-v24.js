@@ -28,12 +28,12 @@ function score(topic,ref){
 // determine placement; only these topic-specific illustrations are eligible.
 const forkliftPageTopics=[
  [/tipolog|principali rischi/i,[27,28,29,30,31,32,33,34,37,38,44]],
- [/fisica|baricentr|stabilit/i,[46,48,49,50,51,54,55,57]],
+ [/fisica|baricentr|stabilit/i,[49,50,51,54,55,57]],
  [/component|montant|organi di presa/i,[35,36,39,40,41,52,53,74]],
- [/comandi|freni|dispositivi di sicurezza/i,[22,23,59,60]],
- [/portata|targhett|diagramm|equilibrio/i,[49,50,51,54,55,57,65,66]],
- [/circolaz|utilizzo in sicurezza/i,[13,19,20,23,58,62,78,80,81,83]],
- [/controll|manutenz|procedure operative/i,[64,65,66,70,71,72,73,74,75,76,77,86,88,89,90]]
+ [/comandi|freni|dispositivi di sicurezza/i,[22,23,60]],
+ [/portata|targhett|diagramm|equilibrio/i,[49,50,54,55,57,66]],
+ [/circolaz|utilizzo in sicurezza/i,[13,19,20,23,58,62,80,81,83]],
+ [/controll|manutenz|procedure operative/i,[66,70,74,75,76,86]]
 ];
 function placementIndex(course,ref,topics,topicCounts=new Map()){
  if(!Array.isArray(topics)||!topics.length||!Array.isArray(ref?.candidate_course_keys)||!ref.candidate_course_keys.includes(keyOf(course)))return -1;
