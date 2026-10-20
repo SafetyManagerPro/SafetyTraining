@@ -35,5 +35,15 @@ test('slides + two-up print invoke exact same private source placement',()=>{
  assert.ok(printer.includes("isTrustedSrc"));
  assert.ok(printer.includes("projection.buildDeck(converted)"));
  const html=rd('apps/training/index.html');assert.ok(html.includes('integral-pdf-v24.js'));
- assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-57"));
+ assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-58"));
+});
+
+test('multi-select deletion removes imported figure references, persists tombstones and protects frozen courses',()=>{
+ const s=rd('apps/training/integral-pdf-v24.js');
+ const sql=rd('supabase/migrations/20261020204500_v24_005_delete_imported_pdf_figures.sql');
+ for(const token of ['integralPdfSelectPage','integralPdfClearSelection','integralPdfDeleteSelected','selected=new Set()','training_delete_integral_pdf_assets_v24','window.confirm(','cleanupDeletedStorage','discarded.has(f.asset_id)','selected.size>=100','storage_cleared_at'])assert.ok(s.includes(token),token);
+ for(const token of ['security definer','private.is_platform_admin()','training_integral_pdf_refs_v24','training_integral_pdf_assets_v24','training_integral_pdf_deleted_v24','source_pdf_integral_admin_delete','grant execute','deleted_by'])assert.ok(sql.includes(token),token);
+ assert.ok(sql.includes("name like 'integral/v1/%'"));
+ assert.ok(!sql.includes('on public.courses'));
+ assert.ok(!s.includes('getPublicUrl('));
 });

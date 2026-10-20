@@ -3,12 +3,13 @@
    Source rights / medical and technical compliance remain to be reviewed.
    All links are short-lived signed URLs, NOT public static assets. */
 (()=>{'use strict';
-const BUCKET='training-source-figures',ASSETS='training_integral_pdf_assets_v24',REFS='training_integral_pdf_refs_v24';
+const BUCKET='training-source-figures',ASSETS='training_integral_pdf_assets_v24',REFS='training_integral_pdf_refs_v24',DELETED='training_integral_pdf_deleted_v24';
 const c=()=>window.SAFETY_CLOUD?.state?.client;
 const admin=()=>!!(window.SAFETY_CLOUD?.state?.user?.id&&window.SAFETY_ADMIN_CAPABILITIES_STATE?.platform_admin);
 const frozen=x=>!!window.SAFETY_GRAPHIC_PACK_01?.isFrozen?.(x);
 const safeId=/^img-[0-9a-f]{20}$/,safeFile=/^assets\/pdf-figures\/img-[0-9a-f]{20}\.webp$/;
-const cache=new Map(),trusted=new Set(),loading=new Map();
+const cache=new Map(),trusted=new Set(),loading=new Map(),selected=new Set();
+let catalogBusy=false,currentCatalogPage=0;
 const text=s=>String(s??'').slice(0,600);
 const esc=s=>text(s).replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const vocab=s=>new Set(text(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>4));
@@ -137,10 +138,11 @@ async function importZip(zip){
   note('Aperta '+zipName+': '+manifest.assets.length+' immagini, '+manifest.figures.length+' riferimenti.');
  }
  const stored=await existingIds(db,ASSETS,ids);
+ const discarded=await existingIds(db,DELETED,ids); // Previously rejected logos/irrelevant figures never reappear on reimport.
  let done=0,added=0;
  for(let i=0;i<manifest.assets.length;i+=5){
   if(!admin())throw Error('Sessione amministrativa non più valida.');
-  const chunk=manifest.assets.slice(i,i+5).filter(a=>!stored.has(a.filename.replace(/\.webp$/,'')));
+  const chunk=manifest.assets.slice(i,i+5).filter(a=>!stored.has(a.filename.replace(/\.webp$/,''))&&!discarded.has(a.filename.replace(/\.webp$/,'')));
   const uploaded=await Promise.all(chunk.map(async a=>{
    const id=a.filename.replace(/\.webp$/,'');
    const src='assets/pdf-figures/'+a.filename;
@@ -162,7 +164,7 @@ async function importZip(zip){
  const refsDone=await existingIds(db,REFS,manifest.figures.map(f=>f.id));
  let indexed=0;
  for(let i=0;i<manifest.figures.length;i+=100){
-  const rows=manifest.figures.slice(i,i+100).filter(f=>!refsDone.has(f.id)).map(f=>({
+  const rows=manifest.figures.slice(i,i+100).filter(f=>!refsDone.has(f.id)&&!discarded.has(f.asset_id)).map(f=>({
     id:f.id,asset_id:f.asset_id,source_document:text(f.source_document).slice(0,300),
     source_page:f.source_page,category:text(f.category).slice(0,120),topic:text(f.topic),
     source_kind:f.kind||'embedded',
@@ -178,7 +180,65 @@ async function importZip(zip){
  return {assets:manifest.assets.length,refs:manifest.figures.length,added,indexed};
 }
 
+function refreshBulkControls(){
+ const status=document.getElementById('integralPdfSelectionCount'),remove=document.getElementById('integralPdfDeleteSelected'),
+       clear=document.getElementById('integralPdfClearSelection'),all=document.getElementById('integralPdfSelectPage');
+ if(status)status.textContent=selected.size+' immagini selezionate · massimo 100 per eliminazione';
+ if(remove){remove.disabled=!selected.size||catalogBusy;remove.textContent='Elimina '+selected.size+' immagini selezionate';}
+ if(clear)clear.disabled=!selected.size||catalogBusy;
+ if(all)all.disabled=catalogBusy;
+}
+function setCatalogBusy(value){
+ catalogBusy=!!value;
+ for(const key of ['integralPdfImport','integralPdfZip','integralPdfCategory','integralPdfSearch','integralPdfPrev','integralPdfNext']){
+  const el=document.getElementById(key);if(el)el.disabled=catalogBusy;
+ }
+ const container=document.getElementById('integralPdfCatalog');
+ if(container)container.querySelectorAll('input[type=checkbox]').forEach(el=>{el.disabled=catalogBusy;});
+ refreshBulkControls();
+}
+async function cleanupDeletedStorage(){
+ if(!admin())throw Error('Accesso amministrativo richiesto.');
+ const db=c();
+ const {data,error}=await db.from(DELETED).select('id,storage_path').is('storage_cleared_at',null).order('deleted_at').limit(100);
+ if(error)throw error;
+ if(!(data||[]).length)return {cleaned:0,pending:0};
+ const paths=data.map(x=>x.storage_path);
+ const remove=await db.storage.from(BUCKET).remove(paths);
+ if(remove.error)throw Error('Cancellazione record completata; pulizia file non riuscita: '+remove.error.message);
+ const done=await db.from(DELETED).update({storage_cleared_at:new Date().toISOString()}).in('id',data.map(x=>x.id));
+ if(done.error)throw Error('File eliminati ma conferma pulizia non salvata: '+done.error.message);
+ return {cleaned:data.length,pending:data.length===100?1:0};
+}
+async function removeSelection(){
+ if(catalogBusy||!selected.size)return;
+ if(!admin())return note('Eliminazione riservata al platform-admin.',true);
+ const ids=[...selected];
+ if(ids.length>100)return note('Elimina al massimo 100 immagini alla volta.',true);
+ const db=c();
+ const related=await db.from(REFS).select('id',{count:'exact',head:true}).in('asset_id',ids);
+ if(related.error)return note('Non è stato possibile calcolare i riferimenti: '+related.error.message,true);
+ const count=related.count||0;
+ if(!window.confirm('Eliminare definitivamente '+ids.length+' immagini importate e '+count+' riferimenti a pagine/corsi? Le figure scompariranno dalle slide e dalle stampe al successivo caricamento. Questa azione non è reversibile. Confermi?'))return;
+ setCatalogBusy(true);
+ try{
+  const res=await db.rpc('training_delete_integral_pdf_assets_v24',{p_ids:ids});
+  if(res.error)throw new Error('Eliminazione database: '+res.error.message);
+  const rows=res.data||[],removedRefs=rows.reduce((s,r)=>s+Number(r.removed_references||0),0);
+  // Do not retain short-lived URLs or old course mappings after removal.
+  selected.clear();cache.clear();trusted.clear();loading.clear();
+  let cleanup='';
+  try{
+   const result=await cleanupDeletedStorage();
+   cleanup=result.pending?' Alcuni file restano da ripulire: premi Riprova pulizia file.':' File eliminati anche dallo Storage.';
+  }catch(e){cleanup=' I riferimenti sono stati rimossi, ma occorre completare la pulizia dei file: '+e.message;}
+  await renderCatalog(currentCatalogPage);
+  note('Eliminate '+rows.length+' immagini e '+removedRefs+' riferimenti dal catalogo.'+cleanup);
+ }catch(e){note('Eliminazione non completata: '+e.message,true);}
+ finally{setCatalogBusy(false);}
+}
 async function renderCatalog(page=0){
+ currentCatalogPage=Math.max(0,page);
  const container=document.getElementById('integralPdfCatalog'),status=document.getElementById('integralPdfCatalogStatus');
  if(!container||!status||!admin())return;
  const db=c(),category=document.getElementById('integralPdfCategory')?.value||'';
@@ -186,27 +246,41 @@ async function renderCatalog(page=0){
  let req=db.from(REFS).select('id,asset_id,source_document,source_page,category,topic,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)',{count:'exact'}).order('id');
  if(category)req=req.eq('category',category);
  if(queryString)req=req.ilike('topic','%'+queryString+'%');
- const {data,error,count}=await req.range(page*24,page*24+23);
+ const {data,error,count}=await req.range(currentCatalogPage*24,currentCatalogPage*24+23);
  if(error){status.textContent='Catalogo non disponibile: '+error.message;container.innerHTML='';return;}
+ if(!(data||[]).length&&currentCatalogPage>0)return renderCatalog(currentCatalogPage-1);
  const list=data||[],signed=list.length?await db.storage.from(BUCKET).createSignedUrls(list.map(v=>v.asset?.storage_path).filter(Boolean),1200):{data:[]};
  if(signed.error){status.textContent='Anteprime non disponibili: '+signed.error.message;container.innerHTML='';return;}
  const urls=signed.data||[];
- status.textContent=(count||0)+' riferimenti nel catalogo · pagina '+(page+1);
+ status.textContent=(count||0)+' riferimenti nel catalogo · pagina '+(currentCatalogPage+1)+' · seleziona le immagini che non servono';
  let pos=0;
  container.innerHTML=list.map(r=>{
   const u=urls[pos++],src=u&&!u.error&&u.signedUrl?u.signedUrl:'';
   if(src)trusted.add(src);
-  return '<article class="st-integral-entry">'+(src?'<img loading="lazy" src="'+esc(src)+'" alt="Figura estratta da PDF">':'')+
-   '<strong>'+esc(r.category)+'</strong><small>'+esc(r.source_document)+' · pag. '+r.source_page+'</small>'+
+  const checked=selected.has(r.asset_id),disabled=catalogBusy||(!checked&&selected.size>=100);
+  return '<article class="st-integral-entry"><label class="st-integral-select"><input type="checkbox" data-asset-id="'+esc(r.asset_id)+'" '+(checked?'checked ':'')+(disabled?'disabled ':'')+'><strong>Seleziona per eliminare</strong></label>'+
+   (src?'<img loading="lazy" src="'+esc(src)+'" alt="Figura estratta da PDF">':'')+
+   '<small>ID immagine: '+esc(r.asset_id)+'</small><strong>'+esc(r.category)+'</strong><small>'+esc(r.source_document)+' · pag. '+r.source_page+'</small>'+
    '<p>'+esc(r.topic||'Immagine senza testo riconoscibile')+'</p><small>Corsi candidati: '+esc((r.candidate_course_keys||[]).join(' · '))+'</small></article>';
- }).join('')||'<p>Archivio non ancora importato o nessun risultato. Seleziona lo ZIP integrale qui sopra.</p>';
+ }).join('')||'<p>Archivio non ancora importato o nessun risultato. Seleziona gli ZIP integrali qui sopra.</p>';
+ container.onchange=e=>{
+  const input=e.target;
+  if(!input.matches?.('input[data-asset-id]')||catalogBusy)return;
+  const item=input.dataset.assetId;
+  if(!safeId.test(item))return;
+  if(input.checked){if(selected.size>=100){input.checked=false;return note('Massimo 100 immagini per operazione.',true);}selected.add(item);}
+  else selected.delete(item);
+  refreshBulkControls();
+ };
  const prev=document.getElementById('integralPdfPrev'),next=document.getElementById('integralPdfNext');
- if(prev){prev.disabled=page===0;prev.onclick=()=>void renderCatalog(Math.max(0,page-1));}
- if(next){next.disabled=(page+1)*24>=(count||0);next.onclick=()=>void renderCatalog(page+1);}
+ if(prev){prev.disabled=catalogBusy||currentCatalogPage===0;prev.onclick=()=>void renderCatalog(Math.max(0,currentCatalogPage-1));}
+ if(next){next.disabled=catalogBusy||(currentCatalogPage+1)*24>=(count||0);next.onclick=()=>void renderCatalog(currentCatalogPage+1);}
+ refreshBulkControls();
 }
 function show(){
  if(!admin()){alert('L’archivio integrale è riservato alla gestione CNA.');return;}
  document.getElementById('integralPdfOverlay')?.remove();
+ selected.clear();currentCatalogPage=0;
  const el=document.createElement('div');el.className='admin-modal-overlay';el.id='integralPdfOverlay';
  el.innerHTML='<section class="admin-modal wide st-integral-modal" role="dialog" aria-modal="true" aria-label="Archivio integrale immagini PDF">'+
  '<header><div><div class="admin-kicker">CNA AVELLINO · FONTI PDF</div><h2>Archivio integrale immagini</h2></div><button type="button" id="integralPdfClose" class="admin-modal-close">×</button></header>'+
@@ -214,9 +288,25 @@ function show(){
  '<p>Scarica le <strong>10 parti ZIP da circa 6 MB</strong> e selezionale tutte insieme oppure importale una alla volta; non serve decomprimere né riunire i file. È accettato anche lo ZIP integrale originale. Il caricamento è riprendibile e le figure restano riservate alla docenza CNA; i corsi sospesi sono esclusi.</p>'+
  '<p>Il materiale proviene da fonti esterne: mantieni citazione, utilizzo didattico interno e revisione tecnico-normativa. L’importazione non costituisce autorizzazione generale di riutilizzo.</p>'+
  '<input id="integralPdfZip" type="file" multiple accept=".zip,application/zip"><label class="st-integral-confirm"><input type="checkbox" id="integralPdfPrivateCheck"> Confermo l’importazione nell’archivio privato per revisione e docenza CNA</label>'+
- '<button type="button" class="admin-primary" id="integralPdfImport">Importa / riprendi archivio integrale</button><p id="integralPdfStatus" role="status">Pronto.</p>'+'<h3>Catalogo privato immagini importate</h3><label>Categoria <select id="integralPdfCategory"><option value="">Tutte le categorie</option>'+['DPI III categoria','DPI e protezioni','Carrelli elevatori','PLE','Gru su autocarro','Macchine movimento terra','Antincendio','Primo soccorso','Rischio meccanico','Attrezzature','Lavori in quota'].map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></label>'+'<label>Argomento <input id="integralPdfSearch" type="search" placeholder="Es. stabilità, DPI, evacuazione"></label><p id="integralPdfCatalogStatus" role="status">Catalogo in caricamento...</p><div id="integralPdfCatalog" class="st-integral-gallery"></div>'+'<div class="st-integral-pagination"><button type="button" id="integralPdfPrev">← Precedenti</button><button type="button" id="integralPdfNext">Successive →</button></div></div></section>';
+ '<button type="button" class="admin-primary" id="integralPdfImport">Importa / riprendi archivio integrale</button><p id="integralPdfStatus" role="status">Pronto.</p>'+'<h3>Catalogo privato immagini importate</h3><p>Seleziona le figure inutili o non pertinenti, anche su pagine diverse. Eliminandone una vengono tolte tutte le sue occorrenze nelle lezioni, nelle slide e nella stampa. Lo stesso ZIP non la reimporterà.</p><div class="st-integral-bulk"><span id="integralPdfSelectionCount" role="status">0 immagini selezionate</span><button type="button" id="integralPdfSelectPage">Seleziona pagina</button><button type="button" id="integralPdfClearSelection" disabled>Deseleziona</button><button type="button" id="integralPdfDeleteSelected" class="st-integral-danger" disabled>Elimina selezionate</button><button type="button" id="integralPdfRetryCleanup">Riprova pulizia file</button></div><label>Categoria <select id="integralPdfCategory"><option value="">Tutte le categorie</option>'+['DPI III categoria','DPI e protezioni','Carrelli elevatori','PLE','Gru su autocarro','Macchine movimento terra','Antincendio','Primo soccorso','Rischio meccanico','Attrezzature','Lavori in quota'].map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></label>'+'<label>Argomento <input id="integralPdfSearch" type="search" placeholder="Es. stabilità, DPI, evacuazione"></label><p id="integralPdfCatalogStatus" role="status">Catalogo in caricamento...</p><div id="integralPdfCatalog" class="st-integral-gallery"></div>'+'<div class="st-integral-pagination"><button type="button" id="integralPdfPrev">← Precedenti</button><button type="button" id="integralPdfNext">Successive →</button></div></div></section>';
  document.body.appendChild(el);
  el.querySelector('#integralPdfClose').onclick=()=>el.remove();el.addEventListener('click',e=>{if(e.target===el)el.remove();});
+ el.querySelector('#integralPdfSelectPage').onclick=()=>{
+  for(const input of el.querySelectorAll('#integralPdfCatalog input[data-asset-id]')){
+   if(selected.size>=100)break;
+   selected.add(input.dataset.assetId);input.checked=true;
+  }
+  refreshBulkControls();
+ };
+ el.querySelector('#integralPdfClearSelection').onclick=()=>{selected.clear();void renderCatalog(currentCatalogPage);};
+ el.querySelector('#integralPdfDeleteSelected').onclick=()=>void removeSelection();
+ el.querySelector('#integralPdfRetryCleanup').onclick=async()=>{
+  if(catalogBusy)return;
+  setCatalogBusy(true);
+  try{const result=await cleanupDeletedStorage();note('Pulizia Storage completata: '+result.cleaned+' file.'+(result.pending?' Premi di nuovo per controllare gli altri file.':''));}
+  catch(e){note('Pulizia non completata: '+e.message,true);}
+  finally{setCatalogBusy(false);}
+ };
  el.querySelector('#integralPdfCategory').onchange=()=>void renderCatalog(0);
  el.querySelector('#integralPdfSearch').onchange=()=>void renderCatalog(0);
  void renderCatalog(0);
@@ -224,7 +314,7 @@ function show(){
   const button=el.querySelector('#integralPdfImport'),files=[...(el.querySelector('#integralPdfZip').files||[])].sort((a,b)=>a.name.localeCompare(b.name));
   if(!el.querySelector('#integralPdfPrivateCheck').checked)return note('Conferma uso privato e revisione.',true);
   if(!files.length)return note('Seleziona uno ZIP completo oppure le 10 parti. Puoi selezionarle tutte insieme.',true);
-  button.disabled=true;
+  setCatalogBusy(true);
   let completed=0,figures=0,references=0;
   try{
    for(const file of files){
@@ -236,7 +326,7 @@ function show(){
    note('Completati '+completed+'/'+files.length+' archivi · '+figures+' immagini / '+references+' riferimenti in questa selezione. '+(full?'Tutte le dieci parti presenti.':'Se hai importato meno di dieci parti, aggiungi le rimanenti.'));
    await renderCatalog(0);
   }catch(e){note('Importazione interrotta dopo '+completed+' file: '+(e.message||e)+' · seleziona di nuovo gli ZIP rimasti o tutti, il caricamento è riprendibile.',true);}
-  finally{button.disabled=false;}
+  finally{setCatalogBusy(false);}
  };
 }
 function boot(){

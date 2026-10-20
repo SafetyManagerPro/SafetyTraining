@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.4 import PDF in 10 parti / 65 corsi (2.634 immagini)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-57`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-58`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -657,3 +657,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Creati localmente **10 ZIP indipendenti di circa 6,1 MB ciascuno**, ognuno contiene un `manifest.json` con `archive_type=safetytraining_partial_v1`, `part_index`, `part_count=10`, `total_assets=2634`, `total_figures=4783`. Tutti gli asset sono unici e tutti i riferimenti restano col file corrispondente; archivi verificati in lettura. Disponibili tramite link sandbox nella conversazione, non su GitHub pubblico.
 - Importer `integral-pdf-v24.js` ora accetta il vecchio ZIP completo **o** una selezione multipla delle 10 parti, caricate sequenzialmente; supporta ripresa idempotente e singole parti, controlla ID, firma WebP, SHA256, integrità references, indice/numero delle parti. Storage Supabase resta privato e RLS platform-admin invariata. Nessuna immagine di terzi nel repo, corsi congelati esclusi.
 - PWA cache `safety-training-v22-57` e test aggiornati. Non dichiarare importazione conclusa fino a controllo `training_integral_pdf_assets_v24=2634`, `training_integral_pdf_refs_v24=4783` e verifica di slide e stampa A4 in browser. QA di importazione reale ancora da eseguire.
+
+## 2026-10-20 — v24.5 selezione multipla ed eliminazione figure PDF importate
+- Implementati nel pannello **Archivio PDF integrale** checkbox per singola immagine, selezione di tutte le immagini della pagina (fino a 100 per operazione), selezione mantenuta navigando tra pagine, deselezione ed **Elimina N immagini selezionate** con conferma esplicita del numero di riferimenti pagina che saranno rimossi.
+- L'eliminazione riservata al solo `platform_admin` è eseguita da funzione SQL `training_delete_integral_pdf_assets_v24(text[])` con controllo auth server, rimozione atomica dei riferimenti `training_integral_pdf_refs_v24` e dei record `training_integral_pdf_assets_v24`, più tombstone `training_integral_pdf_deleted_v24` per evitare la ricomparsa dei loghi/immagini scartate se l'admin reimporta le 10 parti ZIP. Nessuna modifica ai corsi, agli iscritti, alle slide authored o agli attestati.
+- Storage DELETE limitato dalla RLS al bucket privato `training-source-figures` e al prefisso `integral/v1/`, solo platform-admin. Dopo commit database, l'interfaccia rimuove le immagini fisiche con API Storage e marca i file ripuliti; pulsante **Riprova pulizia file** gestisce eventuali fallimenti post-commit senza rendere visibili immagini rimosse. Cache del proiettore svuotata; per una sessione già aperta serve ricaricare la presentazione/stampa.
+- Catalogo resta privato per revisione CNA, fonti di terzi non committate su GitHub. PWA `safety-training-v22-58`, nuovi test. Migration `20261020204500_v24_005_delete_imported_pdf_figures.sql` da applicare. QA reale in browser e prova eliminazione da account admin da effettuare; **non cancellare dati esistenti durante i test**.
