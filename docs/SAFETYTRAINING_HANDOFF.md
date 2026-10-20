@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-59`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-60`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -667,3 +667,7 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-20 — v24.6 ZIP figure complete
 - Ricostruite 856 tavole complete dagli originali 14 PDF su 1.219 pagine; 363 pagine non grafiche non selezionate. Nove ZIP da circa 5–7 MB con manifest v2, catalogo per fonte, pagina, corso e argomento. Le slide/stampe useranno solo gli ID nuovi >=pdf-50000, escludendo i frammenti della precedente estrazione. Nessuna cancellazione automatica. Materiale riservato a revisione didattica e diritti.
 - PWA safety-training-v22-59; import e QA stampa da verificare.
+
+## 2026-10-20 — v24.6.1 filtro archivio vecchio e nuovo
+- Importer delle 9 parti figure complete validato da GitHub Actions #427, Vercel deploy success. Aggiunto filtro in catalogo amministratore: **Nuove tavole complete / Vecchi frammenti da scartare / Tutte**. Default nuove figure; cambiare filtro azzera selezione per evitare cancellazioni involontarie del lotto nuovo. La precedente funzione selezione multipla elimina i vecchi file su richiesta amministratore, con tombstone anti-reimport.
+- PWA `safety-training-v22-60`; nuovo controllo statico. La pulizia NON è stata eseguita automaticamente, in attesa della selezione amministrativa e dell'import del nuovo ZIP; la verifica stampa reale resta necessaria.

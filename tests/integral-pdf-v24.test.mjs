@@ -35,7 +35,7 @@ test('slides + two-up print invoke exact same private source placement',()=>{
  assert.ok(printer.includes("isTrustedSrc"));
  assert.ok(printer.includes("projection.buildDeck(converted)"));
  const html=rd('apps/training/index.html');assert.ok(html.includes('integral-pdf-v24.js'));
- assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-59"));
+ assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-60"));
 });
 
 test('multi-select deletion removes imported figure references, persists tombstones and protects frozen courses',()=>{
@@ -47,3 +47,5 @@ test('multi-select deletion removes imported figure references, persists tombsto
  assert.ok(!sql.includes('on public.courses'));
  assert.ok(!s.includes('getPublicUrl('));
 });
+
+test('old and new PDF figure filters coexist with bulk selection',()=>{const s=rd('apps/training/integral-pdf-v24.js');for(const x of ['integralPdfGeneration',"req.gte('id','pdf-50000')","req.lt('id','pdf-50000')"])assert.ok(s.includes(x));});

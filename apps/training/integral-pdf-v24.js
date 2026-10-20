@@ -194,7 +194,7 @@ function refreshBulkControls(){
 }
 function setCatalogBusy(value){
  catalogBusy=!!value;
- for(const key of ['integralPdfImport','integralPdfZip','integralPdfCategory','integralPdfSearch','integralPdfPrev','integralPdfNext']){
+ for(const key of ['integralPdfImport','integralPdfZip','integralPdfGeneration','integralPdfCategory','integralPdfSearch','integralPdfPrev','integralPdfNext']){
   const el=document.getElementById(key);if(el)el.disabled=catalogBusy;
  }
  const container=document.getElementById('integralPdfCatalog');
@@ -247,7 +247,10 @@ async function renderCatalog(page=0){
  if(!container||!status||!admin())return;
  const db=c(),category=document.getElementById('integralPdfCategory')?.value||'';
  const queryString=(document.getElementById('integralPdfSearch')?.value||'').trim().slice(0,90).replace(/[%_,()]/g,'');
+ const generation=document.getElementById('integralPdfGeneration')?.value||'complete';
  let req=db.from(REFS).select('id,asset_id,source_document,source_page,category,topic,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)',{count:'exact'}).order('id');
+ if(generation==='complete')req=req.gte('id','pdf-50000');
+ if(generation==='legacy')req=req.lt('id','pdf-50000');
  if(category)req=req.eq('category',category);
  if(queryString)req=req.ilike('topic','%'+queryString+'%');
  const {data,error,count}=await req.range(currentCatalogPage*24,currentCatalogPage*24+23);
@@ -288,11 +291,11 @@ function show(){
  const el=document.createElement('div');el.className='admin-modal-overlay';el.id='integralPdfOverlay';
  el.innerHTML='<section class="admin-modal wide st-integral-modal" role="dialog" aria-modal="true" aria-label="Archivio integrale immagini PDF">'+
  '<header><div><div class="admin-kicker">CNA AVELLINO · FONTI PDF</div><h2>Archivio integrale immagini</h2></div><button type="button" id="integralPdfClose" class="admin-modal-close">×</button></header>'+
- '<div class="admin-modal-body"><p>14 documenti · 2.634 immagini uniche · 4.783 riferimenti a pagina, categoria, corso e argomento. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
- '<p>Scarica le <strong>10 parti ZIP da circa 6 MB</strong> e selezionale tutte insieme oppure importale una alla volta; non serve decomprimere né riunire i file. È accettato anche lo ZIP integrale originale. Il caricamento è riprendibile e le figure restano riservate alla docenza CNA; i corsi sospesi sono esclusi.</p>'+
+ '<div class="admin-modal-body"><p>14 PDF esaminati · 856 tavole complete pronte per l'importazione · vecchi frammenti selezionabili separatamente. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
+ '<p>Scarica e importa i <strong>9 nuovi ZIP FIGURE COMPLETE (5–7 MB)</strong>, insieme o singolarmente, senza decomprimerli. Il caricamento è riprendibile e le figure restano riservate alla docenza CNA; i corsi sospesi sono esclusi.</p>'+
  '<p>Il materiale proviene da fonti esterne: mantieni citazione, utilizzo didattico interno e revisione tecnico-normativa. L’importazione non costituisce autorizzazione generale di riutilizzo.</p>'+
  '<input id="integralPdfZip" type="file" multiple accept=".zip,application/zip"><label class="st-integral-confirm"><input type="checkbox" id="integralPdfPrivateCheck"> Confermo l’importazione nell’archivio privato per revisione e docenza CNA</label>'+
- '<button type="button" class="admin-primary" id="integralPdfImport">Importa / riprendi archivio integrale</button><p id="integralPdfStatus" role="status">Pronto.</p>'+'<h3>Catalogo privato immagini importate</h3><p>Seleziona le figure inutili o non pertinenti, anche su pagine diverse. Eliminandone una vengono tolte tutte le sue occorrenze nelle lezioni, nelle slide e nella stampa. Lo stesso ZIP non la reimporterà.</p><div class="st-integral-bulk"><span id="integralPdfSelectionCount" role="status">0 immagini selezionate</span><button type="button" id="integralPdfSelectPage">Seleziona pagina</button><button type="button" id="integralPdfClearSelection" disabled>Deseleziona</button><button type="button" id="integralPdfDeleteSelected" class="st-integral-danger" disabled>Elimina selezionate</button><button type="button" id="integralPdfRetryCleanup">Riprova pulizia file</button></div><label>Categoria <select id="integralPdfCategory"><option value="">Tutte le categorie</option>'+['DPI III categoria','DPI e protezioni','Carrelli elevatori','PLE','Gru su autocarro','Macchine movimento terra','Antincendio','Primo soccorso','Rischio meccanico','Attrezzature','Lavori in quota'].map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></label>'+'<label>Argomento <input id="integralPdfSearch" type="search" placeholder="Es. stabilità, DPI, evacuazione"></label><p id="integralPdfCatalogStatus" role="status">Catalogo in caricamento...</p><div id="integralPdfCatalog" class="st-integral-gallery"></div>'+'<div class="st-integral-pagination"><button type="button" id="integralPdfPrev">← Precedenti</button><button type="button" id="integralPdfNext">Successive →</button></div></div></section>';
+ '<button type="button" class="admin-primary" id="integralPdfImport">Importa / riprendi archivio integrale</button><p id="integralPdfStatus" role="status">Pronto.</p>'+'<h3>Catalogo privato immagini importate</h3><label>Versione delle immagini <select id="integralPdfGeneration"><option value="complete">Nuove tavole complete</option><option value="legacy">Vecchi frammenti da scartare</option><option value="all">Tutte le immagini</option></select></label><p>Seleziona le figure inutili o non pertinenti, anche su pagine diverse. Eliminandone una vengono tolte tutte le sue occorrenze nelle lezioni, nelle slide e nella stampa. Lo stesso ZIP non la reimporterà.</p><div class="st-integral-bulk"><span id="integralPdfSelectionCount" role="status">0 immagini selezionate</span><button type="button" id="integralPdfSelectPage">Seleziona pagina</button><button type="button" id="integralPdfClearSelection" disabled>Deseleziona</button><button type="button" id="integralPdfDeleteSelected" class="st-integral-danger" disabled>Elimina selezionate</button><button type="button" id="integralPdfRetryCleanup">Riprova pulizia file</button></div><label>Categoria <select id="integralPdfCategory"><option value="">Tutte le categorie</option>'+['DPI III categoria','DPI e protezioni','Carrelli elevatori','PLE','Gru su autocarro','Macchine movimento terra','Antincendio','Primo soccorso','Rischio meccanico','Attrezzature','Lavori in quota'].map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></label>'+'<label>Argomento <input id="integralPdfSearch" type="search" placeholder="Es. stabilità, DPI, evacuazione"></label><p id="integralPdfCatalogStatus" role="status">Catalogo in caricamento...</p><div id="integralPdfCatalog" class="st-integral-gallery"></div>'+'<div class="st-integral-pagination"><button type="button" id="integralPdfPrev">← Precedenti</button><button type="button" id="integralPdfNext">Successive →</button></div></div></section>';
  document.body.appendChild(el);
  el.querySelector('#integralPdfClose').onclick=()=>el.remove();el.addEventListener('click',e=>{if(e.target===el)el.remove();});
  el.querySelector('#integralPdfSelectPage').onclick=()=>{
@@ -311,6 +314,7 @@ function show(){
   catch(e){note('Pulizia non completata: '+e.message,true);}
   finally{setCatalogBusy(false);}
  };
+ el.querySelector('#integralPdfGeneration').onchange=()=>{selected.clear();void renderCatalog(0);};
  el.querySelector('#integralPdfCategory').onchange=()=>void renderCatalog(0);
  el.querySelector('#integralPdfSearch').onchange=()=>void renderCatalog(0);
  void renderCatalog(0);
