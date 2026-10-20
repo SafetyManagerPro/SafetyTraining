@@ -671,3 +671,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-20 — v24.6.1 filtro archivio vecchio e nuovo
 - Importer delle 9 parti figure complete validato da GitHub Actions #427, Vercel deploy success. Aggiunto filtro in catalogo amministratore: **Nuove tavole complete / Vecchi frammenti da scartare / Tutte**. Default nuove figure; cambiare filtro azzera selezione per evitare cancellazioni involontarie del lotto nuovo. La precedente funzione selezione multipla elimina i vecchi file su richiesta amministratore, con tombstone anti-reimport.
 - PWA `safety-training-v22-60`; nuovo controllo statico. La pulizia NON è stata eseguita automaticamente, in attesa della selezione amministrativa e dell'import del nuovo ZIP; la verifica stampa reale resta necessaria.
+
+## 2026-10-20 — v24.6.2
+- Riparato il testo di un'etichetta nel pannello di importazione delle tavole complete e avviata una nuova verifica CI.
