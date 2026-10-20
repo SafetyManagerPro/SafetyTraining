@@ -629,3 +629,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v24.1.1 PWA retrocompatibilità CI
 - Il primo workflow di v24 ha segnalato una vecchia asserzione che verifica la forma `safety-training-v22-N` della cache. Per evitare regressioni inutili con il runtime v22, impostata cache `safety-training-v22-54`, lasciando invariato il numero funzionale del catalogo PDF v24; test del modulo nuovo allineato. Il collegamento di storage e i contenuti non cambiano. Nuova CI da verificare.
+
+## 2026-10-20 — v24.1.2 compatibilità titolo dei handoff
+- CI #418 unica regressione prima dei nuovi test: la forma titolo v24.1 non era accettata dal controllo v22.xx. Ampliato regex a v22.xx o v24.xx, mantenendo il requisito di identico heading più recente fra i due registri. Nessuna modifica funzionale/DB.
