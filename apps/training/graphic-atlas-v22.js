@@ -31,7 +31,7 @@ function collect(course,topic){
   ...Array.isArray(topic.visuals)?topic.visuals:[],
   ...Array.isArray(topic.graphic_cards)?topic.graphic_cards:[]
  ].map(toVisual).filter(Boolean);
- return [...new Map([...picks,...legacy,...placed,...authored].map(toVisual).filter(Boolean).map(x=>[x.src,x])).values()];
+ return [...new Map([...picks,...legacy,...placed,...authored].map(toVisual).filter(Boolean).map(x=>[x.src,x])).values(),...privatePdf];
 }
 function distribute(course,topic,slides){
  const list=Array.isArray(slides)?slides:[];

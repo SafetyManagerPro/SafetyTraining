@@ -629,15 +629,15 @@ document.getElementById('showDpi').onclick=()=>dpiView();
 document.getElementById('showRefs').onclick=()=>resourcesView();
 document.getElementById('showChecklist').onclick=()=>checklistView();
 
-function renderRoute(){
+async function renderRoute(){
  closeVideoPlayer();
  if(search.value.trim().length>=2){document.body.classList.remove('deckmode');searchView(search.value);return}
  clearInterval(timerInt);
  const p=location.hash.replace('#','').split('/');
- if(p[0]==='deck'){let c=getCourse(p[1]); return c?deckView(c,p[2]||0):home()}
+ if(p[0]==='deck'){let c=getCourse(p[1]);if(c){await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(c).catch(console.warn);if(location.hash.replace('#','').split('/')[1]!==c.id)return;return deckView(c,p[2]||0)}return home()}
  document.body.classList.remove('deckmode');
- if(p[0]==='course'){let c=getCourse(p[1]); return c?courseView(c):home()}
- if(p[0]==='topic'){let c=getCourse(p[1]),t=getTopic(c,p[2]); return c&&t?topicView(c,t):home()}
+ if(p[0]==='course'){let c=getCourse(p[1]);if(c){await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(c).catch(console.warn);if(location.hash.replace('#','').split('/')[1]!==c.id)return;return courseView(c)}return home()}
+ if(p[0]==='topic'){let c=getCourse(p[1]),t=getTopic(c,p[2]);if(c&&t){await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(c).catch(console.warn);if(location.hash.replace('#','').split('/')[2]!==t.id)return;return topicView(c,t)}return home()}
  if(p[0]==='lab'){let c=getCourse(p[1]); return c?labView(c):home()}
  if(p[0]==='resources'){let c=getCourse(p[1]); return c?resourceCourseView(c):home()}
  home();

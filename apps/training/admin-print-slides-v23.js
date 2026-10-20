@@ -12,7 +12,7 @@
   function safeSlideImage(src){
     const value=String(src||'');
     if(/^(?:\.\/)?assets\/(?:undefined|null|nan)(?:\.[a-z0-9]+)?$/i.test(value))return null;
-    return PHOTO.test(value)&&!value.includes('..')?value.replace(/^\.\//,''):null;
+    return PHOTO.test(value)&&!value.includes('..')?value.replace(/^\.\//,''):(window.SAFETY_INTEGRAL_PDF_V24?.isTrustedSrc?.(value)?value:null);
   }
   function isUnassignedImage(src){
     // Legacy course graphics can reference a missing image key. Recover only
@@ -114,6 +114,7 @@
       ...m,units:m.units.map(u=>({...u,stable_key:u.unit_version_id,default_minutes:u.minutes}))
     }))};
     const converted=adapter.adaptBundle(bundle);
+    await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(converted,{client});
     const slides=projection.buildDeck(converted);
     sheetData(slides);
     return {book,slides,renderSlide:projection.deckSlideBody};

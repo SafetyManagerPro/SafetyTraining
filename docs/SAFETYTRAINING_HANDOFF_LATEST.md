@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-20
-Stato: **v22.23 copertura 201 asset in corsi/slide/stampe** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-53`.
+Stato: **v24.1 PDF integrali pronti a importazione privata** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v24-01`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -621,3 +621,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-20 — v24.0 struttura privata estrazione PDF integrale
 - Verificati i 14 PDF allegati nella conversazione: **4.659 occorrenze** di immagini su pagina, corrispondenti a **2.511 file WebP unici**, deduplica per pixel, zero errori di estrazione; PDF con forme vettoriali senza immagini incluse tramite due anteprime vettoriali e altre pagine idonee. Creati ZIP ~58 MB, CSV + manifest con documento, pagina, categoria, testo, SHA-256, elenco corsi candidati (nell'ambiente file ChatGPT).
 - Nuovo schema integrale (v24) asset+ref e bucket privato WebP con RLS solo platform-admin. Non pubblicare immagini da PDF in asset statici GitHub/Vercel. Il caricamento dei binari richiede importazione dal client autorizzato; l'archivio esiste nel runtime ChatGPT, **non** ancora in Supabase né sul deployment GitHub.
+
+## 2026-10-20 — v24.1 archivio PDF privato integrale collegato a slide e stampa
+- Importatore in `apps/training/integral-pdf-v24.js` (solo platform-admin): accetta lo ZIP integrale da 14 PDF preparato in ChatGPT con **2.511 WebP unici + 4.659 riferimenti**. Validazione SHA-256/WebP/ID, controllo duplicati, upload privato idempotente/resumable e metadata batch Supabase; UI `Archivio PDF integrale` nell'admin. Nessuna copia di materiale terzo pubblicata su GitHub.
+- Per i corsi DB non frozen, matching automatico per categoria, corso, argomento della Learning Unit (regole e punteggio testuale, fallback deterministico), ognuna delle immagini dell'archivio caricata una volta per corso e presentata con fonte e pagina. L'atlante comune richiama i link firmati in memoria sia nella proiezione sia in Stampa slide (print allowlist URL firmate), conservando due slide A4 e includendo eventualmente slide Atlante aggiuntive. Accesso rigorosamente admin: NON abilitare apprendimento pubblico con fonti non autorizzate. PWA `safety-training-v24-01`.
+- **Non confondere integrazione di codice con ingest dei file**: le 2.511 immagini sono nello ZIP allegato alla chat e ancora da caricare tramite account platform-admin nell'app (il container ChatGPT non ha connessione HTTP ai sistemi remoti e i tool collegati non accettano binari dal filesystem). Fino all'importazione l'atlante integrale è vuoto. Necessario QA browser e revisione tecnico/normativa/copyright prima dell'uso operativo da parte dei corsisti.

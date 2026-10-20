@@ -255,6 +255,8 @@
       host().innerHTML=selectors+'<p class="admin-loading">Preparazione moduli e Learning Unit…</p>';
       const book=await loadBook(client,course,version);
       if(!current(seq,who))return;
+      const printCourse={...course,presentation_generated_from_db:true,topics:book.modules.flatMap(m=>m.units.map(u=>({id:u.unit_version_id||u.id,title:u.content?.title||u.title,summary:u.content?.summary||'',db_backed:true})))};
+      await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(printCourse,{client});
       const report=inspectBook(book);
       const summary='<section class="admin-card" role="status"><h2>Verifica dispensa</h2>'+
         '<p><strong>'+report.moduleCount+' moduli · '+report.unitCount+' Learning Unit</strong> · corso v'+
