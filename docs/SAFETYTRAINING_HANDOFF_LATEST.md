@@ -532,3 +532,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.18.5 string-match cache test
 - Sostituito l'ultimo controllo GP03 con ricerca testuale del prefisso cache (senza regex suscettibili a doppio escaping nelle tool-call), preservando il check di asset PWA. Nessuna modifica funzionale; CI da ricontrollare.
+
+## 2026-10-20 — v22.18.6 copertura visiva estesa e backend pronto
+- Stato verificato: run GitHub Actions #395 **success**; migrazione Supabase `v22_017_private_source_figures` applicata con successo e bucket privato `training-source-figures` + RLS platform-admin verificati, indice ancora **0** immagini (ZIP da importare tramite console con account platform-admin).
+- Aumentato da una a **due** figure PDF pertinenti per topic DB-backed non congelato, affiancate allo schema SVG originale (tetto 3 immagini per lezione); scelta deterministica distribuisce le immagini a parità di attinenza fra le lezioni evitando duplicati nella stessa lezione. Sempre **anteprima admin** con didascalia obbligatoria, non diffusione pubblica; non cambia testi, minuti, versioni o stampa 2/A4.
+- Verificare CI di questa modifica prima del rilascio; importazione reale, smoke browser desktop/mobile e controllo manuale dei contenuti restano da fare.

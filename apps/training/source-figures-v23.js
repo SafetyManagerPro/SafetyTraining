@@ -33,7 +33,14 @@ function pick(course,topic){
  const ref=tokens(p.excerpt);let score=8;for(const word of terms)if(ref.has(word))score+=3;
  return {...p,score};}).filter(Boolean).sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
  if(!scored.length)return[];
- const p=scored[0];return[{src:p.url,caption:'SOLO RIFERIMENTO NON VALIDATO · '+p.source_document+' · pag. '+p.source_page,graphic_pack_id:'pdf-'+p.id}];
+ // Prefer close thematic matches, but distribute equally relevant PDF figures between lessons.
+ // Maximum two staged figures per topic; original SVG remains the primary diagram.
+ const best=scored[0].score;
+ const pool=scored.filter(p=>p.score>=best-3).slice(0,18);
+ const key=String(topic.id||topic.stable_key||title);
+ let hash=0;for(const codePoint of key)hash=(Math.imul(hash,31)+codePoint.codePointAt(0))>>>0;
+ const chosen=[pool[hash%pool.length],pool[(hash+Math.max(1,Math.floor(pool.length/2)))%pool.length]].filter((p,i,a)=>p&&a.findIndex(x=>x.id===p.id)===i);
+ return chosen.slice(0,2).map(p=>({src:p.url,caption:'SOLO RIFERIMENTO NON VALIDATO · '+p.source_document+' · pag. '+p.source_page,graphic_pack_id:'pdf-'+p.id,source_review_only:true}));
 }
 function msg(s,bad=false){const el=document.getElementById('sourcePdfStatus');if(el){el.textContent=s;el.style.color=bad?'#bd4646':'';}}
 function grid(q=''){const el=document.getElementById('sourcePdfGallery');if(!el)return;

@@ -12,7 +12,11 @@ test('import checks staff identity, MIME and sha before private upload',()=>{
 });
 test('instructor PDF preview never overrides frozen or authored LU',()=>{
  const js=rd('apps/training/source-figures-v23.js');
- assert.ok(js.includes("isFrozen"));assert.ok(js.includes("presentation_generated_from_db"));assert.ok(js.includes("visual_mode==='authored'"));
+ assert.ok(js.includes("isFrozen"));
+ assert.ok(js.includes('source_review_only:true'));
+ assert.ok(js.includes('const pool=scored.filter'));
+ assert.ok(js.includes('chosen.slice(0,2)'));
+assert.ok(js.includes("presentation_generated_from_db"));assert.ok(js.includes("visual_mode==='authored'"));
  const app=rd('apps/training/app.js');
  assert.ok(app.includes('SAFETY_SOURCE_VISUALS_V23?.pick'));
 });
