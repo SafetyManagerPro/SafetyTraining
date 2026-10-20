@@ -53,7 +53,7 @@ test('single-slide landscape A4 layout is printed in its own body-level stage an
  assert.match(css,/page-break-inside:avoid/);
  assert.match(css,/background:#fff/);
  assert.match(css,/print-color-adjust:exact/);
- assert.match(css,/projector-slide/);
+ assert.match(css,/slide-print-projector/);
  assert.doesNotMatch(css,/body\.admin-slides-print #adminShell #adminContent/);
 });
 test('projector reveal controls are removed while a video poster illustration survives',()=>{
