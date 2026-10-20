@@ -141,10 +141,17 @@
     return data || [];
   }
 
-  async function createAttempt(assignment, test) {
+  // The database requires UNIQUE (enrollment_id, test_id, attempt_no).
+  // Retries must never reuse the first attempt number.
+  function nextAttemptNo(attempts) {
+    return (Array.isArray(attempts) ? attempts : [])
+      .reduce((highest, attempt) => Math.max(highest, Number(attempt?.attempt_no) || 0), 0) + 1;
+  }
+
+  async function createAttempt(assignment, test, attempts) {
     const st = cloud().state;
     const { data, error } = await st.client.from('test_attempts')
-      .insert({ enrollment_id:assignment.id, test_id:test.id, attempt_no:1, metadata:{ client:'SafetyTraining Final Test v20' } })
+      .insert({ enrollment_id:assignment.id, test_id:test.id, attempt_no:nextAttemptNo(attempts), metadata:{ client:'SafetyTraining Final Test v20' } })
       .select('id,attempt_no,started_at,completed_at,score_pct,passed,metadata').single();
     if (error) throw error;
     return data;
@@ -195,7 +202,7 @@
         renderResult(test, assignment, latest, attempts);
         return;
       }
-      const attempt = latest && !latest.completed_at ? latest : await createAttempt(assignment, test);
+      const attempt = latest && !latest.completed_at ? latest : await createAttempt(assignment, test, attempts);
       if(!current())return;
       const questions = await loadQuestions(test);
       if(!current())return;
@@ -327,7 +334,7 @@
     window.addEventListener('hashchange', () => window.setTimeout(refreshAvailability, 0));
   }
 
-  window.SAFETY_FINAL_TEST = { refreshAvailability, openPicker, closeTest, openTest, state:local };
+  window.SAFETY_FINAL_TEST = { refreshAvailability, openPicker, closeTest, openTest, nextAttemptNo, state:local };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap);
   else bootstrap();
 })();

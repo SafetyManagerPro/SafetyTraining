@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
@@ -68,4 +69,18 @@ test('learner password setup exposes a non-visual authenticated username to pass
   assert.match(onboard,/usernameField\.value = sessionUser\?\.email/);
   assert.match(onboard,/show\(data\.session\.user\)/);
   assert.match(onboard,/show\(session\.user\)/);
+});
+
+test('restarting a failed final test increments attempt_no instead of violating the unique key',()=>{
+  const source=read('apps/training/final-test-v20.js');
+  const ctx={window:{},document:{readyState:'loading',addEventListener(){}}};
+  runInNewContext(source,ctx);
+  const next=ctx.window.SAFETY_FINAL_TEST.nextAttemptNo;
+  assert.equal(next([]),1);
+  assert.equal(next([{attempt_no:1,completed_at:'2026-10-20'}]),2);
+  assert.equal(next([{attempt_no:4},{attempt_no:2},{attempt_no:3}]),5);
+  assert.equal(next(null),1);
+  assert.match(source,/attempt_no:nextAttemptNo\(attempts\)/);
+  assert.match(source,/createAttempt\(assignment, test, attempts\)/);
+  assert.doesNotMatch(source,/attempt_no:1[,}]/);
 });

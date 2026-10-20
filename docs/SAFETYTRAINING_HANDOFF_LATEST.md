@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-21
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-65`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-66`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -732,3 +732,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - GP02: raffinato matching di titoli LU reali gru (portata/tabelle, pre-utilizzo, segnaletica gestuale), PLE (controlli), MMT (controlli). Regressioni atlas estese ai quattro gruppi: un SVG o pagina PDF per slide supplementare, no sovrapposizioni forzate.
 - PWA `safety-training-v22-65`. Nessuna scrittura a Supabase e nessuna modifica a corsisti, presenze, corsi frozen o documenti PDF privati.
 - Registro tecnico dettagliato `docs/SAFETYTRAINING_QA_ATTREZZATURE_20261021.md`. Da completare: QA browser autenticato e stampa reale, validazione tecnico-legale delle figure, simulazione con utente test e revisione backend. Controllare CI e Vercel del commit.
+
+## 2026-10-21 — v24.8.6 ripetizione verifica finale e controllo backend
+- Audit SQL in sola lettura: 6 corsi attrezzature hanno ciascuno un test attivo da 10 domande con soglia 70%; tabella iscrizioni 2 record, sessioni 0, tentativi 0; nessun riferimento orfano o contatore fuori intervallo nel campione esaminato. RLS attiva sulle 13 tabelle principali esaminate. **Non è un test end-to-end autenticato**.
+- Difetto confermato: `final-test-v20.js` creava sempre `attempt_no:1`; Supabase impone vincolo unico su iscrizione, test e numero tentativo. Corretto calcolando il massimo tentativo precedente + 1 e aggiunto test VM di regressione. Nessuna scrittura a iscrizioni o tentativi esistenti.
+- PWA `safety-training-v22-66`. Aggiornato `docs/SAFETYTRAINING_QA_ATTREZZATURE_20261021.md`. Ancora da collaudare con account prova controllato: rinnovo tentativi, valutazione server, sessioni, autorizzazione pratica e rilascio attestati. Verificare CI e Vercel.

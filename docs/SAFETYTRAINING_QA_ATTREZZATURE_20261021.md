@@ -41,3 +41,12 @@ Regressioni aggiunte alle suite già eseguite da `npm run check`: ciascuna figur
 5. Convalida di produzione e documentazione finale.
 
 Questo rapporto non dichiara la conformità del corso né completa il collaudo visuale.
+
+## Follow-up QA corsista e backend — 21 ottobre 2026
+Controlli in sola lettura:
+- Le 6 versioni di corso attrezzature controllate hanno 1 test attivo ciascuna, 10 domande associate e soglia di superamento registrata al 70%. Si tratta dell'inventario, non della validazione didattica delle domande.
+- Su produzione: 2 iscrizioni registrate, 0 sessioni di apprendimento, 0 tentativi di test; nessun riferimento orfano a iscrizione, valore negativo o avanzamento fuori intervallo nei controlli aggregati. **Impossibile convalidare un flusso end-to-end reale senza un'utenza di test dedicata**. Nessun account fittizio creato in produzione.
+- RLS attiva per 13 tabelle principali controllate, incluse iscrizioni, sessioni, test e audit log. Le policy di accesso esaminate distinguono staff e iscritti con helper autorizzativi privati. Questo controllo non è un penetration test.
+- Difetto funzionale riprodotto per lettura del codice e del vincolo database: `final-test-v20.js` utilizzava `attempt_no:1` per ogni nuovo tentativo, mentre la tabella ha vincolo `UNIQUE(enrollment_id,test_id,attempt_no)`. Un successivo tentativo fallito sarebbe stato respinto per chiave duplicata.
+- Correzione: il nuovo tentativo usa il massimo numero già presente più uno, con test per il primo, secondo e ulteriore tentativo. Resta necessaria prova integrata con utente fittizio in ambiente controllato e verifica delle simultaneità multi-dispositivo.
+- Non vengono ricostruite firme, presenze, ore pratiche, idoneità o attestati dai dati tecnici.
