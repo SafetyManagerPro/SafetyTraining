@@ -63,6 +63,7 @@ test('ambiguous PDF pages never receive arbitrary topic placement',()=>{
  assert.equal(choose(course,ref(50),topics),1,'source forklift stabilita diagram must match the correct topic');
  assert.equal(choose(course,ref(8),topics),-1,'cover must never be added');
  assert.equal(choose(course,ref(42),topics),-1,'unspecific text page must be held');
+ assert.equal(choose(course,ref(71),topics),-1,'predominantly text page must be held');
  assert.equal(choose({stable_key:'attr_ple'},ref(50),topics),-1,'other equipment course must not inherit forklift figures');
  const unknown={source_document:'131220_Inail_slide_DPI.pdf',source_page:34,topic:'D. Lvo 81/2008 –',candidate_course_keys:['attr_carrelli_all']};
  assert.equal(choose(course,unknown,topics),-1,'generic law citation cannot drive placement');
