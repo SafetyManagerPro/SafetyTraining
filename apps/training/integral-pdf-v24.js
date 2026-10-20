@@ -330,8 +330,8 @@ function show(){
     const outcome=await importZip(file);
     completed++;figures+=outcome.assets;references+=outcome.refs;
    }
-   const full=figures===2634&&references===4783;
-   note('Completati '+completed+'/'+files.length+' archivi · '+figures+' immagini / '+references+' riferimenti in questa selezione. '+(full?'Tutte le dieci parti presenti.':'Se hai importato meno di dieci parti, aggiungi le rimanenti.'));
+   const full=(figures===856&&references===856)||(figures===2634&&references===4783);
+   note('Completati '+completed+'/'+files.length+' archivi · '+figures+' immagini / '+references+' riferimenti in questa selezione. '+(full?'Tutti i file della selezione presenti.':'Aggiungi gli eventuali altri ZIP mancanti.'));
    await renderCatalog(0);
   }catch(e){note('Importazione interrotta dopo '+completed+' file: '+(e.message||e)+' · seleziona di nuovo gli ZIP rimasti o tutti, il caricamento è riprendibile.',true);}
   finally{setCatalogBusy(false);}
