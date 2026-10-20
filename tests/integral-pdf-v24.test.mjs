@@ -17,7 +17,7 @@ test('private complete archive importer handles WebP hash, 2511 files and 4659 p
  assert.ok(s.includes("maxPage.get(r.source_document)"));
  assert.ok(s.includes("if(!t||t===doc)return 0"));
 
- assert.ok(s.includes("2.634 immagini uniche"));
+ assert.ok(s.includes("856 tavole complete"));
  assert.ok(!s.includes('getPublicUrl('));
 });
 test('source is private, admin-only, and signed urls must be allowlisted',()=>{
