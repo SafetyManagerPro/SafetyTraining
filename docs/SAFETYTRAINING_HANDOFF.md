@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
-Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-64`.
+Ultimo aggiornamento: 2026-10-21
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-65`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -722,3 +722,11 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Stampa slide / salva PDF: **una slide completa per pagina A4 orizzontale** (non più 2 per A4 verticale). Rendering 1600x900, cornice 270x151,875 mm, scala fisica 0,63; margini A4 10 mm. Anteprima, indicatore fogli e test aggiornati.
 - CSS Atlante riorganizzato a una figura per slide, didascalie con testo a capo e altezza immagine vincolata alla cornice. Preservati corsi congelati, versione pubblicata LU, verifiche corsisti, tempi nominali e permessi. Supabase non richiede migrazioni.
 - PWA `safety-training-v22-64`; verificare GitHub Actions, deploy Vercel e QA visivo in browser (inclusa prova stampa) prima della validazione finale.
+
+## 2026-10-21 — v24.8.5 audit didattico delle attrezzature e QA immagini
+- Audit di produzione in sola lettura: 6 percorsi principali controllati (carrelli industriali e combinati, PLE, gru per autocarro, MMT combinato ed escavatori). Nessuna referenza a Learning Unit mancante o versione LU non pubblicata.
+- **Carrelli combinati 16h: priorità alta.** Pubblicate 8 LU con gli stessi titoli del corso industriale 12h; in `learning_unit_versions.content` sono assenti i termini `telescop` e `rotativ` (0/8 unità per ciascun termine). È assenza di evidenza esplicita, non prova di pratica mancante. Il responsabile deve verificare 8 ore teorico-tecniche + 8 ore pratiche specifiche su industriali, telescopici e rotativi, disponibilità delle macchine e prova osservata, secondo ASR 17/04/2025.
+- Dashboard amministrativa Qualità didattica: evidenza di revisione pratica/varianti nei percorsi attrezzature; il carrelli 16h sale in cima alle priorità senza modificare il suo stato di pubblicazione o attribuire competenze/attestati.
+- GP02: raffinato matching di titoli LU reali gru (portata/tabelle, pre-utilizzo, segnaletica gestuale), PLE (controlli), MMT (controlli). Regressioni atlas estese ai quattro gruppi: un SVG o pagina PDF per slide supplementare, no sovrapposizioni forzate.
+- PWA `safety-training-v22-65`. Nessuna scrittura a Supabase e nessuna modifica a corsisti, presenze, corsi frozen o documenti PDF privati.
+- Registro tecnico dettagliato `docs/SAFETYTRAINING_QA_ATTREZZATURE_20261021.md`. Da completare: QA browser autenticato e stampa reale, validazione tecnico-legale delle figure, simulazione con utente test e revisione backend. Controllare CI e Vercel del commit.

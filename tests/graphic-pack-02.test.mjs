@@ -37,6 +37,11 @@ test('equipment family selection requires subject and relevant lesson keyword',(
   ['Gru su autocarro','Diagramma di carico','crane-capacity'],
   ['MMT macchine movimento terra','Rischio al ciglio dello scavo','mmt-excavation-edge'],
   ['MMT macchine movimento terra','Sottoservizi','mmt-underground'],
+  ['Gru per Autocarro (12h)','Fisica, stabilità e tabelle di carico','crane-capacity'],
+  ['Gru per Autocarro (12h)','Comandi, limitatori e controlli pre-utilizzo','crane-preuse'],
+  ['Gru per Autocarro (12h)','Posizionamento, uso sicuro e segnaletica gestuale','crane-signaller'],
+  ['Piattaforme Lavoro Elevabili PLE (10h)','Rischi, controlli e utilizzo in sicurezza','ple-preuse'],
+  ['Macchine Movimento Terra (Esc+Pale+Terne) (16h)','Comandi, dispositivi di sicurezza e controlli','mmt-preuse'],
   ['DPI lavoratori','Casco: controllo visivo','ppe-helmet-check'],
   ['Lavoratori - emergenze','Uscita di emergenza','exit-obstructed']
  ];

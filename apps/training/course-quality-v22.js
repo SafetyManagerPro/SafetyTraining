@@ -37,8 +37,29 @@
     ['missing_media_or_demo',4,'Aggiungere dimostrazione o media pertinenti e verificare le relative fonti.'],
     ['missing_visual_support',4,'Aggiungere schemi o immagini che chiariscano procedure e rischi.']
   ]);
+  // Advisory only: quality scores and publication do not certify hands-on skills.
+  // Combined forklifts require 8h technical training + 8h observed hands-on work
+  // with industrial, telescopic and rotating telescopic trucks (ASR 17/04/2025).
+  function equipmentReview(course){
+    const key=String(course?.stable_key||'');
+    if(key==='attr_carrelli_all')return {
+      priority:true,
+      text:'Verificare contenuti su telescopici e rotativi, registro delle 8 ore pratiche, disponibilità delle tre tipologie di mezzo e prova finale osservata dal docente.'
+    };
+    if(['attr_carrelli_ind','attr_ple','attr_gru_autocarro','attr_mmt_all','attr_mmt_esc'].includes(key))return {
+      priority:false,
+      text:'Verificare durata, istruzioni della macchina, esercitazioni e prove pratiche in presenza, registri e validazione del docente.'
+    };
+    return null;
+  }
+  function equipmentReviewHtml(course){
+    const note=equipmentReview(course);
+    return note?'<details class="admin-note"><summary>Controlli attrezzature in presenza'+(note.priority?' · priorità alta':'')+'</summary><p>'+esc(note.text)+' Nessuna idoneità viene attestata automaticamente.</p></details>':'';
+  }
   function nextStep(course){
     const flags=Array.isArray(course?.quality_gaps)?course.quality_gaps:[];
+    const equipment=equipmentReview(course);
+    if(equipment?.priority)return {score:10,text:equipment.text,code:'combined_forklift_practical_review'};
     const best=prioritySteps.find(([key])=>flags.includes(key));
     return best?{score:best[1],text:best[2],code:best[0]}:
       {score:0,text:flags.length?'Verificare i gap non classificati prima di dichiarare completo il corso.':
@@ -63,7 +84,7 @@
     const stat=(v,l)=>`<article class="admin-stat"><strong>${esc(v||0)}</strong><span>${esc(l)}</span></article>`;
     host().innerHTML=`
       <section class="admin-card admin-guide-card"><h2>Standard v22.007</h2><p class="admin-note">Lo stato <b>Pubblicato</b> non equivale a “corso finito”. Gold richiede zero gap reali e, oltre alle Learning Unit, almeno uno <b>Safety Scenario specifico</b> e un <b>Practice Lab specifico</b> del corso/famiglia, con visual, media/fonti e verifica coerente.</p><div class="admin-stats">${stat(summary.total,'Corsi valutati')}${stat(summary.gold,'Gold')}${stat(summary.silver,'Silver')}${stat(summary.bronze,'Bronze')}${stat(summary.incomplete,'Da completare')}${stat(summary.specific_complete,'Specifici completi')}${stat(summary.with_gaps,'Con gap')}${stat(summary.frozen_excluded,'Frozen esclusi')}</div><div class="admin-note-block"><strong>Regola pratica:</strong> per competenze manuali il digitale prepara decisione e sequenza; l’abilità fisica resta osservata e validata dal docente/istruttore e non viene marcata automaticamente dal corso online.</div></section>
-      <section class="admin-card"><div class="admin-card-head"><div><h2>Quality backlog prioritizzato</h2><p>Prima le carenze strutturali e di verifica, poi scenari, pratica e supporti. La priorità suggerisce l'ordine di lavoro, non autorizza la pubblicazione.</p></div></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Corso</th><th>Famiglia</th><th>Punteggio</th><th>Livello</th><th>Pratica fisica</th><th>Esperienza v22</th><th>Contenuti</th><th>Prossima azione didattica</th><th>Gap</th></tr></thead><tbody>${courses.map(c=>`<tr><td><strong>${esc(c.title)}</strong><div class="admin-note">${esc(c.stable_key)} · v${esc(c.version_number||'—')} · ${esc(c.version_status||'—')}</div></td><td>${esc(c.family||'—')}</td><td><strong>${esc(c.quality_score)}/100</strong></td><td>${gradeBadge(c.quality_grade)}</td><td>${physical(c.physical_validation_present)}</td><td>${esc(c.scenario_count||0)} scenario (${esc(c.specific_scenario_count||0)} specifici) · ${esc(c.practice_lab_count||0)} lab (${esc(c.specific_lab_count||0)} specifici) · ${esc(c.media_count||0)} media</td><td>${esc(c.unit_count||0)} LU · ${esc(c.operational_units||0)} operative · ${esc(c.scenario_units||0)} con caso · ${esc((c.explicit_visual_units||0)+(c.scenario_visual_count||0))} supporti visuali</td><td><strong>${esc(nextStep(c).text)}</strong>${window.SAFETY_DIDACTIC_REVIEW_V23?.renderFor?.(c.stable_key)||""}</td><td>${gapHtml(c.quality_gaps)}</td></tr>`).join('')}</tbody></table></div></section>`;
+      <section class="admin-card"><div class="admin-card-head"><div><h2>Quality backlog prioritizzato</h2><p>Prima le carenze strutturali e di verifica, poi scenari, pratica e supporti. La priorità suggerisce l'ordine di lavoro, non autorizza la pubblicazione.</p></div></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Corso</th><th>Famiglia</th><th>Punteggio</th><th>Livello</th><th>Pratica fisica</th><th>Esperienza v22</th><th>Contenuti</th><th>Prossima azione didattica</th><th>Gap</th></tr></thead><tbody>${courses.map(c=>`<tr><td><strong>${esc(c.title)}</strong><div class="admin-note">${esc(c.stable_key)} · v${esc(c.version_number||'—')} · ${esc(c.version_status||'—')}</div></td><td>${esc(c.family||'—')}</td><td><strong>${esc(c.quality_score)}/100</strong></td><td>${gradeBadge(c.quality_grade)}</td><td>${physical(c.physical_validation_present)}</td><td>${esc(c.scenario_count||0)} scenario (${esc(c.specific_scenario_count||0)} specifici) · ${esc(c.practice_lab_count||0)} lab (${esc(c.specific_lab_count||0)} specifici) · ${esc(c.media_count||0)} media</td><td>${esc(c.unit_count||0)} LU · ${esc(c.operational_units||0)} operative · ${esc(c.scenario_units||0)} con caso · ${esc((c.explicit_visual_units||0)+(c.scenario_visual_count||0))} supporti visuali</td><td><strong>${esc(nextStep(c).text)}</strong>${equipmentReviewHtml(c)}${window.SAFETY_DIDACTIC_REVIEW_V23?.renderFor?.(c.stable_key)||""}</td><td>${gapHtml(c.quality_gaps)}</td></tr>`).join('')}</tbody></table></div></section>`;
     window.SAFETY_ADMIN_LIST_TOOLS_V21?.schedule?.();
   }
 
@@ -73,6 +94,6 @@
     document.getElementById('adminConsoleBtn')?.addEventListener('click',()=>setTimeout(ensureNav,60));
     document.getElementById('adminRefresh')?.addEventListener('click',()=>setTimeout(ensureNav,60));
   }
-  window.SAFETY_COURSE_QUALITY_V22={render,ensureNav,nextStep,prioritize,version:'22.6'};
+  window.SAFETY_COURSE_QUALITY_V22={render,ensureNav,nextStep,prioritize,equipmentReview,version:'22.7'};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

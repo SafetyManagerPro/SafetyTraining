@@ -9,7 +9,7 @@ test('both persistent handoffs identify the currently deployed PWA cache in thei
  assert.ok(cache);
  for(const path of docs){
   const file=read(path);
-  assert.match(file.slice(0,700),/Ultimo aggiornamento: 2026-10-20/);
+  assert.match(file.slice(0,700),/Ultimo aggiornamento: 2026-10-21/);
   assert.ok(file.slice(0,700).includes('PWA \`'+cache+'\`')||file.slice(0,700).includes('PWA '+cache));
   assert.ok(file.includes('cancellazione')||file.includes('eliminazione'));
  }

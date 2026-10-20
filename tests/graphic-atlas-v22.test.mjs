@@ -59,3 +59,30 @@ test('projector printer and teaching booklet connect to identical artwork invent
  assert.ok(rd('apps/training/index.html').includes('graphic-atlas-v22.js'));
  assert.ok(rd('apps/training/sw.js').includes('graphic-atlas-v22.css'));
 });
+
+test('forklift, PLE, crane and MMT preserve a single figure per supplemental slide',()=>{
+ const atlas=api();
+ const cases=[
+  ['attr_carrelli_all','Carrelli Elev. Ind + Telescopici + Rotativi (16h)','Fisica dei carichi, baricentro e stabilità'],
+  ['attr_ple','Piattaforme Lavoro Elevabili PLE (10h)','Procedure operative e salvataggio in emergenza'],
+  ['attr_gru_autocarro','Gru per Autocarro (12h)','Fisica, stabilità e tabelle di carico'],
+  ['attr_mmt_all','Macchine Movimento Terra (Esc+Pale+Terne) (16h)','Rischi, stabilità e procedure di utilizzo']
+ ];
+ for(const [key,title,heading] of cases){
+  const topic={id:'u',title:heading,summary:'',db_backed:true};
+  const course={id:key,stable_key:key,title,metadata:{},topics:[topic],presentation_generated_from_db:true};
+  const base=[{type:'concept',img:{src:'assets/general.svg'}}];
+  const original=JSON.stringify(base);
+  const candidates=atlas.collect(course,topic);
+  assert.ok(candidates.length,'no diagrams for '+key+' / '+heading);
+  const output=atlas.distribute(course,topic,base);
+  assert.equal(JSON.stringify(base),original,'source presentation mutated: '+key);
+  assert.ok(output.every(s=>!(s.visualGallery||[]).length),'overlapping galleries introduced: '+key);
+  assert.ok(output.filter(s=>s.type==='visualAtlas').every(s=>s.visuals.length===1),'clipped atlas grid: '+key);
+  const seen=new Set(output.flatMap(s=>[s.img?.src,...(s.visuals||[]).map(v=>v.src)].filter(Boolean)));
+  for(const source of candidates)assert.ok(seen.has(source.src),'omitted figure '+source.src+' in '+key);
+ }
+ const css=rd('apps/training/graphic-atlas-v22.css');
+ assert.match(css,/\.st-atlas-grid img\{[^}]*object-fit:contain!important/);
+ assert.match(css,/\.st-atlas-grid\{[^}]*grid-template-columns:minmax\(0,1fr\)/);
+});
