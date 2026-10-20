@@ -677,3 +677,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v24.6.3
 - Aggiornata l'asserzione residua del test importer alle 856 tavole complete del nuovo archivio, al posto del vecchio numero di frammenti. Nessuna modifica al runtime o ai dati.
+
+## 2026-10-20 — v24.6.4
+- Importer dei nove ZIP aggiornato per il conteggio 856 immagini/856 riferimenti del lotto intero. Importazione a parti separata dagli asset originari, archivio rimane privato e i dati didattici sono invariati.
