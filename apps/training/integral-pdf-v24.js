@@ -12,37 +12,56 @@ const cache=new Map(),trusted=new Set(),loading=new Map(),selected=new Set();
 let catalogBusy=false,currentCatalogPage=0;
 const text=s=>String(s??'').slice(0,600);
 const esc=s=>text(s).replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
-const vocab=s=>new Set(text(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>4));
-const score=(topic,ref)=>{
- const t=String(ref.topic||'').trim().toLowerCase(),doc=String(ref.source_document||'').replace(/\.pdf$/i,'').trim().toLowerCase();
- if(!t||t===doc)return 0; // Scanned pages have no OCR, do not pretend topical precision.
- const words=vocab(ref.topic);
- const head=vocab(topic.title+' '+(topic.slide_title||''));
- const more=vocab(topic.summary||'');
- let points=0;for(const w of words)points+=head.has(w)?5:more.has(w)?2:0;
- return points;
-};
-function keyOf(course){return String(course?.stable_key||course?.id||'');}
-const alias=[
- [/^agg_attr_carrelli|^attr_carrelli/,'attr_carrelli_ind'],
- [/^agg_attr_ple|^attr_ple/,'attr_ple'],
- [/^agg_attr_gru_autocarro|^attr_gru_autocarro/,'attr_gru_autocarro'],
- [/^agg_attr_mmt|^attr_mmt/,'attr_mmt_all'],
- [/^agg_antincendio|^antincendio/,'antincendio'],
- [/^agg_primo_soccorso|^primo_soccorso/,'primo_soccorso_12h'],
- [/^lav_(basso|medio|alto)$|^agg_lav$/,'generale'],
- [/^dl_|^agg_dl|^preposto$|^dirigente$|^agg_prep|^agg_dir/,'generale'],
- [/^rls$|^agg_rls/,'generale'],
- [/^mod_cantieri$|^dl_spp_costruzioni$/,'lav_quota'],
- [/^attr_|^agg_attr_/,'lav_alto'],
- [/^emergenze_evacuazione$/,'antincendio'],
- [/^fondamenti$/,'generale'],
- [/^verde$|^frontoffice$|^backoffice$|^ecologici$|^polizia$/,'generale']
+// V25: stop-word-filtered, title-only evidence. Summary is frequently generic DB boilerplate.
+const textNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const stop=new Set('corso corsi lavoro lavori lavoratori lavoratore sicurezza generale generali specifici attrezzature macchine macchina dispositivi dispositivo formazione addetti utilizzo parte capitolo documento documenti pagina pagine figure figura tavola illustrata completa scannerizzata normativa decreto legislativo testo relatore rischio rischi pericoli prevenzione procedure procedura aggiornamento gruppo gruppi primo secondo tecnico teorico pratica pratico dott ing giovanni colafemmina delle della degli dalle nelle nella sullo sul della con senza sono degli sua loro delle degli dell anno 2008 2011 2012 2016 2020 2025'.split(' '));
+const vocab=s=>new Set((textNorm(s).match(/[a-z0-9]+/g)||[]).filter(w=>w.length>=5&&!stop.has(w)));
+const recurringHeader=/tavola illustrata completa|pagina scannerizzata|dott\.?\s*ing\.?|le imbracature mettiamoci la testa|d\.?\s*lvo\s*81|d\.?\s*lgs\.?\s*81|^primo soccorso$|^formazione$|^componenti$|piattaforme di lavoro mobili elevabili con e senza stabilizzatori/i;
+function score(topic,ref){
+ const t=String(ref.topic||'').trim(),doc=String(ref.source_document||'').replace(/\.pdf$/i,'').trim();
+ if(!t||textNorm(t)===textNorm(doc)||recurringHeader.test(t))return 0;
+ const source=vocab(t),heading=vocab((topic?.title||'')+' '+(topic?.slide_title||''));
+ let matching=0;for(const w of source)if(heading.has(w))matching++;
+ return matching*5;
+}
+// Photo/manual pages visually sampled from the original forklift PDF. Indexes never
+// determine placement; only these topic-specific illustrations are eligible.
+const forkliftPageTopics=[
+ [/tipolog|principali rischi/i,[27,28,29,30,31,32,33,34,37,38,44]],
+ [/fisica|baricentr|stabilit/i,[46,48,49,50,51,54,55,57]],
+ [/component|montant|organi di presa/i,[35,36,39,40,41,52,53,74]],
+ [/comandi|freni|dispositivi di sicurezza/i,[22,23,59,60]],
+ [/portata|targhett|diagramm|equilibrio/i,[49,50,51,54,55,57,65,66]],
+ [/circolaz|utilizzo in sicurezza/i,[13,19,20,23,58,62,78,80,81,83]],
+ [/controll|manutenz|procedure operative/i,[64,65,66,70,71,72,73,74,75,76,77,86,88,89,90]]
 ];
+function placementIndex(course,ref,topics,topicCounts=new Map()){
+ if(!Array.isArray(topics)||!topics.length||!Array.isArray(ref?.candidate_course_keys)||!ref.candidate_course_keys.includes(keyOf(course)))return -1;
+ const name=String(ref.source_document||'');
+ if(name==='Manuale-carrelli elevatori.pdf'){
+  const page=Number(ref.source_page);
+  for(const [pattern,pages]of forkliftPageTopics){
+   if(!pages.includes(page))continue;
+   const index=topics.findIndex(t=>pattern.test(String(t.title||'')));
+   if(index>=0)return index;
+  }
+  return -1; // e.g. manual title pages, laws, unillustrated passages
+ }
+ const header=String(ref.topic||'').trim().toLowerCase();
+ if(!header||recurringHeader.test(header)||(topicCounts.get(header)||0)>=4)return -1;
+ let best=0,winner=-1,ambiguous=false;
+ topics.forEach((t,i)=>{
+  const rating=score(t,ref);
+  if(rating>best){best=rating;winner=i;ambiguous=false;}
+  else if(rating===best&&rating>0)ambiguous=true;
+ });
+ return best>=5&&!ambiguous?winner:-1;
+}
+function keyOf(course){return String(course?.stable_key||course?.id||'');}
 function relevantKeys(course){
- const key=keyOf(course);const candidates=new Set([key]);
- for(const [rx,aliasKey]of alias)if(rx.test(key))candidates.add(aliasKey);
- return [...candidates].filter(Boolean);
+ // Do not leak images from general, equipment or employer courses into others.
+ // Only the source manifest's explicit candidate course keys are evidence.
+ const key=keyOf(course);return key?[key]:[];
 }
 function hasAccess(course){return admin()&&!!course?.presentation_generated_from_db&&!frozen(course);}
 async function paginate(query,size=600){
@@ -78,17 +97,13 @@ async function prepareCourse(course,{client}={}){
   }
   const available=list.filter(r=>urls.has(r.asset?.storage_path));
   const topics=Array.isArray(course.topics)?course.topics:[];
-  // Each image is assigned exactly once per course; ties use a stable, even distribution.
   const byTopic=new Map(topics.map(t=>[String(t.id),[]]));
-  const maxPage=new Map();for(const r of available){const doc=r.source_document||'';maxPage.set(doc,Math.max(maxPage.get(doc)||1,Number(r.source_page)||1));}
+  const topicCounts=new Map();
+  for(const r of available){const key=String(r.topic||'').trim().toLowerCase();topicCounts.set(key,(topicCounts.get(key)||0)+1);}
   for(const r of available){
-   let best=-1,idx=0;
-   for(let j=0;j<topics.length;j++){
-    const grade=score(topics[j],r);
-    if(grade>best){best=grade;idx=j;}
-   }
-   // If the source page has no searchable text, keep the original manual sequence across the course LUs.
-   if(best<=0&&topics.length)idx=Math.min(topics.length-1,Math.floor(((Number(r.source_page)||1)-1)/Math.max(1,maxPage.get(r.source_document)||1)*topics.length));
+   const idx=placementIndex(course,r,topics,topicCounts);
+   // Uncertain figures remain in the admin catalog, never silently inserted in slides.
+   if(idx<0)continue;
    const t=topics[idx];if(!t)continue;
    byTopic.get(String(t.id)).push({
      src:urls.get(r.asset.storage_path),
@@ -291,7 +306,7 @@ function show(){
  const el=document.createElement('div');el.className='admin-modal-overlay';el.id='integralPdfOverlay';
  el.innerHTML='<section class="admin-modal wide st-integral-modal" role="dialog" aria-modal="true" aria-label="Archivio integrale immagini PDF">'+
  '<header><div><div class="admin-kicker">CNA AVELLINO · FONTI PDF</div><h2>Archivio integrale immagini</h2></div><button type="button" id="integralPdfClose" class="admin-modal-close">×</button></header>'+
- '<div class="admin-modal-body"><p>14 PDF esaminati · 856 tavole complete pronte per importazione · vecchi frammenti selezionabili separatamente. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
+ '<div class="admin-modal-body"><p>14 PDF esaminati · 856 tavole complete catalogate. Solo gli abbinamenti con riscontro preciso compaiono nelle slide e nella stampa; le altre tavole restano in revisione. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
  '<p>Scarica e importa i <strong>9 nuovi ZIP FIGURE COMPLETE (5–7 MB)</strong>, insieme o singolarmente, senza decomprimerli. Il caricamento è riprendibile e le figure restano riservate alla docenza CNA; i corsi sospesi sono esclusi.</p>'+
  '<p>Il materiale proviene da fonti esterne: mantieni citazione, utilizzo didattico interno e revisione tecnico-normativa. L’importazione non costituisce autorizzazione generale di riutilizzo.</p>'+
  '<input id="integralPdfZip" type="file" multiple accept=".zip,application/zip"><label class="st-integral-confirm"><input type="checkbox" id="integralPdfPrivateCheck"> Confermo l’importazione nell’archivio privato per revisione e docenza CNA</label>'+
@@ -344,6 +359,6 @@ function boot(){
  }
  ensure();[250,800,1500].forEach(delay=>setTimeout(ensure,delay));
 }
-window.SAFETY_INTEGRAL_PDF_V24={prepareCourse,pick,isTrustedSrc,importZip,relevantKeys,score,show,hasAccess};
+window.SAFETY_INTEGRAL_PDF_V24={prepareCourse,pick,isTrustedSrc,importZip,relevantKeys,score,placementIndex,show,hasAccess};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

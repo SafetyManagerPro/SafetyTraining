@@ -29,8 +29,8 @@ function forTopic(course,topic){
    const strength=score(item,topics[i]);
    if(strength>best){best=strength;winner=i;}
   }
-  // If the course has no directly named LU, place in its first introductory unit rather than mislabel another subject.
-  if(winner===idx)assigned.push({src:'assets/'+item.file,caption:item.caption||'Figura didattica'});
+  // Never force an unrelated SVG onto the first LU when no subject match exists.
+  if(best>=6&&winner===idx)assigned.push({src:'assets/'+item.file,caption:item.caption||'Figura didattica'});
  }
  return assigned;
 }

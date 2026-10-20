@@ -1,4 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+import * as importsVm from 'node:vm';
 const rd=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('private complete archive importer handles WebP hash, 2511 files and 4659 page references',()=>{
  const s=rd('apps/training/integral-pdf-v24.js');
@@ -14,8 +15,8 @@ test('private complete archive importer handles WebP hash, 2511 files and 4659 p
  assert.ok(s.includes("for(const file of files)"));
  assert.ok(s.includes("outcome.assets"));
  assert.ok(s.includes("Un riferimento PDF appartiene a una parte ZIP diversa."));
- assert.ok(s.includes("maxPage.get(r.source_document)"));
- assert.ok(s.includes("if(!t||t===doc)return 0"));
+ assert.ok(s.includes("placementIndex(course,r,topics,topicCounts)"));
+ assert.ok(s.includes("if(idx<0)continue"));
 
  assert.ok(s.includes("856 tavole complete"));
  assert.ok(!s.includes('getPublicUrl('));
@@ -35,7 +36,7 @@ test('slides + two-up print invoke exact same private source placement',()=>{
  assert.ok(printer.includes("isTrustedSrc"));
  assert.ok(printer.includes("projection.buildDeck(converted)"));
  const html=rd('apps/training/index.html');assert.ok(html.includes('integral-pdf-v24.js'));
- assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-60"));
+ assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-61"));
 });
 
 test('multi-select deletion removes imported figure references, persists tombstones and protects frozen courses',()=>{
@@ -49,3 +50,22 @@ test('multi-select deletion removes imported figure references, persists tombsto
 });
 
 test('old and new PDF figure filters coexist with bulk selection',()=>{const s=rd('apps/training/integral-pdf-v24.js');for(const x of ['integralPdfGeneration',"req.gte('id','pdf-50000')","req.lt('id','pdf-50000')"])assert.ok(s.includes(x));});
+
+test('ambiguous PDF pages never receive arbitrary topic placement',()=>{
+ const {runInNewContext}=importsVm;
+ const w={SAFETY_GRAPHIC_PACK_01:{isFrozen:()=>false}};
+ const doc={readyState:'loading',addEventListener(){}};
+ runInNewContext(rd('apps/training/integral-pdf-v24.js'),{window:w,document:doc});
+ const choose=w.SAFETY_INTEGRAL_PDF_V24.placementIndex;
+ const course={stable_key:'attr_carrelli_all'};
+ const topics=[{title:'Tipologie di carrelli e principali rischi'},{title:'Fisica dei carichi, baricentro e stabilità'},{title:'Controlli, manutenzione e procedure operative'}];
+ const ref=(page,topic='Tavola illustrata completa (pagina scannerizzata)')=>({source_document:'Manuale-carrelli elevatori.pdf',source_page:page,topic,candidate_course_keys:['attr_carrelli_all']});
+ assert.equal(choose(course,ref(50),topics),1,'source forklift stabilita diagram must match the correct topic');
+ assert.equal(choose(course,ref(8),topics),-1,'cover must never be added');
+ assert.equal(choose(course,ref(42),topics),-1,'unspecific text page must be held');
+ assert.equal(choose({stable_key:'attr_ple'},ref(50),topics),-1,'other equipment course must not inherit forklift figures');
+ const unknown={source_document:'131220_Inail_slide_DPI.pdf',source_page:34,topic:'D. Lvo 81/2008 –',candidate_course_keys:['attr_carrelli_all']};
+ assert.equal(choose(course,unknown,topics),-1,'generic law citation cannot drive placement');
+ const ambiguous={source_document:'Example.pdf',source_page:12,topic:'Baricentro',candidate_course_keys:['attr_carrelli_all']};
+ assert.equal(choose(course,ambiguous,[{title:'Baricentro e stabilità'},{title:'Sicurezza del baricentro'}]),-1,'topic tie must be held');
+});

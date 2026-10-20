@@ -12,8 +12,8 @@ function pick(course,topic){
  const available=items.filter(x=>x.family===family);
  const preferred=available.filter(x=>new RegExp(x.match,'i').test(title));
  const contextual=available.filter(x=>new RegExp(x.match,'i').test(summary));
- const k=hash(topic.id||topic.stable_key||title);
- const ordered=[...preferred,...contextual,...available.slice(k%available.length),...available.slice(0,k%available.length)];
+ // No random figure fallback: category alone never proves relevance to a specific LU.
+ const ordered=[...preferred,...contextual];
  return [...new Map(ordered.map(x=>[x.id,x])).values()].slice(0,2).map(x=>({src:x.src,caption:x.caption,graphic_pack_id:'gp04-'+x.id}));
 }
 window.SAFETY_GRAPHIC_PACK_04={items,pick};

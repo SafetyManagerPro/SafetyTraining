@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-20
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-60`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-61`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -695,3 +695,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Dopo l'azione dell'admin **Riprova pulizia file**, controllo diretto Supabase: **856/856** asset nuovo lotto rimasti nel database, **856/856** riferimenti nuovo lotto rimasti, **856/856** oggetti Storage fisicamente presenti. Vecchi riferimenti **0**, vecchi oggetti Storage **0**; tombstone lotto frammentato **1.290**, cancellazioni Storage in sospeso **0**, oggetti Storage integrali totali **856**.
 - Lettura del codice: `prepareCourse` filtra riferimenti ID `>= pdf-50000` e viene chiamato dalle rotte proiezione e dalla Stampa slide, che riutilizza `projection.buildDeck(converted)`; `safeSlideImage` accetta URL privati firmati solo se riconosciuti dalla cache del modulo; il CSS stampa conserva A4 verticale, due slot da 112 mm ciascuno. Nessuna modifica funzionale al deploy in questa nota.
 - Ancora da svolgere: prova da browser con login amministratore su una presentazione con figure complete, controllo anteprima PDF e foglio A4 reale, verifica della leggibilità e pertinenza tecnica/diritti. Non confondere controlli statici e presenza file con validazione visiva.
+
+## 2026-10-20 — v24.8 audit di pertinenza didattica immagini nelle slide e stampa
+- Audit fonte: 856 tavole PDF, incluse 166 descrizioni identiche «Tavola illustrata completa (pagina scannerizzata)», 43 firme del relatore ricorrenti, 33 intestazioni generiche «LE IMBRACATURE...», 32 «D. Lvo 81/2008 –» e 19 titoli PLE ripetuti. Queste descrizioni non giustificano l'assegnazione alla Learning Unit; campionati visivamente tutti gli 89 fogli del Manuale carrelli (copertine, pagine testuali, schemi distinti).
+- Eliminata l'assegnazione in base alla progressione della pagina nel PDF, i tie-break in assenza di evidenza e gli alias del corso che introducevano fonti generali in corsi specialistici. Per gli altri manuali, solo corrispondenze terminologiche distintive nel TITOLO LU e univoche, non basate sui summary boilerplate; intestazioni ripetute e genericamente datate sospese. Nel manuale carrelli adottata una tabella editoriale delle sole pagine didatticamente illustrate, abbinate ai temi effettivi (tipologie, baricentro, componenti, circolazione, manutenzione); copertine e pagine non pertinenti sospese.
+- Nessuna immagine cancellata: gli 856 WebP e le fonti restano nell'archivio privato admin con indicazione di revisione, ma solo le figure con abbinamento più affidabile compaiono nelle slide e nella Stampa slide, che condividono buildDeck. Esclusi corsi congelati.
+- GP04 non sceglie più due disegni casuali per corso se il titolo della LU non contiene il tema; i 201 asset originali v23 restano in inventario ma non sono più forzati in prima LU quando score zero. Attestati, frequenze, contenuti LU e DB non modificati. PWA `safety-training-v22-61`; suite di regressione aggiornata. Restano revisione visuale individuale di ogni tavola, normativa/diritti e stampa browser fisica.
