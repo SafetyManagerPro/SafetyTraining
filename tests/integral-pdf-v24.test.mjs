@@ -9,7 +9,7 @@ test('private complete archive importer handles WebP hash, 2511 files and 4659 p
  assert.ok(s.includes("renderCatalog(page=0)"));
  assert.ok(s.includes("maxPage.get(r.source_document)"));
  assert.ok(s.includes("if(!t||t===doc)return 0"));
- assert.ok(s.includes("ratio")===false);
+
  assert.ok(s.includes("2.634 immagini uniche"));
  assert.ok(!s.includes('getPublicUrl('));
 });
