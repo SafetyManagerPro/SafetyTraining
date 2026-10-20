@@ -41,7 +41,10 @@ test('all relevant diagrams reach an actual slide via figures or atlas continuat
  for(const img of expected)assert.ok(visible.has(img),'lost visual '+img);
  assert.ok(actual.length>=2);
  const long=atlas.distribute(c,t,[{type:'concept',img:{src:'assets/general.svg'}}]);
- assert.ok(long.some(x=>x.type==='visualAtlas')||long[0].visualGallery.length===expected.length);
+ assert.ok(long.some(x=>x.type==='visualAtlas'));
+ assert.ok(long.filter(x=>x.type==='visualAtlas').every(x=>x.visuals.length===1),'one illustration per supplemental slide');
+ assert.ok(long.every(x=>!x.visualGallery?.length),'no forced galleries on lead slides');
+ assert.equal(long.filter(x=>x.type==='visualAtlas').length,expected.filter(src=>src!=='assets/general.svg').length);
 });
 test('projector printer and teaching booklet connect to identical artwork inventory',()=>{
  const app=rd('apps/training/app.js'),book=rd('apps/training/admin-print-lessons-v23.js'),slides=rd('apps/training/admin-print-slides-v23.js');

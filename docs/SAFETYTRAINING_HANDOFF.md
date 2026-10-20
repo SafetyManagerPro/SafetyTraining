@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-62`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-64`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -715,3 +715,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Verifiche predisposte: test su carrelli combinati, protezione dal riuso in PLE, assenza placeholder nei 48 SVG, esclusione di LU ambigue. Incrementata cache PWA a `safety-training-v22-62` per distribuire file aggiornati.
 - **Nessuna modifica a Supabase o a fonti PDF**: archivio 856 tavole e 856 riferimenti invariato; nessuna pubblicazione ai corsisti delle fonti terze; 27 corsi frozen, frequenze, attestati e dati LU preservati. Perizia tecnica/diritti e QA visivo autenticato (inclusa stampa A4) restano aperti.
 - Registro analitico aggiornato: `docs/SAFETYTRAINING_VISUAL_RELEVANCE_AUDIT_20261020.md`. Verificare l'esito CI e Vercel del commit prima di qualificare il rilascio.
+
+## 2026-10-20 — v24.8.4 correzione sovrapposizione immagini e stampa 1 slide per pagina
+- Problema riportato nelle slide Carrelli: gallerie automatiche da 2 immagini supplementari sulle figure principali, mentre CSS globale dava 590px di altezza a ogni immagine della griglia, causando tagli e sovrapposizioni.
+- Corretto il distributore didattico: ogni figura aggiuntiva, compresa la tavola PDF completa amministrativa, viene visualizzata su una propria slide Atlante, mantenendo l'immagine principale separata e il rapporto di forma con `object-fit:contain`. Nessuna immagine eliminata né esposta pubblicamente.
+- Stampa slide / salva PDF: **una slide completa per pagina A4 orizzontale** (non più 2 per A4 verticale). Rendering 1600x900, cornice 270x151,875 mm, scala fisica 0,63; margini A4 10 mm. Anteprima, indicatore fogli e test aggiornati.
+- CSS Atlante riorganizzato a una figura per slide, didascalie con testo a capo e altezza immagine vincolata alla cornice. Preservati corsi congelati, versione pubblicata LU, verifiche corsisti, tempi nominali e permessi. Supabase non richiede migrazioni.
+- PWA `safety-training-v22-64`; verificare GitHub Actions, deploy Vercel e QA visivo in browser (inclusa prova stampa) prima della validazione finale.

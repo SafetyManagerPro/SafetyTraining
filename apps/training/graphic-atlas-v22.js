@@ -41,19 +41,13 @@ function distribute(course,topic,slides){
  // The authored hero, source-specific video and technical procedure images stay unchanged.
  const displayed=new Set(list.filter(s=>['concept','explain','deep','risks','prevention','procedure','graphic','sourceDigest','video','howTo','escalation'].includes(s.type)).map(s=>s.img?.src).filter(Boolean));
  const unplaced=images.filter(x=>!displayed.has(x.src));
- const targets=list.filter(s=>['concept','explain','deep','risks','prevention','procedure'].includes(s.type)&&s.img?.src);
- let i=0;
- // Up to two supplementary drawings alongside the full-size image on each existing slide.
- for(const visual of unplaced){
-  if(i>=targets.length*2)break;
-  const target=targets[i%targets.length];
-  target.visualGallery=[...(target.visualGallery||[]),visual];
-  i++;
- }
- // Everything else appears in an atlas continuation, also used by the real two-up A4 print.
- const rest=unplaced.slice(i);
+ // Do not pack additional figures next to a lead image: the original 590px
+ // image rule overflowed the 2x2 gallery in projector and A4 printing.
+ // One figure per atlas slide keeps complete PDF pages legible and uncropped.
  const out=[...list];
- for(let j=0;j<rest.length;j+=4)out.push({type:'visualAtlas',weight:.7,img:null,title:topic.slide_title||topic.title||'Illustrazioni',visuals:rest.slice(j,j+4),partIndex:j/4});
+ for(let j=0;j<unplaced.length;j++){
+  out.push({type:'visualAtlas',weight:.7,img:null,title:topic.slide_title||topic.title||'Illustrazioni',visuals:[unplaced[j]],partIndex:j});
+ }
  return out;
 }
 window.SAFETY_VISUAL_ATLAS_V22={collect,distribute};

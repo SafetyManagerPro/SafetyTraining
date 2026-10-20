@@ -48,3 +48,10 @@ La qualità è prioritaria rispetto al numero di immagini in slide. Il materiale
 - Aggiunti test di regressione su assenza di etichette `undefined`, associazione del corso 16h, mancata contaminazione delle famiglie e soppressione dei pareggi.
 - Queste sono correzioni agli **SVG locali originali** e alla selezione; non alterano le **856** tavole PDF private, gli iscritti, le presenze, gli attestati, i 27 corsi congelati o i dati delle Learning Unit.
 - Restano necessari il controllo visivo autenticato di proiezione e stampa, la validazione puntuale dei contenuti tecnici e i diritti sulle immagini PDF di terzi. **Non si dichiara certificato l'intero archivio.**
+
+## 2026-10-20 — v24.8.4 correzione sovrapposizione immagini e stampa 1 slide per pagina
+- Problema riportato nelle slide Carrelli: gallerie automatiche da 2 immagini supplementari sulle figure principali, mentre CSS globale dava 590px di altezza a ogni immagine della griglia, causando tagli e sovrapposizioni.
+- Corretto il distributore didattico: ogni figura aggiuntiva, compresa la tavola PDF completa amministrativa, viene visualizzata su una propria slide Atlante, mantenendo l'immagine principale separata e il rapporto di forma con `object-fit:contain`. Nessuna immagine eliminata né esposta pubblicamente.
+- Stampa slide / salva PDF: **una slide completa per pagina A4 orizzontale** (non più 2 per A4 verticale). Rendering 1600x900, cornice 270x151,875 mm, scala fisica 0,63; margini A4 10 mm. Anteprima, indicatore fogli e test aggiornati.
+- CSS Atlante riorganizzato a una figura per slide, didascalie con testo a capo e altezza immagine vincolata alla cornice. Preservati corsi congelati, versione pubblicata LU, verifiche corsisti, tempi nominali e permessi. Supabase non richiede migrazioni.
+- PWA `safety-training-v22-64`; verificare GitHub Actions, deploy Vercel e QA visivo in browser (inclusa prova stampa) prima della validazione finale.

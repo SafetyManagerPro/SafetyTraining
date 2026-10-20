@@ -8,14 +8,14 @@ const ctx={window:{addEventListener(){}},document:doc,setTimeout,URL};
 runInNewContext(read('apps/training/admin-print-slides-v23.js'),ctx);
 const printer=ctx.window.SAFETY_ADMIN_PRINT_SLIDES_V23;
 const mk=(type,n)=>({type,moduleIndex:0,title:'Slide '+n, img:{src:'assets/idea-risk-cycle.svg'},module:{title:'Modulo'}});
-test('two genuine projector slides are placed on every A4 sheet',()=>{
+test('one genuine projector slide is placed on every A4 sheet',()=>{
  const list=Array.from({length:5},(_,i)=>mk('concept',i+1));
  const sheets=printer.sheetData(list);
- assert.equal(sheets.length,3);
- assert.deepEqual(Array.from(sheets,s=>s.length),[2,2,1]);
+ assert.equal(sheets.length,5);
+ assert.deepEqual(Array.from(sheets,s=>s.length),[1,1,1,1,1]);
  const html=printer.createSheets({title:'Percorso'}, {version_number:2},list,
    (s,i)=>'<h1>'+s.title+'</h1><img src="'+s.img.src+'">');
- assert.equal((html.match(/class="slide-print-sheet"/g)||[]).length,3);
+ assert.equal((html.match(/class="slide-print-sheet"/g)||[]).length,5);
  assert.equal((html.match(/class="projector-slide type-concept slide-print-projector"/g)||[]).length,5);
  assert.match(html,/Slide 5 \/ 5/);
  assert.match(html,/assets\/idea-risk-cycle.svg/);
@@ -45,9 +45,9 @@ test('screen projector engine is reused rather than a new synthetic presentation
  assert.match(js,/SAFETY_ADMIN_PRINT_LESSONS_V23/);
  assert.doesNotMatch(js,/\.insert\s*\(|\.upsert\s*\(|\.update\s*\(|\.delete\s*\(/);
 });
-test('two-up portrait A4 layout is printed in its own body-level stage and never a fixed admin panel',()=>{
+test('single-slide landscape A4 layout is printed in its own body-level stage and never a fixed admin panel',()=>{
  const css=read('apps/training/admin-print-slides-v23.css');
- assert.match(css,/@page\{size:A4 portrait/);
+ assert.match(css,/@page\{size:A4 landscape/);
  assert.match(css,/safetySlidePrintStage/);
  assert.match(css,/slide-print-sheet:last-child/);
  assert.match(css,/page-break-inside:avoid/);
@@ -109,34 +109,30 @@ test('CLI check workflow runs the print-slide regression tests',()=>{
  assert.match(pkg.scripts.check,/node --check apps\/training\/admin-print-slides-v23\.js/);
 });
 
-test('A4 print geometry fits exactly two 16:9 slides strictly within margins',()=>{
+test('A4 landscape print geometry fits one complete 16:9 slide within printable bounds',()=>{
  const css=read('apps/training/admin-print-slides-v23.css');
  const print=css.slice(css.indexOf('@media print{'));
  const value=(pattern)=>{const match=pattern.exec(print);assert.ok(match,'missing print geometry: '+pattern);return Number(match[1]);};
- const margin=value(/@page\{size:A4 portrait;margin:([\d.]+)mm/);
+ const margin=value(/@page\{size:A4 landscape;margin:([\d.]+)mm/);
  const sheetW=value(/#safetySlidePrintStage\{[\s\S]*?width:([\d.]+)mm!important/);
  const sheetH=value(/\.slide-print-sheet\{[\s\S]*?height:([\d.]+)mm!important/);
- const width=value(/\.slide-print-frame\{[\s\S]*?width:([\d.]+)mm!important/);
- const height=value(/\.slide-print-frame\{[\s\S]*?height:([\d.]+)mm!important/);
- const rows=/grid-template-rows:([\d.]+)mm ([\d.]+)mm!important/.exec(print);
- assert.ok(rows);
- const gap=value(/row-gap:([\d.]+)mm!important/);
+ const frameW=value(/\.slide-print-frame\{[\s\S]*?width:([\d.]+)mm!important/);
+ const frameH=value(/\.slide-print-frame\{[\s\S]*?height:([\d.]+)mm!important/);
  const scale=value(/\.slide-print-projector\{[\s\S]*?transform:scale\(([\d.]+)\)!important/);
- assert.ok(sheetW<=210-2*margin,'sheet exceeds horizontal printable region');
- assert.ok(sheetH<=297-2*margin-4,'sheet needs a positive vertical safety margin');
- assert.ok(Number(rows[1])+Number(rows[2])+gap<=sheetH,'two slots and gap exceed sheet');
- assert.ok(Math.abs(width/height-16/9)<0.001,'slide is not 16:9');
- assert.ok(width<sheetW,'frames need lateral margins');
- assert.ok(scale*1600*25.4/96<width-1,'scaled projector exceeds frame width');
- assert.ok(scale*900*25.4/96<height-1,'scaled projector exceeds frame height');
+ assert.ok(sheetW<=297-2*margin,'sheet exceeds landscape printable width');
+ assert.ok(sheetH<=210-2*margin-4,'sheet needs vertical safety margin');
+ assert.ok(Math.abs(frameW/frameH-16/9)<0.001,'slide frame must preserve 16:9');
+ assert.ok(frameW<=sheetW,'frame exceeds sheet width');
+ assert.ok(scale*1600*25.4/96<frameW-0.6,'scaled projector exceeds frame width');
+ assert.ok(scale*900*25.4/96<frameH-0.6,'scaled projector exceeds frame height');
  assert.match(print,/break-after:page!important/);
+ assert.doesNotMatch(print,/grid-template-rows:112mm 112mm/);
 });
-test('printing uses physical CSS scale, never last preview screen transform',()=>{
+test('printing uses physical CSS scale and never keeps the preview transform',()=>{
  const js=read('apps/training/admin-print-slides-v23.js');
  const css=read('apps/training/admin-print-slides-v23.css');
  assert.match(js,/if\(document\.body\?\.classList\?\.contains\('admin-slides-print'\)\)return;/);
  assert.match(js,/window\.addEventListener\('beforeprint'/);
- assert.match(css,/transform:scale\(0\.40\)!important/);
- assert.match(css,/height:250mm!important/);
- assert.doesNotMatch(css,/#adminPrintableSlides .slide-print-sheet\{[\s\S]*?height:272mm!important/);
+ assert.match(css,/transform:scale\(0\.63\)!important/);
+ assert.match(css,/height:184mm!important/);
 });

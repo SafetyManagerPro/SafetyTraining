@@ -1,4 +1,4 @@
-/* SafetyTraining v22.13 — print actual projector slides, two per white A4 page. */
+/* SafetyTraining v22.64 — one complete slide per landscape A4 print page. */
 (() => {
   'use strict';
   const db=()=>window.SAFETY_CLOUD?.state?.client;
@@ -39,7 +39,7 @@
     if(!Array.isArray(slides)||slides.length===0)throw Error('Il percorso non contiene slide presentabili.');
     if(slides.length>MAX_SLIDES)throw Error('Il percorso produce '+slides.length+' slide. Supera il limite prudenziale di '+MAX_SLIDES+' per una singola stampa: suddividere il percorso.');
     const sheets=[];
-    for(let i=0;i<slides.length;i+=2)sheets.push(slides.slice(i,i+2));
+    for(let i=0;i<slides.length;i++)sheets.push([slides[i]]);
     return sheets;
   }
   function createSheets(course,version,slides,renderSlide){
@@ -51,7 +51,7 @@
       ' · Non è attestato né registrazione di frequenza. Non contiene soluzioni riservate.</p>'+
       sheets.map((group,pi)=>'<section class="slide-print-sheet" data-sheet="'+(pi+1)+'">'+
         group.map((slide,si)=>{
-          const i=pi*2+si;
+          const i=pi;
           const b=slideMarkup(slide,i,renderSlide);
           return '<div class="slide-print-tile" data-slide="'+(i+1)+'">'+
             '<div class="slide-print-caption"><strong>'+esc(title)+'</strong><span>Modulo '+(slide.moduleIndex+1)+
@@ -139,7 +139,7 @@
     root()?.querySelectorAll('.admin-nav button').forEach(b=>b.classList.remove('active'));
     root()?.querySelector('[data-print-slides-nav]')?.classList.add('active');
     document.getElementById('adminTitle').textContent='Stampa slide';
-    document.getElementById('adminSubtitle').textContent='Due slide reali per foglio A4 bianco';
+    document.getElementById('adminSubtitle').textContent='Una slide per pagina A4 orizzontale';
     host().innerHTML='<div class="admin-loading">Caricamento corsi…</div>';
     let selectors='';
     try{
@@ -159,8 +159,8 @@
       if(!versions.some(v=>v.id===state.versionId))state.versionId=versions[0]?.id||'';
       const version=versions.find(v=>v.id===state.versionId);
       selectors='<section class="admin-card slide-print-controls">'+
-        '<h2>Stampa slide · 2 per foglio</h2>'+
-        '<p>A4 verticale con fondo bianco, mantenendo titoli, box, immagini e grafica della presentazione. Nessuna risposta riservata.</p>'+
+        '<h2>Stampa slide · 1 per pagina</h2>'+
+        '<p>A4 orizzontale, una slide completa per pagina, immagini senza ritagli e grafica originale. Nessuna risposta riservata.</p>'+
         '<label>Corso <select id="adminSlidesCourse">'+courses.map(c=>
         '<option value="'+esc(c.id)+'"'+(c.id===state.courseId?' selected':'')+'>'+esc(c.title)+'</option>').join('')+
         '</select></label> <label>Versione <select id="adminSlidesVersion">'+versions.map(v=>
@@ -174,7 +174,7 @@
       if(!current(seq,who))return;
       const markup=createSheets(course,version,result.slides,result.renderSlide);
       host().innerHTML=selectors+'<p class="admin-note">Anteprima completa · '+result.slides.length+
-        ' slide · '+Math.ceil(result.slides.length/2)+' fogli A4. Le slide sono ricavate dal motore originale della presentazione.</p>'+markup;
+        ' slide · '+result.slides.length+' fogli A4. Le slide sono ricavate dal motore originale della presentazione.</p>'+markup;
       const preview=host().querySelector('#adminPrintableSlides');
       removeInteraction(preview);
       scaleSlides(preview);
@@ -186,7 +186,7 @@
         status.textContent='Stampa bloccata: '+imgCheck.missing.length+
           ' immagini non caricate: '+imgCheck.missing.slice(0,4).join(', ');
       }else{
-        status.textContent=result.slides.length+' slide · '+Math.ceil(result.slides.length/2)+
+        status.textContent=result.slides.length+' slide · '+result.slides.length+
           ' fogli · '+imgCheck.checked+' immagini verificate. Pronto per la stampa.';
         host().querySelector('[data-print-slides-run]')?.removeAttribute('disabled');
       }

@@ -36,7 +36,7 @@ test('slides + two-up print invoke exact same private source placement',()=>{
  assert.ok(printer.includes("isTrustedSrc"));
  assert.ok(printer.includes("projection.buildDeck(converted)"));
  const html=rd('apps/training/index.html');assert.ok(html.includes('integral-pdf-v24.js'));
- assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-62"));
+ assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-64"));
 });
 
 test('multi-select deletion removes imported figure references, persists tombstones and protects frozen courses',()=>{
