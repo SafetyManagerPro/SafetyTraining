@@ -646,3 +646,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v24.3.1 rettifica test selezione pagine
 - CI #422: tutti i regressions precedenti validi; unico errore nel test nuovo per una condizione senza valore didattico (`ratio` non presente in qualsiasi nome o stringa JS). Rimossa asserzione impropria, mantenuti test puntuali su `maxPage.get(r.source_document)` e `if(!t||t===doc)return 0` che verificano il fallback per scansioni. Nessuna modifica runtime.
+
+## 2026-10-20 — v24.3.2 audit verifiche CI/produzione e passaggio operativo
+- GitHub Actions **#423 SUCCESS** sul commit `4128e3ba72d27c41b0b3acb6ea6afa013e723203` e Vercel deployment **success**. Tutti i test previsti dall'app e dai nuovi moduli v24 passati; **nessuna prova browser autenticata o stampa A4 fisica** ancora condotta.
+- Gli 14 PDF forniti sono stati estratti in **2.634 file WebP distinti, 4.783 riferimenti**, ZIP 64.099.647 byte e catalogo per categoria, corso candidato, argomento, fonte/pagina. Verificate zero immagini mancanti dal file ZIP e zero ID duplicati. Mappatura delle famiglie dei 65 corsi attivi non frozen verificata, 27 corsi sospesi esclusi.
+- Supabase v24 installato ma query di produzione = **0 immagini caricate, 0 riferimenti**; il collegamento codice è pronto e il solo passo di import con l'account platform-admin richiede selezionare ZIP dall'interfaccia CNA. Non dichiarare mai che tutte le immagini sono già visibili nella piattaforma prima dell'upload riuscito e QA visuale sulle slide/stampe. Uso interno non sostituisce verifica copyright e revisione medico-normativa dei manuali.
