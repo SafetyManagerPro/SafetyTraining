@@ -102,10 +102,15 @@
     if(!modules.length||!units.length)failures.push('Percorso senza moduli o lezioni.');
     return {moduleCount:modules.length,unitCount:units.length,issues:failures,ready:failures.length===0};
   }
-  function lessonHtml(unit,i){
+  function lessonHtml(unit,i,course=null){
     const content=isPlain(unit.content)?unit.content:{};
     const title=asText(content.title||unit.title||'Learning Unit '+(i+1));
     const body=printableBody(content);
+    const bookTopic={...content,id:unit.unit_version_id||unit.id||'lesson-'+i,title:content.title||unit.title||'',db_backed:true};
+    const bookCourse=course?{...course,presentation_generated_from_db:true}:null;
+    const illustrations=window.SAFETY_VISUAL_ATLAS_V22?.collect?.(bookCourse,bookTopic)||[];
+    const atlas=illustrations.length?'<section class="print-lesson-section"><h3>Atlante illustrato: rischi e prevenzione</h3><div class="st-print-atlas">'+illustrations.map(v=>'<figure><img loading="eager" src="'+esc(v.src)+'" alt="'+esc(v.caption)+'"><figcaption>'+esc(v.caption)+'</figcaption></figure>').join('')+'</div></section>':'';
+
     const sanction=window.SAFETY_NORMATIVE_SANCTIONS_V23?.renderFor?.({
       title:String(content.title||unit.title||''),
       summary:String(content.summary||''),
@@ -116,7 +121,7 @@
       '<p class="print-unit-meta">Unità didattica '+(i+1)+' · '+asText(unit.minutes??'—')+
       ' minuti nominali · versione LU '+asText(unit.unitVersion??'—')+'</p>'+
       (body||'<p>Contenuto testuale non disponibile per questa unità.</p>')+
-      sanction+'</article>';
+      atlas+sanction+'</article>';
   }
   function documentHtml(book){
     let tocIndex=0;
@@ -130,7 +135,7 @@
     const modules=book.modules.map((m,index)=>
       '<section class="print-module" id="print-module-'+(index+1)+'"><h2>Modulo '+(index+1)+': '+asText(m.title)+'</h2>'+
       '<p>Durata nominale modulo: '+asText(m.minutes??'—')+' minuti</p>'+
-      m.units.map(u=>lessonHtml(u,i++)).join('')+'</section>').join('');
+      m.units.map(u=>lessonHtml(u,i++,book.course)).join('')+'</section>').join('');
     return '<section id="adminPrintableLessons" class="admin-card" aria-label="Dispensa del singolo percorso formativo">'+
       '<div class="print-cover"><p class="print-kicker">SAFETYTRAINING · MATERIALE DIDATTICO</p>'+
       '<h1>'+asText(book.course.title)+'</h1>'+
@@ -223,7 +228,7 @@
     try{
       const auth=await client.from('platform_admins').select('user_id').eq('user_id',who).maybeSingle();
       if(auth.error||!auth.data)throw Error('Richiesta non autorizzata come amministratore di piattaforma.');
-      const courses=await limited(client.from('courses').select('id,title,stable_key,description,nominal_minutes',{count:'exact'})
+      const courses=await limited(client.from('courses').select('id,title,stable_key,description,nominal_minutes,metadata',{count:'exact'})
         .eq('active',true).order('title'),MAX_COURSES,'Catalogo');
       if(!current(seq,who))return;
       if(!courses.some(x=>x.id===state.courseId)){state.courseId=courses[0]?.id||'';state.versionId='';}

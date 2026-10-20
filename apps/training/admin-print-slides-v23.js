@@ -26,6 +26,10 @@
       if(isUnassignedImage(src)) image='assets/general.svg';
       else throw Error('Immagine della slide '+(index+1)+' non ammessa per stampa: '+String(src).slice(0,140));
     }
+    // Every additional image printed from the deck must obey the same local-asset whitelist.
+    for(const extra of [...(slide.visualGallery||[]),...(slide.visuals||[])]){
+      if(!safeSlideImage(extra?.src))throw Error('Figura aggiuntiva della slide '+(index+1)+' non ammessa per stampa.');
+    }
     const safe=image?{...slide,img:{...(slide.img||{}),src:image,caption:slide.img?.caption||'Schema visuale di supporto'}}:slide;
     // The SAME HTML generator used by the screen projector, not a text summary.
     // Buttons are removed from the detached DOM by removeInteraction.

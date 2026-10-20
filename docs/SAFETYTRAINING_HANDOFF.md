@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v22.21 illustrazioni visibili nei corsi (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-50`.
+Stato corrente: **v22.22 atlante completo slide/stampe (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-51`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -594,3 +594,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-20 — v22.21.2 correzione disambiguazione immagini
 - CI #410 e Vercel della correzione agenda/schede = success. Trovata una collisione nei pattern di matching: `gru` poteva corrispondere a `Gruppo A` e `ple` a parole come `completo`, producendo immagini fuori tema in corsi sanitari/generali.
 - Corretto matching GP04 con confini di parola per `gru`, `ple`, `mmt`; aggiunto test regressione su *Primo soccorso – Gruppo A* e *Completo aggiornamento lavoratori*. Nessun dato, minuta, LU, catalogo o stampa modificata. Verificare nuova CI e QA visiva su browser reale.
+
+## 2026-10-20 — v22.22 audit integrale slide e stampe / Graphic Atlas
+- Audit inventario GitHub: **201 immagini locali**, di cui 134 SVG originali GP01 (20), GP02 (48), GP03 (12), GP04 (54) e 67 ulteriori asset storici/autoriali. Non tutte venivano mostrate: vecchio `buildDeck` utilizzava max 3 visual per LU; `admin-print-lessons-v23` stampava solo asset codificati nella LU senza pack contestuali. Le **169 immagini PDF di terzi non sono nello Storage** (0 importate) e non sono autorizzate automaticamente per la stampa o pubblicazione.
+- Aggiunto `graphic-atlas-v22.js`: selezione unica **di tutte le figure pertinenti** già abbinate dalle regole GP01-04, anche come supplemento per LU con immagine authored (la hero authored rimane invariata), più asset locali `idea_images`/`visuals`/`graphic_cards`. Scarta immagini remote/non consentite, doppioni e corsi congelati/non-DB.
+- Proiezione e **Stampa slide A4 due per foglio**: ridistribuite figure aggiuntive nei box visivi esistenti (massimo 2 supplementari ogni box); se rimangono figure pertinenti, slide *Atlante illustrato* di massimo 4 figure, senza aumentare la durata complessiva del corso e senza alterare geometria fisica 2/A4. Il print preflight ora valida anche i path immagine aggiuntivi.
+- **Stampa lezioni/dispensa**: per ogni LU si aggiunge atlante completo immagini contestuali, allineato alla proiezione; stampa tutte le foto/schemi locali già authored che passano la whitelist. Course metadata caricato per escludere i 27 frozen. La navigazione normale delle LU usa la stessa selezione.
+- PWA `safety-training-v22-51`, nuovi test di copertura; NO modifiche Supabase, iscrizioni, durate, presenze, attestati, corsi freeze, test. Verificare CI e smoke test visuale per 1440/820/390 e due slide reali per A4. Gli asset non contestualizzati non vengono forzati in lezioni fuori tema; un file disponibile non implica necessariamente che debba comparire in ogni corso.
