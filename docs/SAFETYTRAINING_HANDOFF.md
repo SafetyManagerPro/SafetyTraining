@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.1 PDF integrali pronti a importazione privata** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-54`.
+Stato corrente: **v24.2 catalogo privato PDF integrale (2.634 immagini)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-55`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -633,3 +633,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v24.1.3 correzione definizione PDF privato nell'atlante
 - CI #419: `privatePdf` veniva richiamato nell'array di media ma non definito nel contesto di `collect`. Dichiarata la variabile locale con optional-chain sul nuovo archivio, che è vuota in assenza del modulo o prima dell'importazione; ripristinati i test esistenti e la compatibilità con 134 schemi SVG originali.
+
+## 2026-10-20 — v24.2 catalogo privato filtrabile e completamento vettori
+- Aggiunte **124 anteprime di pagine con tracciati vettoriali**, 123 file WebP unici supplementari; ZIP finale **2.634 file visivi distinti e 4.783 riferimenti** a pagine su 14 PDF, con CSV aggiornati per categoria/corso candidato/argomento.
+- Archivio integrale ora consultabile dall'admin con anteprime private e filtri categoria/testo dell'argomento, documento, pagina e corso candidato; non sono URL pubblici. Aggiunte corrispondenze tra aggiornamenti attrezzature e corsi base, Fondamenti ed Emergenze. I frozen restano esclusi. Ogni figura ha didascalia che ricorda la necessità di verifica della fonte.
+- PWA `safety-training-v22-55`. I file non sono ancora importati nello Storage Supabase (verifica query: 0 file, 0 riferimenti); la pubblicazione funzionale completa richiede importare lo ZIP via account platform-admin. Queste immagini rimangono private per docenza/revisione, non pubbliche per tutti i corsisti.

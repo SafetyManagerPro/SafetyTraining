@@ -31,6 +31,9 @@ const alias=[
  [/^dl_|^agg_dl|^preposto$|^dirigente$|^agg_prep|^agg_dir/,'generale'],
  [/^rls$|^agg_rls/,'generale'],
  [/^mod_cantieri$|^dl_spp_costruzioni$/,'lav_quota'],
+ [/^attr_|^agg_attr_/,'lav_alto'],
+ [/^emergenze_evacuazione$/,'antincendio'],
+ [/^fondamenti$/,'generale'],
  [/^verde$|^frontoffice$|^backoffice$|^ecologici$|^polizia$/,'generale']
 ];
 function relevantKeys(course){
@@ -84,7 +87,7 @@ async function prepareCourse(course,{client}={}){
    const t=topics[idx];if(!t)continue;
    byTopic.get(String(t.id)).push({
      src:urls.get(r.asset.storage_path),
-     caption:text(r.category+' · '+r.source_document+' · pag. '+r.source_page),
+     caption:text('FONTE PDF DA VERIFICARE · '+r.category+' · '+r.source_document+' · pag. '+r.source_page),
      media_origin:'private_pdf_v24',source_id:r.id,topic_id:t.id
    });
   }
@@ -161,24 +164,54 @@ async function importZip(zip){
  note('Archivio importato: '+manifest.assets.length+' figure uniche, '+manifest.figures.length+' riferimenti, '+added+' nuovi asset e '+indexed+' nuovi riferimenti. Solo consultazione privata CNA.');
  return {assets:manifest.assets.length,refs:manifest.figures.length,added,indexed};
 }
+
+async function renderCatalog(page=0){
+ const container=document.getElementById('integralPdfCatalog'),status=document.getElementById('integralPdfCatalogStatus');
+ if(!container||!status||!admin())return;
+ const db=c(),category=document.getElementById('integralPdfCategory')?.value||'';
+ const queryString=(document.getElementById('integralPdfSearch')?.value||'').trim().slice(0,90).replace(/[%_,()]/g,'');
+ let req=db.from(REFS).select('id,asset_id,source_document,source_page,category,topic,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)',{count:'exact'}).order('id');
+ if(category)req=req.eq('category',category);
+ if(queryString)req=req.ilike('topic','%'+queryString+'%');
+ const {data,error,count}=await req.range(page*24,page*24+23);
+ if(error){status.textContent='Catalogo non disponibile: '+error.message;container.innerHTML='';return;}
+ const list=data||[],signed=list.length?await db.storage.from(BUCKET).createSignedUrls(list.map(v=>v.asset?.storage_path).filter(Boolean),1200):{data:[]};
+ if(signed.error){status.textContent='Anteprime non disponibili: '+signed.error.message;container.innerHTML='';return;}
+ const urls=signed.data||[];
+ status.textContent=(count||0)+' riferimenti nel catalogo · pagina '+(page+1);
+ let pos=0;
+ container.innerHTML=list.map(r=>{
+  const u=urls[pos++],src=u&&!u.error&&u.signedUrl?u.signedUrl:'';
+  if(src)trusted.add(src);
+  return '<article class="st-integral-entry">'+(src?'<img loading="lazy" src="'+esc(src)+'" alt="Figura estratta da PDF">':'')+
+   '<strong>'+esc(r.category)+'</strong><small>'+esc(r.source_document)+' · pag. '+r.source_page+'</small>'+
+   '<p>'+esc(r.topic||'Immagine senza testo riconoscibile')+'</p><small>Corsi candidati: '+esc((r.candidate_course_keys||[]).join(' · '))+'</small></article>';
+ }).join('')||'<p>Archivio non ancora importato o nessun risultato. Seleziona lo ZIP integrale qui sopra.</p>';
+ const prev=document.getElementById('integralPdfPrev'),next=document.getElementById('integralPdfNext');
+ if(prev){prev.disabled=page===0;prev.onclick=()=>void renderCatalog(Math.max(0,page-1));}
+ if(next){next.disabled=(page+1)*24>=(count||0);next.onclick=()=>void renderCatalog(page+1);}
+}
 function show(){
  if(!admin()){alert('L’archivio integrale è riservato alla gestione CNA.');return;}
  document.getElementById('integralPdfOverlay')?.remove();
  const el=document.createElement('div');el.className='admin-modal-overlay';el.id='integralPdfOverlay';
  el.innerHTML='<section class="admin-modal wide st-integral-modal" role="dialog" aria-modal="true" aria-label="Archivio integrale immagini PDF">'+
  '<header><div><div class="admin-kicker">CNA AVELLINO · FONTI PDF</div><h2>Archivio integrale immagini</h2></div><button type="button" id="integralPdfClose" class="admin-modal-close">×</button></header>'+
- '<div class="admin-modal-body"><p>14 documenti · 2.511 immagini uniche · 4.659 riferimenti a pagina, categoria, corso e argomento. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
+ '<div class="admin-modal-body"><p>14 documenti · 2.634 immagini uniche · 4.783 riferimenti a pagina, categoria, corso e argomento. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
  '<p>Usa <strong>SafetyTraining_estrazione_integrale_figure.zip</strong> senza decomprimerlo. Dopo il caricamento compariranno nelle slide del docente autorizzato e nella stampa slide. I corsi sospesi restano esclusi.</p>'+
  '<p>Il materiale proviene da fonti esterne: mantieni citazione, utilizzo didattico interno e revisione tecnico-normativa. L’importazione non costituisce autorizzazione generale di riutilizzo.</p>'+
  '<input id="integralPdfZip" type="file" accept=".zip,application/zip"><label class="st-integral-confirm"><input type="checkbox" id="integralPdfPrivateCheck"> Confermo l’importazione nell’archivio privato per revisione e docenza CNA</label>'+
- '<button type="button" class="admin-primary" id="integralPdfImport">Importa / riprendi archivio integrale</button><p id="integralPdfStatus" role="status">Pronto.</p></div></section>';
+ '<button type="button" class="admin-primary" id="integralPdfImport">Importa / riprendi archivio integrale</button><p id="integralPdfStatus" role="status">Pronto.</p>'+'<h3>Catalogo privato immagini importate</h3><label>Categoria <select id="integralPdfCategory"><option value="">Tutte le categorie</option>'+['DPI III categoria','DPI e protezioni','Carrelli elevatori','PLE','Gru su autocarro','Macchine movimento terra','Antincendio','Primo soccorso','Rischio meccanico','Attrezzature','Lavori in quota'].map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></label>'+'<label>Argomento <input id="integralPdfSearch" type="search" placeholder="Es. stabilità, DPI, evacuazione"></label><p id="integralPdfCatalogStatus" role="status">Catalogo in caricamento...</p><div id="integralPdfCatalog" class="st-integral-gallery"></div>'+'<div class="st-integral-pagination"><button type="button" id="integralPdfPrev">← Precedenti</button><button type="button" id="integralPdfNext">Successive →</button></div></div></section>';
  document.body.appendChild(el);
  el.querySelector('#integralPdfClose').onclick=()=>el.remove();el.addEventListener('click',e=>{if(e.target===el)el.remove();});
+ el.querySelector('#integralPdfCategory').onchange=()=>void renderCatalog(0);
+ el.querySelector('#integralPdfSearch').onchange=()=>void renderCatalog(0);
+ void renderCatalog(0);
  el.querySelector('#integralPdfImport').onclick=async()=>{
   const button=el.querySelector('#integralPdfImport'),file=el.querySelector('#integralPdfZip').files?.[0];
   if(!el.querySelector('#integralPdfPrivateCheck').checked)return note('Conferma uso privato e revisione.',true);
   if(!file)return note('Seleziona lo ZIP integrale.',true);
-  button.disabled=true;try{await importZip(file);}catch(e){note('Importazione interrotta: '+(e.message||e)+' · riprova con lo stesso ZIP per riprendere.',true);}finally{button.disabled=false;}
+  button.disabled=true;try{await importZip(file);await renderCatalog(0);}catch(e){note('Importazione interrotta: '+(e.message||e)+' · riprova con lo stesso ZIP per riprendere.',true);}finally{button.disabled=false;}
  };
 }
 function boot(){
