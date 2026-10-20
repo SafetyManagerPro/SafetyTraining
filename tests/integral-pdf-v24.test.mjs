@@ -69,3 +69,11 @@ test('ambiguous PDF pages never receive arbitrary topic placement',()=>{
  const ambiguous={source_document:'Example.pdf',source_page:12,topic:'Baricentro',candidate_course_keys:['attr_carrelli_all']};
  assert.equal(choose(course,ambiguous,[{title:'Baricentro e stabilità'},{title:'Sicurezza del baricentro'}]),-1,'topic tie must be held');
 });
+
+test('DB presentation adapter never invents course-wide images for unrelated topic',()=>{
+ const adapter=rd('apps/training/db-slide-adapter.js');
+ assert.ok(adapter.includes('No invented hero figures based on course title'));
+ assert.ok(adapter.includes('return [];'));
+ assert.ok(adapter.includes('if (fromIdeas.length) return fromIdeas.slice(0, 3)'));
+ assert.ok(adapter.includes('if (explicitVisuals.length) return explicitVisuals.slice(0, 3)'));
+});

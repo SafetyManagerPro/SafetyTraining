@@ -173,7 +173,9 @@
     }).filter(Boolean);
     if (explicitVisuals.length) return explicitVisuals.slice(0, 3);
 
-    return inferredImages(contextText).slice(0, 3);
+    // No invented hero figures based on course title or unrelated words. A title-specific
+    // supplement comes from the reviewed graphic selectors, otherwise keep neutral fallback.
+    return [];
   }
 
   function normalizeResources(content) {
