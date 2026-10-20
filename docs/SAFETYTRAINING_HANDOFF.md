@@ -688,3 +688,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v24.7.1 completamento pulizia Storage da UI
 - Pulsante **Riprova pulizia file** aggiornato per eseguire fino a 30 batch da 100 file in sequenza, con progressivo e arresto automatico a fine coda. Mantiene le verifiche admin e le policy Storage. Nessun file eliminato dal solo deploy: cliccare il pulsante con account platform-admin per rimuovere fisicamente gli oggetti tombstonati. Verificare CI e deploy e quindi ricontare oggetti.
+
+## 2026-10-20 — v24.7.2 pulizia Storage completata e pipeline slide/stampa verificata staticamente
+- Dopo l'azione dell'admin **Riprova pulizia file**, controllo diretto Supabase: **856/856** asset nuovo lotto rimasti nel database, **856/856** riferimenti nuovo lotto rimasti, **856/856** oggetti Storage fisicamente presenti. Vecchi riferimenti **0**, vecchi oggetti Storage **0**; tombstone lotto frammentato **1.290**, cancellazioni Storage in sospeso **0**, oggetti Storage integrali totali **856**.
+- Lettura del codice: `prepareCourse` filtra riferimenti ID `>= pdf-50000` e viene chiamato dalle rotte proiezione e dalla Stampa slide, che riutilizza `projection.buildDeck(converted)`; `safeSlideImage` accetta URL privati firmati solo se riconosciuti dalla cache del modulo; il CSS stampa conserva A4 verticale, due slot da 112 mm ciascuno. Nessuna modifica funzionale al deploy in questa nota.
+- Ancora da svolgere: prova da browser con login amministratore su una presentazione con figure complete, controllo anteprima PDF e foglio A4 reale, verifica della leggibilità e pertinenza tecnica/diritti. Non confondere controlli statici e presenza file con validazione visiva.
