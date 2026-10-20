@@ -682,3 +682,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v24.6.4
 - Importer dei nove ZIP aggiornato per il conteggio 856 immagini/856 riferimenti del lotto intero. Importazione a parti separata dagli asset originari, archivio rimane privato e i dati didattici sono invariati.
+
+## 2026-10-20 — v24.7 pulizia autorizzata del vecchio lotto PDF
+- Richiesta esplicita di proseguire sulla cancellazione dopo conferma dei conteggi. Verificata disgiunzione totale fra 1.290 frammenti (1.899 riferimenti) e 856 tavole complete. Eseguita pulizia logica in transazione con guardie sui conteggi: 1.290 tombstone persistenti `deletion_origin=chatgpt_user_authorized_maintenance`, 1.899 riferimenti vecchi e 1.290 record asset eliminati. **856 immagini nuove + 856 riferimenti intatti**; vecchi riferimenti rimasti: 0.
+- Modifica audit schema: `training_integral_pdf_deleted_v24.deleted_by` ora nullable per azioni di manutenzione autorizzate via chat e colonna `deletion_origin` per differenziare `platform_admin_ui` vs `chatgpt_user_authorized_maintenance`. Ogni asset nuovo resta separato.
+- **Rimane pulizia fisica Storage da completare**: 1.290 tombstone con `storage_cleared_at IS NULL`, 2.146 oggetti nel bucket prima della pulizia fisica. NON cancellare via SQL direttamente `storage.objects` (rischio orfani); usare pulsante amministrativo `Riprova pulizia file` ripetutamente o API Storage con account platform-admin, aggiornando `storage_cleared_at`. Non dichiarare spazio liberato finché il controllo degli oggetti non conferma 856 restanti.
