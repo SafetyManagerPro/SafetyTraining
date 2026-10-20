@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-20
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-61`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-62`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -710,3 +710,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Rifinita dopo controllo delle due contact sheet del Manuale carrelli la selezione delle pagine da proporre nelle Learning Unit. Escluse altre pagine a prevalenza testuale (es. 71–73), mantenute le tavole illustrate su portata, baricentro, tipologie, organi di presa, circolazione e controlli.
 - Pubblicato il rapporto `docs/SAFETYTRAINING_VISUAL_RELEVANCE_AUDIT_20261020.md` con inventario 856 figure/11 categorie, anomalie di pertinenza documentate (166 etichette generiche, 351 etichette ripetute almeno quattro volte), modifiche a matching PDF / GP04 / SVG originali / adapter e limiti della revisione. I 856 file rimangono archiviati; figure senza sufficiente corrispondenza non sono eliminate ma restano in verifica admin.
 - Non eseguita prova visiva del browser autenticato né di tutti i 856 estratti singolarmente, né stampa fisica; fare QA per corsi principali prima dell'uso, controllare anche diritti e accuratezza tecnico-normativa.
+
+## 2026-10-20 — v24.8.3 etichette SVG e assegnazione carrelli 16h
+- Corretti 48/48 schemi GP02 originali (144 etichette letterali "undefined") con indicazioni preventive attinenti al disegno. Aggiunto test anti-regressione.
+- Corretto matching corso `attr_carrelli_all` («Carrelli Elev. Ind + Telescopici + Rotativi») e riutilizzati solo gli SVG industriali con punteggio della LU univoco. Bloccati pareggi e contaminazioni tra famiglie attrezzature.
+- Versione PWA cache `safety-training-v22-62`; predisposte prove automatiche per riconoscimento corso combinato, assenza placeholder, blocco abbinamenti ambigui e conservazione frozen.
+- Nessuna scrittura Supabase: 856 tavole private, 856 riferimenti, corsi congelati, studenti, presenze e attestati invariati. Restano la revisione tecnico-legale degli estratti PDF e l'ispezione del browser autenticato e della stampa A4.
+- Rapporto: `docs/SAFETYTRAINING_VISUAL_RELEVANCE_AUDIT_20261020.md`. CI/deploy da verificare.

@@ -40,3 +40,11 @@ Per il manuale Carrelli, essendo tutte le 89 didascalie generiche, è utilizzata
 - L'approvazione del docente per immagini con descrizioni generiche o datate.
 
 La qualità è prioritaria rispetto al numero di immagini in slide. Il materiale non assegnato resta accessibile nella biblioteca privata e non viene eliminato. Sono preservati i 27 corsi congelati, le presenze e gli attestati.
+
+## Integrazione v24.8.3 — correzioni SVG GP02 e corso carrelli combinato
+- Rilevato difetto di generazione in tutte le **48** immagini locali GP02 (16 generali, 8 carrelli, 8 PLE, 8 gru, 8 MMT): **3 etichette letterali `undefined` per SVG, 144 campi in totale**. Sostituite con descrizioni brevi per la lettura e una specifica azione preventiva attinente al titolo del disegno; non vengono introdotte portate, distanze o valori tecnici universali.
+- Nei selettori GP02 il corso `attr_carrelli_all` (titolo abbreviato «Carrelli Elev. Ind + Telescopici + Rotativi») è ora riconosciuto esplicitamente come famiglia carrelli. Nel catalogo originali v23 si consente la riutilizzazione dei disegni già destinati al corso `attr_carrelli_ind`, ma soltanto quando il punteggio dell'argomento è sufficiente e univoco.
+- La copertura visuale v23 non assegna più al primo topic disponibile le immagini a pari punteggio: gli abbinamenti ambigui restano sospesi.
+- Aggiunti test di regressione su assenza di etichette `undefined`, associazione del corso 16h, mancata contaminazione delle famiglie e soppressione dei pareggi.
+- Queste sono correzioni agli **SVG locali originali** e alla selezione; non alterano le **856** tavole PDF private, gli iscritti, le presenze, gli attestati, i 27 corsi congelati o i dati delle Learning Unit.
+- Restano necessari il controllo visivo autenticato di proiezione e stampa, la validazione puntuale dei contenuti tecnici e i diritti sulle immagini PDF di terzi. **Non si dichiara certificato l'intero archivio.**

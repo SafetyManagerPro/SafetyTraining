@@ -44,7 +44,9 @@ function pick(course,topic){
  const title=String(topic.slide_title||topic.title||'');
  const summary=String(topic.summary||'').slice(0,800);
  const courseName=String(course.title||'');
- const family=familyRules.find(([,rx])=>rx.test(title))?.[0]||familyRules.find(([,rx])=>rx.test(courseName))?.[0]||null;
+ // Short catalogue labels such as “Carrelli Elev.” still identify the same equipment family.
+ const key=String(course.stable_key||course.id||'');
+ const family=/^attr_carrelli_(?:all|ind|tel|rot)(?:$|_)/i.test(key)?'forklift':familyRules.find(([,rx])=>rx.test(title))?.[0]||familyRules.find(([,rx])=>rx.test(courseName))?.[0]||null;
  const candidate=[];
  if(family){
   const rules=equipmentRules[family]||[];

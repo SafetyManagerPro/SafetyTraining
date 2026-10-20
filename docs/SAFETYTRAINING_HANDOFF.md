@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-61`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-62`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -708,3 +708,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Rifinita dopo controllo delle due contact sheet del Manuale carrelli la selezione delle pagine da proporre nelle Learning Unit. Escluse altre pagine a prevalenza testuale (es. 71–73), mantenute le tavole illustrate su portata, baricentro, tipologie, organi di presa, circolazione e controlli.
 - Pubblicato il rapporto `docs/SAFETYTRAINING_VISUAL_RELEVANCE_AUDIT_20261020.md` con inventario 856 figure/11 categorie, anomalie di pertinenza documentate (166 etichette generiche, 351 etichette ripetute almeno quattro volte), modifiche a matching PDF / GP04 / SVG originali / adapter e limiti della revisione. I 856 file rimangono archiviati; figure senza sufficiente corrispondenza non sono eliminate ma restano in verifica admin.
 - Non eseguita prova visiva del browser autenticato né di tutti i 856 estratti singolarmente, né stampa fisica; fare QA per corsi principali prima dell'uso, controllare anche diritti e accuratezza tecnico-normativa.
+
+## 2026-10-20 — v24.8.3 etichette SVG e assegnazione carrelli 16h
+- Audit del pacchetto grafico GP02: **48/48 SVG** originali hanno evidenziato **tre testi `undefined`** ciascuno, cioè **144 etichette difettose**. Ripristinate etichette leggibili e istruzioni preventive tematiche senza introdurre valori tecnici non giustificati dal manuale specifico. Test automatico aggiunto per impedire regressioni.
+- Corretto il riconoscimento del titolo abbreviato **«Carrelli Elev. Ind + Telescopici + Rotativi (16h)»**, con chiave `attr_carrelli_all`, nei selettori GP02. Riutilizzo degli SVG destinati a `attr_carrelli_ind` solo per LU con corrispondenza semantica univoca; stop ai pareggi del sistema di copertura per evitare inserimenti arbitrarî.
+- Verifiche predisposte: test su carrelli combinati, protezione dal riuso in PLE, assenza placeholder nei 48 SVG, esclusione di LU ambigue. Incrementata cache PWA a `safety-training-v22-62` per distribuire file aggiornati.
+- **Nessuna modifica a Supabase o a fonti PDF**: archivio 856 tavole e 856 riferimenti invariato; nessuna pubblicazione ai corsisti delle fonti terze; 27 corsi frozen, frequenze, attestati e dati LU preservati. Perizia tecnica/diritti e QA visivo autenticato (inclusa stampa A4) restano aperti.
+- Registro analitico aggiornato: `docs/SAFETYTRAINING_VISUAL_RELEVANCE_AUDIT_20261020.md`. Verificare l'esito CI e Vercel del commit prima di qualificare il rilascio.

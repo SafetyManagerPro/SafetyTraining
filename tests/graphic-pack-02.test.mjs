@@ -20,6 +20,8 @@ test('48 original SVG diagrams: 16 general and eight in each equipment family',(
   assert.match(svg,/<desc id="desc">/);
   assert.match(svg,/<\/svg>$/);
   assert.match(svg,/ILLUSTRAZIONE DIDATTICA ORIGINALE/);
+  assert.doesNotMatch(svg,/>undefined<\/text>/,'unfinished SVG labels '+item.src);
+  assert.match(svg,/AZIONE PREVENTIVA/,'safety callout '+item.src);
   assert.doesNotMatch(svg,/<script|<foreignObject|<image |onload=|href=|xlink:href=|<use\b/i);
   assert.ok(svg.length>1400,item.src);
  }
@@ -42,6 +44,9 @@ test('equipment family selection requires subject and relevant lesson keyword',(
   const ids=Array.from(pack.pick(course(name),lesson(title)),x=>x.graphic_pack_id);
   assert.ok(ids.includes(id),name+' · '+title+' -> '+ids);
  }
+ const combined={...course('Carrelli Elev. Ind + Telescopici + Rotativi (16h)'),stable_key:'attr_carrelli_all'};
+ assert.ok(pack.pick(combined,lesson('Fonti di energia, batterie e sistemi di ricarica')).some(x=>x.graphic_pack_id==='forklift-battery'));
+ assert.ok(pack.pick(combined,lesson('Controlli preuso del carrello')).some(x=>x.graphic_pack_id==='forklift-preuse'));
  assert.equal(pack.pick(course('Formazione generale'),lesson('Ruoli e responsabilità')).length,0);
  assert.equal(pack.pick(course('Formazione generale'),lesson('Baricentro e stabilità')).length,0);
 });

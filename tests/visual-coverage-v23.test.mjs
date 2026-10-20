@@ -20,6 +20,12 @@ test('graphic coverage only places assets in specifically relevant lessons',()=>
  assert.equal(intro.length,0,'never force unrelated figures into first LU');
  const battery=m.forTopic(c,c.topics[1]);
  assert.ok(battery.some(x=>x.src.includes('gp02-forklift-battery.svg')),'subject-specific battery illustration stays available');
+ const combined={...c,id:'attr_carrelli_all',stable_key:'attr_carrelli_all'};
+ assert.ok(m.forTopic(combined,combined.topics[1]).some(x=>x.src.includes('gp02-forklift-battery.svg')),'16h forklift course uses relevant original diagram');
+ const wrong={...c,id:'attr_ple',stable_key:'attr_ple'};
+ assert.ok(!m.forTopic(wrong,wrong.topics[1]).some(x=>x.src.includes('gp02-forklift-battery.svg')),'no equipment family leakage');
+ const tied={...combined,topics:[{id:'a',title:'Batteria carrello e ricarica',db_backed:true},{id:'b',title:'Batteria carrello e ricarica',db_backed:true}]};
+ assert.ok(!m.forTopic(tied,tied.topics[0]).some(x=>x.src.includes('gp02-forklift-battery.svg')),'ambiguous lesson tie must be held');
  const inventory=m.assets.filter(x=>x.role==='teaching');
  assert.equal(inventory.length,200,'no original file was removed, only ungrounded placement is suppressed');
 });

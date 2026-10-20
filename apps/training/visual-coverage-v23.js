@@ -23,14 +23,17 @@ function forTopic(course,topic){
  if(idx<0)return[];
  const assigned=[];
  for(const item of assets){
-  if(item.course_key!==key||item.role!=='teaching')continue;
-  let winner=0,best=-1;
+  // The 16h combined forklift course shares the industrial course's eight teaching units.
+  const sameCourse=item.course_key===key||(key==='attr_carrelli_all'&&item.course_key==='attr_carrelli_ind');
+  if(!sameCourse||item.role!=='teaching')continue;
+  let winner=-1,best=0,ambiguous=false;
   for(let i=0;i<topics.length;i++){
    const strength=score(item,topics[i]);
-   if(strength>best){best=strength;winner=i;}
+   if(strength>best){best=strength;winner=i;ambiguous=false;}
+   else if(strength===best&&strength>0){ambiguous=true;}
   }
-  // Never force an unrelated SVG onto the first LU when no subject match exists.
-  if(best>=6&&winner===idx)assigned.push({src:'assets/'+item.file,caption:item.caption||'Figura didattica'});
+  // Suppress ties and zero-evidence assignments rather than choosing the first LU.
+  if(best>=6&&!ambiguous&&winner===idx)assigned.push({src:'assets/'+item.file,caption:item.caption||'Figura didattica'});
  }
  return assigned;
 }
