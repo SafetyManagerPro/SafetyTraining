@@ -18,6 +18,19 @@ test('the atlas offers relevant original and authored images without editing sou
  assert.equal(atlas.collect({...course,presentation_generated_from_db:false},topic).length,0);
  assert.equal(atlas.collect(course,{...topic,db_backed:false}).length,0);
 });
+test('previously isolated original illustrations are selected when their lessons need them',()=>{
+ const atlas=api(),course={title:'Lavoratori rischio specifico',presentation_generated_from_db:true,metadata:{}};
+ for(const [name,expected] of [
+  ['Stress termico e colpo di calore','idea-heat-stress.svg'],
+  ['Archivio e scaffalature','idea-archive-safe.svg'],
+  ['Organigramma delle figure della sicurezza','organigramma-sicurezza.svg'],
+  ['Piramide dei pericoli e gerarchia del rischio','piramide-pericoli.svg'],
+  ['Uso del compattatore rifiuti','idea-compactor-safe.svg']
+ ]){
+  const found=atlas.collect(course,{id:name,title:name,summary:'',db_backed:true}).map(x=>x.src);
+  assert.ok(found.some(x=>x.endsWith(expected)),name+' -> '+found);
+ }
+});
 test('all relevant diagrams reach an actual slide via figures or atlas continuation',()=>{
  const atlas=api(),c={title:'Carrelli elevatori',presentation_generated_from_db:true,metadata:{}};
  const t={id:'u',title:'Pedoni e carico, controlli preuso e visibilità',summary:'Controllo carrelli, zone pedonali e portata',db_backed:true};

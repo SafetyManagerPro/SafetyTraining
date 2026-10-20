@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v22.22 atlante completo slide/stampe (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-51`.
+Stato corrente: **v22.22 atlante completo slide/stampe (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-52`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -604,3 +604,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.22.1 adeguamento test GP04 all'atlante condiviso
 - CI #412 ha superato controlli fino al vecchio test GP04: l'aspettativa cercava il selector GP04 direttamente in `app.js`, ma ora la selezione è correttamente centralizzata nel nuovo `graphic-atlas-v22.js` chiamato da app, proiettore e stampa. Aggiornato esclusivamente il percorso nell'asserzione, conservando le verifiche di qualità dei 54 SVG. Ripetere CI e verificare l'eventuale esito dei test seguenti.
+
+## 2026-10-20 — v22.22.2 completamento asset storici originali
+- Inventory specifico dei 67 asset non-GP: 42 citati letteralmente nelle famiglie di didattica ed enrichment, altri 25 non citati direttamente (fra cui scene, backgrounds dinamici, poster video, icone, marchio CNA e grafici orfani). Nessun obbligo di mostrare logo/sfondo/video in ogni LU.
+- Collegate al nuovo atlante **36 grafiche didattiche legacy** mediante regole contestuali per rischi, organigramma, piramide dei pericoli, stress termico, archivio, rifiuti, verde, VDT, DPI, segnaletica, antincendio, RLS e altri temi. Queste sono visual originali locali, non copie dei 169 PDF di terzi.
+- Gli asset si aggiungono alle figure GP nel medesimo percorso di scheda, proiettore, Stampa slide 2/A4 e Stampa lezioni; nessuna durata o layout fisico è modificata. PWA `safety-training-v22-52`, test regressione per le cinque figure storiche più richieste. Verificare CI e correttezza visiva prima del rilascio definitivo.
