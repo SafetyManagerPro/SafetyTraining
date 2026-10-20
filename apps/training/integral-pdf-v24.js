@@ -13,7 +13,9 @@ const text=s=>String(s??'').slice(0,600);
 const esc=s=>text(s).replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
 const vocab=s=>new Set(text(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>4));
 const score=(topic,ref)=>{
- const words=vocab(ref.topic+' '+ref.category);
+ const t=String(ref.topic||'').trim().toLowerCase(),doc=String(ref.source_document||'').replace(/\.pdf$/i,'').trim().toLowerCase();
+ if(!t||t===doc)return 0; // Scanned pages have no OCR, do not pretend topical precision.
+ const words=vocab(ref.topic);
  const head=vocab(topic.title+' '+(topic.slide_title||''));
  const more=vocab(topic.summary||'');
  let points=0;for(const w of words)points+=head.has(w)?5:more.has(w)?2:0;
@@ -77,13 +79,15 @@ async function prepareCourse(course,{client}={}){
   const topics=Array.isArray(course.topics)?course.topics:[];
   // Each image is assigned exactly once per course; ties use a stable, even distribution.
   const byTopic=new Map(topics.map(t=>[String(t.id),[]]));
+  const maxPage=new Map();for(const r of available){const doc=r.source_document||'';maxPage.set(doc,Math.max(maxPage.get(doc)||1,Number(r.source_page)||1));}
   for(const r of available){
-   let best=-1,idx=0;const token=r.asset_id.slice(-7);const seed=parseInt(token,16)||0;
+   let best=-1,idx=0;
    for(let j=0;j<topics.length;j++){
     const grade=score(topics[j],r);
     if(grade>best){best=grade;idx=j;}
    }
-   if(best<=0&&topics.length)idx=seed%topics.length;
+   // If the source page has no searchable text, keep the original manual sequence across the course LUs.
+   if(best<=0&&topics.length)idx=Math.min(topics.length-1,Math.floor(((Number(r.source_page)||1)-1)/Math.max(1,maxPage.get(r.source_document)||1)*topics.length));
    const t=topics[idx];if(!t)continue;
    byTopic.get(String(t.id)).push({
      src:urls.get(r.asset.storage_path),

@@ -7,6 +7,9 @@ test('private complete archive importer handles WebP hash, 2511 files and 4659 p
  assert.ok(s.includes('const refsDone=await existingIds'));
  assert.ok(s.includes("admin()"));
  assert.ok(s.includes("renderCatalog(page=0)"));
+ assert.ok(s.includes("maxPage.get(r.source_document)"));
+ assert.ok(s.includes("if(!t||t===doc)return 0"));
+ assert.ok(s.includes("ratio")===false);
  assert.ok(s.includes("2.634 immagini uniche"));
  assert.ok(!s.includes('getPublicUrl('));
 });
@@ -25,5 +28,5 @@ test('slides + two-up print invoke exact same private source placement',()=>{
  assert.ok(printer.includes("isTrustedSrc"));
  assert.ok(printer.includes("projection.buildDeck(converted)"));
  const html=rd('apps/training/index.html');assert.ok(html.includes('integral-pdf-v24.js'));
- assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-55"));
+ assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-56"));
 });

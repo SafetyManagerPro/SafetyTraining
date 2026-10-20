@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-20
-Stato: **v24.2 catalogo privato PDF integrale (2.634 immagini)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-55`.
+Stato: **v24.3 mappatura completa PDF / 65 corsi (2.634 immagini)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-56`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -640,3 +640,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Aggiunte **124 anteprime di pagine con tracciati vettoriali**, 123 file WebP unici supplementari; ZIP finale **2.634 file visivi distinti e 4.783 riferimenti** a pagine su 14 PDF, con CSV aggiornati per categoria/corso candidato/argomento.
 - Archivio integrale ora consultabile dall'admin con anteprime private e filtri categoria/testo dell'argomento, documento, pagina e corso candidato; non sono URL pubblici. Aggiunte corrispondenze tra aggiornamenti attrezzature e corsi base, Fondamenti ed Emergenze. I frozen restano esclusi. Ogni figura ha didascalia che ricorda la necessità di verifica della fonte.
 - PWA `safety-training-v22-55`. I file non sono ancora importati nello Storage Supabase (verifica query: 0 file, 0 riferimenti); la pubblicazione funzionale completa richiede importare lo ZIP via account platform-admin. Queste immagini rimangono private per docenza/revisione, non pubbliche per tutti i corsisti.
+
+## 2026-10-20 — v24.3 assegnazione pagine scannerizzate e verifica 65 corsi
+- Audit SQL database: **65 corsi attivi non congelati**; le chiavi dirette o tramite alias famiglia del modulo PDF coprono **65/65**, gli altri cataloghi congelati sono esclusi. Nessun contenuto DB dei corsi modificato.
+- Per pagine PDF scannerizzate senza testo significativo (es. manuale carrelli), la collocazione non usa più un indice casuale né finge corrispondenza semantica: segue **l'ordine delle pagine** del relativo manuale distribuito fra le LU del corso. Dove c'è testo estraibile, prevale il matching titolo/riassunto. L'attribuzione resta una proposta didattica da verificare prima dell'uso, con fonte e pagina.
+- Corretto conteggio finale: 14 PDF, **2.634 immagini WebP uniche** con vettori ricchi, **4.783 riferimenti**. ZIP disponibile nella chat; in produzione ancora 0 immagini perché il trasferimento dal file sandbox al browser amministrativo non è supportato automaticamente. PWA `safety-training-v22-56`, CI da ricontrollare, nessun diritto di terzi pubblicato in repo statico.
