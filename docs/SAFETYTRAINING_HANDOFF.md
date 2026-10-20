@@ -576,3 +576,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.20.3 verifica formale XML immagini GP04
 - **CI #406 success**, Vercel deploy success e due migrazioni applicate in Supabase. Aggiunto preflight Python `scripts/validate_gp04_xml.py` nel `npm run check`: parser XML reale su 54 SVG GP04, viewBox, accessibilità, assenza immagini esterne e presenza delle etichette rischio/comportamento sicuro. Rafforza verifica rispetto alle vecchie sole regex. Verificare il nuovo CI prima di considerarlo approvato.
+
+## 2026-10-20 — v22.20.4 verifica rilascio illustrazioni
+- **CI #407 completata con esito success**, incluso parser XML reale sui 54 SVG GP04, regressioni core e verifiche stampa. **Vercel produzione in stato success** sul commit `139b5461551a4ee2c3e1acdec379e30778afa9c4`.
+- La migrazione Supabase `v22_018_review_private_source_figures` risulta applicata: bucket Storage privato e policy platform-admin attive. Al controllo database del 20/10 risultano **0 immagini PDF di terzi importate** (26 gialle/143 rosse nel pacchetto ZIP in chat, non in produzione). I 54 SVG originali sono invece presenti nel deploy, totale 134 originali.
+- Restano da eseguire prova visiva nel browser su desktop/tablet/mobile, controllo manuale di leggibilità/testi tecnici, simulazione stampa reale 2/A4 e, solo se deciso, import archivio PDF classificato da un vero admin; nessuna pubblicazione ai corsisti di materiale di terzi non autorizzato.
