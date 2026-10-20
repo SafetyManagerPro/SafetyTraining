@@ -60,7 +60,7 @@ async function prepareCourse(course,{client}={}){
  const operation=(async()=>{
   const rows=[];const seen=new Set();
   for(const k of relevantKeys(course)){
-   const found=await paginate(db.from(REFS).select('id,asset_id,topic,source_document,source_page,category,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)').contains('candidate_course_keys',[k]).order('id'),650);
+   const found=await paginate(db.from(REFS).select('id,asset_id,topic,source_document,source_page,category,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)').gte('id','pdf-50000').contains('candidate_course_keys',[k]).order('id'),650);
    for(const r of found)if(!seen.has(r.id)){rows.push(r);seen.add(r.id);}
   }
   const unique=new Map();
@@ -124,9 +124,13 @@ async function importZip(zip){
  const source=archive.file('manifest.json');if(!source)throw Error('Indice manifest.json non trovato.');
  const manifest=JSON.parse(await source.async('string'));
  // Accept the original complete ZIP or a set of ten small, independently resumable parts.
- const split=manifest.archive_type==='safetytraining_partial_v1';
+ const coherent=manifest.archive_type==='safetytraining_coherent_v2';
+ const split=manifest.archive_type==='safetytraining_partial_v1'||coherent;
+ if(coherent&&(!Number.isInteger(manifest.total_assets)||manifest.total_assets<300||manifest.total_assets>3000||
+ !Number.isInteger(manifest.total_figures)||manifest.total_figures<manifest.total_assets||manifest.total_figures>5000||
+ !Number.isInteger(manifest.part_count)||manifest.part_count<1||manifest.part_count>40))throw Error('Indice figure complete non valido.');
  if(!Array.isArray(manifest.assets)||!Array.isArray(manifest.figures)||(!split&&(manifest.assets.length<2000||manifest.figures.length<4000)))throw Error('Archivio incompleto o formato errato.');
- if(split&&(manifest.total_assets!==2634||manifest.total_figures!==4783||manifest.part_count!==10||!Number.isInteger(manifest.part_index)||manifest.part_index<1||manifest.part_index>manifest.part_count||!manifest.assets.length||!manifest.figures.length))throw Error('Pacchetto suddiviso non valido: scarica le dieci parti ufficiali.');
+ if(split&&((!coherent&&(manifest.total_assets!==2634||manifest.total_figures!==4783||manifest.part_count!==10))||!Number.isInteger(manifest.part_index)||manifest.part_index<1||manifest.part_index>manifest.part_count||!manifest.assets.length||!manifest.figures.length))throw Error('Pacchetto suddiviso non valido: scarica le dieci parti ufficiali.');
  if(manifest.assets.length>12000||manifest.figures.length>40000)throw Error('Manifest superiore ai limiti ammessi.');
  const ids=manifest.assets.map(a=>a.filename?.replace(/\.webp$/,''));
  if(ids.some(id=>!safeId.test(String(id))))throw Error('ID immagine fuori formato.');
@@ -134,7 +138,7 @@ async function importZip(zip){
  if(split){
   const assigned=new Set(ids);
   if(manifest.figures.some(f=>!assigned.has(f.asset_id)))throw Error('Un riferimento PDF appartiene a una parte ZIP diversa.');
-  const zipName='PARTE_'+String(manifest.part_index).padStart(2,'0')+'_di_10';
+  const zipName='PARTE_'+String(manifest.part_index).padStart(2,'0')+'_di_'+String(manifest.part_count).padStart(2,'0');
   note('Aperta '+zipName+': '+manifest.assets.length+' immagini, '+manifest.figures.length+' riferimenti.');
  }
  const stored=await existingIds(db,ASSETS,ids);

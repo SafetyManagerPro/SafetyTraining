@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-20
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-58`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-59`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -665,3 +665,7 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - L'eliminazione riservata al solo `platform_admin` è eseguita da funzione SQL `training_delete_integral_pdf_assets_v24(text[])` con controllo auth server, rimozione atomica dei riferimenti `training_integral_pdf_refs_v24` e dei record `training_integral_pdf_assets_v24`, più tombstone `training_integral_pdf_deleted_v24` per evitare la ricomparsa dei loghi/immagini scartate se l'admin reimporta le 10 parti ZIP. Nessuna modifica ai corsi, agli iscritti, alle slide authored o agli attestati.
 - Storage DELETE limitato dalla RLS al bucket privato `training-source-figures` e al prefisso `integral/v1/`, solo platform-admin. Dopo commit database, l'interfaccia rimuove le immagini fisiche con API Storage e marca i file ripuliti; pulsante **Riprova pulizia file** gestisce eventuali fallimenti post-commit senza rendere visibili immagini rimosse. Cache del proiettore svuotata; per una sessione già aperta serve ricaricare la presentazione/stampa.
 - Catalogo resta privato per revisione CNA, fonti di terzi non committate su GitHub. PWA `safety-training-v22-58`, nuovi test. Migration `20261020204500_v24_005_delete_imported_pdf_figures.sql` da applicare. QA reale in browser e prova eliminazione da account admin da effettuare; **non cancellare dati esistenti durante i test**.
+
+## 2026-10-20 — v24.6 ZIP figure complete
+- Ricostruite 856 tavole complete dagli originali 14 PDF su 1.219 pagine; 363 pagine non grafiche non selezionate. Nove ZIP da circa 5–7 MB con manifest v2, catalogo per fonte, pagina, corso e argomento. Le slide/stampe useranno solo gli ID nuovi >=pdf-50000, escludendo i frammenti della precedente estrazione. Nessuna cancellazione automatica. Materiale riservato a revisione didattica e diritti.
+- PWA safety-training-v22-59; import e QA stampa da verificare.
