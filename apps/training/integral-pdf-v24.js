@@ -117,16 +117,25 @@ async function importZip(zip){
  if(!admin())throw Error('Accedi come platform-admin CNA per importare.');
  const db=c();if(!db)throw Error('Connessione Supabase assente.');
  if(!window.JSZip)throw Error('Lettore ZIP non disponibile.');
- if(!zip||zip.size>110*1024*1024)throw Error('Seleziona il file ZIP integrale (max 110 MB).');
+ if(!zip||zip.size>110*1024*1024)throw Error('Seleziona lo ZIP completo o uno dei dieci ZIP piccoli (max 110 MB per file).');
  note('Lettura ZIP e controllo indice...');
  const archive=await JSZip.loadAsync(zip);
  const source=archive.file('manifest.json');if(!source)throw Error('Indice manifest.json non trovato.');
  const manifest=JSON.parse(await source.async('string'));
- if(!Array.isArray(manifest.assets)||!Array.isArray(manifest.figures)||manifest.assets.length<2000||manifest.figures.length<4000)throw Error('Archivio incompleto o formato errato.');
+ // Accept the original complete ZIP or a set of ten small, independently resumable parts.
+ const split=manifest.archive_type==='safetytraining_partial_v1';
+ if(!Array.isArray(manifest.assets)||!Array.isArray(manifest.figures)||(!split&&(manifest.assets.length<2000||manifest.figures.length<4000)))throw Error('Archivio incompleto o formato errato.');
+ if(split&&(manifest.total_assets!==2634||manifest.total_figures!==4783||manifest.part_count!==10||!Number.isInteger(manifest.part_index)||manifest.part_index<1||manifest.part_index>manifest.part_count||!manifest.assets.length||!manifest.figures.length))throw Error('Pacchetto suddiviso non valido: scarica le dieci parti ufficiali.');
  if(manifest.assets.length>12000||manifest.figures.length>40000)throw Error('Manifest superiore ai limiti ammessi.');
  const ids=manifest.assets.map(a=>a.filename?.replace(/\.webp$/,''));
  if(ids.some(id=>!safeId.test(String(id))))throw Error('ID immagine fuori formato.');
  if(new Set(ids).size!==ids.length)throw Error('Immagini duplicate nel manifesto.');
+ if(split){
+  const assigned=new Set(ids);
+  if(manifest.figures.some(f=>!assigned.has(f.asset_id)))throw Error('Un riferimento PDF appartiene a una parte ZIP diversa.');
+  const zipName='PARTE_'+String(manifest.part_index).padStart(2,'0')+'_di_10';
+  note('Aperta '+zipName+': '+manifest.assets.length+' immagini, '+manifest.figures.length+' riferimenti.');
+ }
  const stored=await existingIds(db,ASSETS,ids);
  let done=0,added=0;
  for(let i=0;i<manifest.assets.length;i+=5){
@@ -202,9 +211,9 @@ function show(){
  el.innerHTML='<section class="admin-modal wide st-integral-modal" role="dialog" aria-modal="true" aria-label="Archivio integrale immagini PDF">'+
  '<header><div><div class="admin-kicker">CNA AVELLINO · FONTI PDF</div><h2>Archivio integrale immagini</h2></div><button type="button" id="integralPdfClose" class="admin-modal-close">×</button></header>'+
  '<div class="admin-modal-body"><p>14 documenti · 2.634 immagini uniche · 4.783 riferimenti a pagina, categoria, corso e argomento. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
- '<p>Usa <strong>SafetyTraining_estrazione_integrale_figure.zip</strong> senza decomprimerlo. Dopo il caricamento compariranno nelle slide del docente autorizzato e nella stampa slide. I corsi sospesi restano esclusi.</p>'+
+ '<p>Scarica le <strong>10 parti ZIP da circa 6 MB</strong> e selezionale tutte insieme oppure importale una alla volta; non serve decomprimere né riunire i file. È accettato anche lo ZIP integrale originale. Il caricamento è riprendibile e le figure restano riservate alla docenza CNA; i corsi sospesi sono esclusi.</p>'+
  '<p>Il materiale proviene da fonti esterne: mantieni citazione, utilizzo didattico interno e revisione tecnico-normativa. L’importazione non costituisce autorizzazione generale di riutilizzo.</p>'+
- '<input id="integralPdfZip" type="file" accept=".zip,application/zip"><label class="st-integral-confirm"><input type="checkbox" id="integralPdfPrivateCheck"> Confermo l’importazione nell’archivio privato per revisione e docenza CNA</label>'+
+ '<input id="integralPdfZip" type="file" multiple accept=".zip,application/zip"><label class="st-integral-confirm"><input type="checkbox" id="integralPdfPrivateCheck"> Confermo l’importazione nell’archivio privato per revisione e docenza CNA</label>'+
  '<button type="button" class="admin-primary" id="integralPdfImport">Importa / riprendi archivio integrale</button><p id="integralPdfStatus" role="status">Pronto.</p>'+'<h3>Catalogo privato immagini importate</h3><label>Categoria <select id="integralPdfCategory"><option value="">Tutte le categorie</option>'+['DPI III categoria','DPI e protezioni','Carrelli elevatori','PLE','Gru su autocarro','Macchine movimento terra','Antincendio','Primo soccorso','Rischio meccanico','Attrezzature','Lavori in quota'].map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select></label>'+'<label>Argomento <input id="integralPdfSearch" type="search" placeholder="Es. stabilità, DPI, evacuazione"></label><p id="integralPdfCatalogStatus" role="status">Catalogo in caricamento...</p><div id="integralPdfCatalog" class="st-integral-gallery"></div>'+'<div class="st-integral-pagination"><button type="button" id="integralPdfPrev">← Precedenti</button><button type="button" id="integralPdfNext">Successive →</button></div></div></section>';
  document.body.appendChild(el);
  el.querySelector('#integralPdfClose').onclick=()=>el.remove();el.addEventListener('click',e=>{if(e.target===el)el.remove();});
@@ -212,10 +221,22 @@ function show(){
  el.querySelector('#integralPdfSearch').onchange=()=>void renderCatalog(0);
  void renderCatalog(0);
  el.querySelector('#integralPdfImport').onclick=async()=>{
-  const button=el.querySelector('#integralPdfImport'),file=el.querySelector('#integralPdfZip').files?.[0];
+  const button=el.querySelector('#integralPdfImport'),files=[...(el.querySelector('#integralPdfZip').files||[])].sort((a,b)=>a.name.localeCompare(b.name));
   if(!el.querySelector('#integralPdfPrivateCheck').checked)return note('Conferma uso privato e revisione.',true);
-  if(!file)return note('Seleziona lo ZIP integrale.',true);
-  button.disabled=true;try{await importZip(file);await renderCatalog(0);}catch(e){note('Importazione interrotta: '+(e.message||e)+' · riprova con lo stesso ZIP per riprendere.',true);}finally{button.disabled=false;}
+  if(!files.length)return note('Seleziona uno ZIP completo oppure le 10 parti. Puoi selezionarle tutte insieme.',true);
+  button.disabled=true;
+  let completed=0,figures=0,references=0;
+  try{
+   for(const file of files){
+    note('Importazione '+(completed+1)+'/'+files.length+' · '+file.name);
+    const outcome=await importZip(file);
+    completed++;figures+=outcome.assets;references+=outcome.refs;
+   }
+   const full=figures===2634&&references===4783;
+   note('Completati '+completed+'/'+files.length+' archivi · '+figures+' immagini / '+references+' riferimenti in questa selezione. '+(full?'Tutte le dieci parti presenti.':'Se hai importato meno di dieci parti, aggiungi le rimanenti.'));
+   await renderCatalog(0);
+  }catch(e){note('Importazione interrotta dopo '+completed+' file: '+(e.message||e)+' · seleziona di nuovo gli ZIP rimasti o tutti, il caricamento è riprendibile.',true);}
+  finally{button.disabled=false;}
  };
 }
 function boot(){

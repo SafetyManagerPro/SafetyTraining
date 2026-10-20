@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.3 mappatura completa PDF / 65 corsi (2.634 immagini)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-56`.
+Stato corrente: **v24.4 import PDF in 10 parti / 65 corsi (2.634 immagini)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-57`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -651,3 +651,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - GitHub Actions **#423 SUCCESS** sul commit `4128e3ba72d27c41b0b3acb6ea6afa013e723203` e Vercel deployment **success**. Tutti i test previsti dall'app e dai nuovi moduli v24 passati; **nessuna prova browser autenticata o stampa A4 fisica** ancora condotta.
 - Gli 14 PDF forniti sono stati estratti in **2.634 file WebP distinti, 4.783 riferimenti**, ZIP 64.099.647 byte e catalogo per categoria, corso candidato, argomento, fonte/pagina. Verificate zero immagini mancanti dal file ZIP e zero ID duplicati. Mappatura delle famiglie dei 65 corsi attivi non frozen verificata, 27 corsi sospesi esclusi.
 - Supabase v24 installato ma query di produzione = **0 immagini caricate, 0 riferimenti**; il collegamento codice è pronto e il solo passo di import con l'account platform-admin richiede selezionare ZIP dall'interfaccia CNA. Non dichiarare mai che tutte le immagini sono già visibili nella piattaforma prima dell'upload riuscito e QA visuale sulle slide/stampe. Uso interno non sostituisce verifica copyright e revisione medico-normativa dei manuali.
+
+## 2026-10-20 — v24.4 download ripristinato tramite 10 ZIP piccoli
+- Segnalazione CNA: il link ChatGPT al file integrale di **61 MB** presenta il messaggio `Non è stato possibile completare questa azione`. Originale verificato con zip.testzip senza errori: **2.634 WebP** e **4.783 riferimenti**.
+- Creati localmente **10 ZIP indipendenti di circa 6,1 MB ciascuno**, ognuno contiene un `manifest.json` con `archive_type=safetytraining_partial_v1`, `part_index`, `part_count=10`, `total_assets=2634`, `total_figures=4783`. Tutti gli asset sono unici e tutti i riferimenti restano col file corrispondente; archivi verificati in lettura. Disponibili tramite link sandbox nella conversazione, non su GitHub pubblico.
+- Importer `integral-pdf-v24.js` ora accetta il vecchio ZIP completo **o** una selezione multipla delle 10 parti, caricate sequenzialmente; supporta ripresa idempotente e singole parti, controlla ID, firma WebP, SHA256, integrità references, indice/numero delle parti. Storage Supabase resta privato e RLS platform-admin invariata. Nessuna immagine di terzi nel repo, corsi congelati esclusi.
+- PWA cache `safety-training-v22-57` e test aggiornati. Non dichiarare importazione conclusa fino a controllo `training_integral_pdf_assets_v24=2634`, `training_integral_pdf_refs_v24=4783` e verifica di slide e stampa A4 in browser. QA di importazione reale ancora da eseguire.

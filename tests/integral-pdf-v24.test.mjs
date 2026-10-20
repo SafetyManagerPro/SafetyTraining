@@ -7,6 +7,13 @@ test('private complete archive importer handles WebP hash, 2511 files and 4659 p
  assert.ok(s.includes('const refsDone=await existingIds'));
  assert.ok(s.includes("admin()"));
  assert.ok(s.includes("renderCatalog(page=0)"));
+ assert.ok(s.includes("manifest.archive_type==='safetytraining_partial_v1'"));
+ assert.ok(s.includes("manifest.total_assets!==2634"));
+ assert.ok(s.includes("manifest.total_figures!==4783"));
+ assert.ok(s.includes("multiple accept="));
+ assert.ok(s.includes("for(const file of files)"));
+ assert.ok(s.includes("outcome.assets"));
+ assert.ok(s.includes("Un riferimento PDF appartiene a una parte ZIP diversa."));
  assert.ok(s.includes("maxPage.get(r.source_document)"));
  assert.ok(s.includes("if(!t||t===doc)return 0"));
 
@@ -28,5 +35,5 @@ test('slides + two-up print invoke exact same private source placement',()=>{
  assert.ok(printer.includes("isTrustedSrc"));
  assert.ok(printer.includes("projection.buildDeck(converted)"));
  const html=rd('apps/training/index.html');assert.ok(html.includes('integral-pdf-v24.js'));
- assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-56"));
+ assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-57"));
 });
