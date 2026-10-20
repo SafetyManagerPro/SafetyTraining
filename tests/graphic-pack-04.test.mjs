@@ -19,6 +19,14 @@ test('authored courses retain their hero visual and gain an additive gallery',()
  assert.ok(html.includes('graphic-pack-04-gallery.css'));
  assert.ok(sw.includes('graphic-pack-04-gallery.css'));
 });
+test('family matching does not misclassify first-aid groups as cranes or generic words as PLE',()=>{
+ const p=w.SAFETY_GRAPHIC_PACK_04.pick;
+ const aid=p({title:'Primo soccorso - Gruppo A',presentation_generated_from_db:true},{title:'Chiamata di emergenza',id:'aid-1',db_backed:true});
+ assert.ok(aid.length>0);
+ assert.ok(aid.every(x=>x.src.includes('-soccorso.svg')));
+ const other=p({title:'Completo aggiornamento lavoratori',presentation_generated_from_db:true},{title:'Riconoscere rischi generali',id:'other-1',summary:'Regole per il personale',db_backed:true});
+ assert.equal(other.length,0);
+});
 test('projector and PWA load original diagrams',()=>{
 assert.ok(read('apps/training/index.html').includes('graphic-pack-04.js'));assert.ok(read('apps/training/app.js').includes('SAFETY_GRAPHIC_PACK_04?.pick'));const sw=read('apps/training/sw.js');assert.ok(sw.includes("const CACHE='safety-training-v22-"));assert.ok(sw.includes('gp04-pedoni-carrelli.svg'));
 });

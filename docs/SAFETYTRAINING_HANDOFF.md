@@ -590,3 +590,7 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.21.1 correzione test promemoria per nuova versione
 - Il run CI #409 conferma la sintassi e i test principali del nuovo visual overlay ma fallisce sull'asserzione storica del numero `v22.20` nell'ultimo titolo degli handoff. Aggiornato il test a controllo di forma `v22.N` senza suffisso hardcoded e mantenuta l'uguaglianza testuale dei due titoli: così il rilascio v22.21 non richiede correggere i test ad ogni versione. Nessun cambio funzionale, dati o catalogo.
+
+## 2026-10-20 — v22.21.2 correzione disambiguazione immagini
+- CI #410 e Vercel della correzione agenda/schede = success. Trovata una collisione nei pattern di matching: `gru` poteva corrispondere a `Gruppo A` e `ple` a parole come `completo`, producendo immagini fuori tema in corsi sanitari/generali.
+- Corretto matching GP04 con confini di parola per `gru`, `ple`, `mmt`; aggiunto test regressione su *Primo soccorso – Gruppo A* e *Completo aggiornamento lavoratori*. Nessun dato, minuta, LU, catalogo o stampa modificata. Verificare nuova CI e QA visiva su browser reale.
