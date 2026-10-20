@@ -4,12 +4,12 @@ const w={SAFETY_GRAPHIC_PACK_01:{isFrozen:c=>!!c.metadata?.freeze_scope}};
 vm.runInNewContext(read('apps/training/graphic-pack-04.js'),{window:w});
 test('original standalone schematics are complete and have no foreign image embeddings',()=>{
 assert.equal(w.SAFETY_GRAPHIC_PACK_04.items.length,54);
-for(const i of w.SAFETY_GRAPHIC_PACK_04.items){assert.ok(existsSync(new URL('../apps/training/'+i.src,import.meta.url)));const s=read('apps/training/'+i.src);assert.match(s,/<svg xmlns=/);assert.match(s,/<\/svg>$/);assert.ok(s.includes('COMPORTAMENTO SICURO'));assert.ok(s.includes('DA EVITARE'));assert.doesNotMatch(s,/<image|data:image/);}
+for(const i of w.SAFETY_GRAPHIC_PACK_04.items){assert.ok(existsSync(new URL('../apps/training/'+i.src,import.meta.url)));const s=read('apps/training/'+i.src);assert.match(s,/<svg xmlns=/);assert.match(s,/<\/svg>$/);assert.ok(s.includes('COMPORTAMENTO SICURO'));assert.ok(s.includes('DA EVITARE'));assert.doesNotMatch(s,/<image|data:image|<\/rect>/);}
 });
 test('selector honors DB and frozen / authored gates',()=>{
 const p=w.SAFETY_GRAPHIC_PACK_04.pick,c={title:'Carrelli elevatori',presentation_generated_from_db:true},t={db_backed:true,title:'Pedoni e viabilità',id:'test'};
 assert.equal(p(c,t).length,2);assert.equal(p({...c,metadata:{freeze_scope:true}},t).length,0);assert.equal(p(c,{...t,db_backed:false}).length,0);assert.equal(p(c,{...t,presentation_quality:{visual_mode:'authored'}}).length,0);
 });
 test('projector and PWA load original diagrams',()=>{
-assert.ok(read('apps/training/index.html').includes('graphic-pack-04.js'));assert.ok(read('apps/training/app.js').includes('SAFETY_GRAPHIC_PACK_04?.pick'));const sw=read('apps/training/sw.js');assert.ok(sw.includes('safety-training-v22-47'));assert.ok(sw.includes('gp04-pedoni-carrelli.svg'));
+assert.ok(read('apps/training/index.html').includes('graphic-pack-04.js'));assert.ok(read('apps/training/app.js').includes('SAFETY_GRAPHIC_PACK_04?.pick'));const sw=read('apps/training/sw.js');assert.ok(sw.includes('safety-training-v22-48'));assert.ok(sw.includes('gp04-pedoni-carrelli.svg'));
 });

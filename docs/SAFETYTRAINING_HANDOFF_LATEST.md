@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-19
-Stato: **v22.19 Graphic Pack 04 (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-47`.
+Stato: **v22.19 Graphic Pack 04 (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-48`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -559,3 +559,7 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.19.4 correzione XML SVG (lotto 4/5)
 - Corrette 11 illustrazioni GP04 nel quarto lotto, senza modifiche ai contenuti didattici, al catalogo o alle policy.
+
+## 2026-10-20 — v22.19.5 correzione XML SVG (lotto 5/5)
+- Completata correzione di **tutti i 54 SVG GP04**, eliminati tag di chiusura rettangolo ridondanti. Nuovo test su assenza `</rect>` superflui, PWA cache **safety-training-v22-48** per ricaricare il pacchetto corretto.
+- Invariate tabelle e materiali pubblicati a livello di database, geometria A4 e corsi frozen. Verificare CI e deploy; audit diritti 26/143 da importare separatamente come ZIP privato.
