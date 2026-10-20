@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v22.22 atlante completo slide/stampe (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-52`.
+Stato corrente: **v22.23 copertura 201 asset in corsi/slide/stampe** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-53`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -609,3 +609,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Inventory specifico dei 67 asset non-GP: 42 citati letteralmente nelle famiglie di didattica ed enrichment, altri 25 non citati direttamente (fra cui scene, backgrounds dinamici, poster video, icone, marchio CNA e grafici orfani). Nessun obbligo di mostrare logo/sfondo/video in ogni LU.
 - Collegate al nuovo atlante **36 grafiche didattiche legacy** mediante regole contestuali per rischi, organigramma, piramide dei pericoli, stress termico, archivio, rifiuti, verde, VDT, DPI, segnaletica, antincendio, RLS e altri temi. Queste sono visual originali locali, non copie dei 169 PDF di terzi.
 - Gli asset si aggiungono alle figure GP nel medesimo percorso di scheda, proiettore, Stampa slide 2/A4 e Stampa lezioni; nessuna durata o layout fisico è modificata. PWA `safety-training-v22-52`, test regressione per le cinque figure storiche più richieste. Verificare CI e correttezza visiva prima del rilascio definitivo.
+
+## 2026-10-20 — v22.23 copertura completa asset e collocazione verificabile
+- Creato manifesto versionato di TUTTI i **201** file grafici di `apps/training/assets/`: **200 illustrazioni o poster didattici** assegnati ciascuno a un corso pubblicato non frozen specifico; **1 logo CNA Avellino** collocato nell'agenda, nella slide di apertura modulo (anche stampa due/A4) e nella copertina dispensa. Registro `docs/SAFETYTRAINING_ASSET_COVERAGE.json` elenca ogni filename e corso. Nessun file lasciato senza ruolo.
+- Modulo read-only `visual-coverage-v23.js` assegna deterministicamente le immagini al topic più vicino semanticamente tra quelli reali del corso destinazione, senza spostare minuti, modificare LU o forzare grafiche attrezzatura in corsi differenti. Usa `course.topics` sia per proiezione sia per Stampa lezioni (in quest'ultima ora la lista dei topic deriva dalle stesse unità del corso/versione selezionato); `graphic-atlas-v22.js` unisce queste immagini a GP01-04, schemi storici e immagini authored, evitando doppioni.
+- La Stampa slide continua a riutilizzare `buildDeck` e mantiene geometria esatta 2 slide/A4; gli extra entrano in slot visivi o nelle slide Atlante. Nuovo test di integrità **201** asset + prova dinamica di ogni file in almeno un topic di un corso destinazione + check di equivalenza proiezione e stampa.
+- PWA `safety-training-v22-53`; unchanged 27 frozen, Supabase, iscrizioni, presenze, test, certificati; fonti PDF di terzi ancora in revisione privata e non nel manifesto pubblico. CI / browser QA e stampa fisica da verificare.

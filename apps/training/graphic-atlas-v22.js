@@ -25,12 +25,13 @@ function collect(course,topic){
  ];
  const subject=String(topic.slide_title||topic.title||'')+' '+String(topic.summary||'');
  const legacy=legacyRules.filter(x=>x.re.test(subject)).map(x=>({src:'assets/'+x.filename,caption:x.filename.replace(/^(?:idea-)/,'').replace(/\.svg$/,'').replace(/-/g,' ')}));
+ const placed=window.SAFETY_VISUAL_COVERAGE_V23?.forTopic?.(course,topic)||[];
  const authored=[
   ...Array.isArray(topic.idea_images)?topic.idea_images:[],
   ...Array.isArray(topic.visuals)?topic.visuals:[],
   ...Array.isArray(topic.graphic_cards)?topic.graphic_cards:[]
  ].map(toVisual).filter(Boolean);
- return [...new Map([...picks,...legacy,...authored].map(toVisual).filter(Boolean).map(x=>[x.src,x])).values()];
+ return [...new Map([...picks,...legacy,...placed,...authored].map(toVisual).filter(Boolean).map(x=>[x.src,x])).values()];
 }
 function distribute(course,topic,slides){
  const list=Array.isArray(slides)?slides:[];

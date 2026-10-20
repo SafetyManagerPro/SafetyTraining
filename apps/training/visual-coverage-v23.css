@@ -1,0 +1,6 @@
+/* Original CNA branding belongs on course opening and booklet cover, not in learning-unit diagrams. */
+.st-brand-course{display:block;width:175px;max-width:32%;height:auto;max-height:105px;object-fit:contain;margin:0 0 14px auto}
+.projector-slide .slide-module .st-brand-course{position:absolute;right:74px;top:45px;width:200px;max-width:200px;max-height:110px}
+#adminPrintableLessons .print-cover>.st-brand-course{max-width:200px;margin:0 0 18px auto;max-height:100px}
+@media(max-width:650px){.agenda-hero>.st-brand-course{max-width:150px}}
+@media print{#adminPrintableLessons .print-cover>.st-brand-course{max-width:180px;break-inside:avoid}}

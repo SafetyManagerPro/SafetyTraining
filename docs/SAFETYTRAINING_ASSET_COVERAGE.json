@@ -1,0 +1,1441 @@
+{
+  "updated": "2026-10-20",
+  "summary": {
+    "total": 201,
+    "brand": 1,
+    "teaching": 200,
+    "assignments": {
+      "": 1,
+      "antincendio": 14,
+      "attr_carrelli_ind": 18,
+      "attr_gru_autocarro": 18,
+      "attr_mmt_all": 13,
+      "attr_ple": 14,
+      "backoffice": 5,
+      "dl_base": 3,
+      "dl_spp_chimico": 6,
+      "ecologici": 4,
+      "emergenze_evacuazione": 3,
+      "frontoffice": 5,
+      "generale": 26,
+      "lav_alto": 36,
+      "lav_basso": 1,
+      "lav_medio": 3,
+      "lav_quota": 9,
+      "polizia": 6,
+      "preposto": 1,
+      "primo_soccorso_12h": 6,
+      "rls": 3,
+      "verde": 6
+    }
+  },
+  "assets": [
+    {
+      "file": "bio.svg",
+      "course_key": "dl_spp_chimico",
+      "category": "hazard",
+      "caption": "bio",
+      "role": "teaching"
+    },
+    {
+      "file": "cna-avellino.png",
+      "course_key": "",
+      "category": "brand",
+      "caption": "cna avellino",
+      "role": "brand"
+    },
+    {
+      "file": "conflict.svg",
+      "course_key": "frontoffice",
+      "category": "front",
+      "caption": "conflict",
+      "role": "teaching"
+    },
+    {
+      "file": "emergency.svg",
+      "course_key": "emergenze_evacuazione",
+      "category": "emergency",
+      "caption": "emergency",
+      "role": "teaching"
+    },
+    {
+      "file": "fire.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fire",
+      "role": "teaching"
+    },
+    {
+      "file": "general.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "general",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-casco.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi casco",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-guanti.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi guanti",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-imbracatura.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "dpi imbracatura",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-occhiali.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi occhiali",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-respiratore.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi respiratore",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-scarpe.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi scarpe",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-udito.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi udito",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-dpi-vs-dpc.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi vs dpc",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-procedura-emergenza.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "procedura emergenza",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-procedura-preuso.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "traffic",
+      "caption": "procedura preuso",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-rischio-caduta.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "rischio caduta",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-rischio-investimento.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "traffic",
+      "caption": "rischio investimento",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-rischio-ribaltamento.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "traffic",
+      "caption": "rischio ribaltamento",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-rischio-schiacciamento.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "rischio schiacciamento",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-segnali-avvertimento.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "segnali avvertimento",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-segnali-colori.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "segnali colori",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-segnali-divieto.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "segnali divieto",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-segnali-emergenza.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "segnali emergenza",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-segnali-famiglie.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "segnali famiglie",
+      "role": "teaching"
+    },
+    {
+      "file": "gp01-segnali-obbligo.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "segnali obbligo",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-checklist-dpi.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "checklist dpi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-chemical-labels.svg",
+      "course_key": "dl_spp_chimico",
+      "category": "hazard",
+      "caption": "chemical labels",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-collective-barriers.svg",
+      "course_key": "lav_alto",
+      "category": "general",
+      "caption": "collective barriers",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-capacity.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane capacity",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-crushing.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane crushing",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-electric.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane electric",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-outriggers.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane outriggers",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-preuse.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane preuse",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-signaller.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane signaller",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-suspended.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane suspended",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-crane-swing.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "crane swing",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-emergency-alert.svg",
+      "course_key": "primo_soccorso_12h",
+      "category": "medical",
+      "caption": "emergency alert",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-exit-obstructed.svg",
+      "course_key": "lav_alto",
+      "category": "general",
+      "caption": "exit obstructed",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-fire-extinguisher-identify.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fire extinguisher identify",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-first-aid-safety.svg",
+      "course_key": "primo_soccorso_12h",
+      "category": "medical",
+      "caption": "first aid safety",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-battery.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift battery",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-blindspot.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift blindspot",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-forks.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift forks",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-load.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift load",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-park.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift park",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-pedestrians.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift pedestrians",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-preuse.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift preuse",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-forklift-ramp.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "forklift ramp",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-lifting-suspended-load.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "lifting",
+      "caption": "lifting suspended load",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-machine-pinch-guard.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "machine pinch guard",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-excavation-edge.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt excavation edge",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-maintenance.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt maintenance",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-preuse.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt preuse",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-reversing.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt reversing",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-slope.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt slope",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-swing-zone.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt swing zone",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-three-points.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt three points",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-mmt-underground.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "mmt underground",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-pedestrian-separated.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "traffic",
+      "caption": "pedestrian separated",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-emergency.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple emergency",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-exclusion.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple exclusion",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-harness.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple harness",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-overhead-pinch.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple overhead pinch",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-power-lines.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple power lines",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-preuse.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple preuse",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-stabilizers.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple stabilizers",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ple-weather.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ple weather",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ppe-gloves-rotation.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "ppe gloves rotation",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ppe-harness-check.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "ppe harness check",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ppe-helmet-check.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "ppe helmet check",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-ppe-respirator-fit.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "ppe respirator fit",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-signs-ban-mandate.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "signs ban mandate",
+      "role": "teaching"
+    },
+    {
+      "file": "gp02-signs-warning-rescue.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "signs warning rescue",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-aspirazione-polveri.svg",
+      "course_key": "dl_spp_chimico",
+      "category": "chemicals",
+      "caption": "aspirazione polveri",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-caduta-livello.svg",
+      "course_key": "lav_basso",
+      "category": "slips",
+      "caption": "caduta livello",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-gerarchia-prevenzione.svg",
+      "course_key": "generale",
+      "category": "prevention",
+      "caption": "gerarchia prevenzione",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-isolamento-elettrico.svg",
+      "course_key": "lav_alto",
+      "category": "risk",
+      "caption": "isolamento elettrico",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-matrice-rischio.svg",
+      "course_key": "generale",
+      "category": "prevention",
+      "caption": "matrice rischio",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-microclima-calore.svg",
+      "course_key": "verde",
+      "category": "climate",
+      "caption": "microclima calore",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-movimentazione-carichi.svg",
+      "course_key": "lav_medio",
+      "category": "manual",
+      "caption": "movimentazione carichi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-near-miss.svg",
+      "course_key": "preposto",
+      "category": "management",
+      "caption": "near miss",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-postazione-vdt.svg",
+      "course_key": "backoffice",
+      "category": "office",
+      "caption": "postazione vdt",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-rischi-interferenziali.svg",
+      "course_key": "dl_base",
+      "category": "interference",
+      "caption": "rischi interferenziali",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-rumore-esposizione.svg",
+      "course_key": "lav_alto",
+      "category": "risk",
+      "caption": "rumore esposizione",
+      "role": "teaching"
+    },
+    {
+      "file": "gp03-scheda-sicurezza-chimica.svg",
+      "course_key": "dl_spp_chimico",
+      "category": "chemicals",
+      "caption": "scheda sicurezza chimica",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-allarme-fire.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "allarme fire",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-ancoraggio-quota.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "ancoraggio quota",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-anomalia-macchina.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "anomalia macchina",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-aperture-quota.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "aperture quota",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-arrivo-soccorso.svg",
+      "course_key": "primo_soccorso_12h",
+      "category": "medical",
+      "caption": "arrivo soccorso",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-avvertimento-segnali.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "avvertimento segnali",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-baricentro-carrelli.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "baricentro carrelli",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-baricentro-sollevamento.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "lifting",
+      "caption": "baricentro sollevamento",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-brache-gru.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "brache gru",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-brache-sollevamento.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "lifting",
+      "caption": "brache sollevamento",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-calzature-dpi.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "calzature dpi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-casco-dpi.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "casco dpi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-chiamata-soccorso.svg",
+      "course_key": "primo_soccorso_12h",
+      "category": "medical",
+      "caption": "chiamata soccorso",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-controlli-ple.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "controlli ple",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-divieto-segnali.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "divieto segnali",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-elettrico-gru.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "elettrico gru",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-elettrico-ple.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "elettrico ple",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-energia-macchina.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "energia macchina",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-esodo-segnali.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "esodo segnali",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-fumo-fire.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fumo fire",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-guanti-dpi.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "guanti dpi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-innesco-fire.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "innesco fire",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-obbligo-segnali.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "obbligo segnali",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-ostacoli-ple.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "ostacoli ple",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-parapetti-quota.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "parapetti quota",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-parcheggio-carrelli.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "parcheggio carrelli",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-pedoni-carrelli.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "pedoni carrelli",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-pendenza-carrelli.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "pendenza carrelli",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-perimetro-sollevamento.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "lifting",
+      "caption": "perimetro sollevamento",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-portata-gru.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "portata gru",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-presidi-fire.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "presidi fire",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-presidi-soccorso.svg",
+      "course_key": "primo_soccorso_12h",
+      "category": "medical",
+      "caption": "presidi soccorso",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-preuso-carrelli.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "preuso carrelli",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-preuso-mmt.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "preuso mmt",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-raggio-mmt.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "raggio mmt",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-recupero-ple.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "recupero ple",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-recupero-quota.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "recupero quota",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-respiratore-dpi.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "respiratore dpi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-retromarcia-mmt.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "retromarcia mmt",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-riparo-macchina.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "riparo macchina",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-rotanti-macchina.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "rotanti macchina",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-scarpate-mmt.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "scarpate mmt",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-scena-soccorso.svg",
+      "course_key": "primo_soccorso_12h",
+      "category": "medical",
+      "caption": "scena soccorso",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-segnalatore-gru.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "segnalatore gru",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-sospeso-gru.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "sospeso gru",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-sottoservizi-mmt.svg",
+      "course_key": "attr_mmt_all",
+      "category": "equipment",
+      "caption": "sottoservizi mmt",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-stabilita-ple.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "stabilita ple",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-stabilizzatori-gru.svg",
+      "course_key": "attr_gru_autocarro",
+      "category": "equipment",
+      "caption": "stabilizzatori gru",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-udito-dpi.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "udito dpi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-uscita-fire.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "uscita fire",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-utensili-macchina.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "utensili macchina",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-vento-ple.svg",
+      "course_key": "attr_ple",
+      "category": "equipment",
+      "caption": "vento ple",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-visiera-dpi.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "visiera dpi",
+      "role": "teaching"
+    },
+    {
+      "file": "gp04-visuale-carrelli.svg",
+      "course_key": "attr_carrelli_ind",
+      "category": "equipment",
+      "caption": "visuale carrelli",
+      "role": "teaching"
+    },
+    {
+      "file": "green.svg",
+      "course_key": "verde",
+      "category": "green",
+      "caption": "green",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-aggression-flow.svg",
+      "course_key": "frontoffice",
+      "category": "front",
+      "caption": "aggression flow",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-archive-safe.svg",
+      "course_key": "backoffice",
+      "category": "office",
+      "caption": "archive safe",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-bio-chain.svg",
+      "course_key": "dl_spp_chimico",
+      "category": "hazard",
+      "caption": "bio chain",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-chainsaw-safe.svg",
+      "course_key": "verde",
+      "category": "green",
+      "caption": "chainsaw safe",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-compactor-safe.svg",
+      "course_key": "ecologici",
+      "category": "ecology",
+      "caption": "compactor safe",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-dpi-hierarchy.svg",
+      "course_key": "lav_alto",
+      "category": "ppe",
+      "caption": "dpi hierarchy",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-duvri.svg",
+      "course_key": "generale",
+      "category": "general",
+      "caption": "duvri",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-dvr-reading.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "dvr reading",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-emergency-steps.svg",
+      "course_key": "emergenze_evacuazione",
+      "category": "emergency",
+      "caption": "emergency steps",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-evac-public.svg",
+      "course_key": "emergenze_evacuazione",
+      "category": "emergency",
+      "caption": "evac public",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-fire-passive.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fire passive",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-fire-practice.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fire practice",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-fire-response.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fire response",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-fire-triangle.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fire triangle",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-front-layout.svg",
+      "course_key": "frontoffice",
+      "category": "front",
+      "caption": "front layout",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-green-safearea.svg",
+      "course_key": "verde",
+      "category": "green",
+      "caption": "green safearea",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-heat-stress.svg",
+      "course_key": "verde",
+      "category": "green",
+      "caption": "heat stress",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-hygiene-clean-dirty.svg",
+      "course_key": "ecologici",
+      "category": "ecology",
+      "caption": "hygiene clean dirty",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-inspection-flow.svg",
+      "course_key": "dl_base",
+      "category": "management",
+      "caption": "inspection flow",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-ladder-safe.svg",
+      "course_key": "lav_alto",
+      "category": "procedures",
+      "caption": "ladder safe",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-police-conflict.svg",
+      "course_key": "polizia",
+      "category": "police",
+      "caption": "police conflict",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-police-night.svg",
+      "course_key": "polizia",
+      "category": "police",
+      "caption": "police night",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-police-road.svg",
+      "course_key": "polizia",
+      "category": "police",
+      "caption": "police road",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-risk-cycle.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "risk cycle",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-rls-consult.svg",
+      "course_key": "rls",
+      "category": "worker-representation",
+      "caption": "rls consult",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-rls-cycle.svg",
+      "course_key": "rls",
+      "category": "worker-representation",
+      "caption": "rls cycle",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-road-safety.svg",
+      "course_key": "polizia",
+      "category": "police",
+      "caption": "road safety",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-safety-system.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "safety system",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-sanctions-logic.svg",
+      "course_key": "dl_base",
+      "category": "management",
+      "caption": "sanctions logic",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-sharps-safe.svg",
+      "course_key": "ecologici",
+      "category": "ecology",
+      "caption": "sharps safe",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-signs-basic.svg",
+      "course_key": "generale",
+      "category": "signs",
+      "caption": "signs basic",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-vdt-ergonomia.svg",
+      "course_key": "backoffice",
+      "category": "office",
+      "caption": "vdt ergonomia",
+      "role": "teaching"
+    },
+    {
+      "file": "idea-working-height-safe.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "working height safe",
+      "role": "teaching"
+    },
+    {
+      "file": "modello-farfalla-rischio.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "modello farfalla rischio",
+      "role": "teaching"
+    },
+    {
+      "file": "office.svg",
+      "course_key": "backoffice",
+      "category": "office",
+      "caption": "office",
+      "role": "teaching"
+    },
+    {
+      "file": "organigramma-sicurezza.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "organigramma sicurezza",
+      "role": "teaching"
+    },
+    {
+      "file": "piramide-pericoli.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "piramide pericoli",
+      "role": "teaching"
+    },
+    {
+      "file": "procedura-operativa-5-fasi.svg",
+      "course_key": "lav_alto",
+      "category": "procedures",
+      "caption": "procedura operativa 5 fasi",
+      "role": "teaching"
+    },
+    {
+      "file": "rights.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "rights",
+      "role": "teaching"
+    },
+    {
+      "file": "risk.svg",
+      "course_key": "lav_alto",
+      "category": "risk",
+      "caption": "risk",
+      "role": "teaching"
+    },
+    {
+      "file": "road.svg",
+      "course_key": "polizia",
+      "category": "police",
+      "caption": "road",
+      "role": "teaching"
+    },
+    {
+      "file": "roles.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "roles",
+      "role": "teaching"
+    },
+    {
+      "file": "scenario-critical.svg",
+      "course_key": "lav_alto",
+      "category": "risk",
+      "caption": "scenario critical",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-antincendio.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "antincendio",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-backoffice.svg",
+      "course_key": "backoffice",
+      "category": "office",
+      "caption": "backoffice",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-ecologici.svg",
+      "course_key": "ecologici",
+      "category": "ecology",
+      "caption": "ecologici",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-frontoffice.svg",
+      "course_key": "frontoffice",
+      "category": "front",
+      "caption": "frontoffice",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-generale.svg",
+      "course_key": "generale",
+      "category": "system",
+      "caption": "generale",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-polizia.svg",
+      "course_key": "polizia",
+      "category": "police",
+      "caption": "polizia",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-rls.svg",
+      "course_key": "rls",
+      "category": "worker-representation",
+      "caption": "rls",
+      "role": "teaching"
+    },
+    {
+      "file": "scene-verde.svg",
+      "course_key": "verde",
+      "category": "green",
+      "caption": "verde",
+      "role": "teaching"
+    },
+    {
+      "file": "stop-segnala-ripristina.svg",
+      "course_key": "lav_alto",
+      "category": "machinery",
+      "caption": "stop segnala ripristina",
+      "role": "teaching"
+    },
+    {
+      "file": "video-chemicals.svg",
+      "course_key": "dl_spp_chimico",
+      "category": "hazard",
+      "caption": "chemicals",
+      "role": "teaching"
+    },
+    {
+      "file": "video-fire-alert.svg",
+      "course_key": "antincendio",
+      "category": "fire",
+      "caption": "fire alert",
+      "role": "teaching"
+    },
+    {
+      "file": "video-lighten-load.svg",
+      "course_key": "lav_medio",
+      "category": "manual",
+      "caption": "lighten load",
+      "role": "teaching"
+    },
+    {
+      "file": "video-risky-business.svg",
+      "course_key": "lav_alto",
+      "category": "risk",
+      "caption": "risky business",
+      "role": "teaching"
+    },
+    {
+      "file": "video-safe-moves.svg",
+      "course_key": "lav_medio",
+      "category": "manual",
+      "caption": "safe moves",
+      "role": "teaching"
+    },
+    {
+      "file": "video-stop-noise.svg",
+      "course_key": "lav_alto",
+      "category": "risk",
+      "caption": "stop noise",
+      "role": "teaching"
+    },
+    {
+      "file": "video-violence.svg",
+      "course_key": "frontoffice",
+      "category": "front",
+      "caption": "violence",
+      "role": "teaching"
+    },
+    {
+      "file": "video-work-height.svg",
+      "course_key": "lav_quota",
+      "category": "height",
+      "caption": "work height",
+      "role": "teaching"
+    }
+  ]
+}

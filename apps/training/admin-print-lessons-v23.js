@@ -131,13 +131,16 @@
       return '<li><a href="#print-module-'+(i+1)+'">Modulo '+(i+1)+': '+asText(m.title)+
         '</a> ('+m.units.length+' unità)<ol>'+lessonRows+'</ol></li>';
     }).join('');
+    const printCourse={...book.course,stable_key:book.course.stable_key||book.course.id,topics:book.modules.flatMap(m=>m.units.map(u=>({
+      id:u.unit_version_id||u.id,title:u.content?.title||u.title||'',summary:u.content?.summary||'',db_backed:true
+    })))};
     let i=0;
     const modules=book.modules.map((m,index)=>
       '<section class="print-module" id="print-module-'+(index+1)+'"><h2>Modulo '+(index+1)+': '+asText(m.title)+'</h2>'+
       '<p>Durata nominale modulo: '+asText(m.minutes??'—')+' minuti</p>'+
-      m.units.map(u=>lessonHtml(u,i++,book.course)).join('')+'</section>').join('');
+      m.units.map(u=>lessonHtml(u,i++,printCourse)).join('')+'</section>').join('');
     return '<section id="adminPrintableLessons" class="admin-card" aria-label="Dispensa del singolo percorso formativo">'+
-      '<div class="print-cover"><p class="print-kicker">SAFETYTRAINING · MATERIALE DIDATTICO</p>'+
+      '<div class="print-cover"><img class="st-brand-course" src="assets/cna-avellino.png" alt="CNA Avellino"><p class="print-kicker">SAFETYTRAINING · MATERIALE DIDATTICO</p>'+
       '<h1>'+asText(book.course.title)+'</h1>'+
       '<p>'+asText(book.course.description||'')+'</p><p><strong>Versione corso '+asText(book.version.version_number)+
       '</strong> · '+asText(book.version.status)+
