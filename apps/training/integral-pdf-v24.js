@@ -291,7 +291,7 @@ function show(){
  const el=document.createElement('div');el.className='admin-modal-overlay';el.id='integralPdfOverlay';
  el.innerHTML='<section class="admin-modal wide st-integral-modal" role="dialog" aria-modal="true" aria-label="Archivio integrale immagini PDF">'+
  '<header><div><div class="admin-kicker">CNA AVELLINO · FONTI PDF</div><h2>Archivio integrale immagini</h2></div><button type="button" id="integralPdfClose" class="admin-modal-close">×</button></header>'+
- '<div class="admin-modal-body"><p>14 PDF esaminati · 856 tavole complete pronte per l'importazione · vecchi frammenti selezionabili separatamente. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
+ '<div class="admin-modal-body"><p>14 PDF esaminati · 856 tavole complete pronte per importazione · vecchi frammenti selezionabili separatamente. Biblioteca privata riservata agli amministratori della piattaforma.</p>'+
  '<p>Scarica e importa i <strong>9 nuovi ZIP FIGURE COMPLETE (5–7 MB)</strong>, insieme o singolarmente, senza decomprimerli. Il caricamento è riprendibile e le figure restano riservate alla docenza CNA; i corsi sospesi sono esclusi.</p>'+
  '<p>Il materiale proviene da fonti esterne: mantieni citazione, utilizzo didattico interno e revisione tecnico-normativa. L’importazione non costituisce autorizzazione generale di riutilizzo.</p>'+
  '<input id="integralPdfZip" type="file" multiple accept=".zip,application/zip"><label class="st-integral-confirm"><input type="checkbox" id="integralPdfPrivateCheck"> Confermo l’importazione nell’archivio privato per revisione e docenza CNA</label>'+
