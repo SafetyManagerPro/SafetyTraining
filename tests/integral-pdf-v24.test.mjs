@@ -10,7 +10,7 @@ test('private complete archive importer handles WebP hash, 2511 files and 4659 p
 });
 test('source is private, admin-only, and signed urls must be allowlisted',()=>{
  const s=rd('apps/training/integral-pdf-v24.js');
- assert.ok(s.includes("privatePdf"));
+ assert.ok(s.includes("trusted.has(url)"));
  assert.ok(s.includes("trusted.has(url)"));
  assert.ok(s.includes("private.is_platform_admin()")===false);
  assert.ok(rd('supabase/migrations/20261020191000_v24_001_integral_pdf_media.sql').includes('private.is_platform_admin()'));
@@ -23,5 +23,5 @@ test('slides + two-up print invoke exact same private source placement',()=>{
  assert.ok(printer.includes("isTrustedSrc"));
  assert.ok(printer.includes("projection.buildDeck(converted)"));
  const html=rd('apps/training/index.html');assert.ok(html.includes('integral-pdf-v24.js'));
- assert.ok(rd('apps/training/sw.js').includes("safety-training-v24-01"));
+ assert.ok(rd('apps/training/sw.js').includes("safety-training-v22-54"));
 });

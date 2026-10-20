@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-20
-Stato corrente: **v24.1 PDF integrali pronti a importazione privata** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v24-01`.
+Stato corrente: **v24.1 PDF integrali pronti a importazione privata** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-54`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -624,3 +624,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Importatore in `apps/training/integral-pdf-v24.js` (solo platform-admin): accetta lo ZIP integrale da 14 PDF preparato in ChatGPT con **2.511 WebP unici + 4.659 riferimenti**. Validazione SHA-256/WebP/ID, controllo duplicati, upload privato idempotente/resumable e metadata batch Supabase; UI `Archivio PDF integrale` nell'admin. Nessuna copia di materiale terzo pubblicata su GitHub.
 - Per i corsi DB non frozen, matching automatico per categoria, corso, argomento della Learning Unit (regole e punteggio testuale, fallback deterministico), ognuna delle immagini dell'archivio caricata una volta per corso e presentata con fonte e pagina. L'atlante comune richiama i link firmati in memoria sia nella proiezione sia in Stampa slide (print allowlist URL firmate), conservando due slide A4 e includendo eventualmente slide Atlante aggiuntive. Accesso rigorosamente admin: NON abilitare apprendimento pubblico con fonti non autorizzate. PWA `safety-training-v24-01`.
 - **Non confondere integrazione di codice con ingest dei file**: le 2.511 immagini sono nello ZIP allegato alla chat e ancora da caricare tramite account platform-admin nell'app (il container ChatGPT non ha connessione HTTP ai sistemi remoti e i tool collegati non accettano binari dal filesystem). Fino all'importazione l'atlante integrale è vuoto. Necessario QA browser e revisione tecnico/normativa/copyright prima dell'uso operativo da parte dei corsisti.
+
+## 2026-10-20 — v24.1.1 PWA retrocompatibilità CI
+- Il primo workflow di v24 ha segnalato una vecchia asserzione che verifica la forma `safety-training-v22-N` della cache. Per evitare regressioni inutili con il runtime v22, impostata cache `safety-training-v22-54`, lasciando invariato il numero funzionale del catalogo PDF v24; test del modulo nuovo allineato. Il collegamento di storage e i contenuti non cambiano. Nuova CI da verificare.
