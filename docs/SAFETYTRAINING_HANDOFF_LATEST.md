@@ -547,3 +547,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Analisi preliminare dei 169 estratti dai 14 PDF: **0 verdi, 26 gialli, 143 rossi**. Report CSV/JSON e ZIP con classi disponibili nella chat; solo uso con valutazione diritti e attualità dei contenuti. Nessun JPEG di terze parti nel repository.
 - Aggiunto **Graphic Pack 04**: 54 schemi originali con confronto visivo rischio/controllo per DPI, segnaletica, carrelli, PLE, gru, MMT, macchine, antincendio, primo soccorso, quota e sollevamento. Totale **134 SVG originali**. Matching sul titolo/riassunto, fallback deterministico tra varianti della stessa famiglia, massimo 3 slot visual preesistenti in `buildDeck`; nessuna variazione a minuti né LU DB.
 - Resta escluso qualsiasi corso frozen, authored e non DB-backed. PWA **safety-training-v22-47**, test specifici. CI, QA browser, stampa A4 e revisione tecnico-didattica da verificare; no promozione automatica delle fonti di terzi ai corsisti.
+
+## 2026-10-20 — v22.19.1 correzione XML SVG (lotto 1/5)
+- Corrette 11 illustrazioni GP04 rimuovendo tag `</rect>` superflui dopo elementi autoconclusivi; nessun cambio alle istruzioni o immagini di riferimento di terzi. Rimanenti gruppi in lavorazione.
