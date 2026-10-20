@@ -575,3 +575,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.20.2 stabilizzazione test del Graphic Pack 04
 - CI #405: i nuovi 54 SVG e relative verifiche di fonte/freeze superano i test. Unico errore: il test GP04 richiedeva la vecchia cache `v22-48` anziché la cache corrente `v22-49`; sostituita la verifica del suffisso con controllo del prefisso invariabile `safety-training-v22-`. Nessun cambiamento funzionale, stampa o database. Verificare run successivo.
+
+## 2026-10-20 — v22.20.3 verifica formale XML immagini GP04
+- **CI #406 success**, Vercel deploy success e due migrazioni applicate in Supabase. Aggiunto preflight Python `scripts/validate_gp04_xml.py` nel `npm run check`: parser XML reale su 54 SVG GP04, viewBox, accessibilità, assenza immagini esterne e presenza delle etichette rischio/comportamento sicuro. Rafforza verifica rispetto alle vecchie sole regex. Verificare il nuovo CI prima di considerarlo approvato.
