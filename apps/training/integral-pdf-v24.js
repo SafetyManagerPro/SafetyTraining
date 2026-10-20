@@ -310,7 +310,7 @@ function show(){
  el.querySelector('#integralPdfRetryCleanup').onclick=async()=>{
   if(catalogBusy)return;
   setCatalogBusy(true);
-  try{const result=await cleanupDeletedStorage();note('Pulizia Storage completata: '+result.cleaned+' file.'+(result.pending?' Premi di nuovo per controllare gli altri file.':''));}
+  try{let cleaned=0,pending=0;for(let part=0;part<30;part++){const result=await cleanupDeletedStorage();cleaned+=result.cleaned;pending=result.pending;note('Pulizia Storage in corso: '+cleaned+' file rimossi.');if(!pending||!result.cleaned)break;}note('Pulizia Storage completata: '+cleaned+' file.'+(pending?' Restano file da ripulire, riprova.':''));}
   catch(e){note('Pulizia non completata: '+e.message,true);}
   finally{setCatalogBusy(false);}
  };
