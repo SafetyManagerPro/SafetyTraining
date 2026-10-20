@@ -215,6 +215,7 @@ function buildDeck(c){
      // Original Graphic Pack 01: only unfrozen DB-backed lessons without authored visuals.
      // A view-layer choice; does not change the source LU or its published version.
      const originalVisuals=[
+       ...(window.SAFETY_GRAPHIC_PACK_04?.pick?.(c,t)||[]),
        ...(window.SAFETY_GRAPHIC_PACK_02?.pick?.(c,t)||[]),
        ...(window.SAFETY_GRAPHIC_PACK_03?.pick?.(c,t)||[]),
        ...(window.SAFETY_GRAPHIC_PACK_01?.pick?.(c,t)||[])

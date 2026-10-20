@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-19
-Stato: **v22.18 PDF source figure staging (169 JPEG da 14 PDF + 80 SVG)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-46`.
+Stato: **v22.19 Graphic Pack 04 (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-47`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -542,3 +542,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - GitHub Actions #396 sul commit `fe9707d58ea8b9b83dad81a427d19aaa287485f5` = **success** (test di sintassi/importer/regressioni inclusi), Vercel = **success**; migration `v22_017_private_source_figures` già applicata e tabelle/policies/bucket privati verificati.
 - Stato reale contenuti: **169 JPEG estratti e consegnati nello ZIP ChatGPT**, ma database produzione con **0 immagini indicizzate**: l'admin deve ancora scaricare ZIP e usare pannello *Amministrazione → Immagini PDF → Importa*; l'interfaccia di amministrazione potrà quindi mostrare fino a due immagini PDF per LU coerente, rigorosamente in **anteprima riservata**. Niente distribuzione corsisti senza permessi e revisione.
 - Rimane da fare smoke test visuale 1440/820/390 + stampa 2/A4, prova reale di upload in browser con credenziali admin e revisione normativa/copyright. Nessuna dichiarazione di pubblicazione delle figure estratte ai corsisti.
+
+## 2026-10-20 — v22.19 Graphic Pack 04: 54 SVG originali nuovi
+- Analisi preliminare dei 169 estratti dai 14 PDF: **0 verdi, 26 gialli, 143 rossi**. Report CSV/JSON e ZIP con classi disponibili nella chat; solo uso con valutazione diritti e attualità dei contenuti. Nessun JPEG di terze parti nel repository.
+- Aggiunto **Graphic Pack 04**: 54 schemi originali con confronto visivo rischio/controllo per DPI, segnaletica, carrelli, PLE, gru, MMT, macchine, antincendio, primo soccorso, quota e sollevamento. Totale **134 SVG originali**. Matching sul titolo/riassunto, fallback deterministico tra varianti della stessa famiglia, massimo 3 slot visual preesistenti in `buildDeck`; nessuna variazione a minuti né LU DB.
+- Resta escluso qualsiasi corso frozen, authored e non DB-backed. PWA **safety-training-v22-47**, test specifici. CI, QA browser, stampa A4 e revisione tecnico-didattica da verificare; no promozione automatica delle fonti di terzi ai corsisti.
