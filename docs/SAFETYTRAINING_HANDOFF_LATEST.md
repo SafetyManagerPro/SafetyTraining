@@ -572,3 +572,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-20 — v22.20.1 manutenzione test CI
 - Corretto test di sincronizzazione promemoria: vecchia asserzione hardcoded `v22.18` sostituita con `v22.20`, in linea con ultima sezione presente in entrambi gli handoff. Il test rimane rigido su coincidenza del titolo e della PWA tra i due file. Migrazione `v22_018_review_private_source_figures` applicata con successo, CI #404 fallita solo per questa asserzione obsoleta. Nessuna modifica al runtime o ai dati didattici.
+
+## 2026-10-20 — v22.20.2 stabilizzazione test del Graphic Pack 04
+- CI #405: i nuovi 54 SVG e relative verifiche di fonte/freeze superano i test. Unico errore: il test GP04 richiedeva la vecchia cache `v22-48` anziché la cache corrente `v22-49`; sostituita la verifica del suffisso con controllo del prefisso invariabile `safety-training-v22-`. Nessun cambiamento funzionale, stampa o database. Verificare run successivo.

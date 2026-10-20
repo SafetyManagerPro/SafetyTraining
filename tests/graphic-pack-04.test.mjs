@@ -11,5 +11,5 @@ const p=w.SAFETY_GRAPHIC_PACK_04.pick,c={title:'Carrelli elevatori',presentation
 assert.equal(p(c,t).length,2);assert.equal(p({...c,metadata:{freeze_scope:true}},t).length,0);assert.equal(p(c,{...t,db_backed:false}).length,0);assert.equal(p(c,{...t,presentation_quality:{visual_mode:'authored'}}).length,0);
 });
 test('projector and PWA load original diagrams',()=>{
-assert.ok(read('apps/training/index.html').includes('graphic-pack-04.js'));assert.ok(read('apps/training/app.js').includes('SAFETY_GRAPHIC_PACK_04?.pick'));const sw=read('apps/training/sw.js');assert.ok(sw.includes('safety-training-v22-48'));assert.ok(sw.includes('gp04-pedoni-carrelli.svg'));
+assert.ok(read('apps/training/index.html').includes('graphic-pack-04.js'));assert.ok(read('apps/training/app.js').includes('SAFETY_GRAPHIC_PACK_04?.pick'));const sw=read('apps/training/sw.js');assert.ok(sw.includes("const CACHE='safety-training-v22-"));assert.ok(sw.includes('gp04-pedoni-carrelli.svg'));
 });
