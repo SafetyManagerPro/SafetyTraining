@@ -5,9 +5,9 @@ const families=[["dpi","dpi|protezione individuale|guanti|occhiali|respirator|ca
 const hash=s=>String(s).split('').reduce((h,c)=>(Math.imul(h,31)+c.charCodeAt(0))>>>0,19);
 function pick(course,topic){
  const guard=window.SAFETY_GRAPHIC_PACK_01?.isFrozen;
- if(typeof guard!=='function'||!course?.presentation_generated_from_db||!topic?.db_backed||guard(course)||topic?.presentation_quality?.visual_mode==='authored')return [];
+ if(typeof guard!=='function'||!course?.presentation_generated_from_db||!topic?.db_backed||guard(course))return [];
  const title=String(topic.slide_title||topic.title||''),summary=String(topic.summary||''),courseTitle=String(course.title||'');
- const family=families.find(x=>x[1].test(courseTitle))?.[0]||families.find(x=>x[1].test(title))?.[0];
+ const family=families.find(x=>x[1].test(courseTitle))?.[0]||families.find(x=>x[1].test(title))?.[0]||families.find(x=>x[1].test(summary))?.[0];
  if(!family)return[];
  const available=items.filter(x=>x.family===family);
  const preferred=available.filter(x=>new RegExp(x.match,'i').test(title));

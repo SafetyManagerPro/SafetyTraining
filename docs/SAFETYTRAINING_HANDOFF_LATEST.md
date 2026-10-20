@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-20
-Stato: **v22.20 PDF review class + GP04 (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-49`.
+Stato: **v22.21 illustrazioni visibili nei corsi (134 SVG originali)** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-50`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -583,3 +583,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - **CI #407 completata con esito success**, incluso parser XML reale sui 54 SVG GP04, regressioni core e verifiche stampa. **Vercel produzione in stato success** sul commit `139b5461551a4ee2c3e1acdec379e30778afa9c4`.
 - La migrazione Supabase `v22_018_review_private_source_figures` risulta applicata: bucket Storage privato e policy platform-admin attive. Al controllo database del 20/10 risultano **0 immagini PDF di terzi importate** (26 gialle/143 rosse nel pacchetto ZIP in chat, non in produzione). I 54 SVG originali sono invece presenti nel deploy, totale 134 originali.
 - Restano da eseguire prova visiva nel browser su desktop/tablet/mobile, controllo manuale di leggibilità/testi tecnici, simulazione stampa reale 2/A4 e, solo se deciso, import archivio PDF classificato da un vero admin; nessuna pubblicazione ai corsisti di materiale di terzi non autorizzato.
+
+## 2026-10-20 — v22.21 correzione visibilità illustrazioni nelle schede corso
+- Segnalazione CNA: immagini GP04 presenti ma non visibili nell'**agenda corso** e nelle **schede argomento**. Root cause verificata: app.js caricava GP04 solo dentro `buildDeck`, mentre `topicView` usava sempre `assets/general.svg`; GP04 `pick` scartava i topic con `visual_mode=authored`. In Supabase verificati molti corsi effettivamente pubblicati con `idea_images` già presenti, quindi esclusi dal vecchio filtro.
+- UI corretta **senza scrivere su DB**: per ogni topic DB-backed di corsi non congelati e corrispondenti alle famiglie esistenti, thumbnail GP04 nell'agenda; sezione esplicita *Illustrazioni dell'argomento* con fino a 2 schemi originali nella scheda. La scelta include anche titoli generici con tema riconosciuto dal riassunto. I 27 corsi frozen restano esclusi.
+- Nella proiezione il tema authored conserva la propria immagine principale e gli SVG GP04 entrano solo negli slot supplementari. Stampa A4 usa ancora stesso `buildDeck`; niente incremento ore/minuti né nuovi slide aggiunti, né duplicazioni in database. La galleria delle normali schede è CSS responsive 1 colonna mobile e 2 desktop. Nessun PDF di terzi pubblicato ai corsisti.
+- CSS `graphic-pack-04-gallery.css`, PWA `safety-training-v22-50`, regressioni selector/agenda/schede/deck. Convalida necessaria con CI e smoke test browser reale, incluso hard refresh se la PWA mostra asset cached.

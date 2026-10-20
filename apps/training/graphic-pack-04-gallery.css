@@ -1,0 +1,10 @@
+/* Original GP04 figures visible in normal course agenda and detail views. */
+.timeline-topics button .st-topic-thumb{display:block;width:100%;height:132px;max-width:100%;object-fit:contain;border-radius:10px;background:#172d41;border:1px solid rgba(255,255,255,.12)}
+.st-extra-illustrations{margin:18px 0 24px;border-color:rgba(129,207,192,.35)}
+.st-extra-illustrations>p{margin-bottom:16px}
+.st-extra-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.st-extra-figure{min-width:0;margin:0;border-radius:15px;overflow:hidden;background:#102236;border:1px solid rgba(255,255,255,.16)}
+.st-extra-figure img{display:block;max-width:100%;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;background:#122b40}
+.st-extra-figure figcaption{padding:12px 14px;color:#d9eee9;font-size:.88rem;line-height:1.45}
+@media(max-width:720px){.st-extra-grid{grid-template-columns:1fr}.timeline-topics button .st-topic-thumb{height:160px}}
+@media print{.st-extra-illustrations{break-inside:avoid}.st-extra-grid{grid-template-columns:1fr 1fr}.st-extra-figure{background:#fff;border:1px solid #aaa}.st-extra-figure figcaption{color:#222}.st-extra-figure img{background:#fff}}

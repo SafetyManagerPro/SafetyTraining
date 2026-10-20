@@ -64,6 +64,17 @@ function getTopicImage(t){
  if(valid) return {src:`assets/${valid.file}`,caption:valid.caption||''};
  return {src:`assets/${t.visual||'general'}.svg`,caption:'Schema visuale di supporto'};
 }
+
+// Only original, additive diagrams. Never mutate authored content or frozen course data.
+function topicAdditionalVisuals(course,topic){
+ return (window.SAFETY_GRAPHIC_PACK_04?.pick?.(course,topic)||[]).slice(0,2);
+}
+function topicIllustrationsHtml(course,topic){
+ const items=topicAdditionalVisuals(course,topic);
+ if(!items.length)return '';
+ return '<section class="section st-extra-illustrations" aria-label="Illustrazioni per l’argomento"><h3>🖼 Illustrazioni dell’argomento</h3><p class="muted">Schemi originali aggiuntivi per spiegare rischi e comportamenti sicuri. Le immagini didattiche già presenti restano disponibili.</p><div class="st-extra-grid">'+items.map(item=>'<figure class="st-extra-figure"><img loading="lazy" decoding="async" src="'+esc(item.src)+'" alt="'+esc(item.caption||topic.title)+'"><figcaption>'+esc(item.caption||'Schema didattico')+'</figcaption></figure>').join('')+'</div></section>';
+}
+
 function concise(arr,n=4){return (arr||[]).slice(0,n)}
 function slideTitle(t){return t?.slide_title||t?.title||''}
 function splitSentences(text,maxChars=235){
@@ -215,16 +226,18 @@ function buildDeck(c){
      // Original Graphic Pack 01: only unfrozen DB-backed lessons without authored visuals.
      // A view-layer choice; does not change the source LU or its published version.
      const originalVisuals=[
-       ...(window.SAFETY_GRAPHIC_PACK_04?.pick?.(c,t)||[]),
+       ...topicAdditionalVisuals(c,t),
        ...(window.SAFETY_GRAPHIC_PACK_02?.pick?.(c,t)||[]),
        ...(window.SAFETY_GRAPHIC_PACK_03?.pick?.(c,t)||[]),
        ...(window.SAFETY_GRAPHIC_PACK_01?.pick?.(c,t)||[])
      ];
      const pdfVisuals=window.SAFETY_SOURCE_VISUALS_V23?.pick?.(c,t)||[];
      const packVisuals=[...originalVisuals.slice(0,1),...pdfVisuals.slice(0,1),...originalVisuals.slice(1)].filter((visual,i,arr)=>arr.findIndex(v=>v.src===visual.src)===i).slice(0,3);
-     const img=packVisuals[0]||getTopicImage(t);
-     const img2=packVisuals[1]||topicSecondImage(t);
-     const img3=packVisuals[2]||topicThirdImage(t);
+     // An authored course keeps its existing lead image; GP04 only enriches later image slots.
+     const authoredMain=t.presentation_quality?.visual_mode==='authored'?getTopicImage(t):null;
+     const img=authoredMain||packVisuals[0]||getTopicImage(t);
+     const img2=packVisuals.find(v=>v.src!==img.src)||topicSecondImage(t);
+     const img3=packVisuals.find(v=>v.src!==img.src&&v.src!==img2.src)||topicThirdImage(t);
      const topicSlides=[];
      // Opening = one message + large image. No long explanation on the first slide.
      topicSlides.push({type:'concept',weight:.8,img,summary:t.summary,title});
@@ -529,7 +542,7 @@ function courseView(c){
  const mods=presentationModules(c);
  app.innerHTML=`<div class="breadcrumb"><button onclick="setHash('')">Home</button> › ${esc(c.title)}</div>
  <section class="hero agenda-hero"><span class="pill">AGENDA DEL CORSO</span><h1>${c.icon} ${esc(c.title)}</h1><p>${esc(c.subtitle)}</p><div class="agenda-summary"><strong>${fmtMin(total)}</strong><span>${mods.length} moduli</span><span>${c.topics.length} argomenti</span></div><button class="openbtn big" onclick="setHash('deck/${c.id}/0')">▶ Avvia presentazione dall'inizio</button></section>
- <div class="timeline">${mods.map((m,mi)=>`<article class="timeline-module"><div class="timeline-time"><strong>${clockMin(m.start_minute)}</strong><span>→ ${clockMin(m.end_minute)}</span></div><div class="timeline-content"><div class="module-head"><div><span class="module-num">MODULO ${mi+1}</span><h2>${esc(m.title)}</h2><p>${fmtMin(m.minutes)}</p></div><button class="openbtn" onclick="setHash('deck/${c.id}/${moduleSlideIndex(c,mi)}')">▶ Avvia da qui</button></div><div class="timeline-topics">${m.topic_ids.map(id=>{const t=getTopic(c,id);return `<button onclick="setHash('topic/${c.id}/${t.id}')"><span>${t.minutes} min</span><strong>${esc(t.title)}</strong><em>Dettaglio / approfondimento</em></button>`}).join('')}</div></div></article>`).join('')}</div>
+ <div class="timeline">${mods.map((m,mi)=>`<article class="timeline-module"><div class="timeline-time"><strong>${clockMin(m.start_minute)}</strong><span>→ ${clockMin(m.end_minute)}</span></div><div class="timeline-content"><div class="module-head"><div><span class="module-num">MODULO ${mi+1}</span><h2>${esc(m.title)}</h2><p>${fmtMin(m.minutes)}</p></div><button class="openbtn" onclick="setHash('deck/${c.id}/${moduleSlideIndex(c,mi)}')">▶ Avvia da qui</button></div><div class="timeline-topics">${m.topic_ids.map(id=>{const t=getTopic(c,id);const visuals=topicAdditionalVisuals(c,t);return `<button onclick="setHash('topic/${c.id}/${t.id}')">${visuals.length?`<img class="st-topic-thumb" loading="lazy" decoding="async" src="${esc(visuals[0].src)}" alt="">`:''}<span>${t.minutes} min</span><strong>${esc(t.title)}</strong><em>${visuals.length?'🖼 Illustrazioni disponibili · ':''}Dettaglio / approfondimento</em></button>`}).join('')}</div></div></article>`).join('')}</div>
  <div class="notice">Gli approfondimenti delle vecchie schede sono ora inseriti anche nella <strong>sequenza di proiezione</strong>, nel punto coerente con ciascun argomento. Le schede restano disponibili per consultazione.</div>`;
 }
 window.toggleFav=(cid,tid,e)=>{e?.stopPropagation();let k=cid+':'+tid;favs.has(k)?favs.delete(k):favs.add(k);saveFavs();renderRoute();}
@@ -557,6 +570,7 @@ function topicView(c,t){
  <button class="ghost" onclick="toggleFullscreen()">⛶ Presentazione</button><button class="ghost" onclick="window.print()">🖨 Stampa scheda</button></div>
  <div class="topicprogress"><span style="width:${((idx+1)/c.topics.length)*100}%"></span></div>
  <div class="visualcard"><img src="assets/${visual}.svg" alt="Schema visuale ${esc(t.title)}"><div class="imgcaption">Schema sintetico locale a supporto della spiegazione dell'argomento.</div></div>
+ ${topicIllustrationsHtml(c,t)}
  <div class="section summary"><h3>In aula</h3><p>${esc(t.summary)}</p></div>
  <div class="section"><h3>Approfondimento</h3><p>${esc(t.detail)}</p></div>
  ${explainBlocks(t)}
