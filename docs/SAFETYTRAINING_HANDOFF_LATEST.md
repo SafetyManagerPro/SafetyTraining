@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-21
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-75`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-76`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -824,3 +824,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Verifica SQL: 76 proposte distribuite in 11 corsi, tra cui antincendio L2/L3, carrelli industriali/combinati, MMT complessivo/escavatori, PLE, gru, lavori in quota, primo soccorso A/B-C. Frontend `image-suggestions-v26.js` le elenca in Gestione immagini con descrizioni Corso → Modulo → Argomento e motivazioni.
 - Il motore delle slide/PDF continua a rispettare doppia validazione tecnica e dei diritti, esclusioni e limiti sui corsi frozen. La nuova tabella è una coda editoriale, non pubblica e non attiva da sola le 76 proposte.
 - PWA `safety-training-v22-75`, test `tests/image-placements-v30.test.mjs`. CI e deployment da verificare.
+
+## 2026-10-21 — v24.8.15 correzione Stampa bloccata: Modulo 1 senza Learning Unit
+- Diagnosi Supabase READ-ONLY: **6 corsi pubblicati** con moduli segnaposto storici senza LU, nello STESSO `position=1` di un modulo reale con LU pubblicate: `agg_lav`, `agg_dir`, `agg_prep`, `agg_rls_4h`, `agg_rls_8h`, `lav_quota`. Le versioni v2 pubblicate contengono rispettivamente 4,4,4,4,8,8 collegamenti LU validi nei loro moduli effettivi; non c'è perdita delle Learning Unit.
+- `admin-print-lessons-v23.js`: introdotta `classifyPrintModules(modules,links)`; omette dal processo di stampa SOLO modulo **vuoto** con uno dei tre `module_key` storici `dynamic_update`, `dynamic_rls_update`, `height_theory` QUANDO esiste un altro modulo alla stessa posizione con Learning Unit. Altri moduli vuoti o corsi privi di LU restano bloccati. `loadBook` restituisce le LU pubblicate intatte e `ignoredPlaceholders`; il riepilogo stampa spiega l'omissione.
+- `admin-print-slides-v23.js`: usa lo stesso `loadBook`, mostra avviso nelle slide stampabili, mantiene preflight `inspectBook` e controllo delle immagini. `db-slide-adapter.js`: la presentazione in aula scarta lo stesso guscio duplicato dalla durata didattica senza cancellare dati o modificare il curriculum pubblicato.
+- Nessuna scrittura al database, nessun cambiamento a certificati, presenze, diritti o 27 corsi frozen. Solo normalizzazione della vista. Test nuovo `tests/print-legacy-placeholders-v31.test.mjs` con casi reali e guardie per i moduli veramente incompleti, incluso caricamento mock e adattamento deck. PWA cache `safety-training-v22-76`.
+- GitHub Actions e distribuzione Vercel da verificare dopo commit. Per prova manuale: Amministrazione → Stampa slide / Stampa lezioni, selezionare `agg_lav` o `lav_quota`, versione v2. Deve apparire un modulo reale con LU e un avviso sul segnaposto omesso; il bottone Stampa si sblocca solo dopo il normale preflight immagini.

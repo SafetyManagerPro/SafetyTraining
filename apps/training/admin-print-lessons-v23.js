@@ -181,6 +181,25 @@
     })));
     return {ready:missing.every(x=>x===null),checked:imgs.length,missing:missing.filter(Boolean)};
   }
+  // Some historical published versions include duplicate, empty scheduling
+  // placeholders alongside a fully populated module at the same position.
+  // Ignore ONLY these known scaffold keys when a real sibling has Learning Units.
+  // Unknown or genuinely empty modules still fail inspectBook and block printing.
+  const LEGACY_EMPTY_KEYS=new Set(['dynamic_update','dynamic_rls_update','height_theory']);
+  function classifyPrintModules(modules,links){
+    const counts=new Map();
+    for(const link of links||[])counts.set(link.module_id,(counts.get(link.module_id)||0)+1);
+    const kept=[],ignored=[];
+    for(const module of modules||[]){
+      const sibling=(modules||[]).some(other=>other.id!==module.id &&
+        Number(other.position)===Number(module.position) &&
+        (counts.get(other.id)||0)>0);
+      if(LEGACY_EMPTY_KEYS.has(String(module.module_key||'')) &&
+         !(counts.get(module.id)||0) && sibling)ignored.push(module);
+      else kept.push(module);
+    }
+    return {modules:kept,ignored};
+  }
   async function loadBook(client,course,version){
     if(version.course_id!==course.id||version.status!=='published')throw Error('Versione non pubblicata o non appartenente al corso.');
     const modules=await limited(client.from('course_modules').select('id,title,module_key,position,nominal_minutes',{count:'exact'})
@@ -189,6 +208,8 @@
     const links=await limited(client.from('course_module_units').select('module_id,unit_version_id,position,required',{count:'exact'})
       .in('module_id',modules.map(x=>x.id)).order('position'),MAX_UNITS,'Collegamenti Learning Unit');
     if(!links.length)throw Error('Nessuna Learning Unit nella versione selezionata.');
+    const normalized=classifyPrintModules(modules,links);
+    const printableModules=normalized.modules;
     const ids=[...new Set(links.map(x=>x.unit_version_id))];
     const versions=await limited(client.from('learning_unit_versions').select('id,learning_unit_id,version_number,status,content',{count:'exact'})
       .in('id',ids),MAX_UNITS,'Testi Learning Unit');
@@ -196,7 +217,7 @@
       .in('id',[...new Set(versions.map(v=>v.learning_unit_id))]),MAX_UNITS,'Anagrafiche Learning Unit');
     const textMap=new Map(versions.map(v=>[v.id,v]));
     const labelMap=new Map(units.map(v=>[v.id,v]));
-    const linksByModule=new Map(modules.map(m=>[m.id,[]]));
+    const linksByModule=new Map(printableModules.map(m=>[m.id,[]]));
     for(const link of links){
       const v=textMap.get(link.unit_version_id);const base=v&&labelMap.get(v.learning_unit_id);
       if(!v||!base||!linksByModule.has(link.module_id))throw Error('Unità non visibile o incompleta. Stampa bloccata.');
@@ -204,7 +225,8 @@
       linksByModule.get(link.module_id).push({...link,title:base.title,content:v.content,
         minutes:v.content?.minutes??base.default_minutes,unitVersion:v.version_number,unitStatus:v.status});
     }
-    return {course,version,modules:modules.map(m=>({...m,minutes:m.nominal_minutes,
+    return {course,version,ignoredPlaceholders:normalized.ignored.map(m=>({module_key:m.module_key,title:m.title,position:m.position})),
+      modules:printableModules.map(m=>({...m,minutes:m.nominal_minutes,
       units:linksByModule.get(m.id).sort((a,b)=>a.position-b.position)}))};
   }
   function ensureNav(){
@@ -261,6 +283,9 @@
       const summary='<section class="admin-card" role="status"><h2>Verifica dispensa</h2>'+
         '<p><strong>'+report.moduleCount+' moduli · '+report.unitCount+' Learning Unit</strong> · corso v'+
         esc(version.version_number)+'</p>'+
+        (book.ignoredPlaceholders?.length?
+          '<p class="admin-note">'+book.ignoredPlaceholders.length+
+          ' modulo/i segnaposto storico/i senza LU omesso/i dalla stampa; Learning Unit reali conservate.</p>':'')+
         (report.ready?'<p class="admin-ok">Tutte le unità della versione selezionata hanno contenuti didattici stampabili.</p>':
           '<div class="admin-error"><strong>Stampa bloccata: contenuti incompleti</strong><ul>'+
             report.issues.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>')+
@@ -331,6 +356,6 @@
     for(let i=0;i<40&&!root();i++)await new Promise(r=>setTimeout(r,150));
     ensureNav();bind();
   }
-  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,inspectBook,verifyPrintImages,loadBook,beginPrintStage,finishPrintStage,render};
+  window.SAFETY_ADMIN_PRINT_LESSONS_V23={lessonHtml,documentHtml,renderValue,renderSources,renderVisuals,inspectBook,verifyPrintImages,loadBook,classifyPrintModules,beginPrintStage,finishPrintStage,render};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

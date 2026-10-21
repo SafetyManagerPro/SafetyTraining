@@ -313,9 +313,18 @@
   function adaptBundle(bundle) {
     const c = bundle?.course || {};
     const rawModules = Array.isArray(bundle?.modules) ? bundle.modules : [];
+    const placeholderKeys=new Set(['dynamic_update','dynamic_rls_update','height_theory']);
+    // Prevent a legacy empty scaffold at the same position as a real module
+    // from contributing fake duration or a blank section to the slide deck.
+    const usableModules=rawModules.filter(m=>!(
+      placeholderKeys.has(String(m?.module_key||'')) &&
+      !(Array.isArray(m?.units)&&m.units.length) &&
+      rawModules.some(other=>other!==m&&Number(other?.position)===Number(m?.position) &&
+        Array.isArray(other?.units)&&other.units.length>0)
+    ));
     let cursor = 0;
     const topics = [];
-    const modules = rawModules.map((m, mi) => {
+    const modules = usableModules.map((m, mi) => {
       const units = Array.isArray(m?.units) ? [...m.units].sort((a, b) => numberOr(a.position) - numberOr(b.position)) : [];
       const moduleKey = firstText(m?.module_key, `db-module-${mi + 1}`);
       const moduleTopics = units.map((u, ui) => normalizeTopic(u, topics.length + ui, {

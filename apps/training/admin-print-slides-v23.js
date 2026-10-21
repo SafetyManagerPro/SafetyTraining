@@ -174,7 +174,11 @@
       if(!current(seq,who))return;
       const markup=createSheets(course,version,result.slides,result.renderSlide);
       host().innerHTML=selectors+'<p class="admin-note">Anteprima completa · '+result.slides.length+
-        ' slide · '+result.slides.length+' fogli A4. Le slide sono ricavate dal motore originale della presentazione.</p>'+markup;
+        ' slide · '+result.slides.length+' fogli A4. Le slide sono ricavate dal motore originale della presentazione.</p>'+
+        (result.book.ignoredPlaceholders?.length?
+          '<p class="admin-note">'+result.book.ignoredPlaceholders.length+
+          ' modulo/i segnaposto storico/i senza LU omesso/i; le lezioni reali e il contenuto stampabile sono invariati.</p>':'')+
+        markup;
       const preview=host().querySelector('#adminPrintableSlides');
       removeInteraction(preview);
       scaleSlides(preview);
