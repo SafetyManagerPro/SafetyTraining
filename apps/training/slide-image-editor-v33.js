@@ -98,7 +98,14 @@ async function open(c,slide,index){
  const catalog=window.SAFETY_LOCAL_VISUALS_V32?.catalog||[];
  let privateAssets=[];
  let addMode=false;
- const choose=item=>{if(addMode){if(selection.length<3)selection.push(item);}else{selection=[item];}refresh();};
+ const choose=item=>{
+  if(addMode){
+   // Never render the same visual twice in the same slide gallery.
+   if(selection.some(x=>x.kind===item.kind&&(x.kind==='local'?x.src===item.src:x.ref_id===item.ref_id)))return;
+   if(selection.length<3)selection.push(item);
+  }else selection=[item];
+  refresh();
+ };
  const refresh=()=>{
   chosen.innerHTML=selection.map((x,i)=>itemHtml({src:x.src||'assets/general.svg',caption:x.caption||x.ref_id},i)).join('')||'<p>Nessuna immagine. Il salvataggio mostrerà lo schema neutro.</p>';
   const q=search.value.toLowerCase().trim();const matches=catalog.filter(x=>x.toLowerCase().includes(q)).slice(0,60);
@@ -139,7 +146,11 @@ async function open(c,slide,index){
    if(j>=0&&j<selection.length)[selection[i],selection[j]]=[selection[j],selection[i]];refresh();return;}
   const reset=e.target.closest('[data-reset]'),save=e.target.closest('[data-save]');
   if(!reset&&!save)return;
-  const notice=modal.querySelector('#slideEditNotice');notice.textContent='Salvataggio…';
+  const notice=modal.querySelector('#slideEditNotice');
+  if(modal.dataset.saving==='1')return;
+  modal.dataset.saving='1';
+  modal.querySelectorAll('button').forEach(button=>button.disabled=true);
+  notice.textContent='Salvataggio…';
   const payload=reset?null:selection.map(x=>({kind:x.kind,src:x.kind==='local'?x.src:undefined,ref_id:x.kind==='private_pdf'?x.ref_id:undefined,caption:x.caption||''}));
   try{
    const {error}=await db().rpc('save_slide_images_v33',{p_course_key:c.id,p_version_number:Number(c.db_version),p_slide_uid:slide.uid,p_items:payload});
@@ -149,6 +160,7 @@ async function open(c,slide,index){
    await refreshProjected(c,index);
    document.dispatchEvent(new Event('safety:slide-image-edited'));
   }catch(err){notice.textContent='Salvataggio negato: '+(err.message||err);}
+  finally{if(modal?.isConnected){modal.dataset.saving='0';modal.querySelectorAll('button').forEach(button=>button.disabled=false);}}
  };
 }
 async function applyDeck(slides,c){
