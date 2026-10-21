@@ -3,6 +3,7 @@
 const db=()=>window.SAFETY_CLOUD?.state?.client;
 const uid=()=>window.SAFETY_CLOUD?.state?.user?.id||null;
 let owner=false,who=null,currentKey='',rows=new Map(),loaded=false,modal=null;
+let projectedRevision=0,loadRevision=0;
 const temporaryPrivateUrls=new Set();
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const isFrozen=c=>!!(c?.metadata?.freeze_scope||c?.metadata?.frozen||c?.metadata?.is_frozen||c?.metadata?.course_frozen||c?.frozen);
@@ -12,11 +13,12 @@ function key(c){return String(c?.id||'')+'@'+Number(c?.db_version||0);}
 async function load(c){
  const k=key(c),actor=uid();
  if(k===currentKey&&loaded)return;
+ const requestRevision=++loadRevision;
  currentKey=k;loaded=false;rows=new Map();
  if(!actor||!c?.presentation_generated_from_db||!db())return;
  const {data,error}=await db().rpc('read_slide_images_v33',{p_course_key:c.id,p_version_number:Number(c.db_version)});
  if(error)throw error;
- if(uid()!==actor||currentKey!==k)return;
+ if(uid()!==actor||currentKey!==k||requestRevision!==loadRevision)return;
  for(const row of data||[])rows.set(row.slide_uid,row.items||[]);
  loaded=true;
 }
@@ -48,9 +50,10 @@ async function apply(slide,c){
  return {...slide,img:out[0],visualGallery:out.slice(1)};
 }
 async function refreshProjected(c,index){
+ const revision=++projectedRevision;
  if(!window.__deckSlides?.[index])return;
  const original=window.__deckSlides[index],changed=await apply(original,c);
- if(window.__deck?.cid!==c.id||window.__deck?.index!==index)return;
+ if(revision!==projectedRevision||window.__deck?.cid!==c.id||window.__deck?.index!==index||currentKey!==key(c))return;
  const article=document.getElementById('projectorSlide');if(!article)return;
  article.innerHTML=window.SAFETY_DECK_RENDER.deckSlideBody(changed,index);
 }
@@ -153,6 +156,6 @@ async function applyDeck(slides,c){
  await load(c);
  return Promise.all(slides.map(s=>apply(s,c)));
 }
-window.addEventListener('safety:auth-changed',()=>{who=null;owner=false;rows.clear();temporaryPrivateUrls.clear();loaded=false;currentKey='';modal?.remove();modal=null;});
+window.addEventListener('safety:auth-changed',()=>{projectedRevision++;loadRevision++;who=null;owner=false;rows.clear();temporaryPrivateUrls.clear();loaded=false;currentKey='';modal?.remove();modal=null;});
 window.SAFETY_SLIDE_IMAGE_EDITOR_V33={authenticate,visit,applyDeck,apply,canEdit:()=>owner,load,isTrustedPrivateUrl:url=>owner&&temporaryPrivateUrls.has(url)};
 })();
