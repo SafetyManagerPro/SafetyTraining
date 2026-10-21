@@ -798,3 +798,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ## 2026-10-21 — v24.8.12.1 test regression alias
 - Test `tests/image-suggestions-v26.test.mjs` corretto: dopo l'introduzione della tabella di confronto verificato `training_integral_pdf_comparison_v28`, il front-end non interroga più direttamente `training_integral_pdf_similarity_v27`. Primo ciclo CI fallito per vecchia asserzione; nuovo ciclo da verificare.
 - Nessuna variazione ai contenuti, alla revisione tecnica, ai permessi o al database.
+
+## 2026-10-21 — v24.8.12.2 seconda sincronizzazione test
+- Dopo nuova dicitura UI «Questa osservazione non approva i diritti», corretto il test precedente rimasto alla frase «La valutazione visiva non approva i diritti». CI precedente fallita per una vecchia asserzione testuale, non un errore dati. Nessuna modifica a source, rights, RLS o corsi.

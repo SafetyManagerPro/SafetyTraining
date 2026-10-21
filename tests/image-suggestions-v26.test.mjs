@@ -31,7 +31,7 @@ test('visual inspection evidence and similarity flags appear as auditable privat
  const sql=read('supabase/migrations/20261021174500_v27_visual_figure_audit.sql');
  assert.match(source,/training_integral_pdf_visual_audit_v27/);
  assert.match(source,/training_integral_pdf_comparison_v28/);
- assert.match(source,/La valutazione visiva non approva i diritti/);
+ assert.match(source,/Questa osservazione non approva i diritti/);
  assert.match(sql,/visual_audit_v27_admin_select/);
  assert.match(sql,/similarity_v27_admin_select/);
  assert.match(sql,/contact_sheet_visual_inspection/);
