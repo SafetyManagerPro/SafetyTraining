@@ -23,6 +23,8 @@ test('real editor toolbar and owner-only selected images feed screen and PDF pri
  for(const marker of ['can_edit_slide_images_v33','read_slide_images_v33','save_slide_images_v33','data-pick','data-remove','data-move','data-reset','data-save','training_integral_pdf_reviews_v25','technical_status','rights_status','training_image_exclusions_v26','createSignedUrl','slide.uid'])assert.ok(editor.includes(marker),marker);
  assert.match(app,/SAFETY_SLIDE_IMAGE_EDITOR_V33\?\.visit/);
  assert.match(print,/SAFETY_SLIDE_IMAGE_EDITOR_V33\?\.applyDeck/);
+ assert.match(print,/SAFETY_SLIDE_IMAGE_EDITOR_V33\?\.isTrustedPrivateUrl/);
+ assert.match(editor,/temporaryPrivateUrls\.clear\(\)/);
  assert.ok(html.indexOf('slide-image-editor-v33.js')<html.indexOf('app.js'));
  assert.match(sw,/slide-image-editor-v33\.js/);
  assert.match(read('apps/training/visual-asset-guard-v32.js'),/catalog:\[\.\.\.AVAILABLE\]/);

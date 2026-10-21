@@ -854,3 +854,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-21 — v24.8.17.1 test noneditor
 - Primo run CI fallito per test che cercava la parola «noneditor» non più presente come commento nello script. Riallineata la verifica al controllo di accesso effettivo `if(!owner&&!out.length&&chosen.some(...))`. Runtime e database immutati.
+
+## 2026-10-21 — v24.8.17.2 URL privati verificati in stampa
+- L'editor tiene un insieme effimero di URL firmati realmente ottenuti da Supabase Storage dopo verifica di `technical_status='approved'` e `rights_status='cleared_internal'`; `admin-print-slides-v23.js` accetta quelle URL solo se riconosciute da `SAFETY_SLIDE_IMAGE_EDITOR_V33.isTrustedPrivateUrl`, e solo con sessione editor valida. L'insieme viene svuotato su cambio auth. Non è un bypass arbitrario del preflight PDF.

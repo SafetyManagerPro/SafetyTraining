@@ -12,7 +12,7 @@
   function safeSlideImage(src){
     const value=String(src||'');
     if(/^(?:\.\/)?assets\/(?:undefined|null|nan)(?:\.[a-z0-9]+)?$/i.test(value))return null;
-    return PHOTO.test(value)&&!value.includes('..')?value.replace(/^\.\//,''):(window.SAFETY_INTEGRAL_PDF_V24?.isTrustedSrc?.(value)?value:null);
+    return PHOTO.test(value)&&!value.includes('..')?value.replace(/^\.\//,''):((window.SAFETY_INTEGRAL_PDF_V24?.isTrustedSrc?.(value)||window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.isTrustedPrivateUrl?.(value))?value:null);
   }
   function isUnassignedImage(src){
     // Legacy course graphics can reference a missing image key. Recover only

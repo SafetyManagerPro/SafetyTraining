@@ -3,6 +3,7 @@
 const db=()=>window.SAFETY_CLOUD?.state?.client;
 const uid=()=>window.SAFETY_CLOUD?.state?.user?.id||null;
 let owner=false,who=null,currentKey='',rows=new Map(),loaded=false,modal=null;
+const temporaryPrivateUrls=new Set();
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const isFrozen=c=>!!(c?.metadata?.freeze_scope||c?.metadata?.frozen||c?.metadata?.is_frozen||c?.metadata?.course_frozen||c?.frozen);
 const editable=c=>!!(owner&&c?.presentation_generated_from_db&&c?.db_status==='published'&&!isFrozen(c));
@@ -26,7 +27,9 @@ async function signPdf(item){
   .eq('id',item.ref_id).maybeSingle();
  if(error||!data?.asset?.storage_path)return null;
  const signed=await db().storage.from('training-source-figures').createSignedUrl(data.asset.storage_path,900);
- return signed.error?null:signed.data?.signedUrl||null;
+ if(signed.error||!signed.data?.signedUrl)return null;
+ temporaryPrivateUrls.add(signed.data.signedUrl);
+ return signed.data.signedUrl;
 }
 async function apply(slide,c){
  if(!loaded||!slide?.uid||currentKey!==key(c)||!rows.has(slide.uid))return slide;
@@ -146,6 +149,6 @@ async function applyDeck(slides,c){
  await load(c);
  return Promise.all(slides.map(s=>apply(s,c)));
 }
-window.addEventListener('safety:auth-changed',()=>{who=null;owner=false;rows.clear();loaded=false;currentKey='';modal?.remove();modal=null;});
-window.SAFETY_SLIDE_IMAGE_EDITOR_V33={authenticate,visit,applyDeck,apply,canEdit:()=>owner,load};
+window.addEventListener('safety:auth-changed',()=>{who=null;owner=false;rows.clear();temporaryPrivateUrls.clear();loaded=false;currentKey='';modal?.remove();modal=null;});
+window.SAFETY_SLIDE_IMAGE_EDITOR_V33={authenticate,visit,applyDeck,apply,canEdit:()=>owner,load,isTrustedPrivateUrl:url=>owner&&temporaryPrivateUrls.has(url)};
 })();
