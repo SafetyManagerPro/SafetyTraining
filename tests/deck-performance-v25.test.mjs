@@ -29,7 +29,7 @@ test('offline install precaches a small shell instead of saturating the connecti
  const sw=read('apps/training/sw.js');
  assert.match(sw,/ASSETS\.filter\(asset=>essential\.has\(asset\)\)/);
  assert.match(sw,/caches\.match\(event\.request\)/);
- assert.match(sw,/safety-training-v22-69/);
+ assert.match(sw,/safety-training-v22-70/);
 });
 
 test('visible forward/backward controls are keyboard accessible and disabled at endpoints',()=>{

@@ -131,6 +131,11 @@ async function prepareCourse(course,{client}={}){
   // A rejected technical or rights review must immediately prevent projection,
   // while unreviewed figures may still be inspected in the private admin deck.
   const reviews=new Map();
+  const excluded=new Set();
+  const {data:exclusions,error:exclusionError}=await db.from('training_image_exclusions_v26')
+   .select('image_key').eq('image_kind','private_pdf').eq('excluded',true);
+  if(exclusionError)throw exclusionError;
+  for(const item of exclusions||[])excluded.add(item.image_key);
   for(let i=0;i<reviewable.length;i+=100){
     const slice=reviewable.slice(i,i+100);
     const {data:decisions,error:reviewError}=await db.from('training_integral_pdf_reviews_v25')
@@ -139,6 +144,7 @@ async function prepareCourse(course,{client}={}){
     for(const x of decisions||[])reviews.set(x.ref_id,x);
   }
   const eligible=matching.filter(x=>{
+    if(excluded.has(x.ref.id))return false;
     const decision=reviews.get(x.ref.id);
     if(x.manual)return decision?.technical_status==='approved'&&decision?.rights_status==='cleared_internal';
     return decision?.technical_status!=='rejected'&&decision?.rights_status!=='rejected';
