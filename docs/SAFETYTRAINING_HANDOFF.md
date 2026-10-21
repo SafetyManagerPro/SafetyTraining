@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-21
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-66`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-67`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -735,3 +735,12 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Audit SQL in sola lettura: 6 corsi attrezzature hanno ciascuno un test attivo da 10 domande con soglia 70%; tabella iscrizioni 2 record, sessioni 0, tentativi 0; nessun riferimento orfano o contatore fuori intervallo nel campione esaminato. RLS attiva sulle 13 tabelle principali esaminate. **Non è un test end-to-end autenticato**.
 - Difetto confermato: `final-test-v20.js` creava sempre `attempt_no:1`; Supabase impone vincolo unico su iscrizione, test e numero tentativo. Corretto calcolando il massimo tentativo precedente + 1 e aggiunto test VM di regressione. Nessuna scrittura a iscrizioni o tentativi esistenti.
 - PWA `safety-training-v22-66`. Aggiornato `docs/SAFETYTRAINING_QA_ATTREZZATURE_20261021.md`. Ancora da collaudare con account prova controllato: rinnovo tentativi, valutazione server, sessioni, autorizzazione pratica e rilascio attestati. Verificare CI e Vercel.
+
+## 2026-10-21 — v24.8.7 presentazioni veloci, piramidi leggibili, frecce e gestione immagini
+- Segnalazione: tempi di caricamento delle presentazioni e passaggi fra slide lunghi, apice della piramide illeggibile, assenza frecce testuali evidenti e richiesta di un inventario amministrativo delle immagini.
+- Proiettore: aggiunta cache deck per oggetto corso, riutilizzo del contenitore esistente e sostituzione del solo articolo della slide in navigazione; nessuna compilazione integrale ogni passo. Frecce «← Indietro» e «Avanti →» nel footer, mantenuti controlli laterali e tasti direzionali.
+- Caricamento privato: le tavole PDF vengono associate alle Learning Unit PRIMA di richiedere URL firmati; ingresso deck immediato da SVG locali mentre i PDF riservati autorizzati arrivano, con refresh sicuro dell'indice senza mescolare sessioni. Dismesso il precache iniziale di centinaia di immagini: shell essenziale e cache on-demand.
+- Piramide dei pericoli: SVG corretto con testo breve al vertice, didascalia completa esterna ad alto contrasto, testi a capo e dimensione maggiore.
+- Aggiunta «Gestione immagini» nell'amministrazione: inventario navigabile dei **201 file grafici locali**, conteggi immagini/tavole private realmente importate, 24 anteprime per pagina, ricerca, categoria e accesso agli importatori/eliminatori già esistenti. Le immagini locali distribuite con l'app restano in sola lettura: gestire il relativo file richiede deploy. I PDF restano privati e con diritti/revisione richiesti.
+- PWA `safety-training-v22-67`; test `tests/deck-performance-v25.test.mjs` e validazione statica previsti nel pacchetto `npm run check`.
+- Documento tecnico: `docs/SAFETYTRAINING_PERFORMANCE_IMAGES_20261021.md`. Nessuna mutazione a Supabase/corsi frozen/frequenze/attestati. Necessari dopo deploy: QA cronometrato in browser autenticato e verifica visiva di proiettore, piramide e gestione immagini.

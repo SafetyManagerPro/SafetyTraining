@@ -1,0 +1,12 @@
+/* Visible, accessible slideshow arrows; the main image remains unobstructed. */
+.deck-pager{display:flex;gap:10px;align-items:center;justify-content:center;min-width:270px}
+.deck-pager button{border:1px solid #56778d;border-radius:9px;padding:8px 11px;background:#20354b;color:#f1f7fd;font-weight:700;font-size:14px;white-space:nowrap;cursor:pointer}
+.deck-pager button:hover:not(:disabled){background:#295578}
+.deck-pager button:disabled{opacity:.35;cursor:not-allowed}
+.deck-pager .deck-counter{min-width:64px;display:block;text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:680px){.deck-pager{min-width:0;gap:5px}.deck-pager button{font-size:12px;padding:8px 7px}.deck-pager .deck-counter{min-width:48px}}
+@media print{.deck-pager{display:none!important}}
+
+/* The third footer column contains both arrows and page counter. */
+.deck-footer{grid-template-columns:minmax(0,1fr) auto minmax(270px,max-content)!important}
+@media(max-width:800px){.deck-footer{grid-template-columns:minmax(0,1fr) auto!important}.deck-footer .deck-time{display:none!important}}

@@ -88,23 +88,24 @@ async function prepareCourse(course,{client}={}){
   }
   const list=[...unique.values()];
   if(!list.length){cache.set(name,{visuals:[],expires:Date.now()+5*60*1000});return[];}
-  const paths=list.map(r=>r.asset?.storage_path).filter(Boolean);
+  const topics=Array.isArray(course.topics)?course.topics:[];
+  const byTopic=new Map(topics.map(t=>[String(t.id),[]]));
+  const topicCounts=new Map();
+  for(const r of list){const key=String(r.topic||'').trim().toLowerCase();topicCounts.set(key,(topicCounts.get(key)||0)+1);}
+  // Match the page to a lesson before requesting a private signed URL.
+  // Generic and unassigned pages cannot stall the opening of presentations.
+  const eligible=list.map(r=>({ref:r,index:placementIndex(course,r,topics,topicCounts)}))
+    .filter(x=>x.index>=0&&topics[x.index]&&x.ref.asset?.storage_path);
+  const paths=[...new Set(eligible.map(x=>x.ref.asset.storage_path))];
   const urls=new Map();
   for(let start=0;start<paths.length;start+=50){
    const batch=paths.slice(start,start+50),res=await db.storage.from(BUCKET).createSignedUrls(batch,1200);
    if(res.error)throw res.error;
    (res.data||[]).forEach((u,i)=>{if(u.signedUrl&&!u.error){urls.set(batch[i],u.signedUrl);trusted.add(u.signedUrl);}});
   }
-  const available=list.filter(r=>urls.has(r.asset?.storage_path));
-  const topics=Array.isArray(course.topics)?course.topics:[];
-  const byTopic=new Map(topics.map(t=>[String(t.id),[]]));
-  const topicCounts=new Map();
-  for(const r of available){const key=String(r.topic||'').trim().toLowerCase();topicCounts.set(key,(topicCounts.get(key)||0)+1);}
-  for(const r of available){
-   const idx=placementIndex(course,r,topics,topicCounts);
-   // Uncertain figures remain in the admin catalog, never silently inserted in slides.
-   if(idx<0)continue;
-   const t=topics[idx];if(!t)continue;
+  for(const {ref:r,index:idx} of eligible){
+   if(!urls.has(r.asset.storage_path))continue;
+   const t=topics[idx];
    byTopic.get(String(t.id)).push({
      src:urls.get(r.asset.storage_path),
      caption:text('FONTE PDF DA VERIFICARE · '+r.category+' · '+r.source_document+' · pag. '+r.source_page),

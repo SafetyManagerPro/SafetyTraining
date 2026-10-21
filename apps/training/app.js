@@ -300,7 +300,7 @@ function buildDeck(c){
  return deck;
 }
 function moduleSlideIndex(c,mi){
- const d=buildDeck(c); return d.findIndex(s=>s.type==='module'&&s.moduleIndex===mi);
+ const d=cachedDeck(c); return d.findIndex(s=>s.type==='module'&&s.moduleIndex===mi);
 }
 window.deckGo=(cid,i)=>{setHash(`deck/${cid}/${Math.max(0,i)}`)};
 window.deckReveal=(id)=>{
@@ -311,7 +311,7 @@ window.deckReveal=(id)=>{
 };
 function slideVisualFigure(s,alt,extra=''){
  const extras=(s.visualGallery||[]).slice(0,2);
- const primary='<img src="'+esc(s.img.src)+'" alt="'+esc(alt)+'">';
+ const primary='<img decoding="async" src="'+esc(s.img.src)+'" alt="'+esc(alt)+'">';
  if(!extras.length)return '<figure class="slide-visual '+extra+'">'+primary+'<figcaption>'+esc(s.img.caption||'')+'</figcaption></figure>';
  const more=extras.map((v,i)=>'<img loading="eager" src="'+esc(v.src)+'" alt="'+esc(v.caption||'Schema supplementare '+(i+1))+'">').join('');
  return '<figure class="slide-visual st-multi-visual '+extra+'"><div class="st-slide-images">'+primary+more+'</div><figcaption>'+esc(s.img.caption||'')+' · Altri schemi inerenti alla lezione</figcaption></figure>';
@@ -323,7 +323,7 @@ function deckSlideBody(s,index){
    return `<div class="slide-module"><img class="st-brand-course" src="assets/cna-avellino.png" alt="CNA Avellino"><div class="slide-kicker">MODULO ${s.moduleIndex+1}</div><h1>${esc(s.title)}</h1><div class="slide-time-big">${fmtMin(s.module.minutes)} · tempo corso ${clockMin(s.module.start_minute)}–${clockMin(s.displayEnd||s.module.end_minute)}</div><div class="module-topic-list">${s.topics.map((t,i)=>`<div><span>${i+1}</span><strong>${esc(slideTitle(t))}</strong><em>${t.minutes} min</em></div>`).join('')}</div></div>`;
  }
  if(s.type==='visualAtlas'){
-   return '<div class="st-atlas-slide"><div class="slide-kicker">ATLANTE ILLUSTRATO · FIGURE AGGIUNTIVE</div><h1 class="st-atlas-heading">'+esc(s.title)+'</h1><div class="st-atlas-grid">'+(s.visuals||[]).map((v)=>'<figure><img src="'+esc(v.src)+'" alt="'+esc(v.caption)+'"><figcaption>'+esc(v.caption)+'</figcaption></figure>').join('')+'</div></div>';
+   return '<div class="st-atlas-slide"><div class="slide-kicker">ATLANTE ILLUSTRATO · FIGURE AGGIUNTIVE</div><h1 class="st-atlas-heading">'+esc(s.title)+'</h1><div class="st-atlas-grid">'+(s.visuals||[]).map((v)=>'<figure><img decoding="async" src="'+esc(v.src)+'" alt="'+esc(v.caption)+'"><figcaption>'+esc(v.caption)+'</figcaption></figure>').join('')+'</div></div>';
  }
  if(s.type==='concept'){
    return `<div class="slide-grid slide-opening"><div class="slide-copy"><div class="slide-kicker">NUOVO ARGOMENTO</div><h1>${esc(s.title)}</h1><div class="opening-statement">${esc(s.summary)}</div></div>${slideVisualFigure(s,s.title,'hero-visual')}</div>`;
@@ -381,20 +381,52 @@ function deckSlideBody(s,index){
 }
 // Read-only access to the exact presentation builders for visual printing.
 window.SAFETY_DECK_RENDER={buildDeck,deckSlideBody};
+// Cache one compiled presentation per course object for snappy navigation.
+let liveDeckCache=new WeakMap();
+function cachedDeck(course){
+ const hit=liveDeckCache.get(course);
+ if(hit)return hit;
+ const deck=buildDeck(course);
+ liveDeckCache.set(course,deck);
+ return deck;
+}
+window.addEventListener('safety:auth-changed',()=>{
+ liveDeckCache=new WeakMap();window.__deck=null;window.__deckSlides=[];
+});
 function deckView(c,index=0){
- const deck=buildDeck(c);
+ const deck=cachedDeck(c);
  index=Math.min(Math.max(0,Number(index)||0),deck.length-1);
  const s=deck[index];
  document.body.classList.add('deckmode');
  const pct=((index+1)/deck.length)*100;
+ const shell=app.querySelector('.deck-shell');
+ if(shell&&window.__deck?.cid===c.id){
+   // Only the changing slide is replaced: toolbar, footer and navigation survive.
+   const article=shell.querySelector('#projectorSlide');
+   if(article){
+     article.className='projector-slide type-'+s.type;
+     article.innerHTML=deckSlideBody(s,index);
+     const foot=shell.querySelector('.deck-footer');
+     foot.children[0].innerHTML='<strong>'+esc(s.module.title)+'</strong>'+(s.topic?'<span>'+esc(s.topic.title)+'</span>':'');
+     foot.querySelector('.deck-time').innerHTML='<span>tempo corso '+clockMin(s.start)+'–'+clockMin(s.topic?s.end:(s.displayEnd||s.module.end_minute))+'</span>'+(s.topic?'<b>'+Math.max(0,s.end-s.start)+' min slide</b>':'<b>'+s.module.minutes+' min modulo</b>');
+     foot.querySelector('.deck-counter').textContent=(index+1)+' / '+deck.length;
+     shell.querySelector('.deck-progress span').style.width=pct+'%';
+     for(const [selector,offset] of [['.deck-nav.prev',-1],['.deck-pager-prev',-1],['.deck-nav.next',1],['.deck-pager-next',1]]){
+       const button=shell.querySelector(selector);
+       if(button){button.disabled=index+offset<0||index+offset>=deck.length;button.onclick=()=>deckGo(c.id,index+offset);}
+     }
+     window.__deck={cid:c.id,index,total:deck.length};window.__deckSlides=deck;
+     requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});
+     return;
+   }
+ }
  app.innerHTML=`<div class="deck-shell"><div class="deck-top"><button class="deck-exit" onclick="setHash('course/${c.id}')">← Agenda</button><div class="deck-course">${c.icon} ${esc(c.title)}</div><div class="deck-actions"><button onclick="toggleFullscreen()">⛶</button></div></div>
  <div class="deck-stage" id="deckStage"><article class="projector-slide type-${s.type}" id="projectorSlide">${deckSlideBody(s,index)}</article></div>
- <div class="deck-footer"><div><strong>${esc(s.module.title)}</strong>${s.topic?`<span>${esc(s.topic.title)}</span>`:''}</div><div class="deck-time"><span>tempo corso ${clockMin(s.start)}–${clockMin(s.topic?s.end:(s.displayEnd||s.module.end_minute))}</span>${s.topic?`<b>${Math.max(0,s.end-s.start)} min slide</b>`:`<b>${s.module.minutes} min modulo</b>`}</div><div class="deck-counter">${index+1} / ${deck.length}</div></div>
+ <div class="deck-footer"><div><strong>${esc(s.module.title)}</strong>${s.topic?`<span>${esc(s.topic.title)}</span>`:''}</div><div class="deck-time"><span>tempo corso ${clockMin(s.start)}–${clockMin(s.topic?s.end:(s.displayEnd||s.module.end_minute))}</span>${s.topic?`<b>${Math.max(0,s.end-s.start)} min slide</b>`:`<b>${s.module.minutes} min modulo</b>`}</div><div class="deck-pager"><button type="button" class="deck-pager-prev" aria-label="Slide precedente" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">← Indietro</button><span class="deck-counter" aria-live="polite">${index+1} / ${deck.length}</span><button type="button" class="deck-pager-next" aria-label="Slide successiva" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">Avanti →</button></div></div>
  <div class="deck-progress"><span style="width:${pct}%"></span></div>
- <button class="deck-nav prev" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">‹</button><button class="deck-nav next" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">›</button></div>`;
+ <button class="deck-nav prev" aria-label="Slide precedente" title="Slide precedente" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">‹</button><button class="deck-nav next" aria-label="Slide successiva" title="Slide successiva" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">›</button></div>`;
  window.__deck={cid:c.id,index,total:deck.length}; window.__deckSlides=deck;
  requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});
- setTimeout(()=>{fitDeckContent();fitDeckToViewport();},80);
 }
 
 function fitDeckContent(){
@@ -634,8 +666,26 @@ async function renderRoute(){
  if(search.value.trim().length>=2){document.body.classList.remove('deckmode');searchView(search.value);return}
  clearInterval(timerInt);
  const p=location.hash.replace('#','').split('/');
- if(p[0]==='deck'){let c=getCourse(p[1]);if(c){await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(c).catch(console.warn);if(location.hash.replace('#','').split('/')[1]!==c.id)return;return deckView(c,p[2]||0)}return home()}
+ if(p[0]==='deck'){
+   const c=getCourse(p[1]);
+   if(!c)return home();
+   const entered=!window.__deck||window.__deck.cid!==c.id;
+   // Local lesson media is immediately usable. Sign only the eligible private
+   // figures on entry, never before each Next/Previous navigation.
+   deckView(c,p[2]||0);
+   if(entered&&window.SAFETY_INTEGRAL_PDF_V24?.hasAccess?.(c)){
+     const requestingUser=window.SAFETY_CLOUD?.state?.user?.id;
+     void window.SAFETY_INTEGRAL_PDF_V24.prepareCourse(c).then(()=>{
+       if(requestingUser!==window.SAFETY_CLOUD?.state?.user?.id)return;
+       liveDeckCache.delete(c);
+       const now=location.hash.replace('#','').split('/');
+       if(now[0]==='deck'&&now[1]===c.id)deckView(c,now[2]||0);
+     }).catch(error=>console.warn('[SafetyTraining] Figure riservate:',error));
+   }
+   return;
+  }
  document.body.classList.remove('deckmode');
+ window.__deck=null;window.__deckSlides=[];
  if(p[0]==='course'){let c=getCourse(p[1]);if(c){await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(c).catch(console.warn);if(location.hash.replace('#','').split('/')[1]!==c.id)return;return courseView(c)}return home()}
  if(p[0]==='topic'){let c=getCourse(p[1]),t=getTopic(c,p[2]);if(c&&t){await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(c).catch(console.warn);if(location.hash.replace('#','').split('/')[2]!==t.id)return;return topicView(c,t)}return home()}
  if(p[0]==='lab'){let c=getCourse(p[1]); return c?labView(c):home()}

@@ -1,0 +1,12 @@
+/* SafetyTraining admin image catalog: local assets and protected PDF galleries. */
+.st-image-actions,.st-image-controls,.st-image-pagination{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.st-image-actions{margin-top:20px}.st-image-actions button,.st-image-pagination button{padding:10px 13px;border-radius:9px;border:1px solid #8ba5ba;background:#eaf3fa;color:#132c42;cursor:pointer}
+.st-image-controls{margin:16px 0}.st-image-controls label{display:flex;flex-direction:column;gap:6px;font-weight:650;min-width:210px;flex:1}
+.st-image-controls input,.st-image-controls select{padding:10px 12px;border-radius:9px;border:1px solid #9fb6c8;width:100%;max-width:420px}
+.st-image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:14px}
+.st-image-card{min-width:0;padding:12px;border:1px solid #ced9e3;background:#fff;border-radius:12px;display:flex;flex-direction:column;gap:7px;overflow-wrap:anywhere;color:#20374c}
+.st-image-card img{display:block;width:100%;height:152px;object-fit:contain;background:#f0f6fa;border-radius:7px}
+.st-image-card strong{font-size:14px}.st-image-card small{font-size:12px;color:#596e80}
+.st-image-status{display:block;font-size:11px;font-weight:700;color:#365e76}
+.st-image-missing{min-height:152px;display:grid;place-items:center;background:#eef3f6;color:#64748b;font-size:13px}
+.st-image-pagination{justify-content:space-between;margin-top:19px}.st-image-pagination button:disabled{opacity:.45;cursor:default}
