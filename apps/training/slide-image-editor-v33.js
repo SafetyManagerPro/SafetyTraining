@@ -86,7 +86,7 @@ async function open(c,slide,index){
  modal.innerHTML='<div class="slide-image-editor" role="dialog" aria-modal="true" aria-label="Modifica immagini della slide">'+
  '<header><h2>Immagini della slide</h2><button data-close type="button">✕</button></header>'+
  '<p>'+esc(slide.title||'')+' · Solo amministratore proprietario · max 3 immagini.</p>'+
- '<div id="slideEditSelected"></div><label>Cerca nell’archivio <input id="slideEditSearch" type="search" placeholder="Es. carroponte, stabilità, soccorso"></label>'+
+ '<div id="slideEditSelected"></div><p><button type="button" data-add-mode aria-pressed="false">Modalità: sostituisci immagine</button> <small>Per una galleria di più immagini attiva prima la modalità Aggiungi.</small></p><label>Cerca nell’archivio <input id="slideEditSearch" type="search" placeholder="Es. carroponte, stabilità, soccorso"></label>'+
  '<div id="slideEditLibrary" class="slide-edit-library"></div>'+
  '<footer><button data-reset type="button">Ripristina scelta automatica</button><button data-save type="button">Salva per slide e stampa PDF</button></footer>'+
  '<p id="slideEditNotice" role="status"></p></div>';
@@ -94,6 +94,8 @@ async function open(c,slide,index){
  const chosen=modal.querySelector('#slideEditSelected'),lib=modal.querySelector('#slideEditLibrary'),search=modal.querySelector('#slideEditSearch');
  const catalog=window.SAFETY_LOCAL_VISUALS_V32?.catalog||[];
  let privateAssets=[];
+ let addMode=false;
+ const choose=item=>{if(addMode){if(selection.length<3)selection.push(item);}else{selection=[item];}refresh();};
  const refresh=()=>{
   chosen.innerHTML=selection.map((x,i)=>itemHtml({src:x.src||'assets/general.svg',caption:x.caption||x.ref_id},i)).join('')||'<p>Nessuna immagine. Il salvataggio mostrerà lo schema neutro.</p>';
   const q=search.value.toLowerCase().trim();const matches=catalog.filter(x=>x.toLowerCase().includes(q)).slice(0,60);
@@ -120,11 +122,13 @@ async function open(c,slide,index){
   if(modal?.isConnected)refresh();
  })();
  modal.onclick=async e=>{
+  const mode=e.target.closest('[data-add-mode]');
+  if(mode){addMode=!addMode;mode.setAttribute('aria-pressed',String(addMode));mode.textContent=addMode?'Modalità: aggiungi alla galleria':'Modalità: sostituisci immagine';return;}
   if(e.target.closest('[data-close]')){modal.remove();modal=null;return;}
   const pick=e.target.closest('[data-pick]');
-  if(pick){if(selection.length<3)selection.push({kind:'local',src:pick.dataset.pick,caption:''});refresh();return;}
+  if(pick){choose({kind:'local',src:pick.dataset.pick,caption:''});return;}
   const privatePick=e.target.closest('[data-private-pick]');
-  if(privatePick&&selection.length<3){const f=privateAssets.find(x=>x.ref_id===privatePick.dataset.privatePick);if(f)selection.push({kind:'private_pdf',ref_id:f.ref_id,src:f.src,caption:f.caption});refresh();return;}
+  if(privatePick){const f=privateAssets.find(x=>x.ref_id===privatePick.dataset.privatePick);if(f)choose({kind:'private_pdf',ref_id:f.ref_id,src:f.src,caption:f.caption});return;}
   const remove=e.target.closest('[data-remove]');
   if(remove){selection.splice(Number(remove.dataset.remove),1);refresh();return;}
   const move=e.target.closest('[data-move]');
