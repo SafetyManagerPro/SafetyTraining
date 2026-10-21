@@ -40,8 +40,8 @@ test('review form separates technical suitability and usage rights with evidence
 test('explicitly rejected figures are not selected for projector or printed deck',()=>{
  const js=rd('apps/training/integral-pdf-v24.js');
  assert.match(js,/training_integral_pdf_reviews_v25/);
- assert.match(js,/decision\?\.technical_status!=='rejected'/);
- assert.match(js,/decision\?\.rights_status!=='rejected'/);
+ assert.match(js,/decision\?\.technical_status==='approved'/);
+ assert.match(js,/decision\?\.rights_status==='cleared_internal'/);
  assert.match(js,/FONTE PDF DA VERIFICARE/);
  assert.match(js,/REVISIONATA PER USO INTERNO/);
  assert.match(js,/function hasAccess\(course\)/);

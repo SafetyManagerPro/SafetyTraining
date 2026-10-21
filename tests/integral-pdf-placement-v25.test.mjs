@@ -33,8 +33,8 @@ test('manual positions in slide and print are linked to module and position, not
  assert.match(js,/mod\?\.topic_ids\?\.\[Number\(mapping\.unit_position\)-1\]/);
  assert.match(js,/manuallyUsedAssets/);
  assert.match(js,/const matching=\[\.\.\.automatic,\.\.\.explicit\]/);
- assert.match(js,/if\(x\.manual\)return decision\?\.technical_status==='approved'&&decision\?\.rights_status==='cleared_internal'/);
- assert.match(js,/return decision\?\.technical_status!=='rejected'&&decision\?\.rights_status!=='rejected'/);
+ assert.match(js,/return decision\?\.technical_status==='approved'&&decision\?\.rights_status==='cleared_internal'/);
+ assert.match(js,/excluded\.has\(x\.ref\.id\)\|\|!x\.manual/);
  const printer=rd('apps/training/admin-print-slides-v23.js');
  assert.match(printer,/await window\.SAFETY_INTEGRAL_PDF_V24\?\.prepareCourse\?\.\(converted,\{client\}\)/);
  assert.match(printer,/projection\.buildDeck\(converted\)/);

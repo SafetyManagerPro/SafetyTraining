@@ -128,8 +128,9 @@ async function prepareCourse(course,{client}={}){
   const matching=[...automatic,...explicit];
   const distinct=new Map(matching.map(x=>[x.ref.id,x]));
   const reviewable=[...distinct.values()];
-  // A rejected technical or rights review must immediately prevent projection,
-  // while unreviewed figures may still be inspected in the private admin deck.
+  // A full source page may appear in the admin deck or print only when it has
+  // an exact manual/individually-curated placement AND two real admin approvals.
+  // Unreviewed source pages remain visible exclusively in the private library.
   const reviews=new Map();
   const excluded=new Set();
   const {data:exclusions,error:exclusionError}=await db.from('training_image_exclusions_v26')
@@ -144,10 +145,9 @@ async function prepareCourse(course,{client}={}){
     for(const x of decisions||[])reviews.set(x.ref_id,x);
   }
   const eligible=matching.filter(x=>{
-    if(excluded.has(x.ref.id))return false;
+    if(excluded.has(x.ref.id)||!x.manual)return false;
     const decision=reviews.get(x.ref.id);
-    if(x.manual)return decision?.technical_status==='approved'&&decision?.rights_status==='cleared_internal';
-    return decision?.technical_status!=='rejected'&&decision?.rights_status!=='rejected';
+    return decision?.technical_status==='approved'&&decision?.rights_status==='cleared_internal';
   });
   const paths=[...new Set(eligible.map(x=>x.ref.asset.storage_path))];
   const urls=new Map();

@@ -46,17 +46,24 @@ async function decorate(host,items,type){
  const turn=++generation;
  try{
   const [catalogRows]=await Promise.all([getCatalog(),getExclusions(items.map(x=>x.id||x.src))]);
-  const audited=new Map(),similarity=new Map();
+  const audited=new Map(),screened=new Map(),comparisons=new Map();
   if(type==='integral'){
    const ids=items.map(x=>x.id).filter(x=>/^pdf-[0-9]{5}$/.test(x));
    if(ids.length){
-    const [a,b]=await Promise.all([
+    const [a,b,c]=await Promise.all([
      db().from('training_integral_pdf_visual_audit_v27').select('ref_id,observed_subject,visual_class,recommendation,suggested_course_key,suggested_module_key,suggested_unit_position,rationale,evidence_method').in('ref_id',ids),
-     db().from('training_integral_pdf_similarity_v27').select('left_ref_id,right_ref_id,phash_hamming').in('left_ref_id',ids)
+     db().from('training_integral_pdf_screening_v28').select('ref_id,screening_method,triage_route,source_family,source_course_hint,screening_note').in('ref_id',ids),
+     db().from('training_integral_pdf_comparison_v28').select('left_ref_id,right_ref_id,pixel_identical,comparison_conclusion').limit(100)
     ]);
-    if(a.error)throw a.error;if(b.error)throw b.error;
+    for(const result of [a,b,c])if(result.error)throw result.error;
     for(const x of a.data||[])audited.set(x.ref_id,x);
-    for(const x of b.data||[])similarity.set(x.left_ref_id,[...(similarity.get(x.left_ref_id)||[]),x]);
+    for(const x of b.data||[])screened.set(x.ref_id,x);
+    for(const x of c.data||[]){
+     for(const id of [x.left_ref_id,x.right_ref_id]){
+      if(!comparisons.has(id))comparisons.set(id,[]);
+      comparisons.get(id).push(x);
+     }
+    }
    }
   }
   if(turn!==generation||!host.isConnected)return;
@@ -72,18 +79,49 @@ async function decorate(host,items,type){
    let html='';
    if(allowed){
     const observed=type==='integral'?audited.get(item.id):null;
+    const overview=type==='integral'?screened.get(item.id):null;
     const proposal=recommend(item,catalogRows);
     const reason=proposal.status==='unassigned'?'Nessuna corrispondenza specifica':proposal.status==='candidate_strong'?'Candidato testuale forte':'Corrispondenza incerta';
     html='<strong>Collocazione proposta · '+esc(reason)+'</strong><small>'+esc(proposal.basis)+'</small>';
     if(observed){
      const verdict={candidate:'Figura pertinente candidata',expert_review:'Necessaria valutazione specialistica',redraw_first:'Da ridisegnare prima dell’impiego',omit_candidate:'Proposta di non inserimento'}[observed.recommendation]||'Da esaminare';
-     html='<strong>Esame visivo effettuato · '+esc(verdict)+'</strong>'+
+     const individual=observed.evidence_method==='contact_sheet_visual_inspection';
+     const place=catalogRows.find(x=>x.course_key===observed.suggested_course_key&&
+      x.module_key===observed.suggested_module_key&&Number(x.unit_position)===Number(observed.suggested_unit_position));
+     const destination=observed.suggested_course_key?
+      '<p>Corso: <b>'+esc(place?.course_title||observed.suggested_course_key)+'</b> → '+
+      esc(place?.module_title||observed.suggested_module_key)+' → '+esc(place?.unit_title||'Argomento '+observed.suggested_unit_position)+'</p>':
+      '<p>Nessuna destinazione specifica confermata.</p>';
+     html='<strong>'+(individual?'Scheda visiva individuale':'Screening visivo per gruppo, da verificare')+' · '+esc(verdict)+'</strong>'+
       '<p>'+esc(observed.observed_subject)+'</p><small>'+esc(observed.rationale)+'</small>'+
-      (observed.suggested_course_key?'<p>Destinazione osservata: '+esc(observed.suggested_course_key)+' → '+esc(observed.suggested_module_key)+' → argomento '+Number(observed.suggested_unit_position)+'</p>':'<p>Non assegnata a una lezione.</p>')+
-      '<small>La valutazione visiva non approva i diritti o la correttezza normativa.</small>'+html;
+      destination+
+      (individual&&observed.recommendation==='candidate'?
+       '<small>Associazione automatica solo dopo doppia approvazione amministrativa e per il corso pubblicato. È possibile escludere la figura.</small>':
+       '<small>Il suggerimento NON è applicato automaticamente.</small>')+
+      '<small>Questa osservazione non approva i diritti o la correttezza tecnica.</small>'+html;
+    }else if(overview){
+     const route={
+      clinical_expert_review:'Richiede controllo clinico',
+      normative_expert_review:'Richiede revisione normativa',
+      original_redraw_needed:'Preferire ridisegno originale',
+      visual_detail_needed:'Richiede verifica individuale'
+     }[overview.triage_route]||'Da approfondire';
+     html='<strong>Screening preliminare · '+esc(route)+'</strong>'+
+      '<p>'+esc(overview.source_family)+'</p>'+
+      '<small>'+esc(overview.screening_note)+'</small>'+html;
     }
-    const duplicates=similarity.get(item.id)||[];
-    if(duplicates.length)html+='<p>Somiglianze da controllare: '+duplicates.map(x=>esc(x.right_ref_id)+' (distanza '+Number(x.phash_hamming)+')').join(', ')+'</p>';
+    const pairs=comparisons.get(item.id)||[];
+    if(pairs.length){
+     const classification={
+      shared_template_different_topic:'Stessa grafica-base, argomento diverso',
+      related_layout_different_content:'Impaginazione simile, contenuti differenti',
+      shared_visual_component_different_page:'Componente grafico riutilizzato in pagine differenti'
+     };
+     html+='<p><b>Somiglianze confrontate ('+pairs.length+')</b>: nessun duplicato identico pixel per pixel. '+
+      pairs.slice(0,4).map(x=>esc(item.id===x.left_ref_id?x.right_ref_id:x.left_ref_id)+
+       ' · '+esc(classification[x.comparison_conclusion]||'Da verificare')).join('; ')+
+      (pairs.length>4?' · e altre '+(pairs.length-4):'')+'</p>';
+    }
     for(const c of proposal.suggestions){
      html+='<p><b>'+esc(c.course_title)+'</b> → '+esc(c.module_title)+' → '+esc(c.unit_title)+' <small>('+esc(c.evidence.join('; ')||'titoli')+')</small></p>';
     }

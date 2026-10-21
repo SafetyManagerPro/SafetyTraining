@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-21
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-72`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-73`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -788,3 +788,11 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Calcolati 64-bit pHash da WebP originali per 856 file e individuate **57 coppie potenzialmente simili** nello stesso documento con rapporto dimensioni simile e distanza di Hamming <=7; registrate in `training_integral_pdf_similarity_v27`. Somiglianza non dimostra duplicazione: serve controllo visivo ulteriore.
 - Aggiunta lettura protetta per sola amministrazione nello script `image-suggestions-v26.js`, con osservazione visiva e segnalazione di somiglianze accanto alle proposte basate su testo. Stato amministrativo `Esamina / cambia stato di revisione` resta separato. Al momento del controllo: 75 esaminate, 57 coppie; 1 figura risultava approvata separatamente dall'amministrazione, 0 associazioni manuali.
 - Migrazione `supabase/migrations/20261021174500_v27_visual_figure_audit.sql` applicata. PWA `safety-training-v22-72`. CI e Vercel da verificare dopo commit, revisione del layout autenticato ancora pendente. Prima fase parziale: le altre 781 figure non hanno ancora scheda di osservazione visiva individuale, benché siano state estratte e processate per similarità.
+
+## 2026-10-21 — v24.8.12 schermata di triage totale delle figure PDF
+- Materiale privato originale: 856 WebP, 23 contact sheets da nove ZIP e 13 sorgenti. 57 coppie confrontate visivamente: **zero coppie identiche pixel per pixel**, soprattutto layout condivisi con testo differente. Evitare eliminazione automatica.
+- Migrazione `supabase/migrations/20261021185500_v28_complete_image_triage.sql` applicata: nella `training_integral_pdf_visual_audit_v27` aggiunte **555** schede di **triage per gruppo**, marcate `contact_sheet_group_visual_triage`, da NON confondere con le precedenti **75** schede individuali. Le restanti **226** figure hanno record di **screening per famiglia della fonte**, nella nuova `training_integral_pdf_screening_v28`. 856 su 856 coperte da almeno un livello.
+- Le 630 schede visive indicano: 51 candidate (solo individuali), 387 da ridisegnare, 160 da valutare da esperto (clinico, tecnico, normativo), 32 suggerimenti di esclusione non applicata. `training_integral_pdf_comparison_v28` dettaglia tutti i 57 casi; admin-only RLS su due nuove tabelle enessuna scrittura ai diritti/stati approvativi.
+- In Gestione immagini `image-suggestions-v26.js` ora espone con titoli umani Corso → Modulo → Argomento i suggerimenti osservati, etichettati per profondità (individuale / gruppo / solo fonte) e il confronto di somiglianza verificato. Dashboard mostra i tre conteggi distinti. Corretto `count(*)` per tabelle PK non `id`.
+- Policy slideshow riservato + PDF di stampa: vietato inserimento di qualunque fonte PDF privata non verificata. Ammesse SOLO associazioni manuali o candidate da osservazione **individuale** `recommendation=candidate` con esito `technical_status=approved` e `rights_status=cleared_internal`, versione pubblicata non frozen, nessuna esclusione. Si rinuncia alla proiezione didattica automatica basata solo su keyword; il catalogo amministrativo rimane consultabile per la revisione. Nessuna delle 555 osservazioni di gruppo o 226 preliminari viene auto-applicata.
+- Script e tests: `apps/training/integral-pdf-v24.js`, `apps/training/image-suggestions-v26.js`, `apps/training/admin-image-library-v25.js/css`, `tests/integral-pdf-audit-v28.test.mjs` e regressioni aggiornate. PWA `safety-training-v22-73`; rapporto `docs/SAFETYTRAINING_VISUAL_AUDIT_PHASE2_20261021.md`. CI/production ancora da verificare dopo commit.

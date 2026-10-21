@@ -1,0 +1,43 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('the full source archive is screened without asserting full per-page visual validation',()=>{
+ const s=read('supabase/migrations/20261021185500_v28_complete_image_triage.sql');
+ assert.match(s,/contact_sheet_group_visual_triage/);
+ assert.match(s,/training_integral_pdf_screening_v28/);
+ assert.match(s,/left join public\.training_integral_pdf_visual_audit_v27/);
+ assert.match(s,/d\.ref_id is null/);
+ assert.match(s,/screening_method text not null default 'contact_sheet_overview_and_source_class'/);
+ assert.match(s,/per-asset first-pass source-based triage/i);
+ assert.match(s,/private\.is_platform_admin\(\)/);
+ assert.match(s,/training_integral_pdf_comparison_v28/);
+ assert.match(s,/pixel_identical boolean not null default false/);
+ assert.match(s,/no deletion of similar but different slide content/i);
+ assert.doesNotMatch(s,/update\s+public\.training_integral_pdf_reviews_v25/i);
+ assert.doesNotMatch(s,/delete\s+from\s+public\.training_integral_pdf_refs_v24/i);
+});
+test('admin image catalog displays three evidence levels and matched course/module/unit names',()=>{
+ const view=read('apps/training/image-suggestions-v26.js');
+ const catalog=read('apps/training/admin-image-library-v25.js');
+ for(const phrase of ['training_integral_pdf_visual_audit_v27','training_integral_pdf_screening_v28','training_integral_pdf_comparison_v28','Scheda visiva individuale','Screening visivo per gruppo','Screening preliminare','pixel per pixel'])assert.ok(view.includes(phrase),phrase);
+ assert.match(view,/place\?\.unit_title/);
+ assert.match(view,/escludere la figura/i);
+ assert.match(catalog,/schede visive individuali/);
+ assert.match(catalog,/count\('training_integral_pdf_screening_v28'/);
+ assert.match(catalog,/select\('\*',\{count:'exact',head:true\}\)/);
+});
+test('only individually observed and double-approved candidates are auto-assigned to published admin decks',()=>{
+ const js=read('apps/training/integral-pdf-v24.js');
+ assert.match(js,/course\.db_status==='published'/);
+ assert.match(js,/recommendation','candidate'/);
+ assert.match(js,/evidence_method','contact_sheet_visual_inspection'/);
+ assert.match(js,/training_integral_pdf_visual_audit_v27/);
+ assert.match(js,/curatedIds/);
+ assert.match(js,/explicit\.push\(\{ref,index,manual:true,curated:true\}\)/);
+ assert.match(js,/excluded\.has\(x\.ref\.id\)\|\|!x\.manual/);\n assert.match(js,/return decision\?\.technical_status==='approved'&&decision\?\.rights_status==='cleared_internal'/);
+ assert.match(js,/excluded\.has\(x\.ref\.id\)\|\|!x\.manual/);
+ assert.match(js,/hasAccess\(course\)/);
+ assert.match(read('apps/training/admin-print-slides-v23.js'),/await window\.SAFETY_INTEGRAL_PDF_V24\?\.prepareCourse/);
+ assert.doesNotMatch(js,/getPublicUrl/);
+});
