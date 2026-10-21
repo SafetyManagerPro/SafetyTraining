@@ -765,3 +765,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Presentazione e stampa amministrative usano entrambe `SAFETY_INTEGRAL_PDF_V24.prepareCourse` / `pick`: la corrispondenza manuale ha precedenza sull'associazione euristica, non incorpora tavole respinte e non riguarda corsi congelati o l'area corsista. Rilettura dati versionata, URL effimeri e invalidazione cache dopo modifica.
 - DB migration `supabase/migrations/20261021105000_v25_002_integral_pdf_manual_placements.sql` applicata sul progetto collegato; verifica in sola lettura: **0 associazioni e 0 eventi**, RLS attiva su entrambe le nuove tabelle, 2 policy admin-only; 0 figure approvate inizialmente. Nessun contenuto o diritto attestato fittiziamente.
 - JS nuovo `apps/training/admin-image-placement-v25.js`, CSS e tests `tests/integral-pdf-placement-v25.test.mjs`; PWA `safety-training-v22-69`. CI, deploy e prova in browser autenticato ancora da verificare a conclusione commit.
+
+## 2026-10-21 — v24.8.9.1 allineamento regressione cache offline
+- Corretto il test `tests/deck-performance-v25.test.mjs` rimasto al precedente identificativo PWA `safety-training-v22-68` dopo l'aggiornamento runtime a `safety-training-v22-69`. Runtime, immagini, permessi e database invariati; nuova esecuzione della suite richiesta.
