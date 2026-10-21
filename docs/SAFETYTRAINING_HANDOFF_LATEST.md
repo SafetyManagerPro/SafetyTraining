@@ -746,3 +746,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Aggiunta «Gestione immagini» nell'amministrazione: inventario navigabile dei **201 file grafici locali**, conteggi immagini/tavole private realmente importate, 24 anteprime per pagina, ricerca, categoria e accesso agli importatori/eliminatori già esistenti. Le immagini locali distribuite con l'app restano in sola lettura: gestire il relativo file richiede deploy. I PDF restano privati e con diritti/revisione richiesti.
 - PWA `safety-training-v22-67`; test `tests/deck-performance-v25.test.mjs` e validazione statica previsti nel pacchetto `npm run check`.
 - Documento tecnico: `docs/SAFETYTRAINING_PERFORMANCE_IMAGES_20261021.md`. Nessuna mutazione a Supabase/corsi frozen/frequenze/attestati. Necessari dopo deploy: QA cronometrato in browser autenticato e verifica visiva di proiettore, piramide e gestione immagini.
+
+## 2026-10-21 — v24.8.7.1 regressione test posizionamento PDF
+- CI della prima release ha eseguito con successo i test precedenti ma si è fermata su una vecchia asserzione testuale (`if(idx<0)continue`) non più presente dopo che il posizionamento PDF è stato anticipato prima di `createSignedUrls`. Aggiornato il test per verificare il filtro `index>=0` invece della sintassi eliminata. Nessuna modifica al runtime, ai dati o alla cache.

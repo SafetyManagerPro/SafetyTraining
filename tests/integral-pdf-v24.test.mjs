@@ -16,7 +16,7 @@ test('private complete archive importer handles WebP hash, 2511 files and 4659 p
  assert.ok(s.includes("outcome.assets"));
  assert.ok(s.includes("Un riferimento PDF appartiene a una parte ZIP diversa."));
  assert.ok(s.includes("placementIndex(course,r,topics,topicCounts)"));
- assert.ok(s.includes("if(idx<0)continue"));
+ assert.ok(s.includes(".filter(x=>x.index>=0&&topics[x.index]"));
 
  assert.ok(s.includes("856 tavole complete"));
  assert.ok(!s.includes('getPublicUrl('));
