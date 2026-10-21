@@ -403,3 +403,9 @@ Il valore principale del lavoro didattico non è la quantità di slide, ma la qu
 - L'aggiunta di più immagini è una modalità esplicita, attivata col comando **Modalità: aggiungi alla galleria**; resta il limite di 3 immagini.
 - Il salvataggio continua a utilizzare `save_slide_images_v33` e mantiene i vincoli owner/admin già previsti.
 - Correzione frontend commit `01d3f2c`; verificare deployment Vercel, prova interattiva del salvataggio e resa della stampa PDF prima di dichiarare risolto definitivamente.
+
+### Audit continuato — sincronizzazione editor/slide (21/10/2026)
+
+- Verificata la logica di navigazione `deckView`, la stampa `admin-print-slides-v23.js` e la strategia cache del service worker: JS/CSS in network-first, immagini in cache-first.
+- Riscontrato rischio di race condition: due rendering asincroni della stessa slide o richieste concorrenti di override potevano completarsi in ordine inverso. Mitigato tramite revisione incrementale su caricamento override e proiezione del DOM, invalidata anche ai cambi di autenticazione (commit `19c14b1`).
+- Non è stato eseguito un collaudo manuale end-to-end nel browser: rimangono da verificare durante navigazione rapida, persistenza tra refresh e stampa PDF; non dichiarare l'intera app priva di bug.
