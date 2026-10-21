@@ -91,7 +91,11 @@ async function loadStats(){
  const values=await Promise.allSettled([
   count('training_integral_pdf_assets_v24',q=>q),
   count('training_integral_pdf_refs_v24',q=>q.gte('id','pdf-50000')),
-  count('training_source_figures_v23',q=>q)
+  count('training_source_figures_v23',q=>q),
+  count('training_integral_pdf_visual_audit_v27',q=>q.eq('evidence_method','contact_sheet_visual_inspection')),
+  count('training_integral_pdf_visual_audit_v27',q=>q.eq('evidence_method','contact_sheet_group_visual_triage')),
+  count('training_integral_pdf_screening_v28',q=>q),
+  count('training_integral_pdf_comparison_v28',q=>q)
  ]);
  return values.map(v=>v.status==='fulfilled'?v.value:'n/d');
 }
@@ -194,6 +198,7 @@ async function render(){
   state.stats=counts;
   host().innerHTML='<section class="admin-card"><h2>Inventario immagini</h2><p>Le illustrazioni SVG/PNG distribuite con l’app sono in sola lettura. Il catalogo distingue verifiche visive individuali, osservazioni per gruppi e screening preliminare. Le proposte testuali sono sempre etichettate; una figura osservata individualmente può essere collocata automaticamente solo dopo la doppia approvazione dell’amministratore. Nessuna osservazione certifica automaticamente correttezza tecnica o diritti. Le tavole PDF private richiedono una verifica tecnico-didattica e una verifica separata dei diritti. Puoi registrare le revisioni per singola figura, con motivazione e tracciabilità. Lo stato non determina da solo la presenza nelle slide: conta anche l’abbinamento al corso, e le immagini private non sono pubblicate ai corsisti.</p>'+
    '<div class="admin-stats"><article class="admin-stat"><strong>'+files.length+'</strong><span>Immagini locali disponibili</span></article><article class="admin-stat"><strong>'+esc(counts[0])+'</strong><span>Figure PDF caricate</span></article><article class="admin-stat"><strong>'+esc(counts[1])+'</strong><span>Riferimenti PDF completi</span></article><article class="admin-stat"><strong>'+esc(counts[2])+'</strong><span>Estratti PDF in revisione</span></article></div>'+
+   '<div class="st-image-audit-summary"><strong>Analisi di pertinenza delle tavole PDF</strong><p>'+esc(counts[3])+' schede visive individuali · '+esc(counts[4])+' valutazioni per gruppi · '+esc(counts[5])+' screening preliminari · '+esc(counts[6])+' coppie confrontate.</p><small>Livelli di analisi distinti. Nessuno sostituisce la revisione tecnica o la verifica dei diritti.</small></div>'+
    '<div class="st-image-actions"><button type="button" data-st-image-integral>Gestisci archivio PDF · importa / elimina</button><button type="button" data-st-image-sources>Gestisci estratti PDF</button><button type="button" data-st-image-refresh>Aggiorna inventario</button></div></section>'+
    '<section class="admin-card"><h2>Esplora immagini</h2><div class="st-image-controls"><label>Archivio <select id="stImageType"><option value="local">Illustrazioni locali</option><option value="integral">Tavole PDF complete importate</option><option value="source">Estratti PDF in revisione</option></select></label><label>Cerca per tema <input type="search" id="stImageSearch" placeholder="Es. carrelli, DPI, portata"></label></div>'+
    '<div class="st-image-grid" id="stImageGallery"></div><div class="st-image-pagination"><button type="button" data-st-image-prev>← Precedenti</button><span id="stImagePagination" role="status"></span><button type="button" data-st-image-next>Successive →</button></div></section>';

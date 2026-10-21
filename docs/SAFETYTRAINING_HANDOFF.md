@@ -804,3 +804,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-21 — v24.8.12.3 correzione sintassi test
 - In `tests/integral-pdf-audit-v28.test.mjs`, un carattere escape letterale `\\n` era rimasto tra due asserzioni dopo un refactor, causando `SyntaxError` in GitHub Actions. Convertito in newline reale. Nessuna variazione runtime/SQL.
+
+## 2026-10-21 — v24.8.12.4 ripristino integrazione completa del release
+- La prima tree assembly aveva sovrascritto `integral-pdf-v24.js` e `admin-image-library-v25.js` con versioni di `main` precedenti, pur conservando i tests corrispondenti. Ripristinata ora in UNICO commit la query delle 51 candidate visive individuali della versione pubblicata, con doppia approvazione e collocazione precisa, e i conteggi di dashboard 75/555/226/57. Verificare nuovo diff del commit e GitHub Actions prima del deploy Vercel.

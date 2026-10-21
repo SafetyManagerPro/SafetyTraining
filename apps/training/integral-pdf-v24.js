@@ -86,22 +86,33 @@ async function prepareCourse(course,{client}={}){
    .eq('course_key',name).eq('version_number',Number(course.db_version)||-1);
   if(placementError)throw placementError;
   const manual=placements||[];
+  let curated=[];
+  if(course.db_status==='published'&&Number.isInteger(Number(course.db_version))){
+   const {data:audit,error:auditError}=await db.from('training_integral_pdf_visual_audit_v27')
+    .select('ref_id,suggested_module_key,suggested_unit_position')
+    .eq('suggested_course_key',name).eq('recommendation','candidate')
+    .eq('evidence_method','contact_sheet_visual_inspection');
+   if(auditError)throw auditError;
+   curated=audit||[];
+  }
   for(const k of relevantKeys(course)){
    const found=await paginate(db.from(REFS).select('id,asset_id,topic,source_document,source_page,category,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)').gte('id','pdf-50000').contains('candidate_course_keys',[k]).order('id'),650);
    for(const r of found)if(!seen.has(r.id)){rows.push(r);seen.add(r.id);}
   }
   const manualIds=[...new Set(manual.map(x=>x.ref_id))];
-  for(let i=0;i<manualIds.length;i+=100){
+  const curatedIds=[...new Set(curated.map(x=>x.ref_id).filter(id=>!manualIds.includes(id)))];
+  const extraIds=[...new Set([...manualIds,...curatedIds])];
+  for(let i=0;i<extraIds.length;i+=100){
    const {data:extra,error:extraError}=await db.from(REFS)
     .select('id,asset_id,topic,source_document,source_page,category,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)')
-    .in('id',manualIds.slice(i,i+100));
+    .in('id',extraIds.slice(i,i+100));
    if(extraError)throw extraError;
    for(const r of extra||[])if(!seen.has(r.id)){rows.push(r);seen.add(r.id);}
   }
   // Keep the most specific automatic candidate for an asset. A manual
   // assignment always takes priority over automatic matching for that asset.
   const byId=new Map(rows.map(r=>[r.id,r]));
-  const manuallyUsedAssets=new Set(manualIds.map(id=>byId.get(id)?.asset_id).filter(Boolean));
+  const manuallyUsedAssets=new Set(extraIds.map(id=>byId.get(id)?.asset_id).filter(Boolean));
   const unique=new Map();
   for(const r of rows){
    if(manuallyUsedAssets.has(r.asset_id))continue;
@@ -124,6 +135,14 @@ async function prepareCourse(course,{client}={}){
    const index=topics.findIndex(t=>String(t.id)===String(topicId));
    const ref=byId.get(mapping.ref_id);
    if(index>=0&&ref?.asset?.storage_path)explicit.push({ref,index,manual:true});
+  }
+  for(const mapping of curated){
+   if(manualIds.includes(mapping.ref_id))continue;
+   const mod=(course.modules||[]).find(m=>String(m.id)===String(mapping.suggested_module_key));
+   const topicId=mod?.topic_ids?.[Number(mapping.suggested_unit_position)-1];
+   const index=topics.findIndex(t=>String(t.id)===String(topicId));
+   const ref=byId.get(mapping.ref_id);
+   if(index>=0&&ref?.asset?.storage_path)explicit.push({ref,index,manual:true,curated:true});
   }
   const matching=[...automatic,...explicit];
   const distinct=new Map(matching.map(x=>[x.ref.id,x]));
