@@ -46,18 +46,20 @@ async function decorate(host,items,type){
  const turn=++generation;
  try{
   const [catalogRows]=await Promise.all([getCatalog(),getExclusions(items.map(x=>x.id||x.src))]);
-  const audited=new Map(),screened=new Map(),comparisons=new Map();
+  const audited=new Map(),screened=new Map(),comparisons=new Map(),proposals=new Map();
   if(type==='integral'){
    const ids=items.map(x=>x.id).filter(x=>/^pdf-[0-9]{5}$/.test(x));
    if(ids.length){
-    const [a,b,c]=await Promise.all([
+    const [a,b,c,d]=await Promise.all([
      db().from('training_integral_pdf_visual_audit_v27').select('ref_id,observed_subject,visual_class,recommendation,suggested_course_key,suggested_module_key,suggested_unit_position,rationale,evidence_method').in('ref_id',ids),
      db().from('training_integral_pdf_screening_v28').select('ref_id,screening_method,triage_route,source_family,source_course_hint,screening_note').in('ref_id',ids),
-     db().from('training_integral_pdf_comparison_v28').select('left_ref_id,right_ref_id,pixel_identical,comparison_conclusion').limit(100)
+     db().from('training_integral_pdf_comparison_v28').select('left_ref_id,right_ref_id,pixel_identical,comparison_conclusion').limit(100),
+     db().from('training_image_placement_proposals_v30').select('ref_id,course_key,module_key,unit_position,rationale,status,proposed_rights_note').in('ref_id',ids)
     ]);
-    for(const result of [a,b,c])if(result.error)throw result.error;
+    for(const result of [a,b,c,d])if(result.error)throw result.error;
     for(const x of a.data||[])audited.set(x.ref_id,x);
     for(const x of b.data||[])screened.set(x.ref_id,x);
+    for(const x of d.data||[]){if(!proposals.has(x.ref_id))proposals.set(x.ref_id,[]);proposals.get(x.ref_id).push(x);}
     for(const x of c.data||[]){
      for(const id of [x.left_ref_id,x.right_ref_id]){
       if(!comparisons.has(id))comparisons.set(id,[]);
@@ -109,6 +111,15 @@ async function decorate(host,items,type){
      html='<strong>Screening preliminare · '+esc(route)+'</strong>'+
       '<p>'+esc(overview.source_family)+'</p>'+
       '<small>'+esc(overview.screening_note)+'</small>'+html;
+    }
+    const suggested=proposals.get(item.id)||[];
+    if(suggested.length){
+     html+='<div class="st-image-proposal-list"><strong>Associa a corso, modulo e argomento · '+suggested.length+' destinazioni proposte</strong>';
+     for(const p of suggested){
+      const found=catalogRows.find(x=>x.course_key===p.course_key&&x.module_key===p.module_key&&Number(x.unit_position)===Number(p.unit_position));
+      html+='<p><b>'+esc(found?.course_title||p.course_key)+'</b> → '+esc(found?.module_title||p.module_key)+' → '+esc(found?.unit_title||'Argomento '+p.unit_position)+'</p><small>'+esc(p.rationale)+'</small>';
+     }
+     html+='<small>Dicitura proposta: Autorizzata da amministratore per uso interno. È una dichiarazione amministrativa, non una licenza del titolare della fonte. Nessuna approvazione tecnica o dei diritti è stata registrata automaticamente.</small></div>';
     }
     const pairs=comparisons.get(item.id)||[];
     if(pairs.length){

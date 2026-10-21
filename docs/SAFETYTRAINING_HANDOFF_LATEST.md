@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-21
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-74`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-75`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -817,3 +817,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Nuovi controlli `stImageStatus`, `stImageCourse`, `stImageModule` in `apps/training/admin-image-library-v25.js`. Corso e Modulo a cascata mediante `training_image_matching_catalog_v26`, sola scelta su corsi pubblicati non congelati. Filtri didattici disabilitati per Illustrazioni locali/Estratti, mantenendo ricerca testuale. La griglia conserva miniature private firmate solo per le 24 righe richieste.
 - `apps/training/admin-help-v22.js` aggiunge guida contestuale `Gestione immagini`. Guida completa `docs/SAFETYTRAINING_GUIDA_FILTRI_IMMAGINI_20261021.md`, con percorsi d'uso, definizioni esatte e precauzioni. CSS responsive aggiornato. Test `tests/admin-image-filters-v29.test.mjs`; PWA `safety-training-v22-74`.
 - Da registrare esito finale GitHub Actions/Vercel. Conservati 27 corsi frozen e tutte le autorizzazioni storiche, nessuna assegnazione automatica aggiuntiva.
+
+## 2026-10-21 — v24.8.14 proposte multi-corso da immagini osservate
+- L'amministratore autorizza l'uso interno come dichiarazione organizzativa, non come prova verificata di titolarità/licenza terza parte; non si falsifica «Verificata da un esperto» senza una verifica specialistica documentata. Nessun cambio agli stati di revisione esistenti.
+- Nuova migrazione `supabase/migrations/20261021194500_v30_multiple_placement_proposals.sql`: tabella privata admin-only RLS `training_image_placement_proposals_v30` con chiave composita `(ref_id,course_key,module_key,unit_position)`; una stessa figura ha più proposte in più corsi, senza duplicare asset. Destinazioni solo su versioni pubblicate non congelate, con motivazione, annotazione «Autorizzata da amministratore per uso interno — dichiarazione amministrativa, non licenza del titolare dei diritti». Nessun inserimento in `training_integral_pdf_placements_v25` né approvazione fittizia.
+- Verifica SQL: 76 proposte distribuite in 11 corsi, tra cui antincendio L2/L3, carrelli industriali/combinati, MMT complessivo/escavatori, PLE, gru, lavori in quota, primo soccorso A/B-C. Frontend `image-suggestions-v26.js` le elenca in Gestione immagini con descrizioni Corso → Modulo → Argomento e motivazioni.
+- Il motore delle slide/PDF continua a rispettare doppia validazione tecnica e dei diritti, esclusioni e limiti sui corsi frozen. La nuova tabella è una coda editoriale, non pubblica e non attiva da sola le 76 proposte.
+- PWA `safety-training-v22-75`, test `tests/image-placements-v30.test.mjs`. CI e deployment da verificare.
