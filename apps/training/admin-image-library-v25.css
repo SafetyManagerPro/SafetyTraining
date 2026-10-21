@@ -21,3 +21,16 @@
 .st-image-review button:disabled{opacity:.5;cursor:progress}
 .st-image-review-caution{font-size:12px;line-height:1.4;color:#825b19}
 .st-image-review [data-review-message]{font-size:12px;color:#235a74;overflow-wrap:anywhere}
+
+/* Scoped to the private image catalog; never displays signed PDF source to learners. */
+.st-image-placement{border-top:1px solid #cedde7;margin-top:10px;padding-top:9px;font-size:12px}
+.st-image-placement summary{font-size:13px;font-weight:800;color:#176088;cursor:pointer}
+.st-image-placement form{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.st-image-placement label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:650}
+.st-image-placement select,.st-image-placement textarea{font:inherit;color:#17344b;background:#fff;max-width:100%;width:100%;box-sizing:border-box;border:1px solid #9fb4c4;border-radius:7px;padding:8px}
+.st-image-placement button{border:1px solid #346d89;background:#e4f3fa;border-radius:7px;color:#153e57;padding:7px;cursor:pointer}
+.st-image-placement button[type="submit"]{background:#176c54;border-color:#176c54;color:white;font-weight:800}
+.st-image-placement button:disabled{opacity:.45;cursor:default}
+.st-placement-links{margin:10px 0;padding-left:16px}
+.st-placement-links li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:7px 0;justify-content:space-between}
+.st-image-placement-notice{color:#915d1b;font-size:12px;line-height:1.4}

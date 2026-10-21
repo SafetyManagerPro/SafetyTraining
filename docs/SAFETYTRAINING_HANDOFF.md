@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-21
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-68`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-69`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -755,3 +755,11 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - La pagina Amministrazione > Gestione immagini offre la scheda «Esamina / cambia stato di revisione» per ogni riferimento integrale con select separati, note e documento/licenza, conferma esplicita prima dell'approvazione, ricarica del catalogo. Presentazioni admin e stampa non devono mostrare immagini formalmente respinte; ricalcolano cache dopo una decisione. Figure in attesa restano eventualmente visibili come **anteprima privata non validata** nell'eventuale slide ben abbinata; immagini approvate per uso interno **non diventano pubbliche**.
 - Conservati i vincoli originali dei PDF importati: `rights_status='review_required'` e `technical_review_required=true` nelle tabelle di fonte sono dati di provenienza e non vengono sovrascritti. Il nuovo stato di revisione è separato e verificabile.
 - Migration `supabase/migrations/20261021094500_v25_001_integral_pdf_review_workflow.sql`; test `tests/integral-pdf-review-v25.test.mjs`. PWA `safety-training-v22-68`. Nessuna modifica a corsi frozen, corsisti, attestati o diritti reali. Da verificare CI, deploy e SQL applicato.
+
+## 2026-10-21 — v24.8.9 associazione manuale immagini approvate alle Learning Unit
+- Richiesta eseguita: dopo la verifica indipendente dei diritti e dell'accuratezza, l'amministratore può collegare una figura privata esattamente a un corso, modulo e argomento della **versione attualmente pubblicata**. Non sono effettuate assegnazioni di massa o automatiche.
+- Aggiunta `training_integral_pdf_placements_v25` con riferimento immagine, chiave corso, UUID versione e numero versione, modulo, posizione unitaria, motivazione, autore e timestamp; `training_integral_pdf_placement_events_v25` conserva storici attach/detach. RLS SELECT amministratori, modifiche soltanto da RPC `training_place_integral_pdf_v25` (verifica `auth.uid`, `private.is_platform_admin`, pubblicazione versione, blocco frozen, validità modulo/posizione e doppia approvazione `training_integral_pdf_reviews_v25`); le immagini restano nello Storage privato.
+- In `Gestione immagini > Tavole PDF complete importate` ora appare per ogni figura la scheda `Associa a corso, modulo e argomento`; gli elenchi moduli/argomenti si caricano solo scegliendo il corso, con motivo obbligatorio. Elenco delle associazioni attuali e pulsante rimozione con motivazione e conferma. Solo immagini con `technical_status=approved` e `rights_status=cleared_internal` possono ricevere nuovi collegamenti.
+- Presentazione e stampa amministrative usano entrambe `SAFETY_INTEGRAL_PDF_V24.prepareCourse` / `pick`: la corrispondenza manuale ha precedenza sull'associazione euristica, non incorpora tavole respinte e non riguarda corsi congelati o l'area corsista. Rilettura dati versionata, URL effimeri e invalidazione cache dopo modifica.
+- DB migration `supabase/migrations/20261021105000_v25_002_integral_pdf_manual_placements.sql` applicata sul progetto collegato; verifica in sola lettura: **0 associazioni e 0 eventi**, RLS attiva su entrambe le nuove tabelle, 2 policy admin-only; 0 figure approvate inizialmente. Nessun contenuto o diritto attestato fittiziamente.
+- JS nuovo `apps/training/admin-image-placement-v25.js`, CSS e tests `tests/integral-pdf-placement-v25.test.mjs`; PWA `safety-training-v22-69`. CI, deploy e prova in browser autenticato ancora da verificare a conclusione commit.

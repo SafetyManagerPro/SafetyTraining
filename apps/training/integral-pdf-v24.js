@@ -79,29 +79,60 @@ async function prepareCourse(course,{client}={}){
  if(loading.has(name))return loading.get(name);
  const operation=(async()=>{
   const rows=[];const seen=new Set();
+  // Manual assignments apply only to the currently presented, published version.
+  // They cannot make an image public or bypass the prerequisite review.
+  const {data:placements,error:placementError}=await db.from('training_integral_pdf_placements_v25')
+   .select('ref_id,module_key,unit_position,version_number')
+   .eq('course_key',name).eq('version_number',Number(course.db_version)||-1);
+  if(placementError)throw placementError;
+  const manual=placements||[];
   for(const k of relevantKeys(course)){
    const found=await paginate(db.from(REFS).select('id,asset_id,topic,source_document,source_page,category,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)').gte('id','pdf-50000').contains('candidate_course_keys',[k]).order('id'),650);
    for(const r of found)if(!seen.has(r.id)){rows.push(r);seen.add(r.id);}
   }
+  const manualIds=[...new Set(manual.map(x=>x.ref_id))];
+  for(let i=0;i<manualIds.length;i+=100){
+   const {data:extra,error:extraError}=await db.from(REFS)
+    .select('id,asset_id,topic,source_document,source_page,category,candidate_course_keys,asset:training_integral_pdf_assets_v24!inner(storage_path)')
+    .in('id',manualIds.slice(i,i+100));
+   if(extraError)throw extraError;
+   for(const r of extra||[])if(!seen.has(r.id)){rows.push(r);seen.add(r.id);}
+  }
+  // Keep the most specific automatic candidate for an asset. A manual
+  // assignment always takes priority over automatic matching for that asset.
+  const byId=new Map(rows.map(r=>[r.id,r]));
+  const manuallyUsedAssets=new Set(manualIds.map(id=>byId.get(id)?.asset_id).filter(Boolean));
   const unique=new Map();
-  for(const r of rows){const curr=unique.get(r.asset_id);
+  for(const r of rows){
+   if(manuallyUsedAssets.has(r.asset_id))continue;
+   const curr=unique.get(r.asset_id);
    if(!curr||String(r.topic||'').length>String(curr.topic||'').length)unique.set(r.asset_id,r);
   }
   const list=[...unique.values()];
-  if(!list.length){cache.set(name,{visuals:[],expires:Date.now()+5*60*1000});return[];}
   const topics=Array.isArray(course.topics)?course.topics:[];
   const byTopic=new Map(topics.map(t=>[String(t.id),[]]));
   const topicCounts=new Map();
   for(const r of list){const key=String(r.topic||'').trim().toLowerCase();topicCounts.set(key,(topicCounts.get(key)||0)+1);}
   // Match the page to a lesson before requesting a private signed URL.
   // Generic and unassigned pages cannot stall the opening of presentations.
-  const matching=list.map(r=>({ref:r,index:placementIndex(course,r,topics,topicCounts)}))
+  const automatic=list.map(r=>({ref:r,index:placementIndex(course,r,topics,topicCounts),manual:false}))
     .filter(x=>x.index>=0&&topics[x.index]&&x.ref.asset?.storage_path);
+  const explicit=[];
+  for(const mapping of manual){
+   const mod=(course.modules||[]).find(m=>String(m.id)===String(mapping.module_key));
+   const topicId=mod?.topic_ids?.[Number(mapping.unit_position)-1];
+   const index=topics.findIndex(t=>String(t.id)===String(topicId));
+   const ref=byId.get(mapping.ref_id);
+   if(index>=0&&ref?.asset?.storage_path)explicit.push({ref,index,manual:true});
+  }
+  const matching=[...automatic,...explicit];
+  const distinct=new Map(matching.map(x=>[x.ref.id,x]));
+  const reviewable=[...distinct.values()];
   // A rejected technical or rights review must immediately prevent projection,
   // while unreviewed figures may still be inspected in the private admin deck.
   const reviews=new Map();
-  for(let i=0;i<matching.length;i+=100){
-    const slice=matching.slice(i,i+100);
+  for(let i=0;i<reviewable.length;i+=100){
+    const slice=reviewable.slice(i,i+100);
     const {data:decisions,error:reviewError}=await db.from('training_integral_pdf_reviews_v25')
       .select('ref_id,technical_status,rights_status').in('ref_id',slice.map(x=>x.ref.id));
     if(reviewError)throw reviewError;
@@ -109,6 +140,7 @@ async function prepareCourse(course,{client}={}){
   }
   const eligible=matching.filter(x=>{
     const decision=reviews.get(x.ref.id);
+    if(x.manual)return decision?.technical_status==='approved'&&decision?.rights_status==='cleared_internal';
     return decision?.technical_status!=='rejected'&&decision?.rights_status!=='rejected';
   });
   const paths=[...new Set(eligible.map(x=>x.ref.asset.storage_path))];

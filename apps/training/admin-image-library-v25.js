@@ -170,6 +170,7 @@ async function paint(){
   }
   if(!active(seq,userId))return;
   gallery.innerHTML=items.map(x=>tile(x,type)).join('')||'<p>Nessuna immagine per questo filtro.</p>';
+  if(type==='integral')void window.SAFETY_ADMIN_IMAGE_PLACEMENT_V25?.renderFor?.(gallery,items);
   const pages=Math.max(1,Math.ceil(total/pageSize));
   stat.textContent=total+' immagini/riferimenti · pagina '+(state.page+1)+' di '+pages;
   host().querySelector('[data-st-image-prev]').disabled=state.page===0;

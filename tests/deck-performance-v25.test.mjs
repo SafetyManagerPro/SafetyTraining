@@ -18,7 +18,7 @@ test('a compiled course deck is reused when paging and private PDF fetches do no
 
 test('signed URLs are issued only after topic placement',()=>{
  const js=read('apps/training/integral-pdf-v24.js');
- const eligible=js.indexOf('const matching=list.map');
+ const eligible=js.indexOf('const automatic=list.map');
  const signing=js.indexOf('createSignedUrls(batch,1200)');
  assert.ok(eligible>=0&&signing>eligible);
  assert.match(js,/\.filter\(x=>x\.index>=0&&topics\[x\.index\]/);
