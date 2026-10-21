@@ -92,6 +92,9 @@
     const img=event.target;
     if(!(img instanceof HTMLImageElement)) return;
     if(img.dataset.assetFallback==='1') return;
+    // A genuinely missing local file gets a clearly labelled neutral diagram,
+    // while print previews retain their strict image-readiness preflight.
+    if(window.SAFETY_LOCAL_VISUALS_V32?.recoverBrokenLocalImage?.(img))return;
     img.dataset.assetFallback='1';
     img.classList.add('asset-unavailable');
     img.alt=(img.alt ? img.alt+' — ' : '')+'immagine non disponibile';

@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-21
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-76`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-77`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -829,3 +829,11 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - `admin-print-slides-v23.js`: usa lo stesso `loadBook`, mostra avviso nelle slide stampabili, mantiene preflight `inspectBook` e controllo delle immagini. `db-slide-adapter.js`: la presentazione in aula scarta lo stesso guscio duplicato dalla durata didattica senza cancellare dati o modificare il curriculum pubblicato.
 - Nessuna scrittura al database, nessun cambiamento a certificati, presenze, diritti o 27 corsi frozen. Solo normalizzazione della vista. Test nuovo `tests/print-legacy-placeholders-v31.test.mjs` con casi reali e guardie per i moduli veramente incompleti, incluso caricamento mock e adattamento deck. PWA cache `safety-training-v22-76`.
 - GitHub Actions e distribuzione Vercel da verificare dopo commit. Per prova manuale: Amministrazione → Stampa slide / Stampa lezioni, selezionare `agg_lav` o `lav_quota`, versione v2. Deve apparire un modulo reale con LU e un avviso sul segnaposto omesso; il bottone Stampa si sblocca solo dopo il normale preflight immagini.
+
+## 2026-10-21 — v24.8.16 ripristino centralizzato immagini assenti nelle slide
+- Screenshot utente: **Carroponte/Gru a cavalletto tutte tipologie comando 11h**, slide Spiegazione 2/3, illustrazione vuota e `immagine non disponibile`; lo stesso difetto su altre pagine.
+- Diagnosi letta da Supabase: tra 661 versioni LU pubblicate, **170** usano `content.visual` come categoria non-file con nessun `idea_images`/visuals presente: `equipment-training` (100), `role-safety` (46), `first-aid` (20), `confined-space` (4). Il precedente `getTopicImage(t)` costruiva `assets/${t.visual}.svg`, file inesistenti. Distinti da 58 nomi di immagini esplicite presenti nei contenuti LU, tutti verificati contro l'inventario dei 201 asset reali.
+- Nuovo `apps/training/visual-asset-guard-v32.js`: inventario *esplicito e verificato* dei 201 file SVG/PNG locali (da `image-library-v25.json`); `resolve(topic,course,slot)` preferisce le immagini authored se esistenti, altrimenti traduce le quattro categorie in figure locali appropriate, con selezione per famiglia (carroponte→baricentro, imbracatura, perimetro; carrelli, PLE, gru, MMT, vari).
+- `app.js`: tutto il viewer (prima, seconda, terza figura, schede topic, card grafiche, approfondimenti, poster video) usa il resolver validato; nessun URL `assets/equipment-training.svg` viene più costruito dalla presentazione. `media-resilience-v3.js`: se una **immagine locale** fallisce davvero durante la presentazione, propone un `general.svg` etichettato come schema sostitutivo, senza nascondere il problema; **non** sostituisce immagini private o il percorso di stampa amministrativo, dove resta il preflight bloccante dei file mancanti.
+- `index.html` include il resolver prima di `app.js`; `sw.js` cache `safety-training-v22-77`, precache script, e test regression `tests/visual-asset-guard-v32.test.mjs` con inventory, famiglie, fallback, protezione stampa. Nessun Supabase write, nessuna modifica ai corsi frozen, ai diritti o alle approvazioni.
+- Test GitHub Actions e deploy Vercel da verificare al termine del rilascio. QA live browser autenticato resta opportuno (Carroponte 11h slide 4/64 + più corsi).

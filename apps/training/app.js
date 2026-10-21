@@ -57,12 +57,11 @@ function clockMin(m){
  const h=Math.floor(m/60), mm=m%60;
  return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
-function getTopicImage(t){
- const arr=t.idea_images||[];
- const valid=arr.find(item=>item&&typeof item.file==='string'&&item.file.trim()&&
-   !['undefined','null'].includes(item.file.trim().toLowerCase()));
- if(valid) return {src:`assets/${valid.file}`,caption:valid.caption||''};
- return {src:`assets/${t.visual||'general'}.svg`,caption:'Schema visuale di supporto'};
+function getTopicImage(t,c,slot=0){
+ // Never treat a pedagogical visual category (e.g. "equipment-training")
+ // as a real SVG filename. Select verified bundled assets by course/topic.
+ return window.SAFETY_LOCAL_VISUALS_V32?.resolve?.(t,c,slot)||
+   {src:'assets/general.svg',caption:'Schema generale di prevenzione'};
 }
 
 // Only original, additive diagrams. Never mutate authored content or frozen course data.
@@ -127,16 +126,8 @@ function allocateSlideMinutes(total,weights){
  for(let k=0;k<left;k++) add[order[k%order.length].i]++;
  return base.map((v,i)=>v+add[i]);
 }
-function topicSecondImage(t){
- const arr=t.idea_images||[];
- if(arr.length>1) return {src:`assets/${arr[1].file}`,caption:arr[1].caption||''};
- return getTopicImage(t);
-}
-function topicThirdImage(t){
- const arr=t.idea_images||[];
- if(arr.length>2) return {src:`assets/${arr[2].file}`,caption:arr[2].caption||''};
- return topicSecondImage(t);
-}
+function topicSecondImage(t,c){return getTopicImage(t,c,1);}
+function topicThirdImage(t,c){return getTopicImage(t,c,2);}
 function trimTopicSlides(slides,totalMinutes){
  let cap=Math.max(7,Math.min(24,Math.round(totalMinutes/3)+3));
  const hasMedia=slides.some(s=>s.type==='video'||s.type==='sourceDigest'||s.type==='graphic');
@@ -234,10 +225,10 @@ function buildDeck(c){
      const pdfVisuals=window.SAFETY_SOURCE_VISUALS_V23?.pick?.(c,t)||[];
      const packVisuals=[...originalVisuals.slice(0,1),...pdfVisuals.slice(0,1),...originalVisuals.slice(1)].filter((visual,i,arr)=>arr.findIndex(v=>v.src===visual.src)===i).slice(0,3);
      // An authored course keeps its existing lead image; GP04 only enriches later image slots.
-     const authoredMain=t.presentation_quality?.visual_mode==='authored'?getTopicImage(t):null;
-     const img=authoredMain||packVisuals[0]||getTopicImage(t);
-     const img2=packVisuals.find(v=>v.src!==img.src)||topicSecondImage(t);
-     const img3=packVisuals.find(v=>v.src!==img.src&&v.src!==img2.src)||topicThirdImage(t);
+     const authoredMain=t.presentation_quality?.visual_mode==='authored'?getTopicImage(t,c):null;
+     const img=authoredMain||packVisuals[0]||getTopicImage(t,c);
+     const img2=packVisuals.find(v=>v.src!==img.src)||topicSecondImage(t,c);
+     const img3=packVisuals.find(v=>v.src!==img.src&&v.src!==img2.src)||topicThirdImage(t,c);
      const topicSlides=[];
      // Opening = one message + large image. No long explanation on the first slide.
      topicSlides.push({type:'concept',weight:.8,img,summary:t.summary,title});
@@ -260,8 +251,9 @@ function buildDeck(c){
        // Some authored graphic cards supply text/points without their own image.
        // Reuse the topic's available visual rather than emitting "assets/undefined".
        const file=typeof g.image==='string'?g.image.trim():'';
-       const graphicImage=(file&&!['undefined','null'].includes(file.toLowerCase()))
-         ?{src:`assets/${file}`,caption:g.caption||''}
+       const graphicSource=file&&window.SAFETY_LOCAL_VISUALS_V32?.normalize?.(file);
+       const graphicImage=graphicSource
+         ?{src:graphicSource,caption:g.caption||''}
          :{...img2,caption:g.caption||img2.caption||''};
        topicSlides.push({type:'graphic',weight:.86,img:graphicImage,graphic:g,partIndex:gi,title:g.title||title});
      });
@@ -281,9 +273,15 @@ function buildDeck(c){
      }
 
      const digests=(t.source_digest||[]).slice(0,2);
-     digests.forEach((d,di)=>topicSlides.push({type:'sourceDigest',weight:.8,img:(d&&d.image)?{src:`assets/${d.image}`,caption:d.image_caption||''}:((di%2)?img2:img),digest:d,partIndex:di,title}));
+     digests.forEach((d,di)=>{
+       const file=d?.image&&window.SAFETY_LOCAL_VISUALS_V32?.normalize?.(d.image);
+       topicSlides.push({type:'sourceDigest',weight:.8,img:file?{src:file,caption:d.image_caption||''}:((di%2)?img2:img),digest:d,partIndex:di,title});
+     });
      const video=t.video_moment||t.video_plan||null;
-     if(video) topicSlides.push({type:'video',weight:.8,img:video.visual?{src:`assets/${video.visual}`,caption:''}:img,video,sourcePrompt:concise(video.before,3),sourceAfter:concise(video.after,3),sourceFocus:video.focus||'',caseSolution:concise(t.procedure||t.prevention,3),generalSolution:concise(t.prevention||t.good,3),title});
+     if(video){
+       const poster=video.visual&&window.SAFETY_LOCAL_VISUALS_V32?.normalize?.(video.visual);
+       topicSlides.push({type:'video',weight:.8,img:poster?{src:poster,caption:''}:img,video,sourcePrompt:concise(video.before,3),sourceAfter:concise(video.after,3),sourceFocus:video.focus||'',caseSolution:concise(t.procedure||t.prevention,3),generalSolution:concise(t.prevention||t.good,3),title});
+     }
 
      const trimmed=trimTopicSlides(topicSlides,t.minutes);
      const projectedSlides=window.SAFETY_VISUAL_ATLAS_V22?.distribute?.(c,t,trimmed)||trimmed;
@@ -606,14 +604,14 @@ function detailedDiscussionHtml(t){
 function topicView(c,t){
  pushRecent(c.id,t.id);
  const k=topicKey(c,t), idx=c.topics.indexOf(t), prev=c.topics[idx-1], next=c.topics[idx+1];
- const visual=t.visual||'general';
+ const visualImage=getTopicImage(t,c);
  app.innerHTML=`<div class="breadcrumb"><button onclick="setHash('')">Home</button> › <button onclick="setHash('course/${c.id}')">${esc(c.title)}</button> › ${esc(t.title)}</div>
  <div class="topichead"><div class="topicicon">${t.icon}</div><div><div class="duration">${t.minutes} min • ${idx+1}/${c.topics.length}</div><h1>${esc(t.title)}</h1></div></div>
  <div class="toolbar"><button class="ghost ${favs.has(k)?'active':''}" onclick="toggleFav('${c.id}','${t.id}')">${favs.has(k)?'★ Preferito':'☆ Aggiungi ai preferiti'}</button>
  <button class="ghost" onclick="startTimer(${t.minutes})">⏱ Avvia timer</button><span class="ghost timer" id="timer">00:00</span>
  <button class="ghost" onclick="toggleFullscreen()">⛶ Presentazione</button><button class="ghost" onclick="window.print()">🖨 Stampa scheda</button></div>
  <div class="topicprogress"><span style="width:${((idx+1)/c.topics.length)*100}%"></span></div>
- <div class="visualcard"><img src="assets/${visual}.svg" alt="Schema visuale ${esc(t.title)}"><div class="imgcaption">Schema sintetico locale a supporto della spiegazione dell'argomento.</div></div>
+ <div class="visualcard"><img src="${esc(visualImage.src)}" alt="${esc(visualImage.caption||t.title)}"><div class="imgcaption">${esc(visualImage.caption||"Schema didattico a supporto dell’argomento")}</div></div>
  ${topicIllustrationsHtml(c,t)}
  <div class="section summary"><h3>In aula</h3><p>${esc(t.summary)}</p></div>
  <div class="section"><h3>Approfondimento</h3><p>${esc(t.detail)}</p></div>
