@@ -21,6 +21,41 @@ function category(src){
  return 'Altre illustrazioni';
 }
 const nameOf=src=>String(src).split('/').pop().replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+async function saveReview(event){
+ event.preventDefault();
+ const form=event.target;
+ if(!form.matches?.('form[data-review-form]')||!await verified())return;
+ const button=form.querySelector('[data-review-save]');
+ const refId=button?.dataset.reviewSave||'';
+ const msg=form.querySelector('[data-review-message]');
+ const formData=new FormData(form);
+ const technical_status=String(formData.get('technical_status')||'');
+ const rights_status=String(formData.get('rights_status')||'');
+ const technical_note=String(formData.get('technical_note')||'').trim();
+ const rights_evidence=String(formData.get('rights_evidence')||'').trim();
+ if(!/^pdf-[0-9]{5}$/.test(refId))return;
+ if(technical_note.length<25){msg.textContent='Descrivi la motivazione tecnica con almeno 25 caratteri.';return;}
+ if(rights_status==='cleared_internal'&&rights_evidence.length<20){
+  msg.textContent='Inserisci un riferimento verificabile ai diritti di almeno 20 caratteri.';return;
+ }
+ if((technical_status==='approved'||rights_status==='cleared_internal')&&!window.confirm(
+  'Confermi di avere realmente verificato la figura e la documentazione dichiarata? Questa operazione non pubblica l’immagine e sarà registrata con la tua identità.'))return;
+ const currentActor=actor();
+ button.disabled=true;msg.textContent='Registrazione della revisione…';
+ try{
+  const {error}=await db().rpc('training_review_integral_pdf_v25',{
+   p_ref_id:refId,p_technical_status:technical_status,p_rights_status:rights_status,
+   p_technical_note:technical_note,p_rights_evidence:rights_evidence
+  });
+  if(error)throw error;
+  if(actor()!==currentActor)return;
+  window.SAFETY_INTEGRAL_PDF_V24?.invalidate?.();
+  document.dispatchEvent(new Event('safety:image-review-updated'));
+  msg.textContent='Revisione registrata. Il catalogo verrà aggiornato.';
+  await paint();
+ }catch(error){if(actor()===currentActor)msg.textContent='Revisione non salvata: '+(error?.message||error);}
+ finally{button.disabled=false;}
+}
 function ensureNav(){
  const nav=root()?.querySelector('.admin-nav nav');
  if(!nav||nav.querySelector('[data-image-library-v25]'))return;
@@ -71,6 +106,15 @@ async function rowsPrivate(type,page,q){
  const {data,error,count:total}=await req.range(page*pageSize,page*pageSize+pageSize-1);
  if(error)throw error;
  const list=data||[],paths=list.map(x=>type==='integral'?x.asset?.storage_path:x.storage_path).filter(Boolean);
+ // Independent, administrator-only decisions do not alter the source's immutable provenance.
+ const reviews=new Map();
+ if(type==='integral'&&list.length){
+  const {data:decisions,error:reviewError}=await db().from('training_integral_pdf_reviews_v25')
+   .select('ref_id,technical_status,rights_status,technical_note,rights_evidence,reviewed_by,updated_at')
+   .in('ref_id',list.map(x=>x.id));
+  if(reviewError)throw reviewError;
+  for(const decision of decisions||[])reviews.set(decision.ref_id,decision);
+ }
  const map=new Map();
  if(paths.length){
   const {data:signed,error:signError}=await db().storage.from('training-source-figures').createSignedUrls(paths,600);
@@ -83,16 +127,32 @@ async function rowsPrivate(type,page,q){
   category:x.category||'Senza categoria',
   src:map.get(type==='integral'?x.asset?.storage_path:x.storage_path)||'',
   detail:(x.source_document||'')+' · pagina '+(x.source_page||'—'),
-  status:type==='integral'?(x.technical_review_required?'Revisione tecnica richiesta':'Verificare i diritti'):(x.review_class||'In revisione'),
-  rights:x.rights_status||'review_required'
+  status:type==='integral'
+   ?(reviews.get(x.id)?.technical_status==='approved'?'Revisione tecnica confermata':reviews.get(x.id)?.technical_status==='rejected'?'Non idonea':'Revisione tecnica richiesta')
+   :(x.review_class||'In revisione'),
+  rights:type==='integral'?(reviews.get(x.id)?.rights_status||'review_required'):(x.rights_status||'review_required'),
+  review:reviews.get(x.id)||null
  }))};
 }
 function tile(x,type){
  const image=x.src?'<img loading="lazy" decoding="async" src="'+esc(x.src)+'" alt="'+esc(x.name)+'">':'<div class="st-image-missing">Anteprima non disponibile</div>';
- return '<article class="st-image-card">'+image+'<strong>'+esc(x.name)+'</strong><small>'+esc(x.category)+'</small>'+
- (type==='local'?'<span class="st-image-status">Disponibile nell’app</span>':
- '<span class="st-image-status">Privata · '+esc(x.status)+' · '+esc(x.rights)+'</span>')+
- (x.detail?'<small>'+esc(x.detail)+'</small>':'')+'</article>';
+ const review=x.review||{};
+ const technical=review.technical_status||'pending',rights=review.rights_status||'review_required';
+ const approved=technical==='approved'&&rights==='cleared_internal';
+ const label=approved?'Revisionata per uso interno':x.status;
+ const status='<span class="st-image-status">'+(type==='local'?'Disponibile nell’app':'Privata · '+esc(label)+' · Diritti: '+esc(rights))+'</span>';
+ const detail=type==='integral'
+  ?'<details class="st-image-review"><summary>Esamina / cambia stato di revisione</summary><form data-review-form>'+
+     '<label>Esito tecnico<select name="technical_status"><option value="pending"'+(technical==='pending'?' selected':'')+'>Da verificare</option><option value="approved"'+(technical==='approved'?' selected':'')+'>Verificata da un esperto</option><option value="rejected"'+(technical==='rejected'?' selected':'')+'>Non idonea</option></select></label>'+
+     '<label>Diritti di utilizzo<select name="rights_status"><option value="review_required"'+(rights==='review_required'?' selected':'')+'>Da verificare</option><option value="cleared_internal"'+(rights==='cleared_internal'?' selected':'')+'>Autorizzata per uso interno</option><option value="rejected"'+(rights==='rejected'?' selected':'')+'>Utilizzo non consentito</option></select></label>'+
+     '<label>Motivazione tecnico-didattica (obbligatoria)<textarea name="technical_note" rows="3" maxlength="1000" required placeholder="Pertinenza, accuratezza, data e riferimenti esaminati">'+esc(review.technical_note||'')+'</textarea></label>'+
+     '<label>Documento/licenza/autorizzazione dei diritti<textarea name="rights_evidence" rows="2" maxlength="1000" placeholder="Fonte verificabile, intestatario, autorizzazione e ambito di utilizzo">'+esc(review.rights_evidence||'')+'</textarea></label>'+
+     '<p class="st-image-review-caution">L’approvazione non pubblica immagini ai corsisti: restano in archivio privato. L’abbinamento alla lezione è una verifica separata.</p>'+
+     (review.updated_at?'<small>Ultima revisione: '+esc(new Date(review.updated_at).toLocaleString('it-IT'))+'</small>':'')+
+     '<button type="submit" data-review-save="'+esc(x.id)+'">Salva revisione</button><p role="status" data-review-message></p>'+
+    '</form></details>':'';
+ return '<article class="st-image-card" data-review-ref="'+esc(x.id)+'">'+image+'<strong>'+esc(x.name)+'</strong><small>'+esc(x.category)+'</small>'+status+
+ (x.detail?'<small>'+esc(x.detail)+'</small>':'')+detail+'</article>';
 }
 async function paint(){
  const seq=++state.seq,userId=actor(),gallery=host()?.querySelector('#stImageGallery'),stat=host()?.querySelector('#stImagePagination');
@@ -131,7 +191,7 @@ async function render(){
   const [files,counts]=await Promise.all([loadLocal(),loadStats()]);
   if(!active(seq,userId))return;
   state.stats=counts;
-  host().innerHTML='<section class="admin-card"><h2>Inventario immagini</h2><p>Le illustrazioni SVG/PNG distribuite con l’app sono in sola lettura. I file PDF importati restano privati e soggetti a revisione: la presenza in archivio non implica autorizzazione o pertinenza didattica.</p>'+
+  host().innerHTML='<section class="admin-card"><h2>Inventario immagini</h2><p>Le illustrazioni SVG/PNG distribuite con l’app sono in sola lettura. Le tavole PDF private richiedono una verifica tecnico-didattica e una verifica separata dei diritti. Puoi registrare le revisioni per singola figura, con motivazione e tracciabilità. Lo stato non determina da solo la presenza nelle slide: conta anche l’abbinamento al corso, e le immagini private non sono pubblicate ai corsisti.</p>'+
    '<div class="admin-stats"><article class="admin-stat"><strong>'+files.length+'</strong><span>Immagini locali disponibili</span></article><article class="admin-stat"><strong>'+esc(counts[0])+'</strong><span>Figure PDF caricate</span></article><article class="admin-stat"><strong>'+esc(counts[1])+'</strong><span>Riferimenti PDF completi</span></article><article class="admin-stat"><strong>'+esc(counts[2])+'</strong><span>Estratti PDF in revisione</span></article></div>'+
    '<div class="st-image-actions"><button type="button" data-st-image-integral>Gestisci archivio PDF · importa / elimina</button><button type="button" data-st-image-sources>Gestisci estratti PDF</button><button type="button" data-st-image-refresh>Aggiorna inventario</button></div></section>'+
    '<section class="admin-card"><h2>Esplora immagini</h2><div class="st-image-controls"><label>Archivio <select id="stImageType"><option value="local">Illustrazioni locali</option><option value="integral">Tavole PDF complete importate</option><option value="source">Estratti PDF in revisione</option></select></label><label>Cerca per tema <input type="search" id="stImageSearch" placeholder="Es. carrelli, DPI, portata"></label></div>'+
@@ -139,6 +199,7 @@ async function render(){
   host().querySelector('#stImageType').value=state.type;
   host().querySelector('#stImageSearch').value=state.query;
   const content=host();
+  content.querySelector('#stImageGallery').addEventListener('submit',e=>void saveReview(e));
   content.querySelector('#stImageType').onchange=e=>{state.type=e.target.value;state.page=0;void paint();};
   content.querySelector('#stImageSearch').oninput=e=>{state.query=e.target.value;state.page=0;void paint();};
   content.querySelector('[data-st-image-prev]').onclick=()=>{state.page=Math.max(0,state.page-1);void paint();};

@@ -393,6 +393,7 @@ function cachedDeck(course){
 window.addEventListener('safety:auth-changed',()=>{
  liveDeckCache=new WeakMap();window.__deck=null;window.__deckSlides=[];
 });
+document.addEventListener('safety:image-review-updated',()=>{liveDeckCache=new WeakMap();});
 function deckView(c,index=0){
  const deck=cachedDeck(c);
  index=Math.min(Math.max(0,Number(index)||0),deck.length-1);

@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-21
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-67`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-68`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -749,3 +749,11 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-21 — v24.8.7.1 regressione test posizionamento PDF
 - CI della prima release ha eseguito con successo i test precedenti ma si è fermata su una vecchia asserzione testuale (`if(idx<0)continue`) non più presente dopo che il posizionamento PDF è stato anticipato prima di `createSignedUrls`. Aggiornato il test per verificare il filtro `index>=0` invece della sintassi eliminata. Nessuna modifica al runtime, ai dati o alla cache.
+
+## 2026-10-21 — v24.8.8 stati di revisione tavole PDF (senza autopubblicazione)
+- Verifica tecnica: le 856 tavole integrate da PDF avevano `rights_status=review_required` e `technical_review_required=true`, senza workflow di approvazione. Questi campi di provenienza non sono direttamente filtri di collocazione: nel proiettore amministrativo contano i permessi e il matching `placementIndex`, mentre nel percorso corsista i PDF privati non vengono pubblicati.
+- Introdotti due stati di revisione indipendenti per ciascun riferimento immagine (`training_integral_pdf_reviews_v25`): accuratezza tecnico-didattica (`pending/approved/rejected`) e diritti di impiego interno (`review_required/cleared_internal/rejected`). Motivo tecnico da 25 caratteri, evidenza verificabile dei diritti da 20 caratteri se dichiarati liberati per uso interno.
+- Soltanto platform-admin autenticato può salvare una decisione tramite la funzione SQL `training_review_integral_pdf_v25`, con controllo identità, input validato, motivazione obbligatoria e storico append-only `training_integral_pdf_review_events_v25`. RLS admin-only. Nessuna riga precedentemente importata viene marcata automaticamente approvata.
+- La pagina Amministrazione > Gestione immagini offre la scheda «Esamina / cambia stato di revisione» per ogni riferimento integrale con select separati, note e documento/licenza, conferma esplicita prima dell'approvazione, ricarica del catalogo. Presentazioni admin e stampa non devono mostrare immagini formalmente respinte; ricalcolano cache dopo una decisione. Figure in attesa restano eventualmente visibili come **anteprima privata non validata** nell'eventuale slide ben abbinata; immagini approvate per uso interno **non diventano pubbliche**.
+- Conservati i vincoli originali dei PDF importati: `rights_status='review_required'` e `technical_review_required=true` nelle tabelle di fonte sono dati di provenienza e non vengono sovrascritti. Il nuovo stato di revisione è separato e verificabile.
+- Migration `supabase/migrations/20261021094500_v25_001_integral_pdf_review_workflow.sql`; test `tests/integral-pdf-review-v25.test.mjs`. PWA `safety-training-v22-68`. Nessuna modifica a corsi frozen, corsisti, attestati o diritti reali. Da verificare CI, deploy e SQL applicato.

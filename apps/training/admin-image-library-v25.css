@@ -10,3 +10,14 @@
 .st-image-status{display:block;font-size:11px;font-weight:700;color:#365e76}
 .st-image-missing{min-height:152px;display:grid;place-items:center;background:#eef3f6;color:#64748b;font-size:13px}
 .st-image-pagination{justify-content:space-between;margin-top:19px}.st-image-pagination button:disabled{opacity:.45;cursor:default}
+
+.st-image-review{margin-top:8px;border-top:1px solid #c5d3df;padding-top:8px}
+.st-image-review summary{font-size:13px;font-weight:750;color:#165e89;cursor:pointer}
+.st-image-review form,.st-image-review label{display:flex;flex-direction:column;gap:6px}
+.st-image-review form{margin-top:10px;gap:11px}
+.st-image-review label{font-size:12px;font-weight:700;color:#27435a}
+.st-image-review select,.st-image-review textarea{width:100%;min-width:0;max-width:100%;box-sizing:border-box;border-radius:8px;padding:8px;border:1px solid #9aafbf;background:#fff;color:#17344b;font-size:12px}
+.st-image-review button{border:1px solid #167a5b;border-radius:8px;background:#156b55;color:#fff;padding:10px 12px;cursor:pointer;font-weight:750}
+.st-image-review button:disabled{opacity:.5;cursor:progress}
+.st-image-review-caution{font-size:12px;line-height:1.4;color:#825b19}
+.st-image-review [data-review-message]{font-size:12px;color:#235a74;overflow-wrap:anywhere}

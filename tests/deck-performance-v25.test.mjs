@@ -18,7 +18,7 @@ test('a compiled course deck is reused when paging and private PDF fetches do no
 
 test('signed URLs are issued only after topic placement',()=>{
  const js=read('apps/training/integral-pdf-v24.js');
- const eligible=js.indexOf('const eligible=list.map');
+ const eligible=js.indexOf('const matching=list.map');
  const signing=js.indexOf('createSignedUrls(batch,1200)');
  assert.ok(eligible>=0&&signing>eligible);
  assert.match(js,/\.filter\(x=>x\.index>=0&&topics\[x\.index\]/);
@@ -29,7 +29,7 @@ test('offline install precaches a small shell instead of saturating the connecti
  const sw=read('apps/training/sw.js');
  assert.match(sw,/ASSETS\.filter\(asset=>essential\.has\(asset\)\)/);
  assert.match(sw,/caches\.match\(event\.request\)/);
- assert.match(sw,/safety-training-v22-67/);
+ assert.match(sw,/safety-training-v22-68/);
 });
 
 test('visible forward/backward controls are keyboard accessible and disabled at endpoints',()=>{

@@ -64,6 +64,7 @@ function relevantKeys(course){
  const key=keyOf(course);return key?[key]:[];
 }
 function hasAccess(course){return admin()&&!!course?.presentation_generated_from_db&&!frozen(course);}
+function invalidate(){cache.clear();}
 async function paginate(query,size=600){
  let out=[];for(let from=0;from<10000;from+=size){
   const {data,error}=await query.range(from,from+size-1);
@@ -94,8 +95,22 @@ async function prepareCourse(course,{client}={}){
   for(const r of list){const key=String(r.topic||'').trim().toLowerCase();topicCounts.set(key,(topicCounts.get(key)||0)+1);}
   // Match the page to a lesson before requesting a private signed URL.
   // Generic and unassigned pages cannot stall the opening of presentations.
-  const eligible=list.map(r=>({ref:r,index:placementIndex(course,r,topics,topicCounts)}))
+  const matching=list.map(r=>({ref:r,index:placementIndex(course,r,topics,topicCounts)}))
     .filter(x=>x.index>=0&&topics[x.index]&&x.ref.asset?.storage_path);
+  // A rejected technical or rights review must immediately prevent projection,
+  // while unreviewed figures may still be inspected in the private admin deck.
+  const reviews=new Map();
+  for(let i=0;i<matching.length;i+=100){
+    const slice=matching.slice(i,i+100);
+    const {data:decisions,error:reviewError}=await db.from('training_integral_pdf_reviews_v25')
+      .select('ref_id,technical_status,rights_status').in('ref_id',slice.map(x=>x.ref.id));
+    if(reviewError)throw reviewError;
+    for(const x of decisions||[])reviews.set(x.ref_id,x);
+  }
+  const eligible=matching.filter(x=>{
+    const decision=reviews.get(x.ref.id);
+    return decision?.technical_status!=='rejected'&&decision?.rights_status!=='rejected';
+  });
   const paths=[...new Set(eligible.map(x=>x.ref.asset.storage_path))];
   const urls=new Map();
   for(let start=0;start<paths.length;start+=50){
@@ -108,7 +123,7 @@ async function prepareCourse(course,{client}={}){
    const t=topics[idx];
    byTopic.get(String(t.id)).push({
      src:urls.get(r.asset.storage_path),
-     caption:text('FONTE PDF DA VERIFICARE · '+r.category+' · '+r.source_document+' · pag. '+r.source_page),
+     caption:text(((reviews.get(r.id)?.technical_status==='approved'&&reviews.get(r.id)?.rights_status==='cleared_internal')?'REVISIONATA PER USO INTERNO · ':'FONTE PDF DA VERIFICARE · ')+r.category+' · '+r.source_document+' · pag. '+r.source_page),
      media_origin:'private_pdf_v24',source_id:r.id,topic_id:t.id
    });
   }
@@ -360,6 +375,6 @@ function boot(){
  }
  ensure();[250,800,1500].forEach(delay=>setTimeout(ensure,delay));
 }
-window.SAFETY_INTEGRAL_PDF_V24={prepareCourse,pick,isTrustedSrc,importZip,relevantKeys,score,placementIndex,show,hasAccess};
+window.SAFETY_INTEGRAL_PDF_V24={prepareCourse,pick,isTrustedSrc,importZip,relevantKeys,score,placementIndex,show,hasAccess,invalidate};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
