@@ -801,3 +801,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-21 — v24.8.12.2 seconda sincronizzazione test
 - Dopo nuova dicitura UI «Questa osservazione non approva i diritti», corretto il test precedente rimasto alla frase «La valutazione visiva non approva i diritti». CI precedente fallita per una vecchia asserzione testuale, non un errore dati. Nessuna modifica a source, rights, RLS o corsi.
+
+## 2026-10-21 — v24.8.12.3 correzione sintassi test
+- In `tests/integral-pdf-audit-v28.test.mjs`, un carattere escape letterale `\\n` era rimasto tra due asserzioni dopo un refactor, causando `SyntaxError` in GitHub Actions. Convertito in newline reale. Nessuna variazione runtime/SQL.

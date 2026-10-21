@@ -35,7 +35,8 @@ test('only individually observed and double-approved candidates are auto-assigne
  assert.match(js,/training_integral_pdf_visual_audit_v27/);
  assert.match(js,/curatedIds/);
  assert.match(js,/explicit\.push\(\{ref,index,manual:true,curated:true\}\)/);
- assert.match(js,/excluded\.has\(x\.ref\.id\)\|\|!x\.manual/);\n assert.match(js,/return decision\?\.technical_status==='approved'&&decision\?\.rights_status==='cleared_internal'/);
+ assert.match(js,/excluded\.has\(x\.ref\.id\)\|\|!x\.manual/);
+ assert.match(js,/return decision\?\.technical_status==='approved'&&decision\?\.rights_status==='cleared_internal'/);
  assert.match(js,/excluded\.has\(x\.ref\.id\)\|\|!x\.manual/);
  assert.match(js,/hasAccess\(course\)/);
  assert.match(read('apps/training/admin-print-slides-v23.js'),/await window\.SAFETY_INTEGRAL_PDF_V24\?\.prepareCourse/);
