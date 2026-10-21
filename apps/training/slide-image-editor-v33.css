@@ -1,0 +1,14 @@
+.slide-image-edit-btn{border:1px solid #4787a4;background:#164e70;color:#fff;padding:8px 14px;border-radius:7px;font-weight:750;cursor:pointer}
+.slide-image-editor-backdrop{position:fixed;inset:0;z-index:11000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:14px}
+.slide-image-editor{background:#f8fafc;color:#163248;border-radius:12px;padding:18px;max-width:1020px;width:100%;max-height:94vh;overflow:auto;box-shadow:0 15px 60px #0007}
+.slide-image-editor header,.slide-image-editor footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.slide-image-editor button{cursor:pointer;border:1px solid #7a9cab;border-radius:6px;background:#fff;color:#16455f;padding:8px}
+.slide-image-editor footer button[data-save]{background:#137457;color:white;font-weight:800}
+.slide-image-editor label{display:block;margin:12px 0}.slide-image-editor input{width:100%;box-sizing:border-box;padding:10px}
+.slide-edit-library{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;max-height:320px;overflow:auto}
+.slide-edit-library button{display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
+.slide-edit-library img{height:100px;width:100%;object-fit:contain}
+.slide-edit-library span{font-size:11px;overflow-wrap:anywhere}
+.slide-edit-item{display:flex;gap:12px;align-items:center;margin:8px 0;background:#eaf2f7;padding:8px;border-radius:8px}
+.slide-edit-item>img{width:115px;height:68px;object-fit:contain}.slide-edit-actions{display:flex;gap:7px;margin-top:6px}
+@media(max-width:600px){.slide-image-editor{max-height:95vh;padding:12px}.slide-image-editor header h2{font-size:18px}}

@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-21
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-77`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-78`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -840,3 +840,12 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-21 — v24.8.16.1 aggiornamento verifica regressione
 - Test storico `tests/admin-print-slides-v23.test.mjs` aggiornato: non ricerca più il precedente `const valid=arr.find` rimosso da `getTopicImage`, ma verifica il nuovo resolver `SAFETY_LOCAL_VISUALS_V32.resolve(t,c,slot)`. Primo ciclo CI fallito solo per asserzione obsoleta, senza evidenza di errore di runtime. Rilanciare CI completo prima di pubblicare.
+
+## 2026-10-21 — v24.8.17 editor immagini per singola slide riservato all'account proprietario
+- Richiesta esplicita: inserire/sostituire/riordinare/rimuovere immagini direttamente da una slide e usare stessa scelta nella stampa PDF, SOLO dall'account utente amministratore, non qualsiasi futuro admin.
+- DB `supabase/migrations/20261021172500_v33_slide_image_owner_editor.sql` applicato: all'atto dell'installazione risultava **1 utente auth e 1 platform_admin**. `private.slide_image_editor_allowlist_v33` contiene solo quell'account: non si amplia automaticamente al nascere di nuovi admin. RPC `can_edit_slide_images_v33`, `save_slide_images_v33` controllano UID effettivo, allowlist, platform_admin, versione pubblicata più recente, stato non-frozen, percorso asset locale/privato approvato, max 3 immagini. Tabella `slide_image_overrides_v33` senza GRANT diretto API e RLS attiva; altre persone non possono modificare neppure chiamando endpoint a mano. `read_slide_images_v33` restituisce ai non editor solo override locali, mai identificativi PDF privati.
+- Catalogo `slide_image_local_catalog_v33` con 201 asset locali verificati, selezione anche di sole tavole PDF con doppia revisione approvata e non escluse; URL firmati e temporanei senza pubblicazione ai corsisti.
+- Nuovo `slide-image-editor-v33.js/css`: pulsante «✎ Modifica immagini» nelle slide per il solo account autorizzato; dialog con ricerca tra figure, aggiunta fino a 3, rimozione, ordine ↑↓, ripristino scelta automatica, salvataggio per corso + versione + UID slide. Il database è la fonte di verità; non si modificano le LU pubblicate.
+- `app.js` richiama `visit` dopo render della slide; `admin-print-slides-v23.js` richiama `applyDeck` prima di stampare, riutilizzando gli override. Nuovo asset inventory export `visual-asset-guard-v32.js`, HTML e PWA cache `safety-training-v22-78`. Aggiunto test `tests/slide-image-owner-editor-v33.test.mjs`.
+- AVVERTENZA: i viewer non-editor continuano a vedere la figura originale quando tutte le immagini modificate sono private; solo le sostituzioni locali sono visibili come override ai non editor. Nessun accesso alle licenze private per corsisti/docenti, 27 corsi frozen non modificati.
+- La prova in browser autenticato e la verifica CI / Vercel vanno registrate dopo pubblicazione.

@@ -415,6 +415,7 @@ function deckView(c,index=0){
        if(button){button.disabled=index+offset<0||index+offset>=deck.length;button.onclick=()=>deckGo(c.id,index+offset);}
      }
      window.__deck={cid:c.id,index,total:deck.length};window.__deckSlides=deck;
+     void window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.visit?.(c,s,index);
      requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});
      return;
    }
@@ -425,6 +426,7 @@ function deckView(c,index=0){
  <div class="deck-progress"><span style="width:${pct}%"></span></div>
  <button class="deck-nav prev" aria-label="Slide precedente" title="Slide precedente" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">‹</button><button class="deck-nav next" aria-label="Slide successiva" title="Slide successiva" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">›</button></div>`;
  window.__deck={cid:c.id,index,total:deck.length}; window.__deckSlides=deck;
+ void window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.visit?.(c,s,index);
  requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});
 }
 

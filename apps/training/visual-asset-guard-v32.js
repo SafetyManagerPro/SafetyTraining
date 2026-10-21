@@ -99,5 +99,5 @@ function recoverBrokenLocalImage(img){
  img.title='Immagine originale non caricata: utilizzato uno schema generale, da verificare';
  return true;
 }
-window.SAFETY_LOCAL_VISUALS_V32={resolve,normalize,available:src=>!!normalize(src),recoverBrokenLocalImage};
+window.SAFETY_LOCAL_VISUALS_V32={resolve,normalize,available:src=>!!normalize(src),recoverBrokenLocalImage,catalog:[...AVAILABLE].sort()};
 })();

@@ -115,7 +115,8 @@
     }))};
     const converted=adapter.adaptBundle(bundle);
     await window.SAFETY_INTEGRAL_PDF_V24?.prepareCourse?.(converted,{client});
-    const slides=projection.buildDeck(converted);
+    const built=projection.buildDeck(converted);
+    const slides=await window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.applyDeck?.(built,converted)||built;
     sheetData(slides);
     return {book,slides,renderSlide:projection.deckSlideBody};
   }
