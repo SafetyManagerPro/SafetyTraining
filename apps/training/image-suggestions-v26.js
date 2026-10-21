@@ -39,7 +39,7 @@ async function setExclude(key,kind,value,reason){
  if(!authorized())throw Error('Accesso amministrativo richiesto');
  const {error}=await db().rpc('training_set_image_exclusion_v26',{p_key:key,p_kind:kind,p_excluded:value,p_reason:reason});
  if(error)throw error;
- excluded.set(key,value);window.SAFETY_INTEGRAL_PDF_V24?.invalidate?.();document.dispatchEvent(new Event('safety:image-review-updated'));
+ excluded.set(key,value);if(kind==='local')await window.SAFETY_VISUAL_ATLAS_V22?.refreshExcludedLocal?.();window.SAFETY_INTEGRAL_PDF_V24?.invalidate?.();document.dispatchEvent(new Event('safety:image-review-updated'));
 }
 async function decorate(host,items,type){
  if(!authorized()||!host?.isConnected||!items?.length)return;

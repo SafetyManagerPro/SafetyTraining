@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-21
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-70`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-71`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -773,4 +773,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - `apps/training/image-suggestions-v26.js` analizza **metadati, categoria, titolo e testo derivato dalle fonti** per restituire fino a 3 collocazioni candidate e il grado di evidenza `candidate_strong`, `uncertain`, `unassigned`. Il componente DICHIARA che **non ha letto i pixel** degli 856 file privati: i titoli generici (D.Lvo etc.) non determinano abbinamenti; niente autoconvalida e niente associazione forzata.
 - Aggiunto pulsante amministrativo `Escludi dalle presentazioni` / `Ripristina nelle presentazioni`, diverso dall'eliminazione dell'originale, con motivazione obbligatoria. Stato persistito in `training_image_exclusions_v26` e RPC `training_set_image_exclusion_v26` esclusivamente platform-admin. Il renderer PDF privato filtra gli ID esclusi quando costruisce presentazione e stampa amministrative. Il catalogo permette anche l'esclusione delle figure SVG/PNG, ma la propagazione automatica dello stato alle immagini locali di TUTTE le modalità viewer va ancora completata e verificata: non dichiararla conclusa.
 - Continuiamo a NON approvare in modo automatico i diritti di nessuna tavola; zero verifiche tecniche/diritti inventate, zero associazioni salvate arbitrariamente. Lo stato di immagine privata nel viewer continua a rispettare permessi e `technical_status`/`rights_status`.
-- Migration: `supabase/migrations/20261021170000_v26_image_matching_and_exclusions.sql` applicata; `tests/image-suggestions-v26.test.mjs`; PWA `safety-training-v22-70`. Necessario test CI, deploy, verifica live con login e reale classificazione VISIVA per elevare una proposta da metadati a revisione grafica.
+- Migration: `supabase/migrations/20261021170000_v26_image_matching_and_exclusions.sql` applicata; `tests/image-suggestions-v26.test.mjs`; PWA `safety-training-v22-71`. Necessario test CI, deploy, verifica live con login e reale classificazione VISIVA per elevare una proposta da metadati a revisione grafica.
+
+## 2026-10-21 — v24.8.10.1 esclusioni locali nell'atlante
+- Filtraggio delle illustrazioni locali SVG/PNG in `SAFETY_VISUAL_ATLAS_V22.collect` con lista persistente proveniente dalla RPC `training_excluded_local_images_v26`. Il filtraggio viene applicato alle figure supplementari nell'atlante, usate anche nella stampa amministrativa dei corsi; immagini eroiche authored già presenti in slide originarie non vengono automaticamente mutate. Refresh su login e dopo azione di esclusione; invalidazione cache deck.
+- Guard `typeof document!=='undefined'` per test Node VM. PWA cache `safety-training-v22-71`; tests del service worker riallineati.
+- Da collaudare: comportamento completo del viewer e stampa reali, navigazione con sessione autenticata. La classificazione visiva delle 856 immagini non è stata eseguita: suggerimenti soltanto sulla base di titoli/categorie; nessun accoppiamento salvato senza verifica diritti e qualità.
