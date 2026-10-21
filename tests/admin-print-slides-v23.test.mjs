@@ -100,7 +100,7 @@ test('the source deck never constructs an undefined graphic-card visual',()=>{
  assert.match(src,/const graphicImage=/);
  assert.match(src,/img:graphicImage/);
  assert.doesNotMatch(src,/src:\`assets\/\$\{g\.image\}\`/);
- assert.match(src,/const valid=arr\.find/);
+ assert.match(src,/SAFETY_LOCAL_VISUALS_V32\?\.resolve\?\.\(t,c,slot\)/);
 });
 
 test('CLI check workflow runs the print-slide regression tests',()=>{
