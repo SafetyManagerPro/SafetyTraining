@@ -409,3 +409,9 @@ Il valore principale del lavoro didattico non è la quantità di slide, ma la qu
 - Verificata la logica di navigazione `deckView`, la stampa `admin-print-slides-v23.js` e la strategia cache del service worker: JS/CSS in network-first, immagini in cache-first.
 - Riscontrato rischio di race condition: due rendering asincroni della stessa slide o richieste concorrenti di override potevano completarsi in ordine inverso. Mitigato tramite revisione incrementale su caricamento override e proiezione del DOM, invalidata anche ai cambi di autenticazione (commit `19c14b1`).
 - Non è stato eseguito un collaudo manuale end-to-end nel browser: rimangono da verificare durante navigazione rapida, persistenza tra refresh e stampa PDF; non dichiarare l'intera app priva di bug.
+
+### Audit continuato — selezione multipla e salvataggi concorrenti (21/10/2026)
+
+- Nell'editor delle immagini è stato impedito di aggiungere la stessa figura due volte alla stessa slide (confronto per percorso locale o ID PDF).
+- Durante il salvataggio i comandi dell'editor sono temporaneamente disabilitati e un secondo salvataggio concorrente viene ignorato; i comandi vengono riabilitati anche in caso di errore.
+- Commit applicativo `728e76c`; test manuali della galleria e della stampa restano da completare. Non rappresentare il codice verificato come collaudo completo dell'app.
