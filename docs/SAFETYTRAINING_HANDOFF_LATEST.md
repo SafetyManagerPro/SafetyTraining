@@ -857,3 +857,8 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-21 — v24.8.17.2 URL privati verificati in stampa
 - L'editor tiene un insieme effimero di URL firmati realmente ottenuti da Supabase Storage dopo verifica di `technical_status='approved'` e `rights_status='cleared_internal'`; `admin-print-slides-v23.js` accetta quelle URL solo se riconosciute da `SAFETY_SLIDE_IMAGE_EDITOR_V33.isTrustedPrivateUrl`, e solo con sessione editor valida. L'insieme viene svuotato su cambio auth. Non è un bypass arbitrario del preflight PDF.
+
+## 2026-10-21 — v24.8.17.3 fix salvataggio immagini UID con due punti
+- Segnalazione Admin: «Salvataggio negato: Corso o identificativo slide non valido». Causa riprodotta sui corsi pubblicati: adattatore DB produce `course-module::unit:stable:key::1-explain-1`, ma la RPC v33 rifiutava `:` in `p_slide_uid`. Su 65 corsi attivi molti stable_key unità contengono `:` e sono corretti.
+- Migrazione `supabase/migrations/20261021232000_v34_slide_uid_colons.sql` applicata: regex UID `^[A-Za-z0-9_:-]+$`, preservati prefisso del corso, 240 caratteri, singolo account Admin in allowlist, corso pubblicato non frozen, revisione doppia per PDF e asset locali autorizzati. SQL verificato `accepts_colons=true`; ancora 0 scelte salvate prima della prova reale.
+- Test regressione nuovo per verificare identificativi reali e vincoli, guida aggiornata. Correzione server-side immediata, nessuna mutazione alle Learning Unit e ai corsi congelati.
