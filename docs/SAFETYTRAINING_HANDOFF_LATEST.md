@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-21
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-73`.
+Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-74`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -809,3 +809,11 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 
 ## 2026-10-21 — v24.8.12.4 ripristino integrazione completa del release
 - La prima tree assembly aveva sovrascritto `integral-pdf-v24.js` e `admin-image-library-v25.js` con versioni di `main` precedenti, pur conservando i tests corrispondenti. Ripristinata ora in UNICO commit la query delle 51 candidate visive individuali della versione pubblicata, con doppia approvazione e collocazione precisa, e i conteggi di dashboard 75/555/226/57. Verificare nuovo diff del commit e GitHub Actions prima del deploy Vercel.
+
+## 2026-10-21 — v24.8.13 filtri avanzati Esplora immagini
+- Richiesta utente: aggiungere a Gestione immagini/Esplora immagini filtri oltre ad Archivio: Esaminate, Da associare, Associate, Corso, Modulo e aggiornare le guide.
+- Migrazione `supabase/migrations/20261021192500_v29_admin_image_filters.sql`: RPC `training_image_filter_page_v29` `SECURITY DEFINER` con `private.is_platform_admin`, ricerca + stato + corso + modulo + paginazione 24 su **intero archivio PDF**, `total` e `ids`; nessun filtro solo sui 24 elementi già caricati. Revoke public/anon. Status `all,examined,individual,group,screening,approved,review_pending,to_associate,associated,excluded,rejected`.
+- Semantica: `examined` significa presenza di scheda visiva individuale o per gruppo, indipendentemente da validazione diritti; `screening` è valutazione preliminare per fonte; `associated` significa immagine inseribile in presentazione amministrativa nella versione pubblicata, con entrambe le approvazioni e abbinamento corrente manuale o visuale individuale; `to_associate` significa proposta esistente ma non attiva; NON pubblica immagini ai corsisti.
+- Nuovi controlli `stImageStatus`, `stImageCourse`, `stImageModule` in `apps/training/admin-image-library-v25.js`. Corso e Modulo a cascata mediante `training_image_matching_catalog_v26`, sola scelta su corsi pubblicati non congelati. Filtri didattici disabilitati per Illustrazioni locali/Estratti, mantenendo ricerca testuale. La griglia conserva miniature private firmate solo per le 24 righe richieste.
+- `apps/training/admin-help-v22.js` aggiunge guida contestuale `Gestione immagini`. Guida completa `docs/SAFETYTRAINING_GUIDA_FILTRI_IMMAGINI_20261021.md`, con percorsi d'uso, definizioni esatte e precauzioni. CSS responsive aggiornato. Test `tests/admin-image-filters-v29.test.mjs`; PWA `safety-training-v22-74`.
+- Da registrare esito finale GitHub Actions/Vercel. Conservati 27 corsi frozen e tutte le autorizzazioni storiche, nessuna assegnazione automatica aggiuntiva.

@@ -3,6 +3,20 @@
   'use strict';
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const guides={
+    'Gestione immagini':{
+      title:'Guida · Gestione immagini e filtri',
+      steps:[
+       'Apri Esplora immagini e scegli Archivio. I filtri avanzati si applicano alle Tavole PDF complete importate, mentre gli altri archivi mantengono la ricerca per tema.',
+       'Usa Esaminate per le tavole con analisi visiva registrata (individuale o per gruppo). Solo screening preliminare indica tavole che non hanno ancora una scheda visiva.',
+       'Usa Da associare per proposte non attive e Associate per figure effettivamente collocabili nel corso amministrativo, con entrambe le revisioni approvate; nessun filtro concede automaticamente i diritti.',
+       'Scegli Corso e, successivamente, Modulo. Gli elenchi provengono dai corsi attivi pubblicati e non congelati. I filtri cercano in tutto l’archivio, non soltanto nelle 24 figure visibili.',
+       'Per modificare gli esiti apri Esamina / cambia stato di revisione nella scheda, indicando la motivazione tecnica e i documenti relativi ai diritti.',
+       'Se una figura non è pertinente, scegli Escludi dalle presentazioni; usa Ripristina per tornare indietro senza cancellare il file originale.',
+       'Usa le frecce Precedenti e Successive per sfogliare il risultato filtrato; la voce Cerca per tema restringe ulteriormente la ricerca.'
+      ],
+      note:'Esaminata ≠ approvata ≠ associata. Le associazioni proposte e le pagine private non vengono pubblicate ai corsisti. Le verifiche tecniche, cliniche e dei diritti restano sotto responsabilità del revisore.'
+    },
+
     'Stampa lezioni':{title:'Guida · Stampa lezioni',steps:['Seleziona un corso e una versione pubblicata.','Verifica che siano presenti tutti i moduli e le Learning Unit.','Stampa da browser oppure scegli Salva in PDF nella finestra di stampa.'],note:'La dispensa non contiene soluzioni dei test e non è un attestato o registro presenze.'},
     'Controllo percorsi':{title:'Guida · Controllo percorsi',steps:['Seleziona l’edizione da esaminare.','Controlla iscrizioni, qualità didattica, frequenze, test ed evidenze.','Riconcilia anomalie e documenti con docente e registri prima di emettere un attestato.'],note:'I dati sono indicativi e limitati dall’accesso RLS. Nessun rilascio automatico di attestati.'},
     'Dashboard':{

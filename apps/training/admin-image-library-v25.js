@@ -6,7 +6,7 @@ const cloud=()=>window.SAFETY_CLOUD?.state;
 const actor=()=>cloud()?.user?.id||null;
 const db=()=>cloud()?.client;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state={type:'local',query:'',page:0,files:null,seq:0,stats:null};
+const state={type:'local',query:'',status:'all',course:'',module:'',page:0,files:null,seq:0,stats:null,filterCatalog:null};
 const pageSize=24;
 function category(src){
  const s=String(src).toLowerCase();
@@ -99,17 +99,77 @@ async function loadStats(){
  ]);
  return values.map(v=>v.status==='fulfilled'?v.value:'n/d');
 }
+async function courseOptions(){
+ if(state.filterCatalog)return state.filterCatalog;
+ const {data,error}=await db().rpc('training_image_matching_catalog_v26');
+ if(error)throw error;
+ const courses=new Map(),modules=new Map();
+ for(const r of data||[]){
+  if(!courses.has(r.course_key))courses.set(r.course_key,r.course_title);
+  if(!modules.has(r.course_key))modules.set(r.course_key,new Map());
+  modules.get(r.course_key).set(r.module_key,r.module_title);
+ }
+ state.filterCatalog={courses,modules};
+ return state.filterCatalog;
+}
+function syncFilterControls(){
+ const root=host(),type=root?.querySelector('#stImageType')?.value||state.type;
+ const pdf=type==='integral';
+ for(const id of ['stImageStatus','stImageCourse','stImageModule']){
+  const el=root?.querySelector('#'+id);
+  if(el){el.disabled=!pdf;el.closest('label')?.classList.toggle('st-filter-disabled',!pdf);}
+ }
+ const mod=root?.querySelector('#stImageModule');
+ if(mod&&!state.course)mod.disabled=true;
+ const message=root?.querySelector('#stImageFilterHint');
+ if(message)message.textContent=pdf?
+  'Filtri sull’intero archivio PDF (non soltanto sulla pagina corrente). “Esaminate” indica analisi visiva, non approvazione. “Associate” richiede diritti e revisione tecnica approvati e una collocazione valida.':
+  'I filtri didattici avanzati sono disponibili per le Tavole PDF complete. Per questo archivio rimane attiva la ricerca per tema.';
+}
+async function fillCourseOptions(){
+ const cat=await courseOptions(),c=host()?.querySelector('#stImageCourse');
+ if(!c)return;
+ c.innerHTML='<option value="">Tutti i corsi</option>'+[...cat.courses].map(([key,title])=>'<option value="'+esc(key)+'">'+esc(title)+'</option>').join('');
+ c.value=state.course;
+ fillModuleOptions(cat);
+}
+function fillModuleOptions(cat){
+ const m=host()?.querySelector('#stImageModule');
+ if(!m)return;
+ const options=state.course?Array.from(cat.modules.get(state.course)||[]):[];
+ m.innerHTML='<option value="">Tutti i moduli</option>'+options.map(([key,title])=>'<option value="'+esc(key)+'">'+esc(title)+'</option>').join('');
+ m.value=state.module;
+ syncFilterControls();
+}
 async function rowsPrivate(type,page,q){
  const table=type==='integral'?'training_integral_pdf_refs_v24':'training_source_figures_v23';
  const fields=type==='integral'
   ?'id,category,topic,source_document,source_page,rights_status,technical_review_required,asset:training_integral_pdf_assets_v24!inner(storage_path)'
   :'id,category,excerpt,source_document,source_page,rights_status,review_class,storage_path';
  let req=db().from(table).select(fields,{count:'exact'}).order('id');
+ if(type==='integral'&&(state.status!=='all'||state.course||state.module)){
+  const {data:filtered,error:filterError}=await db().rpc('training_image_filter_page_v29',{
+   p_status:state.status,p_course_key:state.course||null,p_module_key:state.module||null,
+   p_search:q,p_page:page,p_page_size:pageSize
+  });
+  if(filterError)throw filterError;
+  const ids=filtered?.ids||[];
+  if(!ids.length)return {total:Number(filtered?.total)||0,rows:[]};
+  req=db().from(table).select(fields).in('id',ids).order('id');
+  q='';
+  const {data,error}=await req;
+  if(error)throw error;
+  const original=data||[];
+  return enrichPrivateRows(type,original,Number(filtered.total)||0);
+ }
  if(type==='integral')req=req.gte('id','pdf-50000');
  if(q)req=req.ilike(type==='integral'?'topic':'excerpt','%'+q.replace(/[%_,()]/g,'').slice(0,65)+'%');
  const {data,error,count:total}=await req.range(page*pageSize,page*pageSize+pageSize-1);
  if(error)throw error;
- const list=data||[],paths=list.map(x=>type==='integral'?x.asset?.storage_path:x.storage_path).filter(Boolean);
+ return enrichPrivateRows(type,data||[],total||0);
+}
+async function enrichPrivateRows(type,list,total){
+ const paths=list.map(x=>type==='integral'?x.asset?.storage_path:x.storage_path).filter(Boolean);
  // Independent, administrator-only decisions do not alter the source's immutable provenance.
  const reviews=new Map();
  if(type==='integral'&&list.length){
@@ -175,6 +235,7 @@ async function paint(){
   if(!active(seq,userId))return;
   gallery.innerHTML=items.map(x=>tile(x,type)).join('')||'<p>Nessuna immagine per questo filtro.</p>';
   if(type==='integral')void window.SAFETY_ADMIN_IMAGE_PLACEMENT_V25?.renderFor?.(gallery,items);
+  void window.SAFETY_IMAGE_SUGGESTIONS_V26?.decorate?.(gallery,items,type);
   const pages=Math.max(1,Math.ceil(total/pageSize));
   stat.textContent=total+' immagini/riferimenti · pagina '+(state.page+1)+' di '+pages;
   host().querySelector('[data-st-image-prev]').disabled=state.page===0;
@@ -200,13 +261,23 @@ async function render(){
    '<div class="admin-stats"><article class="admin-stat"><strong>'+files.length+'</strong><span>Immagini locali disponibili</span></article><article class="admin-stat"><strong>'+esc(counts[0])+'</strong><span>Figure PDF caricate</span></article><article class="admin-stat"><strong>'+esc(counts[1])+'</strong><span>Riferimenti PDF completi</span></article><article class="admin-stat"><strong>'+esc(counts[2])+'</strong><span>Estratti PDF in revisione</span></article></div>'+
    '<div class="st-image-audit-summary"><strong>Analisi di pertinenza delle tavole PDF</strong><p>'+esc(counts[3])+' schede visive individuali · '+esc(counts[4])+' valutazioni per gruppi · '+esc(counts[5])+' screening preliminari · '+esc(counts[6])+' coppie confrontate.</p><small>Livelli di analisi distinti. Nessuno sostituisce la revisione tecnica o la verifica dei diritti.</small></div>'+
    '<div class="st-image-actions"><button type="button" data-st-image-integral>Gestisci archivio PDF · importa / elimina</button><button type="button" data-st-image-sources>Gestisci estratti PDF</button><button type="button" data-st-image-refresh>Aggiorna inventario</button></div></section>'+
-   '<section class="admin-card"><h2>Esplora immagini</h2><div class="st-image-controls"><label>Archivio <select id="stImageType"><option value="local">Illustrazioni locali</option><option value="integral">Tavole PDF complete importate</option><option value="source">Estratti PDF in revisione</option></select></label><label>Cerca per tema <input type="search" id="stImageSearch" placeholder="Es. carrelli, DPI, portata"></label></div>'+
+   '<section class="admin-card"><h2>Esplora immagini</h2><div class="st-image-controls"><label>Archivio <select id="stImageType"><option value="local">Illustrazioni locali</option><option value="integral">Tavole PDF complete importate</option><option value="source">Estratti PDF in revisione</option></select></label>'+
+   '<label>Esaminate / associazioni <select id="stImageStatus"><option value="all">Tutti gli stati</option><option value="examined">Esaminate (visivamente)</option><option value="individual">Esaminate singolarmente</option><option value="group">Esaminate per gruppi</option><option value="screening">Solo screening preliminare</option><option value="to_associate">Da associare (proposte)</option><option value="associated">Associate (attive e approvate)</option><option value="approved">Approvate per uso interno</option><option value="review_pending">Revisione da completare</option><option value="excluded">Escluse dalle presentazioni</option><option value="rejected">Respinte</option></select></label>'+
+   '<label>Corso <select id="stImageCourse"><option value="">Tutti i corsi</option></select></label>'+
+   '<label>Modulo <select id="stImageModule"><option value="">Tutti i moduli</option></select></label>'+
+   '<label>Cerca per tema <input type="search" id="stImageSearch" placeholder="Es. carrelli, DPI, portata"></label></div><p class="st-image-filter-hint" id="stImageFilterHint"></p>'+
    '<div class="st-image-grid" id="stImageGallery"></div><div class="st-image-pagination"><button type="button" data-st-image-prev>← Precedenti</button><span id="stImagePagination" role="status"></span><button type="button" data-st-image-next>Successive →</button></div></section>';
   host().querySelector('#stImageType').value=state.type;
   host().querySelector('#stImageSearch').value=state.query;
+  host().querySelector('#stImageStatus').value=state.status;
+  syncFilterControls();
+  void fillCourseOptions().catch(error=>{const hint=host()?.querySelector('#stImageFilterHint');if(hint)hint.textContent='Elenco corsi non disponibile: '+(error?.message||error);});
   const content=host();
   content.querySelector('#stImageGallery').addEventListener('submit',e=>void saveReview(e));
-  content.querySelector('#stImageType').onchange=e=>{state.type=e.target.value;state.page=0;void paint();};
+  content.querySelector('#stImageType').onchange=e=>{state.type=e.target.value;state.page=0;syncFilterControls();void paint();};
+  content.querySelector('#stImageStatus').onchange=e=>{state.status=e.target.value;state.page=0;void paint();};
+  content.querySelector('#stImageCourse').onchange=e=>{state.course=e.target.value;state.module='';state.page=0;if(state.filterCatalog)fillModuleOptions(state.filterCatalog);void paint();};
+  content.querySelector('#stImageModule').onchange=e=>{state.module=e.target.value;state.page=0;void paint();};
   content.querySelector('#stImageSearch').oninput=e=>{state.query=e.target.value;state.page=0;void paint();};
   content.querySelector('[data-st-image-prev]').onclick=()=>{state.page=Math.max(0,state.page-1);void paint();};
   content.querySelector('[data-st-image-next]').onclick=()=>{state.page++;void paint();};
@@ -220,7 +291,7 @@ function boot(){
  ensureNav();[200,650,1500].forEach(ms=>setTimeout(ensureNav,ms));
  document.getElementById('adminConsoleBtn')?.addEventListener('click',()=>setTimeout(ensureNav,80));
  document.getElementById('adminRefresh')?.addEventListener('click',()=>setTimeout(ensureNav,80));
- document.addEventListener('safety:auth-changed',()=>{state.seq++;state.files=null;state.stats=null;});
+ document.addEventListener('safety:auth-changed',()=>{state.seq++;state.files=null;state.stats=null;state.filterCatalog=null;});
 }
 window.SAFETY_ADMIN_IMAGE_LIBRARY_V25={render,ensureNav,category};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
