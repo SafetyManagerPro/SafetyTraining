@@ -849,3 +849,6 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - `app.js` richiama `visit` dopo render della slide; `admin-print-slides-v23.js` richiama `applyDeck` prima di stampare, riutilizzando gli override. Nuovo asset inventory export `visual-asset-guard-v32.js`, HTML e PWA cache `safety-training-v22-78`. Aggiunto test `tests/slide-image-owner-editor-v33.test.mjs`.
 - AVVERTENZA: i viewer non-editor continuano a vedere la figura originale quando tutte le immagini modificate sono private; solo le sostituzioni locali sono visibili come override ai non editor. Nessun accesso alle licenze private per corsisti/docenti, 27 corsi frozen non modificati.
 - La prova in browser autenticato e la verifica CI / Vercel vanno registrate dopo pubblicazione.
+
+## 2026-10-21 — v24.8.17.1 test noneditor
+- Primo run CI fallito per test che cercava la parola «noneditor» non più presente come commento nello script. Riallineata la verifica al controllo di accesso effettivo `if(!owner&&!out.length&&chosen.some(...))`. Runtime e database immutati.

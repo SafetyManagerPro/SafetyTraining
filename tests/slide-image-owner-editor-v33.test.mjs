@@ -26,7 +26,7 @@ test('real editor toolbar and owner-only selected images feed screen and PDF pri
  assert.ok(html.indexOf('slide-image-editor-v33.js')<html.indexOf('app.js'));
  assert.match(sw,/slide-image-editor-v33\.js/);
  assert.match(read('apps/training/visual-asset-guard-v32.js'),/catalog:\[\.\.\.AVAILABLE\]/);
- assert.match(editor,/noneditor|Noneditor/);
+ assert.match(editor,/!owner&&![a-zA-Z]+\.length&&chosen\.some/);
 });
 test('editor does not grant changes without editor rights',async()=>{
  const source=read('apps/training/slide-image-editor-v33.js');
