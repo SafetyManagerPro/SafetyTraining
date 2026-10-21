@@ -396,3 +396,10 @@ Vedere `docs/VERSION_HISTORY_V20.md` per la progressione corrente.
 La direzione del progetto è passata da “portare online corsi esistenti” a costruire una **piattaforma e-learning/formazione completa**, capace di gestire materiale docente/corsista, frequenza, tracking, test/verifiche, categorie e rischi, mantenendo compatibilità con la gestione cartacea e digitale. Il modello deve restare ibrido: supportare la progressiva digitalizzazione senza presumere che ogni aula disponga già di hardware per firme o processi totalmente digitali.
 
 Il valore principale del lavoro didattico non è la quantità di slide, ma la qualità: contenuti verificati, comprensibili, riutilizzabili, operativi e tracciati fino alla fonte.
+
+## Aggiornamento 21/10/2026 — selezione immagini slide
+
+- Corretto nell'editor `apps/training/slide-image-editor-v33.js` il comportamento del selettore: scegliere un'immagine ora **sostituisce** la selezione precedente per impostazione predefinita, anziché aggiungerla sopra/in galleria.
+- L'aggiunta di più immagini è una modalità esplicita, attivata col comando **Modalità: aggiungi alla galleria**; resta il limite di 3 immagini.
+- Il salvataggio continua a utilizzare `save_slide_images_v33` e mantiene i vincoli owner/admin già previsti.
+- Correzione frontend commit `01d3f2c`; verificare deployment Vercel, prova interattiva del salvataggio e resa della stampa PDF prima di dichiarare risolto definitivamente.
