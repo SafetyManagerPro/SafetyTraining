@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-21
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-71`.
+Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-72`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -779,3 +779,10 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Filtraggio delle illustrazioni locali SVG/PNG in `SAFETY_VISUAL_ATLAS_V22.collect` con lista persistente proveniente dalla RPC `training_excluded_local_images_v26`. Il filtraggio viene applicato alle figure supplementari nell'atlante, usate anche nella stampa amministrativa dei corsi; immagini eroiche authored già presenti in slide originarie non vengono automaticamente mutate. Refresh su login e dopo azione di esclusione; invalidazione cache deck.
 - Guard `typeof document!=='undefined'` per test Node VM. PWA cache `safety-training-v22-71`; tests del service worker riallineati.
 - Da collaudare: comportamento completo del viewer e stampa reali, navigazione con sessione autenticata. La classificazione visiva delle 856 immagini non è stata eseguita: suggerimenti soltanto sulla base di titoli/categorie; nessun accoppiamento salvato senza verifica diritti e qualità.
+
+## 2026-10-21 — v24.8.11 prima verifica visiva delle tavole PDF
+- Dal Library dell'utente recuperati 9 ZIP `SafetyTraining_FIGURE_COMPLETE_PARTE_01..09_di_09.zip` e archivio indice; verificati 856 riferimenti, 856 WebP unici, 13 documenti d'origine. Costruiti fogli di contatto delle pagine complete e osservate figure tecniche, copertine, segnaposto video, informazioni mediche e normative datate.
+- Registrati su Supabase **75 casi di esame visivo individuale** (`training_integral_pdf_visual_audit_v27`): 51 candidati di pertinenza, 8 richiedono valutazione specialistica, 2 necessitano ridisegno, 14 suggeriti per non inserimento. Ogni record ha descrizione osservata, motivazione, eventuale corso/modulo/posizione e dicitura che non certifica diritti o correttezza tecnica. **Nessuna figura è stata esclusa/eliminata automaticamente**.
+- Calcolati 64-bit pHash da WebP originali per 856 file e individuate **57 coppie potenzialmente simili** nello stesso documento con rapporto dimensioni simile e distanza di Hamming <=7; registrate in `training_integral_pdf_similarity_v27`. Somiglianza non dimostra duplicazione: serve controllo visivo ulteriore.
+- Aggiunta lettura protetta per sola amministrazione nello script `image-suggestions-v26.js`, con osservazione visiva e segnalazione di somiglianze accanto alle proposte basate su testo. Stato amministrativo `Esamina / cambia stato di revisione` resta separato. Al momento del controllo: 75 esaminate, 57 coppie; 1 figura risultava approvata separatamente dall'amministrazione, 0 associazioni manuali.
+- Migrazione `supabase/migrations/20261021174500_v27_visual_figure_audit.sql` applicata. PWA `safety-training-v22-72`. CI e Vercel da verificare dopo commit, revisione del layout autenticato ancora pendente. Prima fase parziale: le altre 781 figure non hanno ancora scheda di osservazione visiva individuale, benché siano state estratte e processate per similarità.

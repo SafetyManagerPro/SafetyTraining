@@ -25,3 +25,16 @@ test('image exclusions are reversible and do not delete storage objects',()=>{
  const deck=read('apps/training/integral-pdf-v24.js');
  assert.match(deck,/excluded\.has\(x\.ref\.id\)/);
 });
+
+test('visual inspection evidence and similarity flags appear as auditable private metadata',()=>{
+ const source=read('apps/training/image-suggestions-v26.js');
+ const sql=read('supabase/migrations/20261021174500_v27_visual_figure_audit.sql');
+ assert.match(source,/training_integral_pdf_visual_audit_v27/);
+ assert.match(source,/training_integral_pdf_similarity_v27/);
+ assert.match(source,/La valutazione visiva non approva i diritti/);
+ assert.match(sql,/visual_audit_v27_admin_select/);
+ assert.match(sql,/similarity_v27_admin_select/);
+ assert.match(sql,/contact_sheet_visual_inspection/);
+ assert.match(sql,/phash_hamming between 0 and 7/);
+ assert.doesNotMatch(sql,/update public.training_integral_pdf_reviews_v25/i);
+});

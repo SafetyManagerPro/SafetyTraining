@@ -46,6 +46,19 @@ async function decorate(host,items,type){
  const turn=++generation;
  try{
   const [catalogRows]=await Promise.all([getCatalog(),getExclusions(items.map(x=>x.id||x.src))]);
+  const audited=new Map(),similarity=new Map();
+  if(type==='integral'){
+   const ids=items.map(x=>x.id).filter(x=>/^pdf-[0-9]{5}$/.test(x));
+   if(ids.length){
+    const [a,b]=await Promise.all([
+     db().from('training_integral_pdf_visual_audit_v27').select('ref_id,observed_subject,visual_class,recommendation,suggested_course_key,suggested_module_key,suggested_unit_position,rationale,evidence_method').in('ref_id',ids),
+     db().from('training_integral_pdf_similarity_v27').select('left_ref_id,right_ref_id,phash_hamming').in('left_ref_id',ids)
+    ]);
+    if(a.error)throw a.error;if(b.error)throw b.error;
+    for(const x of a.data||[])audited.set(x.ref_id,x);
+    for(const x of b.data||[])similarity.set(x.left_ref_id,[...(similarity.get(x.left_ref_id)||[]),x]);
+   }
+  }
   if(turn!==generation||!host.isConnected)return;
   for(const item of items){
    const key=type==='local'?item.src:item.id;
@@ -58,9 +71,19 @@ async function decorate(host,items,type){
    const allowed=type==='local'||type==='integral';
    let html='';
    if(allowed){
+    const observed=type==='integral'?audited.get(item.id):null;
     const proposal=recommend(item,catalogRows);
     const reason=proposal.status==='unassigned'?'Nessuna corrispondenza specifica':proposal.status==='candidate_strong'?'Candidato testuale forte':'Corrispondenza incerta';
     html='<strong>Collocazione proposta · '+esc(reason)+'</strong><small>'+esc(proposal.basis)+'</small>';
+    if(observed){
+     const verdict={candidate:'Figura pertinente candidata',expert_review:'Necessaria valutazione specialistica',redraw_first:'Da ridisegnare prima dell’impiego',omit_candidate:'Proposta di non inserimento'}[observed.recommendation]||'Da esaminare';
+     html='<strong>Esame visivo effettuato · '+esc(verdict)+'</strong>'+
+      '<p>'+esc(observed.observed_subject)+'</p><small>'+esc(observed.rationale)+'</small>'+
+      (observed.suggested_course_key?'<p>Destinazione osservata: '+esc(observed.suggested_course_key)+' → '+esc(observed.suggested_module_key)+' → argomento '+Number(observed.suggested_unit_position)+'</p>':'<p>Non assegnata a una lezione.</p>')+
+      '<small>La valutazione visiva non approva i diritti o la correttezza normativa.</small>'+html;
+    }
+    const duplicates=similarity.get(item.id)||[];
+    if(duplicates.length)html+='<p>Somiglianze da controllare: '+duplicates.map(x=>esc(x.right_ref_id)+' (distanza '+Number(x.phash_hamming)+')').join(', ')+'</p>';
     for(const c of proposal.suggestions){
      html+='<p><b>'+esc(c.course_title)+'</b> → '+esc(c.module_title)+' → '+esc(c.unit_title)+' <small>('+esc(c.evidence.join('; ')||'titoli')+')</small></p>';
     }

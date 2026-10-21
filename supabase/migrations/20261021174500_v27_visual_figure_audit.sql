@@ -1,0 +1,178 @@
+-- SafetyTraining v27: observed visual evidence and *potential*, not certain, perceptual duplicates.
+-- Original source image provenance, technical review and rights status remain untouched.
+create table if not exists public.training_integral_pdf_visual_audit_v27(
+ ref_id text primary key references public.training_integral_pdf_refs_v24(id) on delete cascade,
+ observed_subject text not null,
+ visual_class text not null,
+ recommendation text not null check(recommendation in ('candidate','redraw_first','omit_candidate','expert_review')),
+ suggested_course_key text,
+ suggested_module_key text,
+ suggested_unit_position integer check(suggested_unit_position between 1 and 500),
+ rationale text not null,
+ evidence_method text not null default 'contact_sheet_visual_inspection',
+ inspected_at timestamptz not null default now()
+);
+alter table public.training_integral_pdf_visual_audit_v27 enable row level security;
+revoke all on public.training_integral_pdf_visual_audit_v27 from public,anon,authenticated;
+grant select on public.training_integral_pdf_visual_audit_v27 to authenticated;
+create policy visual_audit_v27_admin_select on public.training_integral_pdf_visual_audit_v27
+ for select to authenticated using(private.is_platform_admin());
+
+create table if not exists public.training_integral_pdf_similarity_v27(
+ left_ref_id text not null references public.training_integral_pdf_refs_v24(id) on delete cascade,
+ right_ref_id text not null references public.training_integral_pdf_refs_v24(id) on delete cascade,
+ phash_hamming integer not null check(phash_hamming between 0 and 7),
+ source text not null default '64bit_phash_same_document_similar_aspect',
+ primary key(left_ref_id,right_ref_id),
+ check(left_ref_id<>right_ref_id)
+);
+alter table public.training_integral_pdf_similarity_v27 enable row level security;
+revoke all on public.training_integral_pdf_similarity_v27 from public,anon,authenticated;
+grant select on public.training_integral_pdf_similarity_v27 to authenticated;
+create policy visual_similarity_v27_admin_select on public.training_integral_pdf_similarity_v27
+ for select to authenticated using(private.is_platform_admin());
+comment on table public.training_integral_pdf_visual_audit_v27 is
+'Human-readable visual observations made from source figure contact sheets; no rights or medical/technical certifications, no approval or publishing.';
+comment on table public.training_integral_pdf_similarity_v27 is
+'Potential near duplicates, perceptual hash at 64bit distance <=7 among same source and similar aspect; not proof of duplicate.';
+
+insert into public.training_integral_pdf_visual_audit_v27
+(ref_id,observed_subject,visual_class,recommendation,suggested_course_key,suggested_module_key,suggested_unit_position,rationale)
+values
+('pdf-50362','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50371','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50379','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50399','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50415','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50417','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50423','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50439','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50446','Separatore di capitolo o pagina editoriale senza illustrazione tecnica autonoma','cover','omit_candidate',null,null,null,'Copertina/separatore: non trasformare in una slide illustrativa.'),
+('pdf-50387','Schema/immagine dei componenti del carrello elevatore','diagram','candidate','attr_carrelli_ind','equipment_theory',3,'Verificare leggibilità dei particolari e adattare con grafica originale.'),
+('pdf-50424','Schema/immagine dei componenti del carrello elevatore','diagram','candidate','attr_carrelli_ind','equipment_theory',3,'Verificare leggibilità dei particolari e adattare con grafica originale.'),
+('pdf-50404','Schema di stabilità e centro di gravità del carrello','diagram','candidate','attr_carrelli_ind','equipment_theory',2,'Schema pertinente al baricentro, verificare geometrie e portate.'),
+('pdf-50412','Schema di stabilità e centro di gravità del carrello','diagram','candidate','attr_carrelli_ind','equipment_theory',2,'Schema pertinente al baricentro, verificare geometrie e portate.'),
+('pdf-50407','Disegni di organi di presa e montanti','diagram','candidate','attr_carrelli_ind','equipment_theory',3,'Illustrazione meccanica riconoscibile, richiede nuovo disegno prima della pubblicazione.'),
+('pdf-50428','Disegni di organi di presa e montanti','diagram','candidate','attr_carrelli_ind','equipment_theory',3,'Illustrazione meccanica riconoscibile, richiede nuovo disegno prima della pubblicazione.'),
+('pdf-50409','Indicazioni visive sull''impiego sicuro del carrello','mixed_page','candidate','attr_carrelli_ind','equipment_theory',7,'Pagina di manuale contenente figure: preferibile estrarre il concetto e ridisegnarlo.'),
+('pdf-50434','Indicazioni visive sull''impiego sicuro del carrello','mixed_page','candidate','attr_carrelli_ind','equipment_theory',7,'Pagina di manuale contenente figure: preferibile estrarre il concetto e ridisegnarlo.'),
+('pdf-50416','Rischio da utilizzo del carrello e comportamento operativo','mixed_page','expert_review','attr_carrelli_ind','equipment_theory',7,'Dettagli troppo piccoli nella pagina; richiede controllo docente sulla manovra illustrata.'),
+('pdf-50437','Rischio da utilizzo del carrello e comportamento operativo','mixed_page','expert_review','attr_carrelli_ind','equipment_theory',7,'Dettagli troppo piccoli nella pagina; richiede controllo docente sulla manovra illustrata.'),
+('pdf-50429','Illustrazione di mezzo telescopico, non pertinente in modo certo al solo carrello industriale','diagram','expert_review',null,null,null,'Verificare tipologia effettiva: non collocare nel corso industriale senza riscontro.'),
+('pdf-50490','Dati infortunistici non verificati nel periodo attuale','chart','expert_review',null,null,null,'Grafico statistico: verificare fonte e periodo prima di usarlo.'),
+('pdf-50506','Imbracatura anticaduta vista frontalmente','photo','candidate','lav_quota','height-dpi3',3,'Esempio riconoscibile di imbracatura, verificare marcatura e corretto impiego.'),
+('pdf-50507','Cordini anticaduta e connettori mostrati come componenti','photo','candidate','lav_quota','height-dpi3',3,'Illustrazione idonea a spiegare le famiglie dei componenti, previa verifica EN aggiornata.'),
+('pdf-50521','Cordini anticaduta e connettori mostrati come componenti','photo','candidate','lav_quota','height-dpi3',3,'Illustrazione idonea a spiegare le famiglie dei componenti, previa verifica EN aggiornata.'),
+('pdf-50511','Schema del tirante d''aria e dell''assorbimento di energia','diagram','candidate','lav_quota','height-dpi3',4,'Figura pertinente alla distanza libera di caduta; numeri da verificare prima del riuso.'),
+('pdf-50512','Schema del tirante d''aria e dell''assorbimento di energia','diagram','candidate','lav_quota','height-dpi3',4,'Figura pertinente alla distanza libera di caduta; numeri da verificare prima del riuso.'),
+('pdf-50517','Schema del tirante d''aria e dell''assorbimento di energia','diagram','candidate','lav_quota','height-dpi3',4,'Figura pertinente alla distanza libera di caduta; numeri da verificare prima del riuso.'),
+('pdf-50518','Rappresentazione arresto della caduta ed effetto pendolo','diagram','candidate','lav_quota','height-dpi3',4,'Scenari di arresto e pendolo: ridisegno originale raccomandato.'),
+('pdf-50520','Rappresentazione arresto della caduta ed effetto pendolo','diagram','candidate','lav_quota','height-dpi3',4,'Scenari di arresto e pendolo: ridisegno originale raccomandato.'),
+('pdf-50523','Sistemi di ancoraggio con linea orizzontale','diagram','candidate','lav_quota','height-dpi3',4,'Documentare compatibilità ancoraggi, condizioni di esercizio e autorizzazione diritti.'),
+('pdf-50524','Sistemi di ancoraggio con linea orizzontale','diagram','candidate','lav_quota','height-dpi3',4,'Documentare compatibilità ancoraggi, condizioni di esercizio e autorizzazione diritti.'),
+('pdf-50525','Pagina quasi testuale sulla manutenzione dei DPI anticaduta','text_page','redraw_first','lav_quota','height-dpi3',3,'Non utilizzare intera pagina come figura; convertire in checklist autoriale.'),
+('pdf-50321','Tipologie e caratteristiche di piattaforme elevabili','mixed_page','candidate','attr_ple','equipment_theory',1,'La tavola rappresenta la PLE o più modelli, ma è una pagina intera di manuale.'),
+('pdf-50322','Tipologie e caratteristiche di piattaforme elevabili','mixed_page','candidate','attr_ple','equipment_theory',1,'La tavola rappresenta la PLE o più modelli, ma è una pagina intera di manuale.'),
+('pdf-50328','Schema di definizioni e classificazioni PLE','mixed_page','candidate','attr_ple','equipment_theory',1,'Controllare il criterio di classificazione e la normativa aggiornata.'),
+('pdf-50330','Esempi di utilizzo e situazioni operative di una piattaforma elevabile','mixed_page','expert_review','attr_ple','equipment_theory',3,'Le fotografie sono inserite in pagina composita; verificare messaggio operativo.'),
+('pdf-50342','Esempi di utilizzo e situazioni operative di una piattaforma elevabile','mixed_page','expert_review','attr_ple','equipment_theory',3,'Le fotografie sono inserite in pagina composita; verificare messaggio operativo.'),
+('pdf-50331','Cartelli di avvertenza per luogo di lavoro e PLE','diagram','candidate','attr_ple','equipment_theory',2,'Pittogrammi riconoscibili, verificare corretta applicazione e leggibilità.'),
+('pdf-50353','Imbracature e componenti di sicurezza nei lavori con PLE','diagram','candidate','attr_ple','equipment_theory',2,'Verificare i DPI realmente prescritti per tipologia PLE e situazione.'),
+('pdf-50355','Imbracature e componenti di sicurezza nei lavori con PLE','diagram','candidate','attr_ple','equipment_theory',2,'Verificare i DPI realmente prescritti per tipologia PLE e situazione.'),
+('pdf-50187','Triangolo della combustione e condizioni dell''incendio','diagram','candidate','antincendio','m1',2,'Illustrazione esplicativa pertinente alla combustione.'),
+('pdf-50199','Classi di incendio e relativi simboli','infographic','candidate','antincendio','m1',2,'Classi di fuoco visibili; verificare la classificazione attualmente applicabile.'),
+('pdf-50210','Rete idranti, manichette e lance antincendio','photo','candidate','antincendio','m4',1,'Illustrazione di presidi antincendio, efficace se ridisegnata in modo leggibile.'),
+('pdf-50214','Rete idranti, manichette e lance antincendio','photo','candidate','antincendio','m4',1,'Illustrazione di presidi antincendio, efficace se ridisegnata in modo leggibile.'),
+('pdf-50216','Famiglie di estintori, bombole e carrellati','photo','candidate','antincendio','m4',1,'Rappresentazioni di estintori; verificare classificazioni e gestione pratica.'),
+('pdf-50193','Segnaposto testuale per un video non incluso','video_placeholder','omit_candidate',null,null,null,'La figura non mostra il contenuto del video; non usarla come immagine didattica.'),
+('pdf-50196','Segnaposto testuale per un video non incluso','video_placeholder','omit_candidate',null,null,null,'La figura non mostra il contenuto del video; non usarla come immagine didattica.'),
+('pdf-50206','Separatore di capitolo con icona generica di incendio','cover','omit_candidate',null,null,null,'Copertina senza contenuto tecnico individuale.'),
+('pdf-50533','Illustrazione delle conseguenze di trauma cranico','medical_illustration','candidate','primo_soccorso_12h','theory',5,'Figura sanitaria: verifica medica richiesta prima di usarla.'),
+('pdf-50537','Anatomia del torace e del polmone','medical_illustration','candidate','primo_soccorso_12h','theory',6,'Anatomia pertinente al trauma toracico, evitare riproduzione non autorizzata.'),
+('pdf-50538','Anatomia del torace e del polmone','medical_illustration','candidate','primo_soccorso_12h','theory',6,'Anatomia pertinente al trauma toracico, evitare riproduzione non autorizzata.'),
+('pdf-50555','Radiografie di frattura a un arto','medical_illustration','candidate','primo_soccorso_12h','theory',5,'Immagini radiologiche: verificare dati clinici e provenienza.'),
+('pdf-50569','Sincope: rappresentazione di un mancamento e intervento','mixed_page','expert_review','primo_soccorso_12h','theory',7,'La condotta operativa va validata da docente sanitario.'),
+('pdf-50572','Posizione antishock illustrata nella fonte','medical_illustration','expert_review','primo_soccorso_12h','theory',7,'Non proporre come manovra universalmente corretta: verificare linee guida cliniche.'),
+('pdf-50678','Tipologie di montaggio gru su autocarro','diagram','candidate','attr_gru_autocarro','equipment_theory',1,'Schemi di allestimento: utile per orientamento macchine.'),
+('pdf-50689','Principali componenti strutturali della gru su autocarro','diagram','candidate','attr_gru_autocarro','equipment_theory',1,'Componenti denominati graficamente, verificare riferimenti tecnici.'),
+('pdf-50692','Schema di normativa UNI EN 12999 con riferimenti datati','text_page','redraw_first','attr_gru_autocarro','equipment_theory',1,'Normativa potenzialmente superata: non riutilizzare come figura.'),
+('pdf-50704','Ganci e accessori di sollevamento','diagram','candidate','attr_gru_autocarro','equipment_theory',1,'Rappresentazioni di ganci: verifica portate/marcature.'),
+('pdf-50711','Simboli dei comandi su gru per autocarro','infographic','candidate','attr_gru_autocarro','equipment_theory',3,'Icone di comando leggibili solo parzialmente nella pagina originale.'),
+('pdf-50716','Stabilizzatori, carico e appoggio della gru','diagram','candidate','attr_gru_autocarro','equipment_theory',2,'Rischio ribaltamento e terreno d''appoggio, richiede controllo tecnico.'),
+('pdf-50718','Dispositivi di sicurezza e limitatori della gru','diagram','candidate','attr_gru_autocarro','equipment_theory',3,'Mostra una zona di limitazione della rotazione.'),
+('pdf-50042','Tipologie di macchine movimento terra, bulldozer ed escavatori','photo','candidate','attr_mmt_all','equipment_theory',1,'Foto/disegni dei mezzi: pertinenti alle categorie MMT.'),
+('pdf-50047','Tipologie di macchine movimento terra, bulldozer ed escavatori','photo','candidate','attr_mmt_all','equipment_theory',1,'Foto/disegni dei mezzi: pertinenti alle categorie MMT.'),
+('pdf-50063','Distribuzione dei carichi e stabilità delle MMT','diagram','candidate','attr_mmt_all','equipment_theory',3,'Illustrazioni esplicative di base di appoggio e stabilità.'),
+('pdf-50064','Distribuzione dei carichi e stabilità delle MMT','diagram','candidate','attr_mmt_all','equipment_theory',3,'Illustrazioni esplicative di base di appoggio e stabilità.'),
+('pdf-50065','Distribuzione dei carichi e stabilità delle MMT','diagram','candidate','attr_mmt_all','equipment_theory',3,'Illustrazioni esplicative di base di appoggio e stabilità.'),
+('pdf-50147','Esposizione al rumore durante l''uso di MMT','infographic','candidate','attr_mmt_all','equipment_theory',4,'Concetto chiaro, ma verificare livelli numerici e condizioni d''uso.'),
+('pdf-50151','Controllo giornaliero delle macchine movimento terra','photo','candidate','attr_mmt_all','equipment_theory',2,'Controlli preutilizzo illustrati, attenzione a procedure specifiche della macchina.'),
+('pdf-50176','Schema dei punti di manutenzione MMT','diagram','candidate','attr_mmt_all','equipment_theory',2,'Motivo visivo pertinente al controllo/manutenzione.'),
+('pdf-50776','Estratto normativo e documento istituzionale prevalente','text_page','omit_candidate',null,null,null,'Fonte documentale: citare l''atto pertinente invece di riprodurre la pagina.'),
+('pdf-50789','Diagrammi di tirante d''aria e effetto pendolo nei lavori in quota','diagram','candidate','lav_quota','height-dpi3',4,'Schema del percorso di caduta e del pendolo; ridisegno tecnico consigliato.'),
+('pdf-50791','Diagrammi di tirante d''aria e effetto pendolo nei lavori in quota','diagram','candidate','lav_quota','height-dpi3',4,'Schema del percorso di caduta e del pendolo; ridisegno tecnico consigliato.'),
+('pdf-50796','Finestra nera che indica un video non disponibile','video_placeholder','omit_candidate',null,null,null,'Segnaposto video, senza contenuto riproducibile.'),
+('pdf-50804','Componenti di un sistema di protezione anticaduta','photo','candidate','lav_quota','height-dpi3',3,'Fotografie di imbracature, cordini e componenti.'),
+('pdf-50808','Attività di recupero/salvataggio con operatore sospeso','photo','candidate','lav_quota','height-dpi3',8,'Verificare che il sistema di recupero rappresentato sia idoneo e aggiornato.')
+on conflict(ref_id) do nothing;
+
+insert into public.training_integral_pdf_similarity_v27(left_ref_id,right_ref_id,phash_hamming)
+values
+('pdf-50764','pdf-50766',4),
+('pdf-50664','pdf-50663',6),
+('pdf-50491','pdf-50528',6),
+('pdf-50206','pdf-50284',2),
+('pdf-50206','pdf-50280',4),
+('pdf-50206','pdf-50287',2),
+('pdf-50206','pdf-50178',2),
+('pdf-50206','pdf-50223',2),
+('pdf-50206','pdf-50186',2),
+('pdf-50370','pdf-50359',6),
+('pdf-50370','pdf-50363',2),
+('pdf-50370','pdf-50360',6),
+('pdf-50284','pdf-50280',4),
+('pdf-50284','pdf-50287',0),
+('pdf-50284','pdf-50178',2),
+('pdf-50284','pdf-50223',0),
+('pdf-50284','pdf-50186',0),
+('pdf-50280','pdf-50233',6),
+('pdf-50280','pdf-50287',4),
+('pdf-50280','pdf-50178',6),
+('pdf-50280','pdf-50223',4),
+('pdf-50280','pdf-50186',4),
+('pdf-50363','pdf-50360',6),
+('pdf-50526','pdf-50518',6),
+('pdf-50587','pdf-50573',0),
+('pdf-50037','pdf-50038',6),
+('pdf-50855','pdf-50827',6),
+('pdf-50035','pdf-50094',6),
+('pdf-50035','pdf-50099',6),
+('pdf-50035','pdf-50086',6),
+('pdf-50287','pdf-50178',2),
+('pdf-50287','pdf-50223',0),
+('pdf-50287','pdf-50186',0),
+('pdf-50650','pdf-50651',6),
+('pdf-50167','pdf-50099',4),
+('pdf-50178','pdf-50223',2),
+('pdf-50178','pdf-50186',2),
+('pdf-50404','pdf-50408',6),
+('pdf-50059','pdf-50060',4),
+('pdf-50670','pdf-50645',6),
+('pdf-50423','pdf-50417',6),
+('pdf-50423','pdf-50379',4),
+('pdf-50423','pdf-50439',6),
+('pdf-50830','pdf-50842',2),
+('pdf-50528','pdf-50494',4),
+('pdf-50223','pdf-50186',0),
+('pdf-50502','pdf-50503',6),
+('pdf-50417','pdf-50379',4),
+('pdf-50417','pdf-50399',6),
+('pdf-50236','pdf-50247',4),
+('pdf-50236','pdf-50277',4),
+('pdf-50094','pdf-50099',6),
+('pdf-50094','pdf-50086',4),
+('pdf-50281','pdf-50279',6),
+('pdf-50247','pdf-50277',6),
+('pdf-50523','pdf-50524',6),
+('pdf-50096','pdf-50127',6)
+on conflict(left_ref_id,right_ref_id) do nothing;
