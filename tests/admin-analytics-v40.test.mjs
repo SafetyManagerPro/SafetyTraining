@@ -22,7 +22,7 @@ test('analytics dashboard shows real ratios and escapes untrusted text',()=>{
 });
 
 test('CSV export text cells are escaped against spreadsheet formula injection',()=>{
- assert.equal(api.csvCell('=1+1'),"'\"=1+1\"".replace(/^'/,"'\"").replace(/\"$/,'\"')); 
+ assert.equal(api.csvCell('=1+1'), '"\'=1+1"');
  assert.ok(api.csvCell('=IMPORTXML("http://bad")').startsWith('"\'='));
  assert.equal(api.csvCell('Mario; Rossi'),'"Mario; Rossi"');
  assert.equal(api.csvCell('A"B'),'"A""B"');
