@@ -6,7 +6,7 @@
   {id:'enroll',label:'ISCRIZIONI E FORMAZIONE',icon:'✅',keys:['wizard','enrollments','registrations','access']},
   {id:'courses',label:'CORSI E DIDATTICA',icon:'📚',keys:['courses','editions','catalog','blueprint','readiness','quality','pathaudit']},
   {id:'assets',label:'MATERIALI E STAMPA',icon:'▤',keys:['images','lessons','slides']},
-  {id:'monitor',label:'CONTROLLO E REPORT',icon:'📊',keys:['activity','misc']}
+  {id:'monitor',label:'CONTROLLO E REPORT',icon:'📊',keys:['reports','activity','misc']}
  ];
  const selectors={
   dashboard:'[data-tab="dashboard"]',organizations:'[data-tab="organizations"]',
@@ -19,7 +19,7 @@
   readiness:'[data-readiness-admin]',quality:'[data-quality-v22]',
   pathaudit:'[data-path-audit]',images:'[data-image-library-v25]',
   lessons:'[data-print-lessons-nav]',slides:'[data-print-slides-nav]',
-  activity:'[data-tab="activity"]'
+  reports:'#adminReportsV40Nav',activity:'[data-tab="activity"]'
  };
  const route=new Map();
  sections.forEach(g=>g.keys.forEach(k=>route.set(k,g.id)));
@@ -51,7 +51,7 @@
     if(!detail){
      detail=document.createElement('details');detail.className='admin-menu-group';detail.dataset.adminMenuGroup=group.id;
      detail.innerHTML='<summary><span aria-hidden="true">'+group.icon+'</span> '+group.label+'</summary><div class="admin-menu-items" data-admin-menu-items="'+group.id+'"></div>';
-     detail.open=group.id==='home'||group.id==='enroll';
+     detail.open=group.id==='home'||group.id==='enroll'||group.id==='monitor';
      nav.appendChild(detail);
     }
    }
