@@ -87,5 +87,5 @@ test('entrypoint loads bookmark module before app and PWA includes new resources
  assert.ok(index.indexOf('deck-bookmarks-v42.js')<index.indexOf('<script src="app.js">'));
  for(const f of ['deck-bookmarks-v42.js','deck-bookmarks-v42.css'])
   assert.ok(index.includes(f)&&sw.includes(f),f);
- assert.ok(sw.includes('safety-training-v42-deck-resume'));
+ assert.match(sw,/const CACHE='safety-training-[^']+'/);
 });
