@@ -84,13 +84,16 @@ function dashboardMarkup(data){
  '<p class="a40-note">Aggiornamento all’apertura. Dati secondo le autorizzazioni dell’account. I risultati non attestano automaticamente la validità di un corso.</p></div>';
 }
 async function renderDashboard(args={}){
- const target=document.getElementById(args.targetId||'adminDashboardAnalytics');if(!target||!allowed())return;
+ const target=document.getElementById(args.targetId||'adminDashboardAnalytics');if(!target||!allowed()||target.dataset.a40Loading==='1')return;
+ target.dataset.a40Loading='1';
  initStyle();const id=actor();target.innerHTML='<div class="a40-loading">Caricamento indicatori…</div>';
  try{
   const data=await dataset();if(!target.isConnected||actor()!==id)return;
   target.innerHTML=dashboardMarkup(data);target.dataset.a40Loaded='1';
  } catch(e){
-  if(target.isConnected){target.innerHTML='<p class="a40-error">Grafici non disponibili: '+esc(e.message||e)+'</p>';delete target.dataset.a40Loaded;}
+  if(target.isConnected){target.innerHTML='<p class="a40-error">Grafici non disponibili: '+esc(e.message||e)+'</p>';target.dataset.a40Loaded='error';}
+ } finally {
+  if(target.isConnected)delete target.dataset.a40Loading;
  }
 }
 function controlMarkup(data){
@@ -115,14 +118,17 @@ function controlMarkup(data){
  '</div>';
 }
 async function renderControlSummary(args={}){
- const target=document.getElementById(args.targetId||'adminControlAnalytics');if(!target||!allowed())return;
+ const target=document.getElementById(args.targetId||'adminControlAnalytics');if(!target||!allowed()||target.dataset.a40Loading==='1')return;
+ target.dataset.a40Loading='1';
  initStyle();const id=actor();target.innerHTML='<div class="a40-loading">Analisi delle priorità operative…</div>';
  try{
   const data=await dataset();if(!target.isConnected||actor()!==id)return;
   target.innerHTML=controlMarkup(data);target.dataset.a40Loaded='1';
   target.querySelector('[data-a40-open-reports]')?.addEventListener('click',()=>void renderReports());
  }catch(e){
-  if(target.isConnected)target.innerHTML='<p class="a40-error">Controlli non disponibili: '+esc(e.message||e)+'</p>';
+  if(target.isConnected){target.innerHTML='<p class="a40-error">Controlli non disponibili: '+esc(e.message||e)+'</p>';target.dataset.a40Loaded='error';}
+ }finally{
+  if(target.isConnected)delete target.dataset.a40Loading;
  }
 }
 function registerNav(){
