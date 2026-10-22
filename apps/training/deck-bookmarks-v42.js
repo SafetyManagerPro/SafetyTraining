@@ -12,6 +12,12 @@ function save(course,slides,index){
  const record={courseId:String(course.id),version:version(course),index:indexNum,uid:String(current?.uid||''),total:slides.length,savedAt:Date.now()};
  try{storage()?.setItem(key(course),JSON.stringify(record));return !!storage();}catch{return false;}
 }
+function has(course){
+ if(!course?.id)return false;
+ try{const item=JSON.parse(storage()?.getItem(key(course))||'null');
+  return !!(item&&item.courseId===String(course.id)&&item.version===version(course)&&Number.isInteger(item.index)&&item.index>=0);
+ }catch{return false;}
+}
 function read(course,slides){
  if(!course?.id||!Array.isArray(slides)||!slides.length)return null;
  let data;
@@ -25,5 +31,5 @@ function read(course,slides){
  return {index,number:index+1,total:slides.length,title:String(slides[index]?.title||''),savedAt:data.savedAt};
 }
 function clear(course){try{storage()?.removeItem(key(course));return true;}catch{return false;}}
-window.SAFETY_DECK_BOOKMARK_V42={save,read,clear};
+window.SAFETY_DECK_BOOKMARK_V42={save,read,has,clear};
 })();
