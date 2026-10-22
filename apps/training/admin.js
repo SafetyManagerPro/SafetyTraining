@@ -31,7 +31,7 @@
   };
   const state = {
     open:false, admin:false, tab:'dashboard', filters:{}, renderSeq:0,
-    orgs:[], defaultOrgId:null, multiOrg:false, modal:null, showRevokedEnrollments:false
+    orgs:[], defaultOrgId:null, multiOrg:false, modal:null, showRevokedEnrollments:false, showArchivedLearners:false
   };
   // Do not refetch 5 progress datasets after every keystroke in the learner search.
   // Never keep a cached learner snapshot across authentication changes.
@@ -225,9 +225,10 @@
     ]);
     if (error) throw error;
     const cm = new Map((c||[]).map(x=>[x.id,x.name])), im = new Map((i||[]).map(x=>[x.learner_id,x])), om = new Map(state.orgs.map(x=>[x.id,x.name]));
-    const q = state.filters.learners || '', rows = (l||[]).filter(x => match(q,x.first_name,x.last_name,x.email,x.fiscal_code,x.job_title,cm.get(x.company_id)));
+    const q = state.filters.learners || '', rows = (l||[]).filter(x => (state.showArchivedLearners||x.active)&&match(q,x.first_name,x.last_name,x.email,x.fiscal_code,x.job_title,cm.get(x.company_id)));
+    const archivedCount=(l||[]).filter(x=>!x.active).length;
     const missing = (l||[]).filter(x=>x.active&&!x.email).length;
-    current(seq, `${missing?`<div class="admin-warning">${missing} corsist${missing===1?'a attivo non ha':'i attivi non hanno'} un indirizzo email e non può ricevere l’invito di accesso.</div>`:''}<section class="admin-card"><div class="admin-card-head"><div><h2>Corsisti</h2><p>Gestione anagrafica e accesso piattaforma.</p></div><button class="admin-primary" data-action="new-learner">+ Nuovo corsista</button></div>${searchBox('learners','Nome, email, CF, azienda, mansione…')}${table(['Corsista','Email','Azienda',...(state.multiOrg?['Organizzazione']:[]),'Mansione','Accesso','Stato','Azioni'], rows.map(x => { const inv=im.get(x.id), [s,k]=inviteState(x,inv); return [esc(`${x.first_name||''} ${x.last_name||''}`.trim()||'—'),esc(x.email||'—'),esc(cm.get(x.company_id)||'—'),...(state.multiOrg?[esc(om.get(x.organization_id)||'—')]:[]),esc(x.job_title||'—'),`${badge(s,k)}${inv?.last_sent_at?`<small class="admin-cell-note">${fmtDateTime(inv.last_sent_at)}</small>`:''}`,badge(x.active?'Attivo':'Disattivo',x.active?'ok':'muted'),`${btn('Modifica','edit-learner',x.id)} ${x.email&&!x.auth_user_id?btn(inv?'Reinvia':'Invita','invite-learner',x.id):''} ${btn(x.active?'Disattiva accesso':'Riattiva','toggle-learner',x.id,x.active?'danger':'')} ${btn('Elimina…','review-delete-learner',x.id,'danger')}`]; }))}</section>`);
+    current(seq, `${missing?`<div class="admin-warning">${missing} corsist${missing===1?'a attivo non ha':'i attivi non hanno'} un indirizzo email e non può ricevere l’invito di accesso.</div>`:''}<section class="admin-card"><div class="admin-card-head"><div><h2>Corsisti</h2><p>Rimuovi subito i corsisti errati dall’elenco attivo, senza perdere lo storico.</p></div><button type="button" data-action="toggle-archived-learners">${state.showArchivedLearners?'Nascondi':'Mostra'} rimossi (${archivedCount})</button><button class="admin-primary" data-action="new-learner">+ Nuovo corsista</button></div>${searchBox('learners','Nome, email, CF, azienda, mansione…')}${table(['Corsista','Email','Azienda',...(state.multiOrg?['Organizzazione']:[]),'Mansione','Accesso','Stato','Azioni'], rows.map(x => { const inv=im.get(x.id), [s,k]=inviteState(x,inv); return [esc(`${x.first_name||''} ${x.last_name||''}`.trim()||'—'),esc(x.email||'—'),esc(cm.get(x.company_id)||'—'),...(state.multiOrg?[esc(om.get(x.organization_id)||'—')]:[]),esc(x.job_title||'—'),`${badge(s,k)}${inv?.last_sent_at?`<small class="admin-cell-note">${fmtDateTime(inv.last_sent_at)}</small>`:''}`,badge(x.active?'Attivo':'Disattivo',x.active?'ok':'muted'),`${btn('Modifica','edit-learner',x.id)} ${x.email&&!x.auth_user_id?btn(inv?'Reinvia':'Invita','invite-learner',x.id):''} ${x.active?btn('Rimuovi corsista','archive-learner-v36',x.id,'danger'):btn('Ripristina','toggle-learner',x.id)} ${btn('Elimina definitivamente…','review-delete-learner',x.id,'danger')}`]; }))}</section>`);
     void renderLearnerProgress(seq,q);
   }
 
@@ -482,6 +483,12 @@
     const jump=e.target.closest('[data-jump]');if(jump){state.tab=jump.dataset.jump;return render();}
     const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;
     try {
+      if(a==='toggle-archived-learners'){state.showArchivedLearners=!state.showArchivedLearners;return render();}
+      if(a==='archive-learner-v36'){
+        if(!confirm('Rimuovere questo corsista dalla gestione attiva? Non potrà proseguire i corsi. Iscrizioni, presenze, test, attestati e storico saranno conservati. Potrai ripristinarlo dalla sezione «Mostra rimossi».'))return;
+        const {error}=await db().rpc('admin_archive_learner_v36',{p_learner_id:id});if(error)throw error;
+        toast('Corsista rimosso dalla gestione attiva. Puoi ripristinarlo in «Mostra rimossi».','success');return render();
+      }
       if(a==='toggle-revoked-enrollments'){state.showRevokedEnrollments=!state.showRevokedEnrollments;return render();}
       if(a.startsWith('review-delete-'))return reviewDeletion(a.slice('review-delete-'.length),id);
       if(a==='new-company'||a==='edit-company')return editCompany(a==='edit-company'?id:null);
