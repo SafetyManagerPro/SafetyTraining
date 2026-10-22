@@ -908,3 +908,4 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - **Console e servizi:** 0 errori e 0 warning nel browser durante l’apertura; nessun errore runtime aggregato sul deployment Vercel. Il difetto era interamente client-side e non produceva eccezioni server.
 - **CI:** il primo run del commit runtime (`39865602113`) ha individuato un errore di escaping nelle sole nuove asserzioni del test. Le espressioni regolari sono state corrette nel commit di completamento; il comportamento runtime già verificato non è stato modificato.
 - **Integrità:** nessuna modifica a dati live, ruoli, iscrizioni, progressi, attestazioni o revisioni immagini.
+- **Convalida automatica completa:** GitHub Actions run `39866114246` **SUCCESS** sul commit `9fea7d3ff379d1d6d075be4237a13e9194562849` (suite completa, incluse regressioni admin e sincronizzazione handoff).
