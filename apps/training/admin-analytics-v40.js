@@ -10,7 +10,7 @@ const pct=v=>Math.min(100,Math.max(0,Number(v)||0));
 const status=s=>({not_started:'Da iniziare',in_progress:'In corso',completed:'Completato',passed:'Superato',failed:'Non superato',revoked:'Revocato'})[s]||s||'—';
 const done=s=>['completed','passed'].includes(s);
 const num=v=>Number(v)||0;
-let currentReportSeq=0,reportState={course:'',query:'',learner:'',includeRevoked:false,all:null,filtered:[]};
+let currentReportSeq=0,reportState={company:'',course:'',status:'',query:'',learner:'',includeRevoked:false,all:null,filtered:[]};
 const CSS='.a40-root{display:grid;gap:16px}.a40-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px}.a40-kpi{border:1px solid rgba(255,255,255,.11);background:#102439;border-radius:12px;padding:15px}.a40-kpi strong{display:block;font-size:25px;color:#e7f9ff}.a40-kpi small{color:#afc2d2;font-size:12px}.a40-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:15px}.a40-bar{display:grid;grid-template-columns:minmax(94px,140px) minmax(0,1fr) 50px;align-items:center;gap:9px;padding:7px 0;font-size:12px}.a40-bar label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d0deea}.a40-track{height:15px;background:#142a40;border-radius:8px;overflow:hidden}.a40-fill{height:100%;background:linear-gradient(90deg,#288caa,#44cdaa);min-width:0}.a40-bar b{text-align:right;font-variant-numeric:tabular-nums}.a40-filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.a40-filters label{display:grid;gap:5px;min-width:180px;flex:1;font-size:12px}.a40-filters input,.a40-filters select{padding:10px;border:1px solid #496076;border-radius:9px;background:#0d2031;color:#fff;width:100%}.a40-actions{display:flex;gap:8px;flex-wrap:wrap}.a40-actions button,.a40-btn{padding:9px 12px;border-radius:8px;border:1px solid #55728a;background:#1a4059;color:#fff;font-weight:730;cursor:pointer}.a40-actions button:disabled{opacity:.45}.a40-table{overflow-x:auto}.a40-table table{width:100%;border-collapse:collapse;min-width:650px;font-size:12px}.a40-table th,.a40-table td{padding:10px;border-bottom:1px solid #304156;text-align:left}.a40-table th{color:#b9c9db}.a40-note{font-size:12px;color:#adbece;line-height:1.5}.a40-error{color:#ffadad}.a40-badge{display:inline-block;font-size:11px;padding:3px 7px;background:#28445b;border-radius:8px}.a40-badge.done{background:#165e50}.a40-badge.revoked{background:#68383f}.a40-student{padding:12px;border:1px solid #3b4d61;border-radius:10px;background:#102236}.a40-student dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.a40-student dt{font-size:11px;color:#afc5d7}.a40-student dd{margin:3px 0;font-weight:730}.a40-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}.a40-loading{padding:14px;color:#bdd4e4}';
 function initStyle(){if(document.getElementById('a40Style'))return;const s=document.createElement('style');s.id='a40Style';s.textContent=CSS;document.head.appendChild(s);}
 async function paged(table,columns,{max=3000,filters=[]}={}){
@@ -37,19 +37,22 @@ function monthEntries(rows){
 }
 async function dataset(){
  if(!allowed())throw Error('Accesso ai report riservato al personale autorizzato.');
- const [e,l,ed,v,c]=await Promise.all([
+ const [e,l,ed,v,c,co]=await Promise.all([
   paged('enrollments','id,learner_id,edition_id,status,progress_pct,active_seconds,final_score_pct,started_at,completed_at,enrolled_at,last_activity_at',{max:4000}),
   paged('learners','id,first_name,last_name,email,company_id,active',{max:4000}),
   paged('course_editions','id,course_version_id,title,status,company_id',{max:1500}),
   paged('course_versions','id,course_id',{max:1500}),
-  paged('courses','id,title,nominal_minutes',{max:1500})
+  paged('courses','id,title,nominal_minutes',{max:1500}),
+  paged('companies','id,name,active',{max:1500})
  ]);
- const learners=new Map(l.rows.map(x=>[x.id,x])),editions=new Map(ed.rows.map(x=>[x.id,x])),versions=new Map(v.rows.map(x=>[x.id,x])),courses=new Map(c.rows.map(x=>[x.id,x]));
- const rows=e.rows.map(x=>{const edition=editions.get(x.edition_id),course=courses.get(versions.get(edition?.course_version_id)?.course_id);
-  return {...x,learner:learners.get(x.learner_id),edition,course,courseId:course?.id||'',courseTitle:course?.title||edition?.title||'Corso non disponibile',
-    learnerName:[learners.get(x.learner_id)?.last_name,learners.get(x.learner_id)?.first_name].filter(Boolean).join(' ')||'Corsista non disponibile'};
+ const learners=new Map(l.rows.map(x=>[x.id,x])),editions=new Map(ed.rows.map(x=>[x.id,x])),versions=new Map(v.rows.map(x=>[x.id,x])),courses=new Map(c.rows.map(x=>[x.id,x])),companies=new Map(co.rows.map(x=>[x.id,x]));
+ const rows=e.rows.map(x=>{const learner=learners.get(x.learner_id),edition=editions.get(x.edition_id),course=courses.get(versions.get(edition?.course_version_id)?.course_id);
+  const companyId=edition?.company_id||learner?.company_id||'';
+  const company=companies.get(companyId);
+  return {...x,learner,edition,course,companyId,companyName:company?.name||'Azienda non disponibile',courseId:course?.id||'',courseTitle:course?.title||edition?.title||'Corso non disponibile',
+    learnerName:[learner?.last_name,learner?.first_name].filter(Boolean).join(' ')||'Corsista non disponibile'};
  });
- return {rows,learners,editions,courses,truncated:[e,l,ed,v,c].some(x=>x.truncated)};
+ return {rows,learners,editions,courses,companies,truncated:[e,l,ed,v,c,co].some(x=>x.truncated)};
 }
 function statusEntries(rows){const bins=['not_started','in_progress','completed','passed','failed','revoked'];return bins.map(s=>[status(s),rows.filter(r=>r.status===s).length]);}
 function dashboardMarkup(data){
@@ -57,16 +60,23 @@ function dashboardMarkup(data){
  const finished=active.filter(x=>done(x.status)).length;
  const average=active.length?Math.round(active.reduce((sum,x)=>sum+pct(x.progress_pct),0)/active.length):0;
  const tests=active.filter(x=>x.final_score_pct!==null).length;
+ const passed=active.filter(x=>x.status==='passed').length;
+ const completionRate=active.length?Math.round(finished/active.length*100):0;
+ const testedRows=active.filter(x=>x.final_score_pct!==null);
+ const avgScore=testedRows.length?Math.round(testedRows.reduce((sum,x)=>sum+num(x.final_score_pct),0)/testedRows.length):0;
  const byCourse=new Map();active.forEach(r=>byCourse.set(r.courseTitle,(byCourse.get(r.courseTitle)||0)+1));
  const courses=[...byCourse].sort((a,b)=>b[1]-a[1]).slice(0,8);
+ const byCompany=new Map();active.forEach(r=>byCompany.set(r.companyName,(byCompany.get(r.companyName)||0)+1));
+ const companies=[...byCompany].sort((a,b)=>b[1]-a[1]).slice(0,8);
  const needsAttention=rows.filter(x=>x.status==='in_progress'&&x.last_activity_at&&Date.now()-new Date(x.last_activity_at)>30*86400000).length;
  return '<div class="a40-root">'+
  '<div class="a40-kpis">'+kpi(active.length,'Iscrizioni attive')+kpi(finished,'Completate / superate')+
- kpi(average+'%','Avanzamento medio')+kpi(tests,'Esiti test registrati')+kpi(needsAttention,'Inattivi da oltre 30 giorni')+'</div>'+
+ kpi(completionRate+'%','Tasso completamento')+kpi(average+'%','Avanzamento medio')+kpi(avgScore+'%','Punteggio medio test')+kpi(needsAttention,'Inattivi da oltre 30 giorni')+'</div>'+
  '<div class="a40-grid">'+
  '<section class="admin-card"><h2>Distribuzione dei percorsi</h2>'+bars(statusEntries(rows))+'</section>'+
  '<section class="admin-card"><h2>Nuove iscrizioni · ultimi 6 mesi</h2>'+bars(monthEntries(rows))+'</section>'+
  '<section class="admin-card"><h2>Corsi con più iscritti</h2>'+bars(courses)+'</section>'+
+ '<section class="admin-card"><h2>Aziende con più iscrizioni</h2>'+bars(companies)+'</section>'+
  '<section class="admin-card"><h2>Indicatori di avanzamento</h2>'+
  bars([['Non avviati',active.filter(x=>x.status==='not_started').length],['In corso',active.filter(x=>x.status==='in_progress').length],['Completati',finished],['Con test registrato',tests]])+
  '<p class="a40-note">L’avanzamento contenuti e i tempi attivi non equivalgono automaticamente a ore di frequenza certificate.</p></section></div>'+
@@ -136,18 +146,24 @@ function setHeader(){
 }
 function filtered(data){
  const q=reportState.query.toLocaleLowerCase('it-IT').trim();
- return data.rows.filter(r=>(reportState.includeRevoked||r.status!=='revoked')&&(!reportState.course||r.courseId===reportState.course)&&
- (!reportState.learner||r.learner_id===reportState.learner)&&(!q||[r.courseTitle,r.learnerName,r.learner?.email,r.edition?.title].some(x=>String(x||'').toLocaleLowerCase('it-IT').includes(q))));
+ return data.rows.filter(r=>(reportState.includeRevoked||r.status!=='revoked')&&(!reportState.company||r.companyId===reportState.company)&&
+ (!reportState.course||r.courseId===reportState.course)&&(!reportState.status||r.status===reportState.status)&&
+ (!reportState.learner||r.learner_id===reportState.learner)&&(!q||[r.companyName,r.courseTitle,r.learnerName,r.learner?.email,r.edition?.title].some(x=>String(x||'').toLocaleLowerCase('it-IT').includes(q))));
 }
 function reportFilters(data){
+ const companies=[...data.companies.values()].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'it'));
  const courses=[...data.courses.values()].sort((a,b)=>a.title.localeCompare(b.title,'it'));
  const learners=[...data.learners.values()].sort((a,b)=>[a.last_name,a.first_name].join(' ').localeCompare([b.last_name,b.first_name].join(' '),'it'));
- return '<section class="admin-card"><div class="a40-title"><h2>Filtra i report</h2><div class="a40-actions"><button id="a40Csv">Esporta CSV</button><button id="a40Print">Stampa report</button></div></div>'+
- '<div class="a40-filters"><label>Corso<select id="a40Course"><option value="">Tutti i corsi</option>'+
+ return '<section class="admin-card"><div class="a40-title"><h2>Filtra i report</h2><div class="a40-actions"><button id="a40Csv">Esporta CSV</button><button id="a40Print">Stampa report</button><button id="a40PrintSheets">Schede svolgimento</button></div></div>'+
+ '<div class="a40-filters"><label>Azienda<select id="a40Company"><option value="">Tutte le aziende</option>'+
+ companies.map(x=>'<option value="'+attr(x.id)+'"'+(reportState.company===x.id?' selected':'')+'>'+esc(x.name||'Azienda')+'</option>').join('')+'</select></label>'+
+ '<label>Corso<select id="a40Course"><option value="">Tutti i corsi</option>'+
  courses.map(x=>'<option value="'+attr(x.id)+'"'+(reportState.course===x.id?' selected':'')+'>'+esc(x.title)+'</option>').join('')+'</select></label>'+
+ '<label>Stato<select id="a40Status"><option value="">Tutti gli stati</option>'+
+ ['not_started','in_progress','completed','passed','failed','revoked'].map(x=>'<option value="'+x+'"'+(reportState.status===x?' selected':'')+'>'+esc(status(x))+'</option>').join('')+'</select></label>'+
  '<label>Corsista<select id="a40Learner"><option value="">Tutti i corsisti</option>'+
  learners.map(x=>'<option value="'+attr(x.id)+'"'+(reportState.learner===x.id?' selected':'')+'>'+esc([x.last_name,x.first_name].filter(Boolean).join(' ')||x.email||'Corsista')+'</option>').join('')+'</select></label>'+
- '<label>Ricerca<input id="a40Search" type="search" placeholder="Corsista, email, corso…" value="'+attr(reportState.query)+'"></label></div>'+
+ '<label>Ricerca<input id="a40Search" type="search" placeholder="Azienda, corsista, email, corso…" value="'+attr(reportState.query)+'"></label></div>'+
  '<label class="a40-note"><input id="a40Revoked" type="checkbox"'+(reportState.includeRevoked?' checked':'')+'> Includi iscrizioni revocate</label>'+
  '<p class="a40-note">Il CSV contiene dati personali: condividilo soltanto con persone autorizzate. I dati sono limitati al perimetro del tuo account.</p></section>';
 }
@@ -159,20 +175,31 @@ function reportBody(data){
  const statHtml='<div class="a40-kpis">'+kpi(rows.length,'Iscrizioni filtrate')+kpi(complete,'Con stato completato/superato')+
  kpi(tested.length,'Con esito test')+kpi(scores+'%','Punteggio medio dei test presenti')+kpi(Math.floor(time/60),'Minuti attivi registrati')+'</div>';
  const byCourse=new Map();rows.forEach(r=>byCourse.set(r.courseTitle,(byCourse.get(r.courseTitle)||0)+1));
+ const byCompany=new Map();rows.forEach(r=>byCompany.set(r.companyName,(byCompany.get(r.companyName)||0)+1));
  const many='<div class="a40-grid"><section class="admin-card"><h2>Stati dei corsisti</h2>'+bars(statusEntries(rows))+'</section>'+
- '<section class="admin-card"><h2>Iscrizioni per corso</h2>'+bars([...byCourse].sort((a,b)=>b[1]-a[1]).slice(0,12))+'</section></div>';
+ '<section class="admin-card"><h2>Iscrizioni per corso</h2>'+bars([...byCourse].sort((a,b)=>b[1]-a[1]).slice(0,12))+'</section>'+
+ '<section class="admin-card"><h2>Iscrizioni per azienda</h2>'+bars([...byCompany].sort((a,b)=>b[1]-a[1]).slice(0,12))+'</section></div>';
+ const learnerAnalysis=reportState.learner&&rows.length?(()=>{
+  const complete=rows.filter(x=>done(x.status)).length;
+  const tests=rows.filter(x=>x.final_score_pct!==null);
+  const avg=rows.length?Math.round(rows.reduce((a,x)=>a+pct(x.progress_pct),0)/rows.length):0;
+  const score=tests.length?Math.round(tests.reduce((a,x)=>a+num(x.final_score_pct),0)/tests.length):0;
+  const mins=Math.floor(rows.reduce((a,x)=>a+num(x.active_seconds),0)/60);
+  return '<section class="admin-card"><div class="a40-title"><h2>Analisi corsista selezionato</h2><span class="a40-note">'+esc(rows[0].learnerName)+'</span></div><div class="a40-kpis">'+
+   kpi(rows.length,'Percorsi nel filtro')+kpi(complete,'Completati / superati')+kpi(avg+'%','Avanzamento medio')+kpi(mins,'Minuti attivi registrati')+kpi(score+'%','Media test registrati')+'</div></section>';
+ })():'';
  const table='<section class="admin-card"><div class="a40-title"><h2>Riepilogo corsisti</h2><span class="a40-note">'+fmt(rows.length)+' righe</span></div><div class="a40-table"><table><thead><tr>'+
  '<th>Corsista</th><th>Corso / edizione</th><th>Stato</th><th>Avanzamento</th><th>Attività registrata</th><th>Test</th><th>Dettagli</th></tr></thead><tbody>'+
  rows.slice(0,250).map(r=>'<tr><td>'+esc(r.learnerName)+'</td><td>'+esc(r.edition?.title||r.courseTitle)+'</td><td><span class="a40-badge '+(done(r.status)?'done':r.status==='revoked'?'revoked':'')+'">'+esc(status(r.status))+'</span></td><td>'+Math.round(pct(r.progress_pct))+'%</td><td>'+Math.floor(num(r.active_seconds)/60)+' min</td><td>'+ (r.final_score_pct===null?'—':fmt(r.final_score_pct)+'%')+'</td><td><button class="a40-btn" data-a40-detail="'+attr(r.id)+'">Attestazione</button></td></tr>').join('')+
  '</tbody></table></div>'+(rows.length>250?'<p class="a40-note">Tabella limitata a 250 righe. CSV e riepiloghi usano tutto il campione recuperato.</p>':'')+'</section>';
- return statHtml+many+table+
+ return statHtml+many+learnerAnalysis+table+
  '<div id="a40StudentDetail"></div><p class="a40-note">Attestazione interna di svolgimento, non attestato ufficiale. Frequenze effettive, verifiche, idoneità e requisiti normativi vanno validati dall’organizzatore.</p>'+
  (data.truncated?'<p class="a40-error">Risultati parziali: superato limite di righe. Richiedere esportazione aggregata server per dati completi.</p>':'');
 }
 function csvCell(value){let s=String(value??'');if(/^[\s]*[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
 function exportCsv(rows){
- const heads=['Corsista','Email','Edizione','Corso','Stato','Avanzamento %','Tempo attivo min','Punteggio test %','Iscritto','Completato'];
- const data=rows.map(r=>[r.learnerName,r.learner?.email||'',r.edition?.title||'',r.courseTitle,status(r.status),Math.round(pct(r.progress_pct)),Math.floor(num(r.active_seconds)/60),r.final_score_pct??'',date(r.enrolled_at),date(r.completed_at)]);
+ const heads=['Azienda','Corsista','Email','Edizione','Corso','Stato','Avanzamento %','Tempo attivo min','Punteggio test %','Iscritto','Completato'];
+ const data=rows.map(r=>[r.companyName,r.learnerName,r.learner?.email||'',r.edition?.title||'',r.courseTitle,status(r.status),Math.round(pct(r.progress_pct)),Math.floor(num(r.active_seconds)/60),r.final_score_pct??'',date(r.enrolled_at),date(r.completed_at)]);
  const blob=new Blob(['\ufeff'+[heads,...data].map(row=>row.map(csvCell).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='safetytraining-report-'+new Date().toISOString().slice(0,10)+'.csv';
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
@@ -188,6 +215,22 @@ function printOverview(rows){
  const records=rows.map(r=>[r.learnerName,r.edition?.title||r.courseTitle,status(r.status),Math.round(pct(r.progress_pct))+'%',Math.floor(num(r.active_seconds)/60)+' min',r.final_score_pct===null?'—':fmt(r.final_score_pct)+'%']);
  const html='<p>Totale iscrizioni nel filtro: <b>'+fmt(rows.length)+'</b></p><table><thead><tr>'+cols.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+records.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
  printSheet('Riepilogo percorsi e corsisti',html);
+}
+function printInternalSheets(rows){
+ if(!rows.length){alert('Nessuna iscrizione nel filtro corrente.');return;}
+ const safeRows=rows.slice(0,200);
+ const html=safeRows.map((r,i)=>'<section style="page-break-after:'+(i<safeRows.length-1?'always':'auto')+'"><h2>'+esc(r.learnerName)+'</h2><table>'+
+  '<tr><th>Azienda</th><td>'+esc(r.companyName)+'</td></tr>'+
+  '<tr><th>Corso</th><td>'+esc(r.courseTitle)+'</td></tr>'+
+  '<tr><th>Edizione</th><td>'+esc(r.edition?.title||'—')+'</td></tr>'+
+  '<tr><th>Stato registrato</th><td>'+esc(status(r.status))+'</td></tr>'+
+  '<tr><th>Avanzamento contenuti</th><td>'+Math.round(pct(r.progress_pct))+'%</td></tr>'+
+  '<tr><th>Tempo attivo registrato</th><td>'+Math.floor(num(r.active_seconds)/60)+' minuti</td></tr>'+
+  '<tr><th>Punteggio test registrato</th><td>'+(r.final_score_pct===null?'—':esc(fmt(r.final_score_pct))+'%')+'</td></tr>'+
+  '<tr><th>Data iscrizione</th><td>'+esc(date(r.enrolled_at))+'</td></tr>'+
+  '<tr><th>Completamento registrato</th><td>'+esc(date(r.completed_at))+'</td></tr>'+
+  '</table><p class="note">Scheda interna di svolgimento: non costituisce attestato ufficiale, certificazione di frequenza o idoneità.</p></section>').join('');
+ printSheet('Schede interne di svolgimento',html);
 }
 async function studentDetail(enrollmentId,seq,who){
  const r=reportState.filtered.find(x=>x.id===enrollmentId),target=document.getElementById('a40StudentDetail');if(!r||!target)return;
@@ -231,12 +274,15 @@ async function renderReports(){
   const result=document.getElementById('a40Result');
   const draw=()=>{result.innerHTML=reportBody(data);result.querySelectorAll('[data-a40-detail]').forEach(b=>b.onclick=()=>void studentDetail(b.dataset.a40Detail,seq,who));};
   const bind=(id,action,event='change')=>h.querySelector(id)?.addEventListener(event,action);
+  bind('#a40Company',e=>{reportState.company=e.target.value;draw();});
   bind('#a40Course',e=>{reportState.course=e.target.value;draw();});
+  bind('#a40Status',e=>{reportState.status=e.target.value;draw();});
   bind('#a40Learner',e=>{reportState.learner=e.target.value;draw();});
   bind('#a40Search',e=>{reportState.query=e.target.value;draw();},'input');
   bind('#a40Revoked',e=>{reportState.includeRevoked=e.target.checked;draw();});
   bind('#a40Csv',()=>exportCsv(reportState.filtered),'click');
   bind('#a40Print',()=>printOverview(reportState.filtered),'click');
+  bind('#a40PrintSheets',()=>printInternalSheets(reportState.filtered),'click');
   draw();
  }catch(e){if(seq===currentReportSeq&&h.isConnected)h.innerHTML='<section class="admin-card"><p class="a40-error">Report non disponibile: '+esc(e.message||e)+'</p><button id="a40Retry">Riprova</button></section>';h.querySelector('#a40Retry')?.addEventListener('click',()=>void renderReports());}
 }
