@@ -23,7 +23,7 @@ test('registration is per edition, QR share uses canonical production URL, and r
 test('archiving is reversible and permanent deletion remains through guarded planner',()=>{
  const app=file('apps/training/admin.js');
  const sql=file('supabase/migrations/20261022144000_v36_public_registration.sql');
- for(const needle of ['Rimuovi corsista','Mostra','showArchivedLearners','admin_archive_learner_v36','review-delete-learner'])
+ for(const needle of ['Rimuovi corsista','Mostra','showArchivedLearners','admin_archive_learner_v36','quick-delete-learner-v38'])
   assert.ok(app.includes(needle),needle);
  assert.match(sql,/update public\.learners set active=false/);
  assert.doesNotMatch(sql,/delete from public\.learners/);
