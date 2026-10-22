@@ -240,13 +240,28 @@ async function renderReports(){
   draw();
  }catch(e){if(seq===currentReportSeq&&h.isConnected)h.innerHTML='<section class="admin-card"><p class="a40-error">Report non disponibile: '+esc(e.message||e)+'</p><button id="a40Retry">Riprova</button></section>';h.querySelector('#a40Retry')?.addEventListener('click',()=>void renderReports());}
 }
-function boot(){
+function hydrateVisibleAdminAnalytics(){
  registerNav();
- document.addEventListener('safety:admin-capabilities',registerNav);
- document.addEventListener('safety:auth-changed',()=>{currentReportSeq++;reportState.all=null;registerNav();});
- document.getElementById('adminConsoleBtn')?.addEventListener('click',registerNav);
- const n=document.querySelector('#adminShell .admin-nav nav');if(n)new MutationObserver(registerNav).observe(n,{childList:true});
+ if(!allowed())return;
+ const dashboardTarget=document.getElementById('adminDashboardAnalytics');
+ if(dashboardTarget&&!dashboardTarget.dataset.a40Loaded)void renderDashboard({targetId:'adminDashboardAnalytics'});
+ const controlTarget=document.getElementById('adminControlAnalytics');
+ if(controlTarget&&!controlTarget.dataset.a40Loaded)void renderControlSummary({targetId:'adminControlAnalytics'});
+}
+function boot(){
+ hydrateVisibleAdminAnalytics();
+ document.addEventListener('safety:admin-capabilities',hydrateVisibleAdminAnalytics);
+ document.addEventListener('safety:auth-changed',()=>{
+  currentReportSeq++;
+  reportState.all=null;
+  queueMicrotask(hydrateVisibleAdminAnalytics);
+ });
+ document.getElementById('adminConsoleBtn')?.addEventListener('click',()=>setTimeout(hydrateVisibleAdminAnalytics,0));
+ const n=document.querySelector('#adminShell .admin-nav nav');
+ if(n)new MutationObserver(()=>queueMicrotask(hydrateVisibleAdminAnalytics)).observe(n,{childList:true,subtree:true});
+ const content=document.getElementById('adminContent');
+ if(content)new MutationObserver(()=>queueMicrotask(hydrateVisibleAdminAnalytics)).observe(content,{childList:true,subtree:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-window.SAFETY_ADMIN_ANALYTICS_V40={renderDashboard,renderControlSummary,renderReports,dashboardMarkup,controlMarkup,csvCell};
+window.SAFETY_ADMIN_ANALYTICS_V40={renderDashboard,renderControlSummary,renderReports,dashboardMarkup,controlMarkup,csvCell,hydrateVisibleAdminAnalytics};
 })();
