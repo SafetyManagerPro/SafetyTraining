@@ -28,7 +28,7 @@ test('family matching does not misclassify first-aid groups as cranes or generic
  assert.equal(other.length,0);
 });
 test('projector and PWA load original diagrams',()=>{
-assert.ok(read('apps/training/index.html').includes('graphic-pack-04.js'));assert.ok(read('apps/training/graphic-atlas-v22.js').includes('SAFETY_GRAPHIC_PACK_04?.pick'));const sw=read('apps/training/sw.js');assert.ok(sw.includes("const CACHE='safety-training-v22-"));assert.ok(sw.includes('gp04-pedoni-carrelli.svg'));
+assert.ok(read('apps/training/index.html').includes('graphic-pack-04.js'));assert.ok(read('apps/training/graphic-atlas-v22.js').includes('SAFETY_GRAPHIC_PACK_04?.pick'));const sw=read('apps/training/sw.js');assert.match(sw,/const CACHE='safety-training-[^']+'/);assert.ok(sw.includes('gp04-pedoni-carrelli.svg'));
 });
 test('GP04 does not add a family-related but subject-irrelevant diagram',()=>{
  const c={title:'Carrelli elevatori',presentation_generated_from_db:true};

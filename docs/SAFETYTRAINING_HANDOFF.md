@@ -881,3 +881,5 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 ### 2026-10-22 — v43.2 hardening integrazione
 - `enrichPrivateRows` ora passa `source_document` e `source_page` alle checkbox del pannello di approvazione multipla: l'interfaccia può distinguere i PDF di origine e bloccare selezioni multi-documento per la revisione dei diritti; la RPC server mantiene la propria verifica separata e autoritativa.
 - Sistemata regressione CI legacy nel test del pianificatore eliminazioni: ora cerca la vera azione `quick-delete-learner-v38` introdotta nella gestione corsisti al posto della precedente `review-delete-learner`; nessun cambiamento al comportamento di cancellazione. Nessun dato utente modificato, nessuna approvazione di immagini eseguita.
+
+- Allineati gli assert legacy di cache PWA in `graphic-pack-03`, `source-figures-v23`, `graphic-pack-04`, `integral-pdf-v24` e `deck-performance-v25`: verificano la presenza e coerenza di una versione cache SafetyTraining, non un vecchio identificativo ormai obsoleto. Test di handoff adeguato al 2026-10-22 e versione v43; nessuna modifica runtime oltre alla già documentata integrazione v43.
