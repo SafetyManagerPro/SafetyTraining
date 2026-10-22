@@ -32,7 +32,7 @@ test('report code retains learner/course filters, evidence lookup and no officia
  const s=read('apps/training/admin-analytics-v40.js');
  for(const token of ['adminReportsV40Nav','a40Course','a40Learner','test_attempts','learning_sessions','learning_progress',
     'Esporta CSV','Stampa report','Scheda di svolgimento interna','Non costituisce attestato ufficiale',
-    'manage_enrollments','adminDashboardAnalytics'])assert.ok(s.includes(token),token);
+    'manage_enrollments','adminDashboardAnalytics','renderControlSummary','Priorità operative','Attestazione interna di svolgimento'])assert.ok(s.includes(token),token);
  assert.match(s,/new Blob/);
  assert.match(s,/truncated/);
 });
@@ -45,6 +45,17 @@ test('HTML menu and PWA include analytics; sections link to report',()=>{
  assert.ok(menu.includes("keys:['reports','activity','misc']"));
  assert.ok(app.includes('id="adminDashboardAnalytics"'));
  assert.ok(app.includes("renderDashboard?.({targetId:'adminDashboardAnalytics'})"));
- assert.ok(sw.includes('safety-training-v40-reports-dashboard'));
+ assert.ok(app.includes("renderControlSummary?.({targetId:'adminControlAnalytics'})"));
+ assert.match(sw,/const CACHE='safety-training-[^']+'/);
  assert.ok(sw.includes('admin-analytics-v40.js'));
+});
+
+
+test('backend enhancer never replaces the dashboard structure and control panel stays wired',()=>{
+ const backend=read('apps/training/admin-backend-v21.js');
+ const app=read('apps/training/admin.js');
+ assert.doesNotMatch(backend,/host\.innerHTML=dashboardMarkup\(summary\)/);
+ assert.ok(backend.includes("host.querySelector('.admin-loading') || !host.querySelector('.admin-stats')"));
+ assert.ok(app.includes('id="adminControlAnalytics"'));
+ assert.ok(app.includes("setHeader('Controllo operativo'"));
 });
