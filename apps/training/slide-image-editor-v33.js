@@ -125,6 +125,7 @@ async function open(c,slide,index){
  '<label>Argomento<select id="slideEditCategory"><option value="suggested">Suggerite per questa slide</option>'+
  '<option value="all">Tutte le figure</option><option value="dpi">DPI</option><option value="segnaletica">Segnaletica</option>'+
  '<option value="rischi">Rischi e prevenzione</option><option value="attrezzature">Attrezzature</option><option value="emergenze">Emergenze</option><option value="altro">Altre immagini</option></select></label></div>'+
+ '<p class="slide-edit-internal-note">Le figure PDF approvate per uso interno sono riservate alla revisione amministrativa: non diventano automaticamente immagini visibili ai corsisti. Per i corsi erogati usa immagini della libreria illustrata.</p>'+
  '<div class="slide-edit-tabs"><button type="button" data-library-tab="local" aria-pressed="true">Illustrate / SVG</button>'+
  '<button type="button" data-library-tab="private" aria-pressed="false">PDF approvati</button><span id="slideEditLibraryCount" aria-live="polite"></span></div>'+
  '<div id="slideEditLibrary" class="slide-edit-library" aria-label="Figure disponibili"></div></section>'+
