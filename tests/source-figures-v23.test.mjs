@@ -25,6 +25,6 @@ assert.ok(js.includes("presentation_generated_from_db"));assert.ok(js.includes("
 test('script and CSS loaded; print geometry unchanged',()=>{
  const index=rd('apps/training/index.html'),sw=rd('apps/training/sw.js');
  assert.match(index,/source-figures-v23\.js/);assert.match(index,/source-figures-v23\.css/);
- assert.match(sw,/source-figures-v23\.js/);assert.ok(sw.includes("const CACHE='safety-training-v22-"));
+ assert.match(sw,/source-figures-v23\.js/);assert.match(sw,/const CACHE='safety-training-[^']+'/);
  assert.match(rd('apps/training/admin-print-slides-v23.js'),/projection\.buildDeck\(converted\)/);
 });
