@@ -13,7 +13,7 @@
   const match = (q, ...values) => !q || values.some(v => String(v ?? '').toLocaleLowerCase('it').includes(q.toLocaleLowerCase('it')));
 
   const TABS = [
-    ['dashboard','▦','Dashboard'],
+    ['dashboard','▦','Dashboard e grafici'],
     ['wizard','✨','Avvia percorso'],
     ['organizations','🏢','Organizzazioni'],
     ['companies','🏭','Aziende'],
@@ -21,7 +21,7 @@
     ['courses','📚','Corsi'],
     ['editions','🗂','Edizioni'],
     ['enrollments','✅','Iscrizioni'],
-    ['activity','📈','Attività']
+    ['activity','📈','Registro attività']
   ];
   const LABEL = {
     draft:'Bozza', published:'Pubblicata', retired:'Ritirata',
