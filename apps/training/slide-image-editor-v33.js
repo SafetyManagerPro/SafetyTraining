@@ -179,7 +179,6 @@ async function open(c,slide,index){
     const text=(r.src+' '+labelFor(r.src)).toLowerCase();
     return words.every(w=>text.includes(w));
    });
-   if(category.value==='suggested'&&!results.length&&!words.length)results=ranked.slice(0,36);
   }else{
    results=privateAssets.filter(r=>{
     const text=(r.ref_id+' '+r.caption).toLowerCase();
