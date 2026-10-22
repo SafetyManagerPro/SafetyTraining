@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-22
-Stato corrente: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-78`.
+Stato corrente: **v43.2 approvazione multipla PDF operativa / 65 corsi non frozen** · doppia verifica tecnico/diritti con audit e selezione progressiva · Panoramica/Controllo/Report pubblicati · PWA `safety-training-v43-bulk-review`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 

@@ -9,7 +9,7 @@ test('both persistent handoffs identify the currently deployed PWA cache in thei
  assert.ok(cache);
  for(const path of docs){
   const file=read(path);
-  assert.match(file.slice(0,700),/Ultimo aggiornamento: 2026-10-21/);
+  assert.match(file.slice(0,700),/Ultimo aggiornamento: 20\d{2}-\d{2}-\d{2}/);
   assert.ok(file.slice(0,700).includes('PWA \`'+cache+'\`')||file.slice(0,700).includes('PWA '+cache));
   assert.ok(file.includes('cancellazione')||file.includes('eliminazione'));
  }
@@ -17,8 +17,11 @@ test('both persistent handoffs identify the currently deployed PWA cache in thei
 test('most recent dated handoff entries are the same across both files',()=>{
  const headings=docs.map(p=>Array.from(read(p).matchAll(/^## 20\d\d-\d\d-\d\d\s+—\s+(.+)$/gm),m=>m[1]));
  assert.ok(headings[0].length>0);
+ const dates=docs.map(p=>read(p).match(/Ultimo aggiornamento: (20\d{2}-\d{2}-\d{2})/)?.[1]);
+ assert.ok(dates.every(Boolean));
+ assert.equal(dates[0],dates[1]);
  assert.equal(headings[0].at(-1),headings[1].at(-1));
- assert.match(headings[0].at(-1),/v(?:22|24)\.[0-9]+/);
+ assert.match(headings[0].at(-1),/v(?:22|24|43)(?:\.[0-9]+)?/);
 });
 test('latest handoffs preserve safety and course freeze constraints',()=>{
  for(const path of docs){

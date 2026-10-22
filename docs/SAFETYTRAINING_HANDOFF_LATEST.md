@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-22
-Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-78`.
+Stato: **v43.2 approvazione multipla PDF operativa / 65 corsi non frozen** · doppia verifica tecnico/diritti con audit e selezione progressiva · Panoramica/Controllo/Report pubblicati · PWA `safety-training-v43-bulk-review`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
