@@ -91,13 +91,13 @@ function familyOf(src){
  if(/elettric|chimic|rumore|microclima|vdt|polver|caduta|rischio|preven|ergonom/.test(s))return'rischi';
  return'altro';
 }
-function itemHtml(item,index){
+function itemHtml(item,index,total){
  const src=item.src||'assets/general.svg';
  return '<div class="slide-edit-item" data-selected-index="'+index+'"><img src="'+esc(src)+'" alt="Anteprima figura selezionata" loading="lazy"><div class="slide-edit-item-body">'+
  '<span class="slide-edit-index">'+(index===0?'Immagine principale':'Immagine aggiuntiva '+(index+1))+'</span>'+
  '<label>Didascalia <input type="text" data-caption="'+index+'" maxlength="180" value="'+esc(item.caption||'')+'" placeholder="Descrizione didattica chiara e pertinente"></label>'+
  '<div class="slide-edit-actions"><button data-move="'+index+':-1" type="button" '+(index===0?'disabled':'')+' aria-label="Sposta immagine verso l’alto">↑ Sposta</button>'+
- '<button data-move="'+index+':1" type="button" '+(index>=2?'disabled':'')+' aria-label="Sposta immagine verso il basso">↓ Sposta</button>'+
+ '<button data-move="'+index+':1" type="button" '+(index>=total-1?'disabled':'')+' aria-label="Sposta immagine verso il basso">↓ Sposta</button>'+
  '<button data-remove="'+index+'" type="button" aria-label="Rimuovi immagine">Rimuovi</button></div></div></div>';
 }
 async function open(c,slide,index){
@@ -162,7 +162,7 @@ async function open(c,slide,index){
  };
  const renderSelected=()=>{
   dialog.querySelector('#slideEditCount').textContent=selection.length+'/3';
-  chosen.innerHTML=selection.map((x,i)=>itemHtml({...x,src:srcFor(x)},i)).join('')||
+  chosen.innerHTML=selection.map((x,i)=>itemHtml({...x,src:srcFor(x)},i,selection.length)).join('')||
    '<div class="slide-edit-empty">Nessuna figura selezionata. Scegline una dall’archivio oppure ripristina le immagini automatiche.</div>';
   const output=dialog.querySelector('#slideEditPreviewImages');
   output.innerHTML=selection.map((x,i)=>'<figure class="'+(i===0?'main':'secondary')+'"><img src="'+esc(srcFor(x)||'assets/general.svg')+
@@ -198,7 +198,7 @@ async function open(c,slide,index){
    (!total?'<p class="slide-edit-empty">'+(tab==='private'?'Nessuna figura PDF approvata disponibile per questa ricerca.':'Nessuna figura trovata. Seleziona “Tutte le figure” o modifica la ricerca.')+'</p>':'');
  };
  const draw=()=>{if(!stillHere())return;renderSelected();renderLibrary();};
- const close=()=>{if(modal===dialog){modalKeyAbort?.abort();modalKeyAbort=null;dialog.remove();modal=null;}};
+ const close=()=>{if(dialog.dataset.saving==='1')return;if(modal===dialog){modalKeyAbort?.abort();modalKeyAbort=null;dialog.remove();modal=null;}};
  dialog.querySelector('[data-close]').onclick=close;
  dialog.addEventListener('click',e=>{if(e.target===dialog)close();});
  const keyHandler=e=>{if(e.key==='Escape'&&modal===dialog){e.preventDefault();close();}};
