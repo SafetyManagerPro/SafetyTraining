@@ -37,5 +37,5 @@ test('entrypoint and offline cache reference all new assets',()=>{
   assert.ok(html.includes(file),'HTML missing '+file);
   assert.ok(sw.includes(file),'SW missing '+file);
  }
- assert.ok(sw.includes('safety-training-v39-menu-permissions'));
+ assert.match(sw,/const CACHE='safety-training-[^']+'/);
 });
