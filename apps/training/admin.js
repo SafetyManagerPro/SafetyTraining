@@ -189,7 +189,9 @@
       <div class="admin-grid two">
         <section class="admin-card"><div class="admin-card-head"><div><h2>Flusso operativo</h2><p>Dall’anagrafica all’erogazione.</p></div></div><div class="admin-step-list"><button data-jump="companies"><b>1</b><span>Azienda<small>Anagrafica, P.IVA e ATECO</small></span></button><button data-jump="learners"><b>2</b><span>Corsisti<small>Dati, account e inviti</small></span></button><button data-jump="courses"><b>3</b><span>Corsi<small>Catalogo e versioni</small></span></button><button data-jump="editions"><b>4</b><span>Edizioni<small>Versione approvata e disponibilità</small></span></button><button data-jump="enrollments"><b>5</b><span>Iscrizioni<small>Assegnazione, accessi e avanzamento</small></span></button></div></section>
         <section class="admin-card"><div class="admin-card-head"><div><h2>Stato piattaforma</h2><p>Numeri amministrativi correnti.</p></div></div><div class="admin-summary-list"><div><span>Edizioni complessive</span><strong>${editions}</strong></div><div><span>Iscrizioni complessive</span><strong>${enrollments}</strong></div><div><span>Organizzazione</span><strong>${esc(state.multiOrg ? `${state.orgs.filter(x=>x.active).length} attive` : (state.orgs.find(x=>x.id===state.defaultOrgId)?.name || '—'))}</strong></div><div><span>Pubblicazione contenuti</span><strong>Controllata</strong></div></div><p class="admin-note">La console non pubblica automaticamente Learning Unit o nuove versioni corso: le operazioni editoriali restano soggette a revisione.</p></section>
-      </div>`);
+      </div>
+      <section class="admin-card"><div class="admin-card-head"><div><h2>Analisi della formazione</h2><p>Indicatori, distribuzione percorsi, tendenze e partecipazione.</p></div><button data-action="open-reports-v40" type="button">Apri report dettagliati →</button></div><div id="adminDashboardAnalytics" aria-live="polite">Caricamento grafici…</div></section>`);
+    if(seq===state.renderSeq)void window.SAFETY_ADMIN_ANALYTICS_V40?.renderDashboard?.({targetId:'adminDashboardAnalytics'});
   }
 
   async function organizations(seq) {
@@ -483,6 +485,7 @@
     const jump=e.target.closest('[data-jump]');if(jump){state.tab=jump.dataset.jump;return render();}
     const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;
     try {
+      if(a==='open-reports-v40')return window.SAFETY_ADMIN_ANALYTICS_V40?.renderReports?.();
       if(a==='toggle-archived-learners'){state.showArchivedLearners=!state.showArchivedLearners;return render();}
       if(a==='restore-learner-v37'){
         if(!confirm('Ripristinare questo corsista nell’elenco attivo? Se l’account originario è ancora disponibile verrà ricollegato.'))return;
