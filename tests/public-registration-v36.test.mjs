@@ -39,3 +39,29 @@ test('signup databases are private, requests await approval, public functions ar
  assert.match(sql,/revoke all on private\.course_registration_links_v36, private\.course_registration_requests_v36 from public,anon,authenticated/);
  assert.match(sql,/grant execute on function public\.public_registration_info_v36\(text\)/);
 });
+
+test('archive severs live Auth linkage and restoration checks for conflicts',()=>{
+ const archive=file('supabase/migrations/20261022163500_v37_learner_archive_auth_guard.sql');
+ const app=file('apps/training/admin.js');
+ assert.match(archive,/update public\.learners set active=false,auth_user_id=null/);
+ assert.match(archive,/not exists\(select 1 from public\.learners where auth_user_id=v_saved/);
+ assert.match(archive,/admin_restore_learner_v37/);
+ assert.match(app,/restore-learner-v37/);
+});
+test('fast permanent deletion cannot cascade into recorded training evidence',()=>{
+ const sql=file('supabase/migrations/20261022170000_v38_delete_unused_learner.sql');
+ const app=file('apps/training/admin.js');
+ for(const marker of [
+  'learner_has_training_history_protected',
+  'learner_has_training_activity_protected',
+  'learner_has_training_evidence_protected',
+  'linked_account_protected_use_detailed_deletion',
+  'public.learning_events','public.learning_progress','public.learning_sessions',
+  'public.test_attempts','public.question_attempts',
+  'public.enrollment_requirement_evidence','public.enrollment_practice_assessments_v22',
+  'admin_audit_log'
+ ])assert.ok(sql.includes(marker),marker);
+ assert.match(sql,/perform 1 from public\.enrollments where learner_id=p_learner_id for update/);
+ assert.match(app,/admin_delete_unused_learner_v38/);
+ assert.match(app,/reviewDeletion\('learner',id\)/);
+});
