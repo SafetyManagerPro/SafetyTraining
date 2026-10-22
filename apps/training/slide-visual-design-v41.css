@@ -21,5 +21,5 @@
 .projector-slide.type-graphic .slide-visual>img,.projector-slide.type-concept .slide-visual>img{background:#f7fbfc}
 .projector-slide .guided-project section,.projector-slide .operational-slide-grid section{border-radius:19px}
 .slide-print-projector .st-slide-figure-caption{print-color-adjust:exact;-webkit-print-color-adjust:exact}
-@media (max-width:920px){body.deckmode .projector-slide .slide-grid{grid-template-columns:1fr}.projector-slide .slide-visual{height:min(36vh,380px)}}
+/* Slide canvas is 1600x900 and scaled by the deck host: avoid viewport-breakpoint grid changes here. */
 @media print{.projector-slide .slide-visual{box-shadow:none}.projector-slide .st-slide-figure{break-inside:avoid}.projector-slide .slide-visual>figcaption{color:#d2e0ef}}
