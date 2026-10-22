@@ -121,6 +121,7 @@
     const {data,error}=await db().from(table).select('active').eq('id',id).single();
     if(error)throw error;
     const next=!data.active;
+    if(entityType==='learner'&&!next&&!window.confirm('Disattivare questo corsista? Il profilo non potrà accedere ai corsi, anche se iscritto ad altri percorsi. Storico, attestati e iscrizioni resteranno conservati. Per annullare soltanto un corso usa «Annulla iscrizione» nella sezione Iscrizioni.'))return;
     await rpc('admin_set_active',{p_entity_type:entityType,p_entity_id:id,p_active:next});
     notify(next?'Elemento riattivato.':'Elemento disattivato.','success');
     if(entityType==='organization'){state.edit.organization=null;await window.SAFETY_ADMIN?.refreshRole?.();}
@@ -199,7 +200,7 @@
       if(action==='toggle-org')return await setActive('organization',id);
       if(action==='close-edition')return await setEditionStatus(id,'closed');
       if(action==='open-edition')return await setEditionStatus(id,'open');
-      if(action==='revoke'){if(confirm('Revocare questa iscrizione?'))return await setEnrollmentRevoked(id,true);return;}
+      if(action==='revoke'){if(window.confirm('Annullare questa iscrizione? Il corsista non potrà proseguire questo percorso. Le attività e le evidenze già registrate verranno conservate e la revoca sarà tracciata.'))return await setEnrollmentRevoked(id,true);return;}
       if(action==='restore')return await setEnrollmentRevoked(id,false);
       if(action==='bulk-submit')return await bulkSubmit();
     }catch(err){console.error('[Admin v21 RPC action]',err);notify(err?.message||'Operazione non riuscita.','error');}
