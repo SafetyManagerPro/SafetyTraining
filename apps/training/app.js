@@ -301,6 +301,8 @@ function moduleSlideIndex(c,mi){
  const d=cachedDeck(c); return d.findIndex(s=>s.type==='module'&&s.moduleIndex===mi);
 }
 window.deckGo=(cid,i)=>{setHash(`deck/${cid}/${Math.max(0,i)}`)};
+window.resumeCourseDeck=cid=>{const c=getCourse(cid);if(!c)return;const saved=window.SAFETY_DECK_BOOKMARK_V42?.read?.(c,cachedDeck(c));if(saved)setHash('deck/'+c.id+'/'+saved.index);};
+function continueCourseButton(c){const saved=window.SAFETY_DECK_BOOKMARK_V42?.read?.(c,cachedDeck(c));if(!saved||saved.index<1)return '';return `<button type="button" class="deck-resume-btn" onclick="resumeCourseDeck('${esc(c.id)}')">▶ Riprendi dalla slide ${saved.number} / ${saved.total}</button>`;}
 window.deckReveal=(id)=>{
  const el=document.getElementById(id); if(!el) return;
  el.classList.toggle('deck-hidden');
@@ -399,6 +401,8 @@ function deckView(c,index=0){
  const deck=cachedDeck(c);
  index=Math.min(Math.max(0,Number(index)||0),deck.length-1);
  const s=deck[index];
+ // The bookmark is navigation only: it must not credit time, attendance or completion.
+ window.SAFETY_DECK_BOOKMARK_V42?.save?.(c,deck,index);
  document.body.classList.add('deckmode');
  const pct=((index+1)/deck.length)*100;
  const shell=app.querySelector('.deck-shell');
@@ -423,7 +427,7 @@ function deckView(c,index=0){
      return;
    }
  }
- app.innerHTML=`<div class="deck-shell"><div class="deck-top"><button class="deck-exit" onclick="setHash('course/${c.id}')">← Agenda</button><div class="deck-course">${c.icon} ${esc(c.title)}</div><div class="deck-actions"><button onclick="toggleFullscreen()">⛶</button></div></div>
+ app.innerHTML=`<div class="deck-shell"><div class="deck-top"><div class="deck-top-navigation"><button type="button" class="deck-home-btn" onclick="setHash('')" title="Torna alla Home; la posizione viene ricordata">⌂ Home</button><button class="deck-exit" onclick="setHash('course/${c.id}')">← Agenda</button></div><div class="deck-course">${c.icon} ${esc(c.title)}</div><div class="deck-actions"><button onclick="toggleFullscreen()">⛶</button></div></div>
  <div class="deck-stage" id="deckStage"><article class="projector-slide type-${s.type}" id="projectorSlide">${deckSlideBody(s,index)}</article></div>
  <div class="deck-footer"><div><strong>${esc(s.module.title)}</strong>${s.topic?`<span>${esc(s.topic.title)}</span>`:''}</div><div class="deck-time"><span>tempo corso ${clockMin(s.start)}–${clockMin(s.topic?s.end:(s.displayEnd||s.module.end_minute))}</span>${s.topic?`<b>${Math.max(0,s.end-s.start)} min slide</b>`:`<b>${s.module.minutes} min modulo</b>`}</div><div class="deck-pager"><button type="button" class="deck-pager-prev" aria-label="Slide precedente" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">← Indietro</button><span class="deck-counter" aria-live="polite">${index+1} / ${deck.length}</span><button type="button" class="deck-pager-next" aria-label="Slide successiva" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">Avanti →</button></div></div>
  <div class="deck-progress"><span style="width:${pct}%"></span></div>
@@ -462,7 +466,7 @@ function home(){
  const foundation=DATA.find(c=>c.id==='fondamenti');
  const formal=DATA.filter(c=>c.id!=='fondamenti');
  app.innerHTML=`<section class="hero presentation-hero"><span class="pill">MODALITÀ PRESENTAZIONE</span><h1>Safety Training</h1><p>Corso progettato per essere proiettato: agenda temporale, moduli ordinati e slide leggibili da lontano.</p><div class="startpanel"><div><span class="startlabel">MODULO COMUNE</span><h2>🏛️ Fondamenti normativi e sistema prevenzione</h2><p>Normativa, figure della sicurezza, vigilanza, responsabilità e sanzioni.</p></div><button class="openbtn big" onclick="setHash('course/fondamenti')">Apri agenda</button></div></section>
- <h2 class="sectiontitle">Scegli il corso da proiettare</h2><section class="presentation-courses">${formal.map(c=>`<article class="presentation-course"><div class="pc-head"><span class="pc-icon">${c.icon}</span><div><div class="duration">${fmtMin(c.planned_minutes||c.target_minutes||0)}</div><h2>${esc(c.title)}</h2></div></div><p>${esc(c.subtitle)}</p><div class="pc-modules">${(c.modules||[]).map(m=>`<span>${esc(m.title)} · ${fmtMin(m.minutes)}</span>`).join('')}</div><div class="pc-actions"><button class="openbtn" onclick="setHash('deck/${c.id}/0')">▶ Avvia presentazione</button><button class="ghost" onclick="setHash('course/${c.id}')">Agenda</button></div></article>`).join('')}</section>
+ <h2 class="sectiontitle">Scegli il corso da proiettare</h2><section class="presentation-courses">${formal.map(c=>`<article class="presentation-course"><div class="pc-head"><span class="pc-icon">${c.icon}</span><div><div class="duration">${fmtMin(c.planned_minutes||c.target_minutes||0)}</div><h2>${esc(c.title)}</h2></div></div><p>${esc(c.subtitle)}</p><div class="pc-modules">${(c.modules||[]).map(m=>`<span>${esc(m.title)} · ${fmtMin(m.minutes)}</span>`).join('')}</div><div class="pc-actions"><button class="openbtn" onclick="setHash('deck/${c.id}/0')">▶ Avvia presentazione</button>${continueCourseButton(c)}<button class="ghost" onclick="setHash('course/${c.id}')">Agenda</button></div></article>`).join('')}</section>
  <div class="footer">Le schede di approfondimento restano disponibili, ma la modalità principale è ora la presentazione sequenziale.</div>`;
 }
 
@@ -588,7 +592,7 @@ function courseView(c){
  const total=c.topics.reduce((a,t)=>a+t.minutes,0);
  const mods=presentationModules(c);
  app.innerHTML=`<div class="breadcrumb"><button onclick="setHash('')">Home</button> › ${esc(c.title)}</div>
- <section class="hero agenda-hero"><img class="st-brand-course" src="assets/cna-avellino.png" alt="CNA Avellino"><span class="pill">AGENDA DEL CORSO</span><h1>${c.icon} ${esc(c.title)}</h1><p>${esc(c.subtitle)}</p><div class="agenda-summary"><strong>${fmtMin(total)}</strong><span>${mods.length} moduli</span><span>${c.topics.length} argomenti</span></div><button class="openbtn big" onclick="setHash('deck/${c.id}/0')">▶ Avvia presentazione dall'inizio</button></section>
+ <section class="hero agenda-hero"><img class="st-brand-course" src="assets/cna-avellino.png" alt="CNA Avellino"><span class="pill">AGENDA DEL CORSO</span><h1>${c.icon} ${esc(c.title)}</h1><p>${esc(c.subtitle)}</p><div class="agenda-summary"><strong>${fmtMin(total)}</strong><span>${mods.length} moduli</span><span>${c.topics.length} argomenti</span></div><button class="openbtn big" onclick="setHash('deck/${c.id}/0')">▶ Avvia presentazione dall'inizio</button> ${continueCourseButton(c)}</section>
  <div class="timeline">${mods.map((m,mi)=>`<article class="timeline-module"><div class="timeline-time"><strong>${clockMin(m.start_minute)}</strong><span>→ ${clockMin(m.end_minute)}</span></div><div class="timeline-content"><div class="module-head"><div><span class="module-num">MODULO ${mi+1}</span><h2>${esc(m.title)}</h2><p>${fmtMin(m.minutes)}</p></div><button class="openbtn" onclick="setHash('deck/${c.id}/${moduleSlideIndex(c,mi)}')">▶ Avvia da qui</button></div><div class="timeline-topics">${m.topic_ids.map(id=>{const t=getTopic(c,id);const visuals=topicAdditionalVisuals(c,t);return `<button onclick="setHash('topic/${c.id}/${t.id}')">${visuals.length?`<img class="st-topic-thumb" loading="lazy" decoding="async" src="${esc(visuals[0].src)}" alt="">`:''}<span>${t.minutes} min</span><strong>${esc(t.title)}</strong><em>${visuals.length?'🖼 Illustrazioni disponibili · ':''}Dettaglio / approfondimento</em></button>`}).join('')}</div></div></article>`).join('')}</div>
  <div class="notice">Gli approfondimenti delle vecchie schede sono ora inseriti anche nella <strong>sequenza di proiezione</strong>, nel punto coerente con ciascun argomento. Le schede restano disponibili per consultazione.</div>`;
 }
