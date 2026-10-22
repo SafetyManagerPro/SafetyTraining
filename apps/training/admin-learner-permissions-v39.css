@@ -1,0 +1,22 @@
+/* Unified permissions desktop/tablet/mobile */
+.lp39-layout{display:grid;grid-template-columns:minmax(235px,33%) minmax(0,1fr);gap:15px;align-items:start}
+.lp39-layout>.admin-card{position:sticky;top:12px;max-height:calc(100dvh - 120px);display:flex;flex-direction:column}
+.lp39-control{display:grid;gap:7px;font-size:12px;font-weight:750;margin:13px 0}
+.lp39-control input{border:1px solid #577087;background:#0b192c;color:#fff;padding:11px;border-radius:9px;font:inherit}
+.lp39-check{display:flex;align-items:center;gap:9px;font-size:12px;margin-bottom:10px}
+.lp39-list{overflow:auto;min-height:0;max-height:56dvh;display:grid;align-content:start;gap:5px}
+.lp39-list button{display:grid;gap:3px;text-align:left;border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:11px;background:rgba(255,255,255,.03);color:#e4e9f2;cursor:pointer}
+.lp39-list button.selected{border-color:#5daac7;background:rgba(38,149,168,.19)}
+.lp39-list button small,.lp39-course small{display:block;color:#9ab1c5;font-size:11px}
+.lp39-stats{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}
+.lp39-stats span{border:1px solid rgba(255,255,255,.10);border-radius:9px;background:#11263a;padding:10px;font-size:12px}
+.lp39-help{color:#9eb3c9;line-height:1.5;font-size:12px}
+.lp39-actions{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+.lp39-actions button,.lp39-course button{background:#143b50;color:#e8f6ff;border:1px solid #4e8295;border-radius:9px;padding:10px;font-weight:740;cursor:pointer}
+.lp39-actions .lp39-danger{background:#652d35;border-color:#8a4d58}
+.lp39-courses{display:grid;gap:8px}
+.lp39-course{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#102235;border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:12px}
+.lp39-course>div{min-width:0}
+.lp39-course button{flex:none}
+.lp39-actions button:disabled,.lp39-course button:disabled{opacity:.48;cursor:default}
+@media(max-width:900px){.lp39-layout{grid-template-columns:1fr}.lp39-layout>.admin-card{position:static;max-height:none}.lp39-list{max-height:235px}.lp39-course{flex-wrap:wrap}}
