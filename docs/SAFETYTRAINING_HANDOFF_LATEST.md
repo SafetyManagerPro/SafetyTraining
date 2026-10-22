@@ -1,6 +1,6 @@
 # SafetyTraining — handoff LATEST
 
-Ultimo aggiornamento: 2026-10-21
+Ultimo aggiornamento: 2026-10-22
 Stato: **v24.5 eliminazione multipla immagini PDF importate / 65 corsi** · sanzioni contestuali e stampa per percorso pubblicati · admin v21 preservato · PWA `safety-training-v22-78`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
@@ -862,3 +862,14 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - Segnalazione Admin: «Salvataggio negato: Corso o identificativo slide non valido». Causa riprodotta sui corsi pubblicati: adattatore DB produce `course-module::unit:stable:key::1-explain-1`, ma la RPC v33 rifiutava `:` in `p_slide_uid`. Su 65 corsi attivi molti stable_key unità contengono `:` e sono corretti.
 - Migrazione `supabase/migrations/20261021232000_v34_slide_uid_colons.sql` applicata: regex UID `^[A-Za-z0-9_:-]+$`, preservati prefisso del corso, 240 caratteri, singolo account Admin in allowlist, corso pubblicato non frozen, revisione doppia per PDF e asset locali autorizzati. SQL verificato `accepts_colons=true`; ancora 0 scelte salvate prima della prova reale.
 - Test regressione nuovo per verificare identificativi reali e vincoli, guida aggiornata. Correzione server-side immediata, nessuna mutazione alle Learning Unit e ai corsi congelati.
+
+
+## 2026-10-22 — v24.6 Panoramica, Controllo e Report operativi
+- **Panoramica:** eliminata la collisione tra `admin.js` e `admin-backend-v21.js` che poteva sostituire la dashboard completa con un markup ridotto e rimuovere `#adminDashboardAnalytics`. Il backend ora aggiorna solo i contatori della struttura posseduta da `admin.js`; se la struttura non è pronta non la sovrascrive.
+- **Grafici e KPI:** `admin-analytics-v40.js` resta l’unica sorgente della parte analitica e marca il pannello dopo il caricamento. Sono visibili iscrizioni attive, completati/superati, avanzamento medio, esiti test, inattivi oltre 30 giorni, distribuzione stati, andamento iscrizioni e corsi più frequentati.
+- **Controllo operativo:** la voce Registro attività ora apre una vera area di controllo con KPI per corsisti da avviare, inattivi/da verificare, esiti non superati, completati/superati, priorità operative e gli ultimi 200 eventi di apprendimento.
+- **Report formazione:** mantenuti filtri per corso/corsista/ricerca, esportazione CSV, stampa, analisi stati e dettaglio corsista. La precedente “Scheda di svolgimento interna” è resa più esplicita come **Attestazione interna di svolgimento**, con avviso permanente che NON è un attestato ufficiale né una certificazione di frequenza/idoneità.
+- **Permessi:** nessun allargamento. Dashboard/report restano visibili solo secondo le capability admin esistenti `manage_enrollments` / `manage_learners`.
+- **Regressioni:** aggiunto test che vieta a `admin-backend-v21.js` di riassegnare `host.innerHTML=dashboardMarkup(summary)`; testati il collegamento `adminControlAnalytics` e `renderControlSummary`. Rimossi dai test i vecchi numeri cache hardcoded; ora validano il formato della cache corrente.
+- **CI:** `package.json` include ora anche `node --check apps/training/admin-backend-v21.js`.
+- Nessuna modifica ai corsi frozen, Learning Unit, presenze, attestati ufficiali, RLS o contenuti didattici.
