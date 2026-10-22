@@ -2,7 +2,7 @@
 (()=>{'use strict';
 const db=()=>window.SAFETY_CLOUD?.state?.client,actor=()=>window.SAFETY_CLOUD?.state?.user?.id;
 const cap=k=>{const c=window.SAFETY_ADMIN_CAPABILITIES_STATE;return !!(c?.platform_admin||c?.capabilities?.[k]);};
-const allowed=()=>!!actor()&&(cap('manage_enrollments')||cap('manage_learners')||cap('manage_evidence'));
+const allowed=()=>!!actor()&&(cap('manage_enrollments')||cap('manage_learners'));
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const attr=esc, fmt=n=>new Intl.NumberFormat('it-IT').format(Number(n)||0);
 const date=v=>v?new Date(v).toLocaleDateString('it-IT'):'—';
@@ -145,7 +145,7 @@ function printSheet(title,html){
  const win=window.open('','_blank');if(!win){alert('Abilita le finestre di stampa nel browser.');return;}
  const stylesheet='<style>body{font:14px Arial,sans-serif;color:#1b2937;margin:30px}h1{font-size:23px}h2{font-size:17px;border-bottom:1px solid #ccc;padding-bottom:8px}table{border-collapse:collapse;width:100%;font-size:11px}td,th{padding:7px;border:1px solid #cbd1da;text-align:left}small,.note{color:#566370}button{display:none}@page{size:A4;margin:17mm}</style>';
  win.document.open();win.document.write('<!doctype html><html lang="it"><head><meta charset="utf-8"><title>'+esc(title)+'</title>'+stylesheet+'</head><body><h1>'+esc(title)+'</h1><p>SafetyTraining · Elaborato il '+esc(new Date().toLocaleString('it-IT'))+'</p>'+html+
- '<p class="note">DOCUMENTO INTERNO DI ANALISI. Non costituisce attestato ufficiale né certificazione di frequenza, apprendimento o idoneità.</p></body></html>');win.document.close();win.focus();win.print();
+ '<p class="note">DOCUMENTO INTERNO DI ANALISI. Non costituisce attestato ufficiale né certificazione di frequenza, apprendimento o idoneità.</p></body></html>');win.document.close();win.focus();setTimeout(()=>{if(!win.closed)win.print();},200);
 }
 function printOverview(rows){
  const cols=['Corsista','Corso','Stato','Avanzamento','Tempo attivo','Punteggio test'];
