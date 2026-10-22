@@ -428,3 +428,5 @@ L'utente ha chiesto un invio più semplice delle iscrizioni e una correzione rap
 - Vercel per `b84f1a2`: READY. Verifica sintattica JS riuscita; collaudo autenticato end-to-end e test CI completi non ancora certificati.
 
 **Non confondere:** iscrizione a un'edizione, invito all'account, collegamento dell'account Auth, disattivazione del profilo e cancellazione definitiva sono operazioni diverse. La disattivazione del profilo non è eliminazione dell'account Auth. Non rimuovere presenze, attestati o prove di apprendimento per correggere un errore anagrafico. Un futuro link condiviso di preiscrizione con approvazione amministrativa richiede un flusso nuovo di verifica identità e antiabuso; non è ancora implementato.
+
+- Hardening successivo: ricerca che nasconde effettivamente le righe, «Seleziona tutti» limitato ai corsisti visibili, conferma esplicita del numero di destinatari e dell'edizione prima dell'iscrizione/invio (`9b7f05a`).
