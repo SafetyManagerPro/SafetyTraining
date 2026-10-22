@@ -41,9 +41,12 @@ test('help stays nonmodal and wizard retains its own contextual question mark',(
 
 test('v22.3.3 deletion procedure is visible in every required admin list',()=>{
   const source=read('apps/training/admin.js');
-  for(const type of ['company','learner','edition','enrollment']){
+  for(const type of ['company','edition','enrollment']){
     assert.match(source,new RegExp("btn\\('Elimina…','review-delete-"+type+"'"));
   }
+  // Learners now have a separate audited hard-delete path and safe archival.
+  assert.match(source,/btn\\('Elimina definitivamente…','quick-delete-learner-v38'/);
+  assert.match(source,/btn\\('Rimuovi corsista','archive-learner-v36'/);
   assert.match(source,/a\.startsWith\('review-delete-'\)/);
   assert.match(source,/async function reviewDeletion\(kind,id\)/);
   assert.match(source,/SAFETY_ADMIN_DELETE_PLANNER_V22/);
