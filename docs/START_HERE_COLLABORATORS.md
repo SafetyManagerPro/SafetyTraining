@@ -468,3 +468,5 @@ L'utente ha chiesto un invio più semplice delle iscrizioni e una correzione rap
 - PWA: aggiornati `index.html`, `sw.js` (cache v40), `package.json`. Test nuovi `tests/admin-analytics-v40.test.mjs` inclusi in `npm run check`.
 - Verificato in console JavaScript: sintassi, dashboard sintetica 50% su dati di test, escaping HTML di «Corsi <test>», mitigazione CSV formula (=1+1), nota sulle frequenze non certificate. Verificare ancora con account amministratore reale l'uso in app, i permessi multi-tenant e l'apertura della stampa.
 - Commit principali: `2c6f70d`, `86f1c64`, `29aa189`, `8db74b5`, `72721ff`, `cd1bd74`, `3d85dab`, `9c568c2`, `86894bc`.
+
+- Rifiniture v40, 22/10/2026: accesso al centro report limitato a `manage_enrollments` o `manage_learners` (oltre al platform admin tramite capability); la sola `manage_evidence` non basta. Stampa da finestra separata attivata dopo caricamento HTML. Etichette menu rese esplicite: «Dashboard e grafici», «Registro attività»; `Report formazione` è una voce distinta nel gruppo Controllo e report. Commit `8e50f2c`, `024a16f`.
