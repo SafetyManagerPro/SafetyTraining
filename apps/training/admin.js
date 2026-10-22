@@ -336,7 +336,7 @@
   }
 
   async function activity(seq) {
-    setHeader('Attività', 'Ultimi eventi registrati dalla piattaforma');
+    setHeader('Controllo operativo', 'Priorità corsisti, risultati, attività e audit amministrativo');
     const [{data:events,error},{data:en},{data:l},{data:ed},{data:v},{data:c}] = await Promise.all([
       db().from('learning_events').select('event_type,occurred_at,active_delta_seconds,enrollment_id').order('occurred_at',{ascending:false}).limit(200),
       db().from('enrollments').select('id,learner_id,edition_id'), db().from('learners').select('id,first_name,last_name,email'),
@@ -345,7 +345,13 @@
     if(error) throw error;
     const enm=new Map((en||[]).map(x=>[x.id,x])), lm=new Map((l||[]).map(x=>[x.id,x])), edm=new Map((ed||[]).map(x=>[x.id,x])), vm=new Map((v||[]).map(x=>[x.id,x])), cm=new Map((c||[]).map(x=>[x.id,x.title])), q=state.filters.activity||'';
     const rows=(events||[]).filter(x=>match(q,x.event_type)).map(x=>{const enrollment=enm.get(x.enrollment_id),learner=lm.get(enrollment?.learner_id),edition=edm.get(enrollment?.edition_id),ver=vm.get(edition?.course_version_id);return [fmtDateTime(x.occurred_at),esc(x.event_type),esc(`${learner?.first_name||''} ${learner?.last_name||''}`.trim()||learner?.email||'—'),esc(edition?.title||cm.get(ver?.course_id)||'—'),`${x.active_delta_seconds||0}s`];});
-    current(seq, `<section class="admin-card"><div class="admin-card-head"><div><h2>Eventi recenti</h2><p>Ultimi 200 eventi di apprendimento disponibili.</p></div></div>${searchBox('activity','Tipo evento…')}${table(['Quando','Evento','Corsista','Percorso','Tempo accreditato'],rows)}</section>`);
+    current(seq, `
+      <section class="admin-card">
+        <div class="admin-card-head"><div><h2>Controllo corsisti e percorsi</h2><p>Priorità operative ricavate da iscrizioni, avanzamento, attività ed esiti disponibili.</p></div><button type="button" data-action="open-reports-v40">Report dettagliati →</button></div>
+        <div id="adminControlAnalytics" aria-live="polite">Caricamento controlli…</div>
+      </section>
+      <section class="admin-card"><div class="admin-card-head"><div><h2>Eventi recenti</h2><p>Ultimi 200 eventi di apprendimento disponibili.</p></div></div>${searchBox('activity','Tipo evento…')}${table(['Quando','Evento','Corsista','Percorso','Tempo accreditato'],rows)}</section>`);
+    if(seq===state.renderSeq)void window.SAFETY_ADMIN_ANALYTICS_V40?.renderControlSummary?.({targetId:'adminControlAnalytics'});
   }
 
   async function wizard(seq){
