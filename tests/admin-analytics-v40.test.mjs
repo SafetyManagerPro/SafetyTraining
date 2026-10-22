@@ -17,7 +17,7 @@ test('analytics dashboard shows real ratios and escapes untrusted text',()=>{
  assert.match(html,/Corsi &lt;test&gt;/);
  assert.doesNotMatch(html,/Corsi <test>/);
  assert.match(html,/Non avviati/);
- assert.match(html,/Esiti test registrati/);
+ assert.match(html,/Con test registrato/);
  assert.match(html,/non equivalgono automaticamente/);
 });
 
@@ -31,7 +31,7 @@ test('CSV export text cells are escaped against spreadsheet formula injection',(
 test('report code retains learner/course filters, evidence lookup and no official certificate promise',()=>{
  const s=read('apps/training/admin-analytics-v40.js');
  for(const token of ['adminReportsV40Nav','a40Course','a40Learner','test_attempts','learning_sessions','learning_progress',
-    'Esporta CSV','Stampa report','Scheda di svolgimento interna','Non costituisce attestato ufficiale',
+    'Esporta CSV','Stampa report','Schede svolgimento','Non costituisce attestato ufficiale',
     'manage_enrollments','adminDashboardAnalytics','renderControlSummary','Priorità operative','Attestazione interna di svolgimento'])assert.ok(s.includes(token),token);
  assert.match(s,/new Blob/);
  assert.match(s,/truncated/);
