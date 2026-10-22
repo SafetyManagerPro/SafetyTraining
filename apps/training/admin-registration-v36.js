@@ -6,7 +6,7 @@
  const shell=()=>document.getElementById('adminShell');
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
  const state={editionId:'',seq:0,busy:false,qrLoading:null};
- const registrationUrl=token=>{const url=new URL(location.origin+location.pathname);url.searchParams.set('registration',token);return url.toString();};
+ const registrationUrl=token=>{const url=new URL('https://safety-training-safety-manager.vercel.app/');url.searchParams.set('registration',token);return url.toString();};
  const explain=e=>{const msg=e?.message||String(e);alert('Operazione non riuscita: '+msg);};
  const rpc=async(name,params)=>{const {data,error}=await client().rpc(name,params);if(error)throw error;return data;};
  function styles(){
@@ -105,6 +105,7 @@
     '<div class="ar36-actions"><button class="ar36-primary" id="ar36Create">'+(live?'Rigenera link':'Crea link e QR')+'</button>'+
     '<button id="ar36Refresh">Aggiorna richieste</button></div></section>'+
     requestRows(Array.isArray(requests)?requests:[]);
+   if(live)void showQr(url).catch(()=>{const area=root.querySelector('#ar36Qr');if(area)area.textContent='QR temporaneamente non disponibile: utilizza il link.';});
    root.querySelector('#ar36Edition').onchange=e=>{state.editionId=e.target.value;void render();};
    root.querySelector('#ar36Create').onclick=()=>void operate(async()=>{
     if(live&&!confirm('Rigenerare il link? Il vecchio link e relativo QR smetteranno di funzionare.'))return;
