@@ -456,3 +456,15 @@ L'utente ha chiesto un invio più semplice delle iscrizioni e una correzione rap
 - Regression test: tests/admin-menu-permissions-v39.test.mjs; aggiunto a npm run check. Verifica sintattica dei moduli eseguita. Non dichiarare collaudo interattivo completo finché non eseguito su account admin, training manager e mobile.
 - Commit: 3160aaf, 95df86b, e964b66, 03db1c5, 554c2b3, dfd5d9a, eebf8b1, 41acfaa.
 - **Obiettivo successivo**: collaudare visualmente apertura/chiusura gruppi, ritorno da sezione plugin a nav tradizionale, permessi per ruolo scoped e rimozione/ripristino corsista di prova. Conservare tutte le vecchie route e i controlli di audit.
+
+## 22/10/2026 — v40 Panoramica e Controllo e report
+
+- Segnalazione utente: i gruppi «Panoramica» e «Controllo e report» apparivano privi di funzioni utili. Introdotti grafici e report reali basati sui dati già disponibili con RLS.
+- `apps/training/admin-analytics-v40.js`: pannello dashboard aggiunto a `admin.js` (indicatori iscrizioni attive, completati/superati, progresso medio, esiti test, inattività >30 giorni; grafici per stati, sei mesi e corsi più frequentati). Non presenta valori di esempio: usa i record visibili all'account autenticato.
+- Nuova voce `Report formazione` in `Controllo e report`: filtri corso, corsista, ricerca e inclusione revocati; indicatori, istogrammi, tabella dei percorsi, esportazione CSV con protezione formula injection, stampa riepilogo. Dettaglio corsista/iscrizione con sessioni, unità completate visibili, test e migliore esito, stampa della **scheda interna di svolgimento**.
+- Importante: la scheda interna **NON costituisce attestato ufficiale** e non certifica ore di frequenza, idoneità o requisiti normativi. La frequenza validata e l'emissione di attestati formali richiedono una procedura ulteriore e verifica delle evidenze da parte dell'organizzatore.
+- I dati di dashboard e report usano client Supabase autenticato, capability checks UI e RLS, non vi sono nuove tabelle, query pubbliche o RPC admin esposte. Query paginate con limiti espliciti e avviso sui risultati parziali quando superati; dettaglio evidenze limitato a 250 tentativi/sessioni e 400 Learning Unit.
+- Sidebar `admin-menu-v39.js`: aggiunto `#adminReportsV40Nav` al gruppo Controllo e report, gruppo aperto inizialmente. In Panoramica rimane Dashboard (ora con analisi) e scorciatoia «Apri report dettagliati».
+- PWA: aggiornati `index.html`, `sw.js` (cache v40), `package.json`. Test nuovi `tests/admin-analytics-v40.test.mjs` inclusi in `npm run check`.
+- Verificato in console JavaScript: sintassi, dashboard sintetica 50% su dati di test, escaping HTML di «Corsi <test>», mitigazione CSV formula (=1+1), nota sulle frequenze non certificate. Verificare ancora con account amministratore reale l'uso in app, i permessi multi-tenant e l'apertura della stampa.
+- Commit principali: `2c6f70d`, `86f1c64`, `29aa189`, `8db74b5`, `72721ff`, `cd1bd74`, `3d85dab`, `9c568c2`, `86894bc`.
