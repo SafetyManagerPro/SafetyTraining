@@ -228,7 +228,7 @@
     const q = state.filters.learners || '', rows = (l||[]).filter(x => (state.showArchivedLearners||x.active)&&match(q,x.first_name,x.last_name,x.email,x.fiscal_code,x.job_title,cm.get(x.company_id)));
     const archivedCount=(l||[]).filter(x=>!x.active).length;
     const missing = (l||[]).filter(x=>x.active&&!x.email).length;
-    current(seq, `${missing?`<div class="admin-warning">${missing} corsist${missing===1?'a attivo non ha':'i attivi non hanno'} un indirizzo email e non può ricevere l’invito di accesso.</div>`:''}<section class="admin-card"><div class="admin-card-head"><div><h2>Corsisti</h2><p>Rimuovi subito i corsisti errati dall’elenco attivo, senza perdere lo storico.</p></div><button type="button" data-action="toggle-archived-learners">${state.showArchivedLearners?'Nascondi':'Mostra'} rimossi (${archivedCount})</button><button class="admin-primary" data-action="new-learner">+ Nuovo corsista</button></div>${searchBox('learners','Nome, email, CF, azienda, mansione…')}${table(['Corsista','Email','Azienda',...(state.multiOrg?['Organizzazione']:[]),'Mansione','Accesso','Stato','Azioni'], rows.map(x => { const inv=im.get(x.id), [s,k]=inviteState(x,inv); return [esc(`${x.first_name||''} ${x.last_name||''}`.trim()||'—'),esc(x.email||'—'),esc(cm.get(x.company_id)||'—'),...(state.multiOrg?[esc(om.get(x.organization_id)||'—')]:[]),esc(x.job_title||'—'),`${badge(s,k)}${inv?.last_sent_at?`<small class="admin-cell-note">${fmtDateTime(inv.last_sent_at)}</small>`:''}`,badge(x.active?'Attivo':'Disattivo',x.active?'ok':'muted'),`${btn('Modifica','edit-learner',x.id)} ${x.email&&!x.auth_user_id?btn(inv?'Reinvia':'Invita','invite-learner',x.id):''} ${x.active?btn('Rimuovi corsista','archive-learner-v36',x.id,'danger'):btn('Ripristina','restore-learner-v37',x.id)} ${btn('Elimina definitivamente…','review-delete-learner',x.id,'danger')}`]; }))}</section>`);
+    current(seq, `${missing?`<div class="admin-warning">${missing} corsist${missing===1?'a attivo non ha':'i attivi non hanno'} un indirizzo email e non può ricevere l’invito di accesso.</div>`:''}<section class="admin-card"><div class="admin-card-head"><div><h2>Corsisti</h2><p>Rimuovi subito i corsisti errati dall’elenco attivo, senza perdere lo storico.</p></div><button type="button" data-action="toggle-archived-learners">${state.showArchivedLearners?'Nascondi':'Mostra'} rimossi (${archivedCount})</button><button class="admin-primary" data-action="new-learner">+ Nuovo corsista</button></div>${searchBox('learners','Nome, email, CF, azienda, mansione…')}${table(['Corsista','Email','Azienda',...(state.multiOrg?['Organizzazione']:[]),'Mansione','Accesso','Stato','Azioni'], rows.map(x => { const inv=im.get(x.id), [s,k]=inviteState(x,inv); return [esc(`${x.first_name||''} ${x.last_name||''}`.trim()||'—'),esc(x.email||'—'),esc(cm.get(x.company_id)||'—'),...(state.multiOrg?[esc(om.get(x.organization_id)||'—')]:[]),esc(x.job_title||'—'),`${badge(s,k)}${inv?.last_sent_at?`<small class="admin-cell-note">${fmtDateTime(inv.last_sent_at)}</small>`:''}`,badge(x.active?'Attivo':'Disattivo',x.active?'ok':'muted'),`${btn('Modifica','edit-learner',x.id)} ${x.email&&!x.auth_user_id?btn(inv?'Reinvia':'Invita','invite-learner',x.id):''} ${x.active?btn('Rimuovi corsista','archive-learner-v36',x.id,'danger'):btn('Ripristina','restore-learner-v37',x.id)} ${btn('Elimina definitivamente…','quick-delete-learner-v38',x.id,'danger')}`]; }))}</section>`);
     void renderLearnerProgress(seq,q);
   }
 
@@ -488,6 +488,21 @@
         if(!confirm('Ripristinare questo corsista nell’elenco attivo? Se l’account originario è ancora disponibile verrà ricollegato.'))return;
         const {data,error}=await db().rpc('admin_restore_learner_v37',{p_learner_id:id});if(error)throw error;
         toast(data?.auth_link_restored?'Corsista e account ripristinati.':'Corsista ripristinato; verifica il collegamento dell’account in Accessi & import.','success');return render();
+      }
+      if(a==='quick-delete-learner-v38'){
+        const typed=window.prompt('Eliminazione definitiva: consentita in modo rapido solo ai corsisti senza account collegato o attività formative. Digita ELIMINA per confermare.');
+        if(typed!=='ELIMINA')return;
+        const {data,error}=await db().rpc('admin_delete_unused_learner_v38',{p_learner_id:id,p_confirmation:typed});
+        if(error){
+          const message=String(error.message||'');
+          if(/_protected|manual_review|linked_account/i.test(message)){
+            if(window.confirm('Sono presenti un account collegato, attività o dati da conservare. Vuoi aprire la procedura approfondita con verifica delle dipendenze?'))return reviewDeletion('learner',id);
+            return;
+          }
+          throw error;
+        }
+        if(data?.deleted!==true)throw Error('Il server non ha confermato la cancellazione.');
+        toast('Corsista eliminato definitivamente.','success');return render();
       }
       if(a==='archive-learner-v36'){
         if(!confirm('Rimuovere questo corsista dalla gestione attiva? Non potrà proseguire i corsi. Iscrizioni, presenze, test, attestati e storico saranno conservati. Potrai ripristinarlo dalla sezione «Mostra rimossi».'))return;
