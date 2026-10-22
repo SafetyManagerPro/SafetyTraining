@@ -13,7 +13,7 @@
   const match = (q, ...values) => !q || values.some(v => String(v ?? '').toLocaleLowerCase('it').includes(q.toLocaleLowerCase('it')));
 
   const TABS = [
-    ['dashboard','▦','Dashboard e grafici'],
+    ['dashboard','▦','Panoramica e grafici'],
     ['wizard','✨','Avvia percorso'],
     ['organizations','🏢','Organizzazioni'],
     ['companies','🏭','Aziende'],
@@ -21,7 +21,7 @@
     ['courses','📚','Corsi'],
     ['editions','🗂','Edizioni'],
     ['enrollments','✅','Iscrizioni'],
-    ['activity','📈','Registro attività']
+    ['activity','📈','Controllo operativo']
   ];
   const LABEL = {
     draft:'Bozza', published:'Pubblicata', retired:'Ritirata',
@@ -177,7 +177,7 @@
   }
 
   async function dashboard(seq) {
-    setHeader('Dashboard', 'Panoramica immediata di corsi, persone e attività');
+    setHeader('Panoramica', 'Indicatori, grafici e stato generale di corsi, persone e attività');
     const [companies,learners,courses,editions,enrollments,openEditions,inProgress,pendingInvites] = await Promise.all([
       count('companies', q => q.eq('active',true)), count('learners', q => q.eq('active',true)), count('courses', q => q.eq('active',true)),
       count('course_editions'), count('enrollments'), count('course_editions', q => q.eq('status','open')),
