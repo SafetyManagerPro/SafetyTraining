@@ -1,0 +1,36 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const file=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('the bulk review workspace is actually mounted, with persistent page selection and visible styling',()=>{
+ const html=file('apps/training/index.html');
+ const lib=file('apps/training/admin-image-library-v25.js');
+ const bulk=file('apps/training/admin-image-bulk-review-v43.js');
+ const css=file('apps/training/admin-image-bulk-review-v43.css');
+ const sw=file('apps/training/sw.js');
+ assert.match(html,/admin-image-bulk-review-v43\\.js/);
+ assert.match(html,/admin-image-bulk-review-v43\\.css/);
+ assert.ok(html.indexOf('admin-image-bulk-review-v43.js')<html.indexOf('admin-image-library-v25.js'));
+ assert.match(lib,/id="stBulkReviewWorkspace"/);
+ assert.match(lib,/SAFETY_BULK_REVIEW_V43\\?\\.mount\\?\\./);
+ assert.match(lib,/SAFETY_BULK_REVIEW_V43\\?\\.decorate\\?\\./);
+ assert.match(lib,/decorate\\?\\.\\(gallery,items,type\\)/);
+ assert.match(bulk,/new Map\\(\\)/);
+ assert.match(bulk,/selected\\.size>=100/);
+ assert.match(bulk,/p_confirm_visual_review:true/);
+ assert.match(bulk,/p_confirm_rights_review:rights==='cleared_internal'/);
+ assert.match(css,/#stBulkReviewWorkspace\\[hidden\\]/);
+ assert.match(css,/st-bulk-tile-check/);
+ assert.match(sw,/admin-image-bulk-review-v43\\.js/);
+ assert.match(sw,/admin-image-bulk-review-v43\\.css/);
+});
+test('server enforces technical review, source-scoped rights and writes audit only through reviewed RPC',()=>{
+ const sql=file('supabase/migrations/20261022232000_v43_bulk_pdf_reviews.sql');
+ for(const key of ['private.is_platform_admin()','auth.uid() is null','p_confirm_visual_review','p_confirm_rights_review',"p_rights_status='cleared_internal'",'v_source_count<>1','training_review_integral_pdf_v25','v_skipped:=v_skipped+1','cardinality(p_ref_ids)>100','revoke all on function'])assert.ok(sql.includes(key),key);
+ assert.doesNotMatch(sql,/\\bupdate\\s+public\\.learning_units|\\bdelete\\s+from\\s+public\\.training_integral_pdf_assets/i);
+ const client=file('apps/training/admin-image-bulk-review-v43.js');
+ assert.match(client,/confirm\\(question\\)/);
+ assert.match(client,/rights_verified/);
+ assert.match(client,/rights_evidence/);
+ assert.match(client,/&&!!actor\\(\\)/);
+});

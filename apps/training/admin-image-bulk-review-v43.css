@@ -1,0 +1,27 @@
+/* v43 — admin-only private PDF figure bulk review. Never display on learner pages. */
+#stBulkReviewWorkspace[hidden]{display:none!important}
+#stBulkReviewWorkspace{margin:16px 0 20px}
+.st-bulk-shell{border:1px solid #bed4df;border-radius:14px;padding:18px;background:#f2f9fc;color:#213d53}
+.st-bulk-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:start}
+.st-bulk-head h3{margin:0 0 6px;font-size:18px;color:#123f5a}
+.st-bulk-head p{margin:0 0 8px;font-size:13px;max-width:660px;line-height:1.5}
+.st-bulk-buttons,.st-bulk-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.st-bulk-shell button{border:1px solid #58798c;border-radius:8px;padding:9px 12px;font-weight:750;cursor:pointer;background:white;color:#204b63}
+.st-bulk-shell button[type=submit]{color:white;background:#17634f;border-color:#17634f}
+.st-bulk-shell button:disabled{opacity:.5;cursor:not-allowed}
+#stBulkSummary{font-weight:750;margin:13px 0 7px}
+#stBulkSelectedList{font-size:11px;line-height:1.6;color:#516d7e;overflow-wrap:anywhere}
+.st-bulk-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px;margin:12px 0}
+.st-bulk-inputs label{font-size:12px;font-weight:750;display:flex;flex-direction:column;gap:6px}
+.st-bulk-inputs select,.st-bulk-inputs textarea{width:100%;max-width:100%;box-sizing:border-box;padding:10px;border:1px solid #95b0c1;border-radius:8px;color:#203b51;background:#fff;font:inherit}
+.st-bulk-inputs textarea{min-height:100px;resize:vertical}
+.st-bulk-confirm{display:flex;align-items:flex-start;gap:9px;line-height:1.4;font-size:12px;margin:12px 0;cursor:pointer}
+.st-bulk-confirm input{accent-color:#17634f;flex:none;margin-top:3px}
+.st-bulk-foot{margin:14px 0 8px}
+.st-bulk-foot span{font-size:11px;max-width:430px;color:#526879}
+#stBulkMessage{font-size:12px;line-height:1.5;font-weight:700;overflow-wrap:anywhere}
+.st-bulk-error{font-size:12px;color:#a52f37}
+.st-bulk-tile-check{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:750;cursor:pointer;padding:8px;background:#ecf7fa;border:1px solid #c5dfe7;border-radius:8px}
+.st-bulk-tile-check input{width:17px;height:17px;flex:none;accent-color:#17725d}
+.st-bulk-tile-check:has(input:disabled){opacity:.6;cursor:default}
+@media(max-width:640px){.st-bulk-shell{padding:12px}.st-bulk-buttons{width:100%}.st-bulk-buttons button{flex:1}.st-bulk-inputs{grid-template-columns:1fr}}

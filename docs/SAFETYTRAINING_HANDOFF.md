@@ -871,3 +871,9 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - **Regressioni:** aggiunto test che vieta a `admin-backend-v21.js` di riassegnare `host.innerHTML=dashboardMarkup(summary)`; testati il collegamento `adminControlAnalytics` e `renderControlSummary`. Rimossi dai test i vecchi numeri cache hardcoded; ora validano il formato della cache corrente.
 - **CI:** `package.json` include ora anche `node --check apps/training/admin-backend-v21.js`.
 - Nessuna modifica ai corsi frozen, Learning Unit, presenze, attestati ufficiali, RLS o contenuti didattici.
+
+## 2026-10-22 — v43.1 collegamento operativo approvazione multipla
+- Il precedente commit v43 conteneva RPC admin-only `training_bulk_review_integral_pdf_v43` e modulo JS ma **non ne caricava lo script né montava il pannello nella Gestione immagini**: funzionalità predisposta ma non raggiungibile dall'interfaccia. Collegati ora modulo JS, CSS e pannello di controllo `stBulkReviewWorkspace`.
+- In **Amministrazione → Gestione immagini → Tavole PDF complete importate** appaiono caselle selezione, selezione pagina e selezione conservata passando pagina e filtri (max 100). Il pannello propone separatamente verifica tecnica o verifica tecnica + diritti interni, con motivazioni, spunte distinte e conferma finale. Non vengono prese decisioni tecniche o sui diritti automaticamente.
+- La validazione determinante resta nella RPC v43 con controllo `private.is_platform_admin()`, divieto di rivedere giudizi già finali, fonte unica per approvazione dei diritti e audit esistente v25. Niente pubblicazione automatica nelle slide o ai corsisti.
+- Caricati assets in `index.html` e PWA `safety-training-v43-bulk-review`; regressione nuova `tests/admin-image-bulk-review-v43.test.mjs` inclusa in `npm run check`. Nessuna mutazione dati/schema, corsi frozen invariati, `company_admin` ancora disabilitato. QA browser autenticato da eseguire separatamente.

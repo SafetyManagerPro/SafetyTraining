@@ -234,6 +234,7 @@ async function paint(){
   }
   if(!active(seq,userId))return;
   gallery.innerHTML=items.map(x=>tile(x,type)).join('')||'<p>Nessuna immagine per questo filtro.</p>';
+  window.SAFETY_BULK_REVIEW_V43?.decorate?.(gallery,items,type);
   if(type==='integral')void window.SAFETY_ADMIN_IMAGE_PLACEMENT_V25?.renderFor?.(gallery,items);
   void window.SAFETY_IMAGE_SUGGESTIONS_V26?.decorate?.(gallery,items,type);
   const pages=Math.max(1,Math.ceil(total/pageSize));
@@ -266,13 +267,14 @@ async function render(){
    '<label>Corso <select id="stImageCourse"><option value="">Tutti i corsi</option></select></label>'+
    '<label>Modulo <select id="stImageModule"><option value="">Tutti i moduli</option></select></label>'+
    '<label>Cerca per tema <input type="search" id="stImageSearch" placeholder="Es. carrelli, DPI, portata"></label></div><p class="st-image-filter-hint" id="stImageFilterHint"></p>'+
-   '<div class="st-image-grid" id="stImageGallery"></div><div class="st-image-pagination"><button type="button" data-st-image-prev>← Precedenti</button><span id="stImagePagination" role="status"></span><button type="button" data-st-image-next>Successive →</button></div></section>';
+   '<div id="stBulkReviewWorkspace" hidden></div><div class="st-image-grid" id="stImageGallery"></div><div class="st-image-pagination"><button type="button" data-st-image-prev>← Precedenti</button><span id="stImagePagination" role="status"></span><button type="button" data-st-image-next>Successive →</button></div></section>';
   host().querySelector('#stImageType').value=state.type;
   host().querySelector('#stImageSearch').value=state.query;
   host().querySelector('#stImageStatus').value=state.status;
   syncFilterControls();
   void fillCourseOptions().catch(error=>{const hint=host()?.querySelector('#stImageFilterHint');if(hint)hint.textContent='Elenco corsi non disponibile: '+(error?.message||error);});
   const content=host();
+  window.SAFETY_BULK_REVIEW_V43?.mount?.(content.querySelector('#stBulkReviewWorkspace'),paint);
   content.querySelector('#stImageGallery').addEventListener('submit',e=>void saveReview(e));
   content.querySelector('#stImageType').onchange=e=>{state.type=e.target.value;state.page=0;syncFilterControls();void paint();};
   content.querySelector('#stImageStatus').onchange=e=>{state.status=e.target.value;state.page=0;void paint();};
