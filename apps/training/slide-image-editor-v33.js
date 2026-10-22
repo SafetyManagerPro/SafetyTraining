@@ -230,7 +230,7 @@ async function open(c,slide,index){
    await refreshProjected(c,index);
    document.dispatchEvent(new Event('safety:slide-image-edited'));
   }catch(err){if(stillHere())flash('Salvataggio non riuscito: '+(err.message||err));}
-  finally{if(stillHere()){dialog.dataset.saving='0';dialog.querySelectorAll('button,input,select').forEach(el=>el.disabled=false);}}
+  finally{if(stillHere()){dialog.dataset.saving='0';dialog.querySelectorAll('button,input,select').forEach(el=>el.disabled=false);draw();}}
  };
  dialog.addEventListener('input',e=>{
   const field=e.target.closest('[data-caption]');if(!field)return;
