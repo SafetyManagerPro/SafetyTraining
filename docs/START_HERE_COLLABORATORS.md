@@ -415,3 +415,16 @@ Il valore principale del lavoro didattico non è la quantità di slide, ma la qu
 - Nell'editor delle immagini è stato impedito di aggiungere la stessa figura due volte alla stessa slide (confronto per percorso locale o ID PDF).
 - Durante il salvataggio i comandi dell'editor sono temporaneamente disabilitati e un secondo salvataggio concorrente viene ignorato; i comandi vengono riabilitati anche in caso di errore.
 - Commit applicativo `728e76c`; test manuali della galleria e della stampa restano da completare. Non rappresentare il codice verificato come collaudo completo dell'app.
+
+## Aggiornamento 22/10/2026 — iscrizioni e disattivazioni rapide
+
+L'utente ha chiesto un invio più semplice delle iscrizioni e una correzione rapida dei corsisti attivati per errore. Implementata una prima semplificazione **senza nuove API pubbliche, cancellazioni fisiche o modifiche al modello RLS**.
+
+- In `Accessi & import`: ricerca corsisti per nome/email, pulsante principale «Iscrivi e invia email», selezione multipla, modalità avanzate sotto pannello dedicato. Gli inviti già inviati e non scaduti non vengono rigenerati automaticamente nel flusso combinato; reinvio esplicito resta disponibile. Protezione dai doppi clic/salvataggi concorrenti.
+- In `Iscrizioni`: «Annulla iscrizione errata» per record senza attività, «Revoca accesso» per altre iscrizioni; entrambe le operazioni utilizzano `admin_set_enrollment_revoked`, conservano evidenze e audit. Iscrizioni revocate nascoste per impostazione predefinita; «Mostra revocate» consente «Riattiva».
+- In `Corsisti`: pulsante «Disattiva accesso» ben distinto da «Annulla iscrizione», con conferma che avvisa dell'impatto su *tutti* i corsi. Usa `admin_set_active`; non rimuove account Auth né storico.
+- File: `apps/training/admin-access-import-v21.js`, `apps/training/admin.js`, `apps/training/admin-backend-v21.js`; regressioni statiche `tests/admin-quick-access-v35.test.mjs`, aggiunte a `npm run check`.
+- Commit sequenza: `0c55d49`, `0db83ea`, `de4b1f3`, `b0cb02d`, `b84f1a2`.
+- Vercel per `b84f1a2`: READY. Verifica sintattica JS riuscita; collaudo autenticato end-to-end e test CI completi non ancora certificati.
+
+**Non confondere:** iscrizione a un'edizione, invito all'account, collegamento dell'account Auth, disattivazione del profilo e cancellazione definitiva sono operazioni diverse. La disattivazione del profilo non è eliminazione dell'account Auth. Non rimuovere presenze, attestati o prove di apprendimento per correggere un errore anagrafico. Un futuro link condiviso di preiscrizione con approvazione amministrativa richiede un flusso nuovo di verifica identità e antiabuso; non è ancora implementato.
