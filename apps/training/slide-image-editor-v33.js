@@ -3,7 +3,7 @@
 const db=()=>window.SAFETY_CLOUD?.state?.client;
 const uid=()=>window.SAFETY_CLOUD?.state?.user?.id||null;
 let owner=false,who=null,currentKey='',rows=new Map(),loaded=false,modal=null;
-let projectedRevision=0,loadRevision=0;
+let projectedRevision=0,loadRevision=0,modalKeyAbort=null;
 const temporaryPrivateUrls=new Set();
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const isFrozen=c=>!!(c?.metadata?.freeze_scope||c?.metadata?.frozen||c?.metadata?.is_frozen||c?.metadata?.course_frozen||c?.frozen);
@@ -79,7 +79,6 @@ function matchScore(path,context){
  const name=labelFor(path).toLowerCase(),source=String(path).toLowerCase();
  const topic=[...new Set(cleanTokens(context))];
  let points=topic.reduce((score,word)=>score+(name.includes(word)?5:source.includes(word)?2:0),0);
- if(/(gp0[1-4]|gp03|gp04)/.test(source))points+=1;
  if(/general\.svg$/.test(source))points-=8;
  return points;
 }
@@ -109,7 +108,7 @@ async function open(c,slide,index){
   .filter(x=>window.SAFETY_LOCAL_VISUALS_V32?.available?.(x.src))
   .map(x=>({kind:'local',src:x.src,caption:x.caption||''}));
  if(selection.length>3)selection=selection.slice(0,3);
- modal?.remove();
+ modalKeyAbort?.abort();modal?.remove();
  const dialog=document.createElement('div');modal=dialog;
  dialog.className='slide-image-editor-backdrop';
  dialog.innerHTML='<div class="slide-image-editor slide-image-editor-v41" role="dialog" aria-modal="true" aria-labelledby="slideEditHeading">'+
@@ -156,7 +155,7 @@ async function open(c,slide,index){
    selection.push({...item});
   }else{
    // Replace the main visual and keep only distinct supporting figures.
-   selection=[{...item},...selection.filter(x=>choiceKey(x)!==choiceKey(item)).slice(1)].slice(0,3);
+   selection=[{...item},...selection.filter(x=>choiceKey(x)!==choiceKey(item)).slice(0,2)].slice(0,3);
   }
   flash('Modifica pronta: premi Salva per renderla visibile anche nella stampa PDF.');
   draw();
@@ -200,11 +199,12 @@ async function open(c,slide,index){
    (!total?'<p class="slide-edit-empty">'+(tab==='private'?'Nessuna figura PDF approvata disponibile per questa ricerca.':'Nessuna figura trovata. Seleziona “Tutte le figure” o modifica la ricerca.')+'</p>':'');
  };
  const draw=()=>{if(!stillHere())return;renderSelected();renderLibrary();};
- const close=()=>{if(modal===dialog){dialog.remove();modal=null;}};
+ const close=()=>{if(modal===dialog){modalKeyAbort?.abort();modalKeyAbort=null;dialog.remove();modal=null;}};
  dialog.querySelector('[data-close]').onclick=close;
  dialog.addEventListener('click',e=>{if(e.target===dialog)close();});
  const keyHandler=e=>{if(e.key==='Escape'&&modal===dialog){e.preventDefault();close();}};
- document.addEventListener('keydown',keyHandler,{signal:(()=>{const ctrl=new AbortController();dialog.addEventListener('DOMNodeRemoved',()=>ctrl.abort(),{once:true});return ctrl.signal;})()});
+ modalKeyAbort=new AbortController();
+ document.addEventListener('keydown',keyHandler,{signal:modalKeyAbort.signal});
  // Search and grouping do not change the selection.
  search.oninput=()=>{limit=48;renderLibrary();};
  category.onchange=()=>{limit=48;renderLibrary();};
@@ -291,6 +291,6 @@ async function applyDeck(slides,c){
  await load(c);
  return Promise.all(slides.map(s=>apply(s,c)));
 }
-window.addEventListener('safety:auth-changed',()=>{projectedRevision++;loadRevision++;who=null;owner=false;rows.clear();temporaryPrivateUrls.clear();loaded=false;currentKey='';modal?.remove();modal=null;});
+window.addEventListener('safety:auth-changed',()=>{modalKeyAbort?.abort();modalKeyAbort=null;projectedRevision++;loadRevision++;who=null;owner=false;rows.clear();temporaryPrivateUrls.clear();loaded=false;currentKey='';modal?.remove();modal=null;});
 window.SAFETY_SLIDE_IMAGE_EDITOR_V33={authenticate,visit,applyDeck,apply,canEdit:()=>owner,load,isTrustedPrivateUrl:url=>owner&&temporaryPrivateUrls.has(url)};
 })();
