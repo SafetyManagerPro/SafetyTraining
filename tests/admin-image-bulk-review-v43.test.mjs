@@ -12,6 +12,7 @@ test('the bulk review workspace is actually mounted, with persistent page select
  assert.match(html,/admin-image-bulk-review-v43\.css/);
  assert.ok(html.indexOf('admin-image-bulk-review-v43.js')<html.indexOf('admin-image-library-v25.js'));
  assert.match(lib,/id="stBulkReviewWorkspace"/);
+ assert.match(lib,/source_document:type==='integral'\?\(x.source_document\|\|''\):null/);
  assert.match(lib,/SAFETY_BULK_REVIEW_V43\?\.mount\?\./);
  assert.match(lib,/SAFETY_BULK_REVIEW_V43\?\.decorate\?\./);
  assert.match(lib,/decorate\?\.\(gallery,items,type\)/);

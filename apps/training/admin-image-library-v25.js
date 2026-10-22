@@ -191,6 +191,8 @@ async function enrichPrivateRows(type,list,total){
   category:x.category||'Senza categoria',
   src:map.get(type==='integral'?x.asset?.storage_path:x.storage_path)||'',
   detail:(x.source_document||'')+' · pagina '+(x.source_page||'—'),
+  source_document:type==='integral'?(x.source_document||''):null,
+  source_page:type==='integral'?x.source_page:null,
   status:type==='integral'
    ?(reviews.get(x.id)?.technical_status==='approved'?'Revisione tecnica confermata':reviews.get(x.id)?.technical_status==='rejected'?'Non idonea':'Revisione tecnica richiesta')
    :(x.review_class||'In revisione'),
