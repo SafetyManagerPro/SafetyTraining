@@ -24,8 +24,10 @@ const course={id:'lav_medio',db_version:2};
 
 test('bookmarks restore the same course slide and support intentional start from beginning',()=>{
  const {api}=setup();
+ assert.equal(api.has(course),false);
  assert.equal(api.read(course,slides),null);
  assert.equal(api.save(course,slides,1),true);
+ assert.equal(api.has(course),true);
  assert.equal(api.read(course,slides).index,1);
  assert.equal(api.read(course,slides).number,2);
  assert.equal(api.read(course,slides).total,3);
@@ -40,6 +42,7 @@ test('bookmarks remain scoped by user, course and version',()=>{
  assert.equal(api.save(course,slides,2),true);
  assert.equal(api.read({id:'lav_basso',db_version:2},slides),null);
  assert.equal(api.read({...course,db_version:3},slides),null);
+ assert.equal(api.has({...course,db_version:3}),false);
  window.SAFETY_CLOUD.state.user.id='teacher-2';
  assert.equal(api.read(course,slides),null);
  assert.equal(api.save(course,slides,1),true);
@@ -70,6 +73,8 @@ test('projector has Home, Agenda and Resume buttons on course home and agenda',(
  assert.ok(app.includes('⌂ Home'));
  assert.ok(app.includes('← Agenda'));
  assert.ok(app.includes('window.resumeCourseDeck='));
+ assert.ok(app.includes('continueCourseButton(foundation)'));
+ assert.ok(app.includes('SAFETY_DECK_BOOKMARK_V42?.has?.(c)'));
  assert.ok(app.includes("window.SAFETY_DECK_BOOKMARK_V42?.save?.(c,deck,index)"));
  assert.ok(app.includes("window.SAFETY_DECK_BOOKMARK_V42?.read?.(c,cachedDeck(c))"));
  assert.ok(app.includes("▶ Avvia presentazione dall'inizio</button> ${continueCourseButton(c)}"));
