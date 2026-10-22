@@ -1,0 +1,13 @@
+/* SafetyTraining v39 grouped admin navigation */
+.admin-nav nav .admin-menu-group{border-bottom:1px solid rgba(255,255,255,.09);padding:0 0 7px;margin:0 0 6px;min-width:0}
+.admin-nav nav .admin-menu-group summary{list-style:none;cursor:pointer;color:#99aec8;display:flex;align-items:center;gap:9px;font-size:11px;text-transform:uppercase;font-weight:850;letter-spacing:.06em;padding:12px 11px 9px;border-radius:9px}
+.admin-nav nav .admin-menu-group summary::-webkit-details-marker{display:none}
+.admin-nav nav .admin-menu-group summary::after{content:'▸';margin-left:auto;font-size:12px}
+.admin-nav nav .admin-menu-group[open] summary::after{content:'▾'}
+.admin-nav nav .admin-menu-group summary:hover,.admin-nav nav .admin-menu-group summary:focus-visible{background:rgba(104,167,255,.10);color:#e3eeff}
+.admin-menu-items{display:grid;gap:3px;padding:0 0 3px}
+.admin-nav nav .admin-menu-group button{width:100%;font-size:13px;line-height:1.35;min-height:40px}
+.admin-menu-group[hidden]{display:none!important}
+.admin-menu-items button[hidden],.admin-menu-items button.hidden{display:none!important}
+.admin-menu-group .admin-menu-items:empty{display:none}
+.admin-menu-count{color:#8296b0;font-size:10px;font-weight:600;letter-spacing:0}
