@@ -18,7 +18,7 @@ test('quick enrollment uses existing scoped enrollment and invitation services',
 test('accidental enrollment revocation is reversible and does not delete learner', () => {
   const ui = read('apps/training/admin.js');
   const backend = read('apps/training/admin-backend-v21.js');
-  for (const marker of ['Annulla iscrizione errata','showRevokedEnrollments','toggle-revoked-enrollments','Riattiva','Disattiva accesso'])
+  for (const marker of ['Annulla iscrizione errata','showRevokedEnrollments','toggle-revoked-enrollments','Riattiva','Revoca accesso'])
     assert.ok(ui.includes(marker), marker);
   assert.match(backend, /admin_set_enrollment_revoked/);
   assert.match(backend, /admin_set_active/);
