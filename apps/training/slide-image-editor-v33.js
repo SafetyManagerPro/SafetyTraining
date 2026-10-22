@@ -95,7 +95,7 @@ function itemHtml(item,index){
  const src=item.src||'assets/general.svg';
  return '<div class="slide-edit-item" data-selected-index="'+index+'"><img src="'+esc(src)+'" alt="Anteprima figura selezionata" loading="lazy"><div class="slide-edit-item-body">'+
  '<span class="slide-edit-index">'+(index===0?'Immagine principale':'Immagine aggiuntiva '+(index+1))+'</span>'+
- '<label>Didascalia <input type="text" data-caption="'+index+'" maxlength="240" value="'+esc(item.caption||'')+'" placeholder="Descrizione didattica chiara e pertinente"></label>'+
+ '<label>Didascalia <input type="text" data-caption="'+index+'" maxlength="180" value="'+esc(item.caption||'')+'" placeholder="Descrizione didattica chiara e pertinente"></label>'+
  '<div class="slide-edit-actions"><button data-move="'+index+':-1" type="button" '+(index===0?'disabled':'')+' aria-label="Sposta immagine verso l’alto">↑ Sposta</button>'+
  '<button data-move="'+index+':1" type="button" '+(index>=2?'disabled':'')+' aria-label="Sposta immagine verso il basso">↓ Sposta</button>'+
  '<button data-remove="'+index+'" type="button" aria-label="Rimuovi immagine">Rimuovi</button></div></div></div>';
@@ -215,7 +215,7 @@ async function open(c,slide,index){
  });
  const save=async(reset)=>{
   if(!stillHere()||dialog.dataset.saving==='1')return;
-  if(!reset&&selection.some(x=>String(x.caption||'').length>240)){flash('Didascalia troppo lunga (massimo 240 caratteri).');return;}
+  if(!reset&&selection.some(x=>String(x.caption||'').length>180)){flash('Didascalia troppo lunga (massimo 180 caratteri).');return;}
   dialog.dataset.saving='1';dialog.querySelectorAll('button,input,select').forEach(el=>el.disabled=true);
   flash('Salvataggio in corso…');
   const payload=reset?null:selection.map(x=>({kind:x.kind,src:x.kind==='local'?x.src:undefined,
