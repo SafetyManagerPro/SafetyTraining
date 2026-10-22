@@ -483,3 +483,5 @@ L'utente ha chiesto un invio più semplice delle iscrizioni e una correzione rap
 - Verifica manuale via isolamento JS effettuata: sintassi app.js/editor/sw.js; scoring «guanti» 5 vs «rumore» 0; tre figure renderizzate con relative didascalie; preservazione della catena stampa. **Non dichiarare collaudo end-to-end autenticato e browser/print già effettuato.**
 - Importante: non sono state scelte immagini al posto dell'amministratore e non sono stati aggiunti nuovi media coperti da copyright. I corsi e la loro validità tecnico-normativa restano invariati; resta da eseguire revisione slide per slide dei due corsi attivi e collaudo save/print usando credenziali autorizzate.
 - Commits principali: `4bef047`, `ea5c0fb`, `2ecf5a5`, `03854b6`, `5bc71ee`, `0824aee`, `f6f2f94`, `6ca9752`, `4d90c22`, `0c3a32d`, `4aae286`, `39ae775`, `795cd1d`.
+
+- Fix UX finale v41 (commit d72136b): dopo il salvataggio vengono ricostruiti i pulsanti di riordino, mantenendo disabilitata la freccia non valida della prima/ultima immagine.
