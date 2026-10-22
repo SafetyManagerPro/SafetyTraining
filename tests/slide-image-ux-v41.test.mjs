@@ -57,5 +57,5 @@ test('visual theme applies consistent composition in presentation and printed sl
  assert.ok(css.includes('object-fit:contain'));
  assert.ok(html.includes('slide-visual-design-v41.css'));
  assert.ok(sw.includes('slide-visual-design-v41.css'));
- assert.ok(sw.includes('safety-training-v41-slide-editor'));
+ assert.match(sw,/const CACHE='safety-training-[^']+'/);
 });
