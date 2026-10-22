@@ -302,7 +302,7 @@ function moduleSlideIndex(c,mi){
 }
 window.deckGo=(cid,i)=>{setHash(`deck/${cid}/${Math.max(0,i)}`)};
 window.resumeCourseDeck=cid=>{const c=getCourse(cid);if(!c)return;const saved=window.SAFETY_DECK_BOOKMARK_V42?.read?.(c,cachedDeck(c));if(saved)setHash('deck/'+c.id+'/'+saved.index);};
-function continueCourseButton(c){const saved=window.SAFETY_DECK_BOOKMARK_V42?.read?.(c,cachedDeck(c));if(!saved||saved.index<1)return '';return `<button type="button" class="deck-resume-btn" onclick="resumeCourseDeck('${esc(c.id)}')">▶ Riprendi dalla slide ${saved.number} / ${saved.total}</button>`;}
+function continueCourseButton(c){if(!c||!window.SAFETY_DECK_BOOKMARK_V42?.has?.(c))return '';const saved=window.SAFETY_DECK_BOOKMARK_V42?.read?.(c,cachedDeck(c));if(!saved||saved.index<1)return '';return `<button type="button" class="deck-resume-btn" onclick="resumeCourseDeck('${esc(c.id)}')">▶ Riprendi dalla slide ${saved.number} / ${saved.total}</button>`;}
 window.deckReveal=(id)=>{
  const el=document.getElementById(id); if(!el) return;
  el.classList.toggle('deck-hidden');
@@ -465,7 +465,7 @@ function home(){
  document.body.classList.remove('deckmode');
  const foundation=DATA.find(c=>c.id==='fondamenti');
  const formal=DATA.filter(c=>c.id!=='fondamenti');
- app.innerHTML=`<section class="hero presentation-hero"><span class="pill">MODALITÀ PRESENTAZIONE</span><h1>Safety Training</h1><p>Corso progettato per essere proiettato: agenda temporale, moduli ordinati e slide leggibili da lontano.</p><div class="startpanel"><div><span class="startlabel">MODULO COMUNE</span><h2>🏛️ Fondamenti normativi e sistema prevenzione</h2><p>Normativa, figure della sicurezza, vigilanza, responsabilità e sanzioni.</p></div><button class="openbtn big" onclick="setHash('course/fondamenti')">Apri agenda</button></div></section>
+ app.innerHTML=`<section class="hero presentation-hero"><span class="pill">MODALITÀ PRESENTAZIONE</span><h1>Safety Training</h1><p>Corso progettato per essere proiettato: agenda temporale, moduli ordinati e slide leggibili da lontano.</p><div class="startpanel"><div><span class="startlabel">MODULO COMUNE</span><h2>🏛️ Fondamenti normativi e sistema prevenzione</h2><p>Normativa, figure della sicurezza, vigilanza, responsabilità e sanzioni.</p></div><button class="openbtn big" onclick="setHash('course/fondamenti')">Apri agenda</button>${continueCourseButton(foundation)}</div></section>
  <h2 class="sectiontitle">Scegli il corso da proiettare</h2><section class="presentation-courses">${formal.map(c=>`<article class="presentation-course"><div class="pc-head"><span class="pc-icon">${c.icon}</span><div><div class="duration">${fmtMin(c.planned_minutes||c.target_minutes||0)}</div><h2>${esc(c.title)}</h2></div></div><p>${esc(c.subtitle)}</p><div class="pc-modules">${(c.modules||[]).map(m=>`<span>${esc(m.title)} · ${fmtMin(m.minutes)}</span>`).join('')}</div><div class="pc-actions"><button class="openbtn" onclick="setHash('deck/${c.id}/0')">▶ Avvia presentazione</button>${continueCourseButton(c)}<button class="ghost" onclick="setHash('course/${c.id}')">Agenda</button></div></article>`).join('')}</section>
  <div class="footer">Le schede di approfondimento restano disponibili, ma la modalità principale è ora la presentazione sequenziale.</div>`;
 }
