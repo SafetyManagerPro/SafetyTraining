@@ -72,96 +72,219 @@ async function visit(c,slide,index){
  if(window.__deck?.cid!==c.id||window.__deck?.index!==index)return;
  toolbar(c,slide,index);await refreshProjected(c,index);
 }
+/* v41: searchable, topic-ranked and accessible visual editor for published lessons. */
+const labelFor=src=>String(src||'').split('/').pop().replace(/\.(svg|png|jpe?g|webp)$/i,'').replace(/^gp\d\d[-_]/,'').replace(/[-_]/g,' ');
+const cleanTokens=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').split(' ').filter(t=>t.length>=4&&!['della','degli','delle','come','sono','dopo','prima','corso','formazione','rischio','sicurezza','slide','procedura','generale'].includes(t));
+function matchScore(path,context){
+ const name=labelFor(path).toLowerCase(),source=String(path).toLowerCase();
+ const topic=[...new Set(cleanTokens(context))];
+ let points=topic.reduce((score,word)=>score+(name.includes(word)?5:source.includes(word)?2:0),0);
+ if(/(gp0[1-4]|gp03|gp04)/.test(source))points+=1;
+ if(/general\.svg$/.test(source))points-=8;
+ return points;
+}
+function familyOf(src){
+ const s=String(src||'').toLowerCase();
+ if(/dpi|casco|guanti|imbracatur|occhiali|udito|calzatur|respirator/.test(s))return'dpi';
+ if(/segnal|cartell|divieto|obbligo|avvertiment|pittogramm/.test(s))return'segnaletica';
+ if(/emerg|incend|soccor|evacua/.test(s))return'emergenze';
+ if(/carrell|ple|gru|sollev|ribalt|macchin|preuso|attrezz|veicol/.test(s))return'attrezzature';
+ if(/elettric|chimic|rumore|microclima|vdt|polver|caduta|rischio|preven|ergonom/.test(s))return'rischi';
+ return'altro';
+}
 function itemHtml(item,index){
- return '<div class="slide-edit-item"><img src="'+esc(item.src)+'" alt="" loading="lazy"><div>'+
- '<small>'+esc(item.caption||item.src)+'</small><div class="slide-edit-actions">'+
- '<button data-move="'+index+':-1" type="button">↑</button><button data-move="'+index+':1" type="button">↓</button>'+
- '<button data-remove="'+index+'" type="button">Rimuovi</button></div></div></div>';
+ const src=item.src||'assets/general.svg';
+ return '<div class="slide-edit-item" data-selected-index="'+index+'"><img src="'+esc(src)+'" alt="Anteprima figura selezionata" loading="lazy"><div class="slide-edit-item-body">'+
+ '<span class="slide-edit-index">'+(index===0?'Immagine principale':'Immagine aggiuntiva '+(index+1))+'</span>'+
+ '<label>Didascalia <input type="text" data-caption="'+index+'" maxlength="240" value="'+esc(item.caption||'')+'" placeholder="Descrizione didattica chiara e pertinente"></label>'+
+ '<div class="slide-edit-actions"><button data-move="'+index+':-1" type="button" '+(index===0?'disabled':'')+' aria-label="Sposta immagine verso l’alto">↑ Sposta</button>'+
+ '<button data-move="'+index+':1" type="button" '+(index>=2?'disabled':'')+' aria-label="Sposta immagine verso il basso">↓ Sposta</button>'+
+ '<button data-remove="'+index+'" type="button" aria-label="Rimuovi immagine">Rimuovi</button></div></div></div>';
 }
 async function open(c,slide,index){
  if(!editable(c)||!await authenticate()||!editable(c))return;
+ if(!loaded||currentKey!==key(c))await load(c);
  const source=rows.get(slide.uid);
  let selection=source?JSON.parse(JSON.stringify(source)):[slide.img,...(slide.visualGallery||[])].filter(x=>x?.src)
   .filter(x=>window.SAFETY_LOCAL_VISUALS_V32?.available?.(x.src))
   .map(x=>({kind:'local',src:x.src,caption:x.caption||''}));
  if(selection.length>3)selection=selection.slice(0,3);
- modal?.remove();modal=document.createElement('div');modal.className='slide-image-editor-backdrop';
- modal.innerHTML='<div class="slide-image-editor" role="dialog" aria-modal="true" aria-label="Modifica immagini della slide">'+
- '<header><h2>Immagini della slide</h2><button data-close type="button">✕</button></header>'+
- '<p>'+esc(slide.title||'')+' · Solo amministratore proprietario · max 3 immagini.</p>'+
- '<div id="slideEditSelected"></div><p><button type="button" data-add-mode aria-pressed="false">Modalità: sostituisci immagine</button> <small>Per una galleria di più immagini attiva prima la modalità Aggiungi.</small></p><label>Cerca nell’archivio <input id="slideEditSearch" type="search" placeholder="Es. carroponte, stabilità, soccorso"></label>'+
- '<div id="slideEditLibrary" class="slide-edit-library"></div>'+
- '<footer><button data-reset type="button">Ripristina scelta automatica</button><button data-save type="button">Salva per slide e stampa PDF</button></footer>'+
- '<p id="slideEditNotice" role="status"></p></div>';
- document.body.appendChild(modal);
- const chosen=modal.querySelector('#slideEditSelected'),lib=modal.querySelector('#slideEditLibrary'),search=modal.querySelector('#slideEditSearch');
- const catalog=window.SAFETY_LOCAL_VISUALS_V32?.catalog||[];
- let privateAssets=[];
- let addMode=false;
+ modal?.remove();
+ const dialog=document.createElement('div');modal=dialog;
+ dialog.className='slide-image-editor-backdrop';
+ dialog.innerHTML='<div class="slide-image-editor slide-image-editor-v41" role="dialog" aria-modal="true" aria-labelledby="slideEditHeading">'+
+ '<header><div><div class="slide-edit-eyebrow">EDITOR VISIVO · SOLO AMMINISTRATORE PROPRIETARIO</div><h2 id="slideEditHeading">Immagini della slide</h2>'+
+ '<p class="slide-edit-context">'+esc(c.title||c.id||'Corso')+' · Slide '+(index+1)+' · '+esc(slide.title||'')+'</p></div><button data-close type="button" aria-label="Chiudi editor">✕</button></header>'+
+ '<div class="slide-edit-grid"><section class="slide-edit-workspace" aria-label="Selezione immagini">'+
+ '<div class="slide-edit-section-title"><h3>Immagini selezionate <span id="slideEditCount">0/3</span></h3><p>La prima è principale. Trascina idealmente la sequenza usando le frecce e scrivi una didascalia utile.</p></div>'+
+ '<div id="slideEditSelected"></div>'+
+ '<fieldset class="slide-edit-modes"><legend>Quando scegli un’immagine</legend>'+
+ '<label><input type="radio" name="slideEditMode" value="replace" checked> Sostituisci immagine principale</label>'+
+ '<label><input type="radio" name="slideEditMode" value="add"> Aggiungi alla galleria (max 3)</label></fieldset>'+
+ '<div class="slide-edit-section-title"><h3>Archivio immagini</h3><p>Scegli una figura pertinente. Le immagini dei PDF devono essere già approvate per uso interno.</p></div>'+
+ '<div class="slide-edit-filters"><label>Cerca per parola chiave<input id="slideEditSearch" type="search" placeholder="Es. DPI, emergenza, caduta, carrelli"></label>'+
+ '<label>Argomento<select id="slideEditCategory"><option value="suggested">Suggerite per questa slide</option>'+
+ '<option value="all">Tutte le figure</option><option value="dpi">DPI</option><option value="segnaletica">Segnaletica</option>'+
+ '<option value="rischi">Rischi e prevenzione</option><option value="attrezzature">Attrezzature</option><option value="emergenze">Emergenze</option><option value="altro">Altre immagini</option></select></label></div>'+
+ '<div class="slide-edit-tabs"><button type="button" data-library-tab="local" aria-pressed="true">Illustrate / SVG</button>'+
+ '<button type="button" data-library-tab="private" aria-pressed="false">PDF approvati</button><span id="slideEditLibraryCount" aria-live="polite"></span></div>'+
+ '<div id="slideEditLibrary" class="slide-edit-library" aria-label="Figure disponibili"></div></section>'+
+ '<aside class="slide-edit-preview" aria-label="Anteprima composizione"><h3>Anteprima della slide</h3>'+
+ '<div class="slide-edit-preview-canvas"><div class="slide-edit-preview-text"><span>CONTENUTO FORMATIVO</span><strong>'+esc(slide.title||'Slide')+'</strong>'+
+ '<small>'+esc(String(slide.objective||slide.summary||slide.explain||slide.paragraph||'Illustrazione di supporto all’argomento').slice(0,145))+'</small></div>'+
+ '<div id="slideEditPreviewImages" class="slide-edit-preview-images"></div></div>'+
+ '<p>La composizione sarà utilizzata nella presentazione e nella stampa delle slide. Controlla la pertinenza tecnica prima del salvataggio.</p></aside></div>'+
+ '<footer><button data-reset type="button">Ripristina immagini automatiche</button><button data-save type="button">Salva immagini nella slide</button></footer>'+
+ '<p id="slideEditNotice" role="status" aria-live="polite"></p></div>';
+ document.body.appendChild(dialog);
+ const chosen=dialog.querySelector('#slideEditSelected'),lib=dialog.querySelector('#slideEditLibrary'),
+ search=dialog.querySelector('#slideEditSearch'),category=dialog.querySelector('#slideEditCategory');
+ const catalog=(window.SAFETY_LOCAL_VISUALS_V32?.catalog||[]).filter(x=>window.SAFETY_LOCAL_VISUALS_V32?.available?.(x));
+ const context=[slide.title,slide.summary,slide.objective,slide.graphic?.title,c.title].filter(Boolean).join(' ');
+ const ranked=catalog.map(src=>({src,score:matchScore(src,context)})).sort((a,b)=>b.score-a.score||a.src.localeCompare(b.src));
+ let privateAssets=[],tab='local',limit=48,privateStatus='Caricamento dei PDF approvati…';
+ const stillHere=()=>modal===dialog&&dialog.isConnected&&uid()===who&&editable(c);
+ const choiceKey=x=>x.kind==='private_pdf'?'pdf:'+x.ref_id:'local:'+x.src;
+ const flash=message=>{const note=dialog.querySelector('#slideEditNotice');if(note)note.textContent=message;};
+ const srcFor=item=>item.kind==='private_pdf'?(item.src||privateAssets.find(x=>x.ref_id===item.ref_id)?.src||'assets/general.svg'):item.src;
  const choose=item=>{
-  if(addMode){
-   // Never render the same visual twice in the same slide gallery.
-   if(selection.some(x=>x.kind===item.kind&&(x.kind==='local'?x.src===item.src:x.ref_id===item.ref_id)))return;
-   if(selection.length<3)selection.push(item);
-  }else selection=[item];
-  refresh();
- };
- const refresh=()=>{
-  chosen.innerHTML=selection.map((x,i)=>itemHtml({src:x.src||'assets/general.svg',caption:x.caption||x.ref_id},i)).join('')||'<p>Nessuna immagine. Il salvataggio mostrerà lo schema neutro.</p>';
-  const q=search.value.toLowerCase().trim();const matches=catalog.filter(x=>x.toLowerCase().includes(q)).slice(0,60);
-  lib.innerHTML=matches.map(x=>'<button type="button" data-pick="'+esc(x)+'"><img src="'+esc(x)+'" loading="lazy" alt=""><span>'+esc(x.split('/').pop())+'</span></button>').join('')+
-   privateAssets.filter(x=>!q||(x.ref_id+' '+x.caption).toLowerCase().includes(q)).map(x=>
-    '<button type="button" data-private-pick="'+esc(x.ref_id)+'"><img src="'+esc(x.src)+'" loading="lazy" alt=""><span>PDF approvato · '+esc(x.ref_id)+'</span></button>').join('');
- };
- search.oninput=refresh;refresh();
- void (async()=>{
-  const {data:approved,error}=await db().from('training_integral_pdf_reviews_v25')
-   .select('ref_id').eq('technical_status','approved').eq('rights_status','cleared_internal').limit(120);
-  if(error||!approved?.length||!modal?.isConnected)return;
-  const {data:figures,error:fe}=await db().from('training_integral_pdf_refs_v24')
-   .select('id,category,asset:training_integral_pdf_assets_v24!inner(storage_path)')
-   .in('id',approved.map(x=>x.ref_id));
-  if(fe||!modal?.isConnected)return;
-  const {data:excluded}=await db().from('training_image_exclusions_v26')
-   .select('image_key').eq('excluded',true).in('image_key',approved.map(x=>x.ref_id));
-  const barred=new Set((excluded||[]).map(x=>x.image_key));
-  for(const f of (figures||[]).filter(x=>!barred.has(x.id))){
-   const src=await signPdf({kind:'private_pdf',ref_id:f.id});
-   if(src)privateAssets.push({ref_id:f.id,src,caption:f.category||''});
+  if(dialog.dataset.saving==='1')return;
+  const add=dialog.querySelector('[name="slideEditMode"]:checked')?.value==='add';
+  if(add){
+   if(selection.some(x=>choiceKey(x)===choiceKey(item))){flash('Questa figura è già stata selezionata.');return;}
+   if(selection.length>=3){flash('Sono consentite al massimo tre immagini per slide. Rimuovine una prima di aggiungerne altre.');return;}
+   selection.push({...item});
+  }else{
+   // Replace the main visual and keep only distinct supporting figures.
+   selection=[{...item},...selection.filter(x=>choiceKey(x)!==choiceKey(item)).slice(1)].slice(0,3);
   }
-  if(modal?.isConnected)refresh();
- })();
- modal.onclick=async e=>{
-  const mode=e.target.closest('[data-add-mode]');
-  if(mode){addMode=!addMode;mode.setAttribute('aria-pressed',String(addMode));mode.textContent=addMode?'Modalità: aggiungi alla galleria':'Modalità: sostituisci immagine';return;}
-  if(e.target.closest('[data-close]')){modal.remove();modal=null;return;}
-  const pick=e.target.closest('[data-pick]');
-  if(pick){choose({kind:'local',src:pick.dataset.pick,caption:''});return;}
-  const privatePick=e.target.closest('[data-private-pick]');
-  if(privatePick){const f=privateAssets.find(x=>x.ref_id===privatePick.dataset.privatePick);if(f)choose({kind:'private_pdf',ref_id:f.ref_id,src:f.src,caption:f.caption});return;}
-  const remove=e.target.closest('[data-remove]');
-  if(remove){selection.splice(Number(remove.dataset.remove),1);refresh();return;}
-  const move=e.target.closest('[data-move]');
-  if(move){const [i,dir]=move.dataset.move.split(':').map(Number),j=i+dir;
-   if(j>=0&&j<selection.length)[selection[i],selection[j]]=[selection[j],selection[i]];refresh();return;}
-  const reset=e.target.closest('[data-reset]'),save=e.target.closest('[data-save]');
-  if(!reset&&!save)return;
-  const notice=modal.querySelector('#slideEditNotice');
-  if(modal.dataset.saving==='1')return;
-  modal.dataset.saving='1';
-  modal.querySelectorAll('button').forEach(button=>button.disabled=true);
-  notice.textContent='Salvataggio…';
-  const payload=reset?null:selection.map(x=>({kind:x.kind,src:x.kind==='local'?x.src:undefined,ref_id:x.kind==='private_pdf'?x.ref_id:undefined,caption:x.caption||''}));
+  flash('Modifica pronta: premi Salva per renderla visibile anche nella stampa PDF.');
+  draw();
+ };
+ const renderSelected=()=>{
+  dialog.querySelector('#slideEditCount').textContent=selection.length+'/3';
+  chosen.innerHTML=selection.map((x,i)=>itemHtml({...x,src:srcFor(x)},i)).join('')||
+   '<div class="slide-edit-empty">Nessuna figura selezionata. Scegline una dall’archivio oppure ripristina le immagini automatiche.</div>';
+  const output=dialog.querySelector('#slideEditPreviewImages');
+  output.innerHTML=selection.map((x,i)=>'<figure class="'+(i===0?'main':'secondary')+'"><img src="'+esc(srcFor(x)||'assets/general.svg')+
+    '" loading="lazy" alt=""><figcaption>'+esc(x.caption||labelFor(x.src||x.ref_id))+'</figcaption></figure>').join('')||
+    '<div class="slide-edit-preview-empty">Anteprima senza immagini</div>';
+ };
+ const renderLibrary=()=>{
+  const q=cleanTokens(search.value).join(' '),words=q?q.split(' '):[];
+  let results=[];
+  if(tab==='local'){
+   results=ranked.filter(r=>{
+    if(category.value==='suggested'&&r.score<=0)return false;
+    if(!['suggested','all'].includes(category.value)&&familyOf(r.src)!==category.value)return false;
+    const text=(r.src+' '+labelFor(r.src)).toLowerCase();
+    return words.every(w=>text.includes(w));
+   });
+   if(category.value==='suggested'&&!results.length&&!words.length)results=ranked.slice(0,36);
+  }else{
+   results=privateAssets.filter(r=>{
+    const text=(r.ref_id+' '+r.caption).toLowerCase();
+    return words.every(w=>text.includes(w));
+   });
+  }
+  const visible=results.slice(0,limit),total=results.length;
+  dialog.querySelector('#slideEditLibraryCount').textContent=tab==='private'&&privateStatus?privateStatus:total+' figure · mostrate '+visible.length;
+  lib.innerHTML=visible.map(r=>{
+   const privateOne=tab==='private',key=privateOne?r.ref_id:r.src,already=selection.some(x=>choiceKey(x)===(privateOne?'pdf:'+key:'local:'+key));
+   return '<button type="button" class="slide-edit-catalog-item '+(already?'selected':'')+'"'+
+    (privateOne?' data-private-pick="'+esc(key)+'"':' data-pick="'+esc(key)+'"')+'>'+
+    '<img src="'+esc(privateOne?r.src:r.src)+'" loading="lazy" alt="Anteprima">'+
+    '<span>'+esc(privateOne?(r.caption||r.ref_id):labelFor(r.src))+'</span>'+
+    (already?'<em>Selezionata</em>':'')+'</button>';
+  }).join('')+(visible.length<total?'<button type="button" class="slide-edit-loadmore" data-loadmore>Mostra altre ('+(total-visible.length)+')</button>':'')+
+   (!total?'<p class="slide-edit-empty">'+(tab==='private'?'Nessuna figura PDF approvata disponibile per questa ricerca.':'Nessuna figura trovata. Seleziona “Tutte le figure” o modifica la ricerca.')+'</p>':'');
+ };
+ const draw=()=>{if(!stillHere())return;renderSelected();renderLibrary();};
+ const close=()=>{if(modal===dialog){dialog.remove();modal=null;}};
+ dialog.querySelector('[data-close]').onclick=close;
+ dialog.addEventListener('click',e=>{if(e.target===dialog)close();});
+ const keyHandler=e=>{if(e.key==='Escape'&&modal===dialog){e.preventDefault();close();}};
+ document.addEventListener('keydown',keyHandler,{signal:(()=>{const ctrl=new AbortController();dialog.addEventListener('DOMNodeRemoved',()=>ctrl.abort(),{once:true});return ctrl.signal;})()});
+ // Search and grouping do not change the selection.
+ search.oninput=()=>{limit=48;renderLibrary();};
+ category.onchange=()=>{limit=48;renderLibrary();};
+ dialog.querySelectorAll('[data-library-tab]').forEach(b=>b.onclick=()=>{
+  tab=b.dataset.libraryTab;limit=48;
+  dialog.querySelectorAll('[data-library-tab]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  renderLibrary();
+ });
+ const save=async(reset)=>{
+  if(!stillHere()||dialog.dataset.saving==='1')return;
+  if(!reset&&selection.some(x=>String(x.caption||'').length>240)){flash('Didascalia troppo lunga (massimo 240 caratteri).');return;}
+  dialog.dataset.saving='1';dialog.querySelectorAll('button,input,select').forEach(el=>el.disabled=true);
+  flash('Salvataggio in corso…');
+  const payload=reset?null:selection.map(x=>({kind:x.kind,src:x.kind==='local'?x.src:undefined,
+   ref_id:x.kind==='private_pdf'?x.ref_id:undefined,caption:String(x.caption||'').trim()}));
   try{
    const {error}=await db().rpc('save_slide_images_v33',{p_course_key:c.id,p_version_number:Number(c.db_version),p_slide_uid:slide.uid,p_items:payload});
    if(error)throw error;
+   if(!stillHere())return;
    if(reset)rows.delete(slide.uid);else rows.set(slide.uid,payload);
-   loaded=true;notice.textContent='Salvato per le slide e per la stampa PDF.';
+   loaded=true;
+   flash(reset?'Immagini automatiche ripristinate.':'Immagini salvate: saranno usate anche dalla stampa PDF.');
    await refreshProjected(c,index);
    document.dispatchEvent(new Event('safety:slide-image-edited'));
-  }catch(err){notice.textContent='Salvataggio negato: '+(err.message||err);}
-  finally{if(modal?.isConnected){modal.dataset.saving='0';modal.querySelectorAll('button').forEach(button=>button.disabled=false);}}
+  }catch(err){if(stillHere())flash('Salvataggio non riuscito: '+(err.message||err));}
+  finally{if(stillHere()){dialog.dataset.saving='0';dialog.querySelectorAll('button,input,select').forEach(el=>el.disabled=false);}}
  };
+ dialog.addEventListener('input',e=>{
+  const field=e.target.closest('[data-caption]');if(!field)return;
+  const i=Number(field.dataset.caption);if(!Number.isInteger(i)||!selection[i])return;
+  selection[i].caption=field.value;
+  const figs=dialog.querySelectorAll('#slideEditPreviewImages figcaption');if(figs[i])figs[i].textContent=field.value||labelFor(selection[i].src||selection[i].ref_id);
+ });
+ dialog.addEventListener('click',e=>{
+  const pick=e.target.closest('[data-pick]');
+  if(pick){const src=pick.dataset.pick;if(catalog.includes(src))choose({kind:'local',src,caption:labelFor(src)});return;}
+  const pdf=e.target.closest('[data-private-pick]');
+  if(pdf){const item=privateAssets.find(x=>x.ref_id===pdf.dataset.privatePick);if(item)choose({kind:'private_pdf',ref_id:item.ref_id,src:item.src,caption:item.caption});return;}
+  if(e.target.closest('[data-loadmore]')){limit+=48;renderLibrary();return;}
+  const remove=e.target.closest('[data-remove]');
+  if(remove){selection.splice(Number(remove.dataset.remove),1);draw();return;}
+  const move=e.target.closest('[data-move]');
+  if(move){const [i,dir]=move.dataset.move.split(':').map(Number),j=i+dir;
+   if(j>=0&&j<selection.length)[selection[i],selection[j]]=[selection[j],selection[i]];
+   draw();return;}
+  if(e.target.closest('[data-reset]')){void save(true);return;}
+  if(e.target.closest('[data-save]'))void save(false);
+ });
+ draw();
+ // Resolve already-selected PDF thumbnails without accidentally switching modal.
+ for(const s of selection.filter(x=>x.kind==='private_pdf'&&!x.src)){
+  void signPdf(s).then(src=>{if(stillHere()&&src){s.src=src;renderSelected();}}).catch(()=>{});
+ }
+ void (async()=>{
+  try{
+   const {data:approved,error}=await db().from('training_integral_pdf_reviews_v25')
+    .select('ref_id').eq('technical_status','approved').eq('rights_status','cleared_internal').limit(200);
+   if(error)throw error;
+   if(!approved?.length){privateStatus='';if(stillHere())renderLibrary();return;}
+   const {data:figures,error:fe}=await db().from('training_integral_pdf_refs_v24')
+    .select('id,category,topic,asset:training_integral_pdf_assets_v24!inner(storage_path)')
+    .in('id',approved.map(x=>x.ref_id));
+   if(fe)throw fe;
+   const {data:excluded,error:ex}=await db().from('training_image_exclusions_v26')
+    .select('image_key').eq('excluded',true).in('image_key',approved.map(x=>x.ref_id));
+   if(ex)throw ex;
+   const blocked=new Set((excluded||[]).map(x=>x.image_key));
+   const pool=(figures||[]).filter(x=>!blocked.has(x.id));
+   const batch=await Promise.all(pool.map(async f=>{
+    const src=await signPdf({kind:'private_pdf',ref_id:f.id});
+    return src?{ref_id:f.id,src,caption:f.topic||f.category||f.id}:null;
+   }));
+   if(!stillHere())return;
+   privateAssets=batch.filter(Boolean);privateStatus='';
+   for(const selected of selection.filter(x=>x.kind==='private_pdf'&&!x.src)){
+    const found=privateAssets.find(x=>x.ref_id===selected.ref_id);if(found)selected.src=found.src;
+   }
+   draw();
+  }catch(error){if(stillHere()){privateStatus='PDF non disponibili';flash('Archivio PDF: '+(error.message||error));renderLibrary();}}
+ })();
 }
 async function applyDeck(slides,c){
  await authenticate();
