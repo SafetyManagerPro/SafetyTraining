@@ -76,8 +76,44 @@ function dashboardMarkup(data){
 async function renderDashboard(args={}){
  const target=document.getElementById(args.targetId||'adminDashboardAnalytics');if(!target||!allowed())return;
  initStyle();const id=actor();target.innerHTML='<div class="a40-loading">Caricamento indicatori…</div>';
- try{const data=await dataset();if(!target.isConnected||actor()!==id)return;target.innerHTML=dashboardMarkup(data);}
- catch(e){if(target.isConnected)target.innerHTML='<p class="a40-error">Grafici non disponibili: '+esc(e.message||e)+'</p>';}
+ try{
+  const data=await dataset();if(!target.isConnected||actor()!==id)return;
+  target.innerHTML=dashboardMarkup(data);target.dataset.a40Loaded='1';
+ } catch(e){
+  if(target.isConnected){target.innerHTML='<p class="a40-error">Grafici non disponibili: '+esc(e.message||e)+'</p>';delete target.dataset.a40Loaded;}
+ }
+}
+function controlMarkup(data){
+ const rows=data.rows,active=rows.filter(x=>x.status!=='revoked');
+ const stale=active.filter(x=>x.status==='in_progress'&&x.last_activity_at&&Date.now()-new Date(x.last_activity_at)>30*86400000);
+ const failed=active.filter(x=>x.status==='failed');
+ const notStarted=active.filter(x=>x.status==='not_started');
+ const completed=active.filter(x=>done(x.status));
+ const noRecent=active.filter(x=>x.status==='in_progress'&&!x.last_activity_at);
+ const priorities=[
+  ...failed.slice(0,5).map(x=>({tone:'danger',label:'Esito non superato',row:x,detail:'Verificare esito, eventuale recupero e stato del percorso.'})),
+  ...stale.slice(0,5).map(x=>({tone:'warn',label:'Inattivo da oltre 30 giorni',row:x,detail:'Percorso in corso senza attività recente registrata.'})),
+  ...noRecent.slice(0,3).map(x=>({tone:'warn',label:'Attività non registrata',row:x,detail:'Percorso in corso senza ultima attività disponibile.'}))
+ ].slice(0,8);
+ return '<div class="a40-root">'+
+  '<div class="a40-kpis">'+kpi(active.length,'Iscrizioni attive')+kpi(notStarted.length,'Da avviare')+kpi(stale.length+noRecent.length,'Da ricontattare / verificare')+kpi(failed.length,'Esiti non superati')+kpi(completed.length,'Completati / superati')+'</div>'+
+  '<div class="a40-grid"><section class="admin-card"><div class="a40-title"><h2>Priorità operative</h2><button type="button" class="a40-btn" data-a40-open-reports>Apri report completi</button></div>'+
+   (priorities.length?priorities.map(x=>'<div class="a40-student"><strong>'+esc(x.label)+'</strong><p>'+esc(x.row.learnerName)+' · '+esc(x.row.courseTitle)+'</p><small>'+esc(x.detail)+'</small></div>').join(''):'<p class="a40-note">Nessuna criticità operativa rilevata dai dati disponibili.</p>')+
+  '</section><section class="admin-card"><h2>Stato dei percorsi</h2>'+bars(statusEntries(rows))+
+  '<p class="a40-note">Gli indicatori sono segnali di controllo amministrativo: non sostituiscono la verifica delle evidenze, della frequenza o dell’idoneità.</p></section></div>'+
+  (data.truncated?'<p class="a40-error">Controllo parziale: raggiunto il limite massimo di righe recuperate.</p>':'')+
+ '</div>';
+}
+async function renderControlSummary(args={}){
+ const target=document.getElementById(args.targetId||'adminControlAnalytics');if(!target||!allowed())return;
+ initStyle();const id=actor();target.innerHTML='<div class="a40-loading">Analisi delle priorità operative…</div>';
+ try{
+  const data=await dataset();if(!target.isConnected||actor()!==id)return;
+  target.innerHTML=controlMarkup(data);target.dataset.a40Loaded='1';
+  target.querySelector('[data-a40-open-reports]')?.addEventListener('click',()=>void renderReports());
+ }catch(e){
+  if(target.isConnected)target.innerHTML='<p class="a40-error">Controlli non disponibili: '+esc(e.message||e)+'</p>';
+ }
 }
 function registerNav(){
  const n=document.querySelector('#adminShell .admin-nav nav');if(!n)return;
@@ -127,10 +163,10 @@ function reportBody(data){
  '<section class="admin-card"><h2>Iscrizioni per corso</h2>'+bars([...byCourse].sort((a,b)=>b[1]-a[1]).slice(0,12))+'</section></div>';
  const table='<section class="admin-card"><div class="a40-title"><h2>Riepilogo corsisti</h2><span class="a40-note">'+fmt(rows.length)+' righe</span></div><div class="a40-table"><table><thead><tr>'+
  '<th>Corsista</th><th>Corso / edizione</th><th>Stato</th><th>Avanzamento</th><th>Attività registrata</th><th>Test</th><th>Dettagli</th></tr></thead><tbody>'+
- rows.slice(0,250).map(r=>'<tr><td>'+esc(r.learnerName)+'</td><td>'+esc(r.edition?.title||r.courseTitle)+'</td><td><span class="a40-badge '+(done(r.status)?'done':r.status==='revoked'?'revoked':'')+'">'+esc(status(r.status))+'</span></td><td>'+Math.round(pct(r.progress_pct))+'%</td><td>'+Math.floor(num(r.active_seconds)/60)+' min</td><td>'+ (r.final_score_pct===null?'—':fmt(r.final_score_pct)+'%')+'</td><td><button class="a40-btn" data-a40-detail="'+attr(r.id)+'">Scheda</button></td></tr>').join('')+
+ rows.slice(0,250).map(r=>'<tr><td>'+esc(r.learnerName)+'</td><td>'+esc(r.edition?.title||r.courseTitle)+'</td><td><span class="a40-badge '+(done(r.status)?'done':r.status==='revoked'?'revoked':'')+'">'+esc(status(r.status))+'</span></td><td>'+Math.round(pct(r.progress_pct))+'%</td><td>'+Math.floor(num(r.active_seconds)/60)+' min</td><td>'+ (r.final_score_pct===null?'—':fmt(r.final_score_pct)+'%')+'</td><td><button class="a40-btn" data-a40-detail="'+attr(r.id)+'">Attestazione</button></td></tr>').join('')+
  '</tbody></table></div>'+(rows.length>250?'<p class="a40-note">Tabella limitata a 250 righe. CSV e riepiloghi usano tutto il campione recuperato.</p>':'')+'</section>';
  return statHtml+many+table+
- '<div id="a40StudentDetail"></div><p class="a40-note">Scheda di svolgimento interna, non attestato ufficiale. Frequenze effettive, verifiche, idoneità e requisiti normativi vanno validati dall’organizzatore.</p>'+
+ '<div id="a40StudentDetail"></div><p class="a40-note">Attestazione interna di svolgimento, non attestato ufficiale. Frequenze effettive, verifiche, idoneità e requisiti normativi vanno validati dall’organizzatore.</p>'+
  (data.truncated?'<p class="a40-error">Risultati parziali: superato limite di righe. Richiedere esportazione aggregata server per dati completi.</p>':'');
 }
 function csvCell(value){let s=String(value??'');if(/^[\s]*[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
@@ -176,7 +212,7 @@ async function studentDetail(enrollmentId,seq,who){
   const dl=items.map(([k,v])=>'<div><dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd></div>').join('');
   const sheet='<h2>'+esc(r.learnerName)+'</h2><table>'+items.map(([k,v])=>'<tr><th>'+esc(k)+'</th><td>'+esc(v)+'</td></tr>').join('')+'</table>'+
    '<p>Dettaglio dei tentativi test: '+esc(ts.map(x=>(x.score_pct===null?'non valutato':x.score_pct+'%')+(x.passed?' superato':'')).join('; ')||'nessuno')+'</p>';
-  target.innerHTML='<section class="admin-card"><div class="a40-title"><h2>Scheda di svolgimento interna</h2><div class="a40-actions"><button id="a40PrintStudent">Stampa scheda</button><button id="a40CloseStudent">Chiudi</button></div></div>'+
+  target.innerHTML='<section class="admin-card"><div class="a40-title"><h2>Attestazione interna di svolgimento</h2><div class="a40-actions"><button id="a40PrintStudent">Stampa scheda</button><button id="a40CloseStudent">Chiudi</button></div></div>'+
    '<div class="a40-student"><dl>'+dl+'</dl></div><p class="a40-note">I minuti sono tempo di attività tracciato, non ore di frequenza certificate. Verificare fonti e completezza delle evidenze prima di qualsiasi attestazione ufficiale.</p></section>';
   target.querySelector('#a40PrintStudent').onclick=()=>printSheet('Scheda interna di svolgimento corso',sheet);
   target.querySelector('#a40CloseStudent').onclick=()=>{target.innerHTML='';};
@@ -212,5 +248,5 @@ function boot(){
  const n=document.querySelector('#adminShell .admin-nav nav');if(n)new MutationObserver(registerNav).observe(n,{childList:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-window.SAFETY_ADMIN_ANALYTICS_V40={renderDashboard,renderReports,dashboardMarkup,csvCell};
+window.SAFETY_ADMIN_ANALYTICS_V40={renderDashboard,renderControlSummary,renderReports,dashboardMarkup,controlMarkup,csvCell};
 })();
