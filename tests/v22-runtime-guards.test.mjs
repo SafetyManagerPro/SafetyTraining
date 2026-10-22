@@ -49,7 +49,7 @@ test('PWA keeps protected navigation outside the service worker',()=>{
   assert.match(index,/rel="icon" href="icons\/icon-192\.png"/);
   assert.match(worker,/request\.mode==='navigate'\)return/);
   assert.match(worker,/Promise\.allSettled/);
-  assert.match(worker,/const CACHE='safety-training-v22-\d+'/); // sync with handoff docs is tested separately
+  assert.match(worker,/const CACHE='safety-training-[^']+'/); // exact current cache is synchronized with both handoff docs separately
 });
 
 test('already-applied v22 migrations are tracked locally',()=>{
