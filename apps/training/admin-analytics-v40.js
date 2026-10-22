@@ -3,7 +3,7 @@
 const db=()=>window.SAFETY_CLOUD?.state?.client,actor=()=>window.SAFETY_CLOUD?.state?.user?.id;
 const cap=k=>{const c=window.SAFETY_ADMIN_CAPABILITIES_STATE;return !!(c?.platform_admin||c?.capabilities?.[k]);};
 const allowed=()=>!!actor()&&(cap('manage_enrollments')||cap('manage_learners')||cap('manage_evidence'));
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&gt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const attr=esc, fmt=n=>new Intl.NumberFormat('it-IT').format(Number(n)||0);
 const date=v=>v?new Date(v).toLocaleDateString('it-IT'):'—';
 const pct=v=>Math.min(100,Math.max(0,Number(v)||0));
@@ -28,7 +28,7 @@ function bars(entries,{percent=false}={}){
  const max=Math.max(1,...entries.map(x=>Number(x[1])||0));
  return entries.map(([label,value])=>'<div class="a40-bar"><label title="'+attr(label)+'">'+esc(label)+'</label><div class="a40-track"><div class="a40-fill" style="width:'+Math.min(100,Math.max(0,(Number(value)||0)/max*100)).toFixed(1)+'%"></div></div><b>'+fmt(value)+(percent?'%':'')+'</b></div>').join('')||'<p class="a40-note">Nessun dato disponibile.</p>';
 }
-function kpi(value,label){return '<div class="a40-kpi"><strong>'+fmt(value)+'</strong><small>'+esc(label)+'</small></div>';}
+function kpi(value,label){return '<div class="a40-kpi"><strong>'+(typeof value==='string'&&value.includes('%')?esc(value):fmt(value))+'</strong><small>'+esc(label)+'</small></div>';}
 const month=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?'':d.toISOString().slice(0,7);};
 function monthEntries(rows){
  const now=new Date(),keys=[];for(let i=5;i>=0;i--){const d=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-i,1));keys.push(d.toISOString().slice(0,7));}
