@@ -900,3 +900,11 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - **Correzione:** guard esplicito `data-a40-loading` per impedire render concorrenti, stato terminale `data-a40-loaded="error"` per evitare retry automatici senza limite e pulizia del guard in `finally`. Cache PWA portata a `safety-training-v43.4-admin-analytics-guard`.
 - **Regressione:** aggiunto controllo automatico che richiede due guard di ingresso, due marcature loading, due cleanup e due stati errore. Verifica locale mirata: sintassi Node OK; 1 test, 1 superato, 0 falliti.
 - **Stato rilascio:** commit correttivo inviato su `main`; deploy Vercel e prova interattiva post-deploy da registrare nel seguito di questa sezione. Nessuna modifica a dati, ruoli, iscrizioni o revisioni immagini.
+
+
+### Verifica post-deploy del ripristino
+- **Release runtime:** commit `7031b6aabb6558ed709702d37ed7aab43009ff77` distribuito su Vercel production come deployment `dpl_iNFmPGkyFW5sUHZMhqRcXYQbsMdu`, stato **READY**.
+- **Prova end-to-end autenticata:** dal dominio production il pulsante `Amministrazione` apre senza blocchi la sezione `Panoramica`; `#adminDashboardAnalytics` termina con `data-a40-loaded="1"` e senza flag loading residuo.
+- **Console e servizi:** 0 errori e 0 warning nel browser durante l’apertura; nessun errore runtime aggregato sul deployment Vercel. Il difetto era interamente client-side e non produceva eccezioni server.
+- **CI:** il primo run del commit runtime (`39865602113`) ha individuato un errore di escaping nelle sole nuove asserzioni del test. Le espressioni regolari sono state corrette nel commit di completamento; il comportamento runtime già verificato non è stato modificato.
+- **Integrità:** nessuna modifica a dati live, ruoli, iscrizioni, progressi, attestazioni o revisioni immagini.

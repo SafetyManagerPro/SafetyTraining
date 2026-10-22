@@ -63,8 +63,8 @@ test('backend enhancer never replaces the dashboard structure and control panel 
 
 test('analytics hydration prevents MutationObserver re-entry storms',()=>{
  const s=read('apps/training/admin-analytics-v40.js');
- assert.equal((s.match(/dataset\\.a40Loading='1'/g)||[]).length,2);
- assert.equal((s.match(/dataset\\.a40Loading==='1'/g)||[]).length,2);
- assert.equal((s.match(/delete target\\.dataset\\.a40Loading/g)||[]).length,2);
- assert.equal((s.match(/dataset\\.a40Loaded='error'/g)||[]).length,2);
+ assert.equal((s.match(/dataset\.a40Loading='1'/g)||[]).length,2);
+ assert.equal((s.match(/dataset\.a40Loading==='1'/g)||[]).length,2);
+ assert.equal((s.match(/delete target\.dataset\.a40Loading/g)||[]).length,2);
+ assert.equal((s.match(/dataset\.a40Loaded='error'/g)||[]).length,2);
 });
