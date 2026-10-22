@@ -307,12 +307,15 @@ window.deckReveal=(id)=>{
  const btn=document.querySelector(`[data-reveal="${id}"]`);
  if(btn) btn.textContent=el.classList.contains('deck-hidden')?'Mostra risposta':'Nascondi risposta';
 };
+/* v41: captions remain associated with each image in screen and printable deck. */
 function slideVisualFigure(s,alt,extra=''){
- const extras=(s.visualGallery||[]).slice(0,2);
- const primary='<img decoding="async" src="'+esc(s.img.src)+'" alt="'+esc(alt)+'">';
- if(!extras.length)return '<figure class="slide-visual '+extra+'">'+primary+'<figcaption>'+esc(s.img.caption||'')+'</figcaption></figure>';
- const more=extras.map((v,i)=>'<img loading="eager" src="'+esc(v.src)+'" alt="'+esc(v.caption||'Schema supplementare '+(i+1))+'">').join('');
- return '<figure class="slide-visual st-multi-visual '+extra+'"><div class="st-slide-images">'+primary+more+'</div><figcaption>'+esc(s.img.caption||'')+' · Altri schemi inerenti alla lezione</figcaption></figure>';
+ const extras=(s.visualGallery||[]).filter(x=>x?.src).slice(0,2);
+ const primary={src:s.img?.src||'assets/general.svg',caption:s.img?.caption||alt||'Immagine di supporto'};
+ if(!extras.length)return '<figure class="slide-visual '+extra+'"><img decoding="async" src="'+esc(primary.src)+'" alt="'+esc(alt||primary.caption)+'"><figcaption>'+esc(primary.caption)+'</figcaption></figure>';
+ const figures=[primary,...extras].map((v,i)=>'<div class="st-slide-figure '+(i===0?'st-slide-main':'st-slide-extra')+'">'+
+  '<img '+(i?'loading="eager" ':'')+'decoding="async" src="'+esc(v.src)+'" alt="'+esc(v.caption||('Figura '+(i+1)))+'">'+
+  '<span class="st-slide-figure-caption">'+esc(v.caption||('Figura '+(i+1)))+'</span></div>').join('');
+ return '<figure class="slide-visual st-multi-visual '+extra+'"><div class="st-slide-images">'+figures+'</div><figcaption class="st-gallery-label">Composizione illustrata · '+(extras.length+1)+' immagini</figcaption></figure>';
 }
 function deckSlideBody(s,index){
  const rid=`deck-answer-${index}`;
@@ -343,10 +346,10 @@ function deckSlideBody(s,index){
    return `<div class="slide-kicker">COSA FARE</div><h1>${esc(s.title)}</h1><div class="operational-slide-grid"><section><span>①</span><h2>Prima</h2>${listHtml(s.before||[])}</section><section><span>②</span><h2>Durante</h2>${listHtml(s.during||[])}</section><section><span>③</span><h2>Dopo</h2>${listHtml(s.after||[])}</section></div>${s.remember?`<div class="slide-memory"><strong>Regola da ricordare</strong> ${esc(s.remember)}</div>`:''}`;
  }
  if(s.type==='howTo'){
-   return `<div class="slide-grid"><div class="slide-copy"><div class="slide-kicker">COME FARE</div><h1>${esc(s.title)}</h1><p class="slide-lead">${esc(s.objective||'')}</p><div class="big-list numbered">${stepsHtml(s.steps||[])}</div></div><figure class="slide-visual"><img src="${s.img.src}" alt="Procedura operativa"><figcaption>${esc(s.img.caption||'')}</figcaption></figure></div>`;
+   return `<div class="slide-grid"><div class="slide-copy"><div class="slide-kicker">COME FARE</div><h1>${esc(s.title)}</h1><p class="slide-lead">${esc(s.objective||'')}</p><div class="big-list numbered">${stepsHtml(s.steps||[])}</div></div>${slideVisualFigure(s,'Procedura operativa')}</div>`;
  }
  if(s.type==='escalation'){
-   return `<div class="slide-grid"><div class="slide-copy"><div class="slide-kicker">COME PROCEDERE SE QUALCOSA NON VA</div><h1>${esc(s.title)}</h1><div class="escalation-box"><h2>⛔ Fermati e gestisci</h2>${listHtml(s.problem||[])}</div><div class="escalation-mini"><div><strong>Quando fermarsi</strong>${listHtml(s.stop||[])}</div><div><strong>Chi coinvolgere</strong>${listHtml(s.who||[])}</div></div></div><figure class="slide-visual"><img src="${s.img.src}" alt="Stop, segnala, ripristina"><figcaption>${esc(s.img.caption||'')}</figcaption></figure></div>`;
+   return `<div class="slide-grid"><div class="slide-copy"><div class="slide-kicker">COME PROCEDERE SE QUALCOSA NON VA</div><h1>${esc(s.title)}</h1><div class="escalation-box"><h2>⛔ Fermati e gestisci</h2>${listHtml(s.problem||[])}</div><div class="escalation-mini"><div><strong>Quando fermarsi</strong>${listHtml(s.stop||[])}</div><div><strong>Chi coinvolgere</strong>${listHtml(s.who||[])}</div></div></div>${slideVisualFigure(s,'Stop, segnala, ripristina')}</div>`;
  }
  if(s.type==='risks'){
    return `<div class="slide-grid single-list"><div class="slide-copy"><div class="slide-kicker">RISCHI E POSSIBILI DANNI</div><h1>${esc(s.title)}</h1><div class="big-list">${listHtml(s.risks)}</div></div>${slideVisualFigure(s,s.title)}</div>`;
@@ -369,7 +372,7 @@ function deckSlideBody(s,index){
  }
  if(s.type==='sourceDigest'){
    const d=s.digest||{};
-   return `<div class="slide-grid"><div class="slide-copy"><div class="slide-kicker">APPROFONDIMENTO · ${esc(d.source||'FONTE')}</div><h1>${esc(s.title)}</h1><h2 class="source-title">${esc(d.title||'Approfondimento')}</h2><p class="slide-lead source-summary">${esc(splitSentences(d.summary||'',230)[0]||'')}</p>${d.keypoints&&d.keypoints.length?`<div class="takeaway"><strong>Punti chiave</strong>${listHtml(concise(d.keypoints,3))}</div>`:''}</div><figure class="slide-visual"><img src="${s.img.src}" alt="Approfondimento"><figcaption>${esc(s.img.caption||d.image_caption||'')}</figcaption></figure></div>`;
+   return `<div class="slide-grid"><div class="slide-copy"><div class="slide-kicker">APPROFONDIMENTO · ${esc(d.source||'FONTE')}</div><h1>${esc(s.title)}</h1><h2 class="source-title">${esc(d.title||'Approfondimento')}</h2><p class="slide-lead source-summary">${esc(splitSentences(d.summary||'',230)[0]||'')}</p>${d.keypoints&&d.keypoints.length?`<div class="takeaway"><strong>Punti chiave</strong>${listHtml(concise(d.keypoints,3))}</div>`:''}</div>${slideVisualFigure(s,'Approfondimento')}</div>`;
  }
  if(s.type==='video'){
    const v=s.video||{};
