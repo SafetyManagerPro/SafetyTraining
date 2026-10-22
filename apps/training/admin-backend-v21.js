@@ -224,15 +224,19 @@
     if(seq!==state.enhanceSeq)return;
     const host=document.getElementById('adminContent');
     if(!host)return;
-    if(host.querySelector('.admin-loading') || !host.querySelector('.admin-stats')) {
-      host.innerHTML=dashboardMarkup(summary);
-      return;
-    }
+    // admin.js è il proprietario della struttura della Panoramica.
+    // Non sostituire mai l'intero contenuto durante il caricamento: in passato questo
+    // poteva rimuovere #adminDashboardAnalytics e lasciare la sezione grafici vuota.
+    if(host.querySelector('.admin-loading') || !host.querySelector('.admin-stats')) return;
     const stats=[summary?.companies_active,summary?.learners_active,summary?.courses_active,summary?.editions_open,summary?.enrollments_in_progress,summary?.pending_invites];
     host.querySelectorAll('.admin-stats .admin-stat strong').forEach((el,i)=>{if(stats[i]!=null&&el.textContent!==String(stats[i]))el.textContent=String(stats[i]);});
     const rows=host.querySelectorAll('.admin-summary-list strong');
     if(rows[0]&&summary?.editions_total!=null)rows[0].textContent=String(summary.editions_total);
     if(rows[1]&&summary?.enrollments_total!=null)rows[1].textContent=String(summary.enrollments_total);
+    const analytics=host.querySelector('#adminDashboardAnalytics');
+    if(analytics && !analytics.dataset.a40Loaded && window.SAFETY_ADMIN_ANALYTICS_V40?.renderDashboard){
+      void window.SAFETY_ADMIN_ANALYTICS_V40.renderDashboard({targetId:'adminDashboardAnalytics'});
+    }
   }
 
   async function enhanceActivity(seq) {
