@@ -445,3 +445,14 @@ L'utente ha chiesto un invio più semplice delle iscrizioni e una correzione rap
 - Sicurezza: tabelle in schema private con RLS; RPC admin non invocabili da anon e protette per organizzazione; RPC pubbliche volutamente consentite ad anon solo per consultazione info essenziali e richiesta. Token casuale 192-bit, anti-doppione per edizione/email e limite di 200 richieste per edizione in 24h.
 - VERIFICHE ANCORA DA FARE: prova end-to-end browser con utente anonimo, approvazione e ricezione email; sostituire informativa privacy sintetica con quella completa dell'organizzatore prima di raccogliere dati personali reali; per alto traffico, aggiungere CAPTCHA/rate limit IP. Non dichiarare GDPR completamente soddisfatto.
 - Controlli: sintassi JS delle nuove sorgenti verificata, Vercel READY al commit e5752974; verificare lo stato del commit successivo di aggiornamento documentazione.
+
+## 22 ottobre 2026 — Riorganizzazione menu e permessi corsisti v39
+
+- Menu amministrazione riorganizzato in **6 gruppi espandibili**: Panoramica; Anagrafiche e accessi; Iscrizioni e formazione; Corsi e didattica; Materiali e stampa; Controllo e report.
+- Implementazione additiva: apps/training/admin-menu-v39.js + admin-menu-v39.css. **Sposta gli elementi DOM originali**, senza clonare pulsanti né perdere i listener. Riconosce i plugin dinamici e mantiene visibilità derivata dai permessi già applicati. Gruppo della voce attiva aperto automaticamente. Anche menu mobile.
+- Nuovo centro **Permessi corsisti**: apps/training/admin-learner-permissions-v39.js + CSS. Elenco consultabile con filtro, stato del profilo, collegamento account, invito, assegnazioni corso, progressi. Azioni per: revoca/ripristino di singola iscrizione con RPC admin_set_enrollment_revoked, revoca invito con RPC admin_revoke_learner_invite, rimozione profilo con admin_archive_learner_v36, ripristino con admin_restore_learner_v37. Accessi amministrativi restano separati.
+- Controlli autorizzazione sia in UI tramite admin_capabilities sia nel server tramite RPC già autorizzate; niente cancellazioni hard nel centro permessi. La cancellazione definitiva resta in Corsisti con controllo v38 e planner protetto per storico.
+- Index e service worker aggiornati per caricare i nuovi moduli e rigenerare la cache (safety-training-v39-menu-permissions).
+- Regression test: tests/admin-menu-permissions-v39.test.mjs; aggiunto a npm run check. Verifica sintattica dei moduli eseguita. Non dichiarare collaudo interattivo completo finché non eseguito su account admin, training manager e mobile.
+- Commit: 3160aaf, 95df86b, e964b66, 03db1c5, 554c2b3, dfd5d9a, eebf8b1, 41acfaa.
+- **Obiettivo successivo**: collaudare visualmente apertura/chiusura gruppi, ritorno da sezione plugin a nav tradizionale, permessi per ruolo scoped e rimozione/ripristino corsista di prova. Conservare tutte le vecchie route e i controlli di audit.
