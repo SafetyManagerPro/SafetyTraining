@@ -72,8 +72,8 @@ test('projector has Home, Agenda and Resume buttons on course home and agenda',(
  assert.ok(app.includes('window.resumeCourseDeck='));
  assert.ok(app.includes("window.SAFETY_DECK_BOOKMARK_V42?.save?.(c,deck,index)"));
  assert.ok(app.includes("window.SAFETY_DECK_BOOKMARK_V42?.read?.(c,cachedDeck(c))"));
- assert.ok(app.includes("▶ Avvia presentazione dall'inizio</button> \${continueCourseButton(c)}"));
- assert.ok(app.includes("▶ Avvia presentazione</button>\${continueCourseButton(c)}"));
+ assert.ok(app.includes("▶ Avvia presentazione dall'inizio</button> ${continueCourseButton(c)}"));
+ assert.ok(app.includes("▶ Avvia presentazione</button>${continueCourseButton(c)}"));
  assert.ok(css.includes('.deck-home-btn')&&css.includes('.deck-resume-btn'));
 });
 
