@@ -58,11 +58,19 @@ async function documents(enrollmentId){
  if(error)throw error;return data||[];
 }
 async function openDocument(row){
- if(!row.storage_path)throw Error('Nessun PDF allegato.');
- const {data,error}=await db().storage.from(BUCKET).createSignedUrl(row.storage_path,90);
- if(error)throw error;
- if(!data?.signedUrl)throw Error('PDF non disponibile.');
- window.open(data.signedUrl,'_blank','noopener,noreferrer');
+ if(!row?.storage_path)throw Error('Nessun PDF allegato.');
+ // Apre subito una scheda in risposta al click (anche Safari/iOS blocca i popup asincroni).
+ const viewer=window.open('','_blank');
+ if(!viewer)throw Error('Consenti i popup per aprire e stampare il PDF.');
+ viewer.opener=null;
+ try{
+   viewer.document.title='Caricamento documento';
+   viewer.document.body.textContent='Apertura PDF riservato…';
+   const {data,error}=await db().storage.from(BUCKET).createSignedUrl(row.storage_path,90);
+   if(error)throw error;
+   if(!data?.signedUrl)throw Error('PDF non disponibile.');
+   viewer.location.replace(data.signedUrl);
+ }catch(e){viewer.close();throw e;}
 }
 function template(kind,assignment){
  const name=[cloud()?.learner?.last_name,cloud()?.learner?.first_name].filter(Boolean).join(' ')||'______________________';
@@ -93,9 +101,18 @@ async function renderForAssignments(host,assignments){
  host.querySelectorAll('.lcd-line').forEach(el=>el.remove());
  const eligible=assignments.filter(a=>done(a.status));
  if(!eligible.length)return;
- const settled=await Promise.all(eligible.map(async a=>{
-   try{return {a,docs:await documents(a.id)};}catch(e){return {a,error:e};}
- }));
+ let settled;
+ try{
+   // Un'unica lettura RLS per tutti i corsi del corsista, evitando N richieste ogni refresh.
+   const {data,error}=await db().from('learner_course_documents')
+     .select('id,enrollment_id,kind,title,document_status,is_required,storage_path,notes,published_at')
+     .in('enrollment_id',eligible.map(a=>a.id)).eq('document_status','published')
+     .order('created_at',{ascending:false});
+   if(error)throw error;
+   const byEnrollment=new Map(eligible.map(a=>[a.id,[]]));
+   (data||[]).forEach(doc=>byEnrollment.get(doc.enrollment_id)?.push(doc));
+   settled=eligible.map(a=>({a,docs:byEnrollment.get(a.id)||[]}));
+ }catch(e){settled=eligible.map(a=>({a,error:e}));}
  if(cloud()?.user?.id!==identity||!host.isConnected)return;
  settled.forEach(({a,docs,error})=>{
    if(!active.has(a.id))return;
