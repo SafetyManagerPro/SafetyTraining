@@ -168,7 +168,12 @@ async function renderAdmin(){
  const title=document.getElementById('adminTitle'),subtitle=document.getElementById('adminSubtitle'),host=document.getElementById('adminContent');
  if(title)title.textContent='Attestati e documenti';if(subtitle)subtitle.textContent='Pubblicazione controllata per ogni corsista e iscrizione';
  if(!host)return;
- host.innerHTML='<section class="admin-card"><h2>Archivio documenti per corsista</h2><p class="lcd-note">Qualsiasi documento può essere caricato, aperto e stampato senza controlli sullo stato del corso. La pubblicazione consente al corsista di vedere il PDF; la validità formale resta distinta dalla stampa.</p><div id="lcdAdminBody">Caricamento…</div></section>';
+ host.innerHTML='<section class="admin-card"><h2>Archivio documenti per corsista</h2><p class="lcd-note">Qualsiasi documento può essere caricato, aperto e stampato senza controlli sullo stato del corso. La pubblicazione consente al corsista di vedere il PDF; la validità formale resta distinta dalla stampa.</p>'+
+  '<div class="lcd-line"><h3>Stampa libera — nessuna iscrizione necessaria</h3><div class="lcd-fieldgrid"><label>Modello<select id="lcdStandaloneType">'+Object.entries(KINDS).map(([k,v])=>'<option value="'+esc(k)+'">'+esc(v)+'</option>').join('')+'</select></label><button type="button" id="lcdStandalonePrint" class="lcd-btn" style="align-self:end">Stampa modello vuoto</button></div><p class="lcd-note">Il facsimile non equivale a un documento emesso o firmato.</p></div>'+
+  '<div id="lcdAdminBody">Caricamento…</div></section>';
+ host.querySelector('#lcdStandalonePrint')?.addEventListener('click',()=>printTemplate(
+   host.querySelector('#lcdStandaloneType')?.value||'altro_documento',{}
+  ));
  try{
   state.assignments=await loadAdminEnrollments();if(!current())return;
   const opts=state.assignments.map(e=>'<option value="'+esc(e.id)+'">'+esc([e.person?.last_name,e.person?.first_name].filter(Boolean).join(' ')||e.person?.email||'Corsista')+' — '+esc(e.edition?.title||'Edizione')+'</option>').join('');
