@@ -943,3 +943,30 @@ Quando è disponibile l'attestato, rendere disponibili anche nomine, incarichi e
 - Completare E2E admin carica→pubblica attestato→allegati→learner scarica/stampa→ritiro quando è disponibile un'iscrizione di test valida; verificare UX iPhone/Safari e PWA.
 
 - Correzione UI successiva: `1caa0262b43fb42e1e9aa19d9152d5396b191247` assicura registrazione della voce menu anche dopo login/apertura tardiva della console admin; deployment Vercel `dpl_2N5W8R44yDiMkFPifboWALwxjAny` READY.
+
+
+## v44.1 — Stampa libera di attestati, nomine, incarichi e modelli (23/10/2026)
+
+### Indicazione operativa prevalente
+Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenza, sull'esito, sull'esistenza dell'attestato, sulla firma preventiva o sull'approvazione deve impedire la PREPARAZIONE, L'ANTEPRIMA O LA STAMPA** di attestati, nomine, incarichi, DPI e modelli documentali. I corsisti vedono PDF pubblicati e facsimili stampabili in qualunque fase di iscrizione. Resta distinta l'emissione/validità formale e rimangono protezioni di identità e privacy.
+
+### SafetyManager
+- `js/modules/documenti_azienda_lavoratore_directory.js`: rimosse le dipendenze da formazione completata e nomina abilitata per aprire/generare/vedere i modelli. Inclusi incarico generico, ruoli senza corsi, dichiarazioni e registro DPI; l'assenza di corso è un campo facoltativo.
+- Aggiunta **Stampa libera — modello in bianco** nel Centro Stampe, con attestato non certificante, preposto, primo soccorso, antincendio, attrezzature, quota/DPI III, confinati, incarico generico, verbale/registro DPI, dichiarazione DL. Funziona anche senza azienda e corsista selezionati.
+- `js/modules/progetti_corsisti_refinement.js`: stampe nomina/incarico/DPI visibili e funzionanti anche per iscrizioni non concluse e senza certificato; per corsi non specifici disponibile incarico generico.
+- `js/utils.js`: elimina filtri che omettevano i modelli `autocert` o `relazione_tutor` dal renderer di stampa; esito non valorizzato non viene più inventato come 'Idoneo', ma appare 'Da verificare'. Attestati incompleti/futuri/senza codice, e documenti di competenza condizionata, sono marcati come **BOZZA/FACSIMILE** pur restando stampabili.
+- La validazione di evidenze formative resta nei monitoraggi: non va riutilizzata come blocco del pulsante stampa.
+- Nessuna variazione allo schema Supabase del gestionale.
+
+### SafetyTraining
+- `apps/training/learner-course-documents-v44.js`: pannello corsista disponibile per tutte le proprie iscrizioni, non solo `passed/completed`, anche se non c'è un attestato. PDF pubblicati visibili e stampabili indipendentemente dalla sequenza di pubblicazione; facsimili stampabili per tutti i tipi inclusi attestato **bozza non certificante** e documento generico.
+- Admin `Attestati e documenti`: mostra iscrizioni di qualsiasi stato (prime 500 recenti), con stampa immediata dei modelli vuoti anche senza PDF; upload di bozze, anteprima e pubblicazione non vincolati a firma, verificatore o attestato preesistente (informazioni facoltative). Pubblicare un PDF significa renderlo visibile, non certificare la validità legale.
+- PWA `safety-training-v44-print-freely`.
+- Migration DB `20261023180441_v44_003_remove_print_status_dependencies.sql` applicata e versionata: trigger pubblicazione non legge stato corso, firma o attestato propedeutico; helper di lettura mantiene **SOLO proprietà del destinatario** e iscrizione collegata. Rimangono RLS, bucket privato, controlli file/path.
+
+### Verifiche e limiti
+- Controlli sintassi dei JS modificati: superati.
+- Deploy produzione SafetyManager `0745d1433c` READY; SafetyTraining `5eab58b20f` READY (prima dei successivi aggiornamenti handoff).
+- Verifica DB: trigger privo dei blocchi `completed` e `attestato`; bucket privato e RLS attiva; helper letto e conferma `auth.uid() = learners.auth_user_id` con identità iscrizione.
+- Nessuna iscrizione completata di test e nessun documento caricato nel database SafetyTraining durante questa modifica: **test finale con stampa reale da browser/admin/corsista non eseguito**. Non affermare di averlo collaudato.
+- Non generare automaticamente documenti firmati o attestazioni valide da modelli vuoti. Non consentire accesso ad anagrafiche di altri corsisti. Non reintrodurre vincoli di stampa quando si interviene su conformità o audit.
