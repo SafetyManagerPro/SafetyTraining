@@ -1,6 +1,6 @@
-# SafetyTraining — piattaforma didattica SafetyManager
+# SafetyTraining — piattaforma didattica autonoma
 
-SafetyTraining è la piattaforma didattica/LMS integrata con SafetyManager. Condivide database e identità con il gestionale, ma mantiene un front-end specializzato per aula, docente, corsista, Learning Unit, tracking e materiali formativi.
+SafetyTraining è una piattaforma didattica/LMS **autonoma**, utilizzabile senza SafetyManager Pro. Gestisce nel proprio database Supabase utenti, aziende, corsisti, corsi, edizioni, Learning Unit, test, presenze e documentazione. SafetyManager Pro è un gestionale distinto, anch'esso autonomo: lo scambio fra le due applicazioni è esclusivamente facoltativo, tramite import/export manuale. Non esistono database né autenticazione condivisi.
 
 ## Stato corrente
 
@@ -27,23 +27,23 @@ Leggere in quest'ordine:
 1. [`docs/START_HERE_COLLABORATORS.md`](docs/START_HERE_COLLABORATORS.md) — stato, decisioni, principi e debito tecnico;
 2. [`docs/VERSION_HISTORY_V20.md`](docs/VERSION_HISTORY_V20.md) — progressione migration/versioni;
 3. [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) — roadmap corrente;
-4. [`docs/ARCHITECTURE_V19.md`](docs/ARCHITECTURE_V19.md) — documento storico della fondazione single database / two frontends;
+4. [`docs/ARCHITECTURE_V19.md`](docs/ARCHITECTURE_V19.md) — documento storico SUPERATO della fondazione single database / two frontends;
 5. [`docs/SECURITY_MIGRATION.md`](docs/SECURITY_MIGRATION.md) — principi RLS/multiutente.
 
-## Architettura
+## Architettura attuale — indipendenza delle applicazioni (23/10/2026)
 
 ```text
-                   SUPABASE / AUTH
-                         │
-        ┌────────────────┴────────────────┐
-        │                                 │
- SafetyManager Pro                  SafetyTraining
- gestione/amministrazione           didattica / LMS
-        │                                 │
-        └──────────── dati unici ─────────┘
+SafetyManager Pro                   SafetyTraining
+proprio repository                 proprio repository
+proprio Supabase/Auth              proprio Supabase/Auth
+propria anagrafica e documenti     propri corsi, corsisti e documenti
+         └──── export JSON  → import manuale ────┘
+                 (SOLO se richiesto)
 ```
 
-Principio: non duplicare anagrafiche, corsi o rischi se esiste già una fonte canonica. Le Learning Unit sono componibili e possono essere riutilizzate in più corsi.
+Nessun utente, corso, attestato, documento o flusso di stampa richiede l'altra app per essere creato o utilizzato. Il catalogo locale di SafetyTraining include 60 corrispondenze storiche con codici SafetyManager, ma sono righe **già presenti nel database SafetyTraining**, non richieste in rete al gestionale. Le edizioni e le iscrizioni possono essere create direttamente in SafetyTraining.
+
+`apps/training/integration-import.js` è un importatore manuale opzionale: le sue validazioni riguardano esclusivamente chi decide di usare quel formato. Il progetto v19 con “un solo database” è architettura storica, non in produzione.
 
 ## Regole didattiche essenziali
 
