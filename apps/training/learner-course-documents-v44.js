@@ -242,9 +242,13 @@ async function upload(form,e){
 }
 function boot(){
  style();ensureNav();
+ // La console amministrativa è creata anche dopo il login; non basta il solo DOMContentLoaded.
  document.addEventListener('safety:cloud-state-changed',ensureNav);
- const nav=document.querySelector('#adminShell .admin-nav nav');
- if(nav)new MutationObserver(()=>{if(!document.getElementById('adminCourseDocumentsNav'))ensureNav();}).observe(nav,{childList:true});
+ document.addEventListener('safety:admin-capabilities',ensureNav);
+ document.addEventListener('safety:auth-changed',ensureNav);
+ document.getElementById('adminConsoleBtn')?.addEventListener('click',()=>setTimeout(ensureNav,0));
+ const shell=document.getElementById('adminShell');
+ if(shell)new MutationObserver(()=>{if(!document.getElementById('adminCourseDocumentsNav'))ensureNav();}).observe(shell,{childList:true,subtree:true});
 }
 window.SAFETY_COURSE_DOCUMENTS={renderForAssignments,renderAdmin,printTemplate,suggest,KINDS};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
