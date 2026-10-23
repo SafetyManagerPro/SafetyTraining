@@ -939,3 +939,5 @@ Quando è disponibile l'attestato, rendere disponibili anche nomine, incarichi e
 - Al collaudo del 23/10, SafetyTraining registra 2 iscrizioni `revoked` e **nessuna completata/superata**. Documenti ancora 0: senza una vera iscrizione completata e PDF approvato, il test end-to-end non è certificabile.
 - Pubblicazione PDF da SafetyManager verso SafetyTraining non è ancora automatica: il platform admin deve caricare il PDF definitivo nell'archivio del portale didattico. Evitare di confondere il fascicolo LMS con i documenti storici del gestionale.
 - Completare E2E admin carica→pubblica attestato→allegati→learner scarica/stampa→ritiro quando è disponibile un'iscrizione di test valida; verificare UX iPhone/Safari e PWA.
+
+- Correzione UI successiva: `1caa0262b43fb42e1e9aa19d9152d5396b191247` assicura registrazione della voce menu anche dopo login/apertura tardiva della console admin; deployment Vercel `dpl_2N5W8R44yDiMkFPifboWALwxjAny` READY.
