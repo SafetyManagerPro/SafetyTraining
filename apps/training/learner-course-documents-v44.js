@@ -189,7 +189,8 @@ async function renderAdminRecords(){
    (d.storage_path?'<button class="lcd-btn" data-lcd-preview="'+esc(d.id)+'">Apri</button>':'')+
    (d.document_status==='draft'?'<button class="lcd-btn" data-lcd-publish="'+esc(d.id)+'">Pubblica</button>':'')+
    (d.document_status==='published'?'<button class="lcd-btn" data-lcd-retire="'+esc(d.id)+'">Ritira</button>':'')+
-   '</div></div>').join(''):'<p class="lcd-note">Non ci sono documenti: inizia caricando l’attestato.</p>')+'</div>'+
+   '</div></div>').join(''):'<p class="lcd-note">Nessun PDF caricato. Puoi comunque stampare qualsiasi modello in bianco.</p>')+'</div>'+
+   '<h3>Stampa immediata di un modello in bianco</h3><div class="lcd-fieldgrid"><label>Tipo di modello<select id="lcdAdminTemplate">'+Object.entries(KINDS).map(([k,v])=>'<option value="'+esc(k)+'">'+esc(v)+'</option>').join('')+'</select></label><button type="button" id="lcdAdminTemplatePrint" class="lcd-btn" style="align-self:end">Stampa facsimile</button></div>'+
    '<h3>Nuovo documento — stampa libera</h3><form id="lcdAdminForm" class="lcd-admin">'+
    '<div class="lcd-fieldgrid"><label>Tipo<select name="kind">'+Object.entries(KINDS).map(([k,v])=>'<option value="'+esc(k)+'">'+esc(v)+'</option>').join('')+'</select></label>'+
    '<label>Titolo<input name="title" required minlength="3" maxlength="180" placeholder="Titolo documento"></label></div>'+
@@ -212,6 +213,11 @@ async function renderAdminRecords(){
    const {error}=await db().from('learner_course_documents').update({document_status:'retired'}).eq('id',d.id);if(error)throw error;
    await renderAdminRecords();
   }));
+  host.querySelector('#lcdAdminTemplatePrint')?.addEventListener('click',()=>{
+    printTemplate(host.querySelector('#lcdAdminTemplate')?.value||'altro_documento',{
+      courseTitle:e.edition?.title||'Corso non specificato',editionTitle:e.edition?.title||''
+    });
+  });
   host.querySelector('#lcdAdminForm').onsubmit=ev=>{ev.preventDefault();void act(()=>upload(ev.currentTarget,e));};
  }catch(err){showError(host,err);}
 }
