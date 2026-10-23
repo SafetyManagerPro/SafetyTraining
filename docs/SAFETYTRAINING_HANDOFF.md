@@ -907,3 +907,35 @@ Created docs/ADMIN_DELETION_RELEASE_GATE_V25.md with an explicit NO-GO release g
 - **CI:** il primo run del commit runtime (`39865602113`) ha individuato un errore di escaping nelle sole nuove asserzioni del test. Le espressioni regolari sono state corrette nel commit di completamento; il comportamento runtime già verificato non è stato modificato.
 - **Integrità:** nessuna modifica a dati live, ruoli, iscrizioni, progressi, attestazioni o revisioni immagini.
 - **Convalida automatica completa:** GitHub Actions run `39866114246` **SUCCESS** sul commit `9fea7d3ff379d1d6d075be4237a13e9194562849` (suite completa, incluse regressioni admin e sincronizzazione handoff).
+
+
+## v44 — Attestato e documenti del corsista (23/10/2026)
+
+### Richiesta operativa
+Quando è disponibile l'attestato, rendere disponibili anche nomine, incarichi e altri allegati pertinenti, leggibili e stampabili dal corsista; se manca un modello, offrire un facsimile stampabile.
+
+### Modifiche applicate
+- `apps/training/learner-course-documents-v44.js`: fascicolo per singola iscrizione; nel pannello `I miei corsi` il corsista completa il corso e, quando il PDF dell'attestato viene pubblicato dall'admin, visualizza attestato e allegati PDF e può aprirli/stamparli.
+- Facsimili stampabili per preposto, primo soccorso, antincendio, autorizzazione attrezzature, quota/DPI e verbale consegna DPI. I facsimili riportano un avviso esplicito: NON sono documenti validi senza completamento, approvazione e firme.
+- Sezione amministrativa `Attestati e documenti` nel gruppo `MATERIALI E STAMPA`; caricamento di PDF verificati, bozza, anteprima, pubblicazione e ritiro. Solo `platform_admin`.
+- `apps/training/learner-dashboard.js`, `apps/training/index.html`, `apps/training/admin-menu-v39.js`: collegamenti UI.
+- `apps/training/sw.js`: PWA `safety-training-v44-learner-documents`, asset aggiunto.
+- SQL live `v44_001` (`20261023174530`) e `v44_002` (`20261023175113`), sorgenti versionate nel repository: `learner_course_documents`, RLS rigorosa, Storage privato `learner-course-documents`, trigger approvazione, controllo univocità dell'attestato attivo e possibilità di più allegati.
+
+### Condizioni e sicurezza
+1. Il completamento didattico NON crea automaticamente l'attestato ufficiale o una nomina aziendale.
+2. L'admin carica il PDF dell'attestato reale, verifica firma e approvatore, poi lo pubblica.
+3. Soltanto dopo sono pubblicabili gli allegati; senza attestato pubblicato le policy negano al corsista visibilità e download dei documenti collegati.
+4. Documenti limitati alla stessa `enrollment_id` e al `learner_id` proprietario via RLS, Storage privato e URL temporanei.
+5. Facsimili mai etichettati come documenti sottoscritti; necessità concreta di nomina/DPI va valutata nel contesto aziendale.
+6. Nessun ampliamento dei permessi `company_admin`, nessuna variazione ai corsi frozen, nessun trasferimento automatico o artificioso di attestati SafetyManager tra due database distinti.
+
+### Verifiche e limiti residui
+- Migration `v44_001` e `v44_002` applicate con esito SUCCESS.
+- RLS attiva, bucket privato, 5 policy Storage specifiche e indice attestato unico verificati.
+- Il ruolo `anon` non ha nemmeno il privilegio SELECT sulla tabella (errore 42501 atteso).
+- Advisor sicurezza: nessuna segnalazione sul nuovo archivio; persistono gli avvisi di baseline del database su altri oggetti.
+- Sintassi JavaScript verificata per modulo, dashboard corsista e navigazione admin.
+- Al collaudo del 23/10, SafetyTraining registra 2 iscrizioni `revoked` e **nessuna completata/superata**. Documenti ancora 0: senza una vera iscrizione completata e PDF approvato, il test end-to-end non è certificabile.
+- Pubblicazione PDF da SafetyManager verso SafetyTraining non è ancora automatica: il platform admin deve caricare il PDF definitivo nell'archivio del portale didattico. Evitare di confondere il fascicolo LMS con i documenti storici del gestionale.
+- Completare E2E admin carica→pubblica attestato→allegati→learner scarica/stampa→ritiro quando è disponibile un'iscrizione di test valida; verificare UX iPhone/Safari e PWA.
