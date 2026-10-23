@@ -1,5 +1,9 @@
-# SafetyManager Pro — applicazione gestionale
+# SafetyManager Pro — gestionale indipendente
 
-La v19 non duplica il codice di SafetyManager Pro. Il gestionale esistente resta nel repository `SafetyManagerPro/SafetyManager` e condivide il medesimo database Supabase con Safety Training.
+SafetyManager Pro vive nel repository `SafetyManagerPro/SafetyManager` e utilizza il proprio progetto Supabase, separato da SafetyTraining.
 
-Nella migrazione progressiva SafetyManager continuerà a usare `enti`, `aziende`, `corsisti`, `docenti`, `progetti`, `iscrizioni`, `training_sessions`, `session_attendance`, `test_digitali` e il motore normativo già esistenti. Le nuove tabelle LMS sono additive.
+SafetyTraining si trova in `SafetyManagerPro/SafetyTraining` e utilizza un secondo progetto Supabase, con proprie identità, aziende, corsisti, corsi, iscrizioni e documenti.
+
+**Nessuna funzione di SafetyManager deve dipendere dal funzionamento di SafetyTraining e viceversa.** L'esportazione JSON da SafetyManager e la relativa importazione in SafetyTraining sono solo opzioni manuali. Non ci sono chiavi o autenticazioni condivise fra i due sistemi.
+
+Nota aggiornata al 23/10/2026: le precedenti indicazioni di architettura v19 sul database condiviso sono superate.
