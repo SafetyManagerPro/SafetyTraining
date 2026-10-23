@@ -1,3 +1,7 @@
+> **ARCHIVIO STORICO, NON ARCHITETTURA ATTIVA (23 ottobre 2026).** Questo documento descrive l'ipotesi v19 di singolo database; **non va più usata come base di sviluppo**. In produzione SafetyManager Pro e SafetyTraining sono autonomi, hanno **due progetti Supabase e due sistemi Auth distinti**. La comunicazione è facoltativa tramite export/import manuale. Per regole correnti vedi `README.md`, `docs/START_HERE_COLLABORATORS.md` e `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
+
+---
+
 # Safety Platform v19 — architettura fondativa
 
 ## Decisione principale
