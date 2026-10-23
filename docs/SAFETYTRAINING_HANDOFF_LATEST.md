@@ -970,3 +970,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Verifica DB: trigger privo dei blocchi `completed` e `attestato`; bucket privato e RLS attiva; helper letto e conferma `auth.uid() = learners.auth_user_id` con identità iscrizione.
 - Nessuna iscrizione completata di test e nessun documento caricato nel database SafetyTraining durante questa modifica: **test finale con stampa reale da browser/admin/corsista non eseguito**. Non affermare di averlo collaudato.
 - Non generare automaticamente documenti firmati o attestazioni valide da modelli vuoti. Non consentire accesso ad anagrafiche di altri corsisti. Non reintrodurre vincoli di stampa quando si interviene su conformità o audit.
+
+
+### Ulteriori rifiniture e stato finale della stampa libera (23/10/2026)
+- **SafetyManager:** `js/modules/documenti_condizionali.js` (`7760c4bb65`) non disabilita più pulsanti autocertificazione, tutor e dichiarazioni docenti per ente/tutor/docente mancante; senza docenti il renderer restituisce il facsimile vuoto anziché zero pagine.
+- `js/utils.js` (`6ca8e2b34e`) etichetta come `FACSIMILE` anche le dichiarazioni docente senza docenti assegnati; rimane disponibile l'apertura della stampa.
+- **SafetyTraining:** `apps/training/learner-course-documents-v44.js` (`e4837d4062`) aggiunge la stampa in bianco nella schermata admin **anche senza alcuna iscrizione selezionata**; accesso riservato all'amministratore, nessun controllo di esito/firma per stampare.
+- I controlli di destinatario e riservatezza dei file pubblicati restano attivi; nessun modello in bianco vale come atto emesso.
