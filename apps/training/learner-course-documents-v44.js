@@ -99,7 +99,7 @@ async function renderForAssignments(host,assignments){
  style();
  const identity=cloud()?.user?.id,active=new Set(assignments.map(a=>a.id));
  host.querySelectorAll('.lcd-line').forEach(el=>el.remove());
- const eligible=assignments.filter(a=>done(a.status));
+ const eligible=assignments.filter(a=>a?.id);
  if(!eligible.length)return;
  let settled;
  try{
@@ -121,15 +121,11 @@ async function renderForAssignments(host,assignments){
    const pane=document.createElement('section');pane.className='lcd-line';
    if(error){pane.innerHTML='<p class="lcd-note">Documenti non disponibili: '+esc(error.message||error)+'</p>';card.appendChild(pane);return;}
    const published=docs.filter(d=>d.document_status==='published');
-   const certificate=published.find(d=>d.kind==='attestato');
-   if(!certificate){
-     pane.innerHTML='<h3>📄 Documenti del corso</h3><p class="lcd-note">I documenti saranno disponibili dopo la pubblicazione dell’attestato verificato da parte dell’amministrazione.</p>';
-     card.appendChild(pane);return;
-   }
-   const linked=published.filter(d=>d.kind!=='attestato');
-   const proposed=suggest(a.courseStableKey).filter(k=>!linked.some(d=>d.kind===k));
-   pane.innerHTML='<h3>📄 Attestato e documenti collegati</h3><div class="lcd-list">'+
-    published.map(d=>'<div class="lcd-row"><div><b>'+esc(d.title)+'</b><small>'+esc(d.kind==='attestato'?'Attestato verificato':d.is_required?'Documento collegato obbligatorio per il caso registrato':'Documento collegato')+'</small></div><button type="button" class="lcd-btn" data-lcd-download="'+esc(d.id)+'">Apri / stampa PDF</button></div>').join('')+
+   const linked=published;
+   // Ogni modello è disponibile subito, senza prerequisiti formativi o documentali.
+   const proposed=Object.keys(KINDS).filter(k=>k!=='altro_documento'&&!linked.some(d=>d.kind===k));
+   pane.innerHTML='<h3>📄 Documenti e modelli stampabili</h3><p class="lcd-note">Stampa disponibile in qualsiasi fase. I PDF pubblicati sono separati dai facsimili da completare.</p><div class="lcd-list">'+
+    published.map(d=>'<div class="lcd-row"><div><b>'+esc(d.title)+'</b><small>'+esc(d.is_required?'Documento collegato indicato come obbligatorio':'PDF pubblicato dall’amministrazione')+'</small></div><button type="button" class="lcd-btn" data-lcd-download="'+esc(d.id)+'">Apri / stampa PDF</button></div>').join('')+
     proposed.map(k=>'<div class="lcd-row"><div><b>'+esc(KINDS[k])+'</b><small>Facsimile da compilare e approvare, non valido come nomina firmata</small></div><button type="button" class="lcd-btn" data-lcd-template="'+esc(k)+'">Stampa modello</button></div>').join('')+
     '</div><p class="lcd-note">Il completamento del corso non conferisce automaticamente incarichi o autorizzazioni. I modelli devono essere validati e sottoscritti dai responsabili prima dell’utilizzo.</p>';
    pane.querySelectorAll('[data-lcd-download]').forEach(b=>b.onclick=async()=>{const row=published.find(d=>d.id===b.dataset.lcdDownload);if(row){b.disabled=true;try{await openDocument(row);}catch(e){alert(e.message||e);}finally{b.disabled=false;}}});
@@ -146,7 +142,7 @@ function ensureNav(){
  b.classList.toggle('hidden',!platformAdmin());b.setAttribute('aria-hidden',String(!platformAdmin()));
 }
 async function loadAdminEnrollments(){
- const {data:rows,error}=await db().from('enrollments').select('id,learner_id,edition_id,status,completed_at').in('status',['completed','passed']).order('completed_at',{ascending:false}).limit(250);
+ const {data:rows,error}=await db().from('enrollments').select('id,learner_id,edition_id,status,completed_at').order('created_at',{ascending:false}).limit(500);
  if(error)throw error;
  const learners=[...new Set((rows||[]).map(e=>e.learner_id))];
  const editions=[...new Set((rows||[]).map(e=>e.edition_id))];
@@ -168,11 +164,11 @@ async function renderAdmin(){
  const title=document.getElementById('adminTitle'),subtitle=document.getElementById('adminSubtitle'),host=document.getElementById('adminContent');
  if(title)title.textContent='Attestati e documenti';if(subtitle)subtitle.textContent='Pubblicazione controllata per ogni corsista e iscrizione';
  if(!host)return;
- host.innerHTML='<section class="admin-card"><h2>Archivio documenti per corsista</h2><p class="lcd-note">PDF caricati solo dall’amministratore; visibili al corsista solo se l’attestato è pubblicato. Firma, approvazione ed effettiva validità vanno verificate prima della pubblicazione.</p><div id="lcdAdminBody">Caricamento…</div></section>';
+ host.innerHTML='<section class="admin-card"><h2>Archivio documenti per corsista</h2><p class="lcd-note">Qualsiasi documento può essere caricato, aperto e stampato senza controlli sullo stato del corso. La pubblicazione consente al corsista di vedere il PDF; la validità formale resta distinta dalla stampa.</p><div id="lcdAdminBody">Caricamento…</div></section>';
  try{
   state.assignments=await loadAdminEnrollments();if(!current())return;
   const opts=state.assignments.map(e=>'<option value="'+esc(e.id)+'">'+esc([e.person?.last_name,e.person?.first_name].filter(Boolean).join(' ')||e.person?.email||'Corsista')+' — '+esc(e.edition?.title||'Edizione')+'</option>').join('');
-  host.querySelector('#lcdAdminBody').innerHTML='<div class="lcd-admin"><label>Seleziona iscrizione completata<select id="lcdAdminEnrollment"><option value="">Seleziona corsista e corso</option>'+opts+'</select></label><div id="lcdAdminRecords"></div><div id="lcdAdminFeedback" role="status" aria-live="polite"></div></div>';
+  host.querySelector('#lcdAdminBody').innerHTML='<div class="lcd-admin"><label>Seleziona corsista e iscrizione<select id="lcdAdminEnrollment"><option value="">Seleziona corsista e corso</option>'+opts+'</select></label><div id="lcdAdminRecords"></div><div id="lcdAdminFeedback" role="status" aria-live="polite"></div></div>';
   const sel=host.querySelector('#lcdAdminEnrollment');if(state.selected&&state.assignments.some(e=>e.id===state.selected))sel.value=state.selected;
   sel.onchange=()=>{state.selected=sel.value;void renderAdminRecords();};
   if(sel.value)await renderAdminRecords();
@@ -190,20 +186,19 @@ async function renderAdminRecords(){
    (d.document_status==='draft'?'<button class="lcd-btn" data-lcd-publish="'+esc(d.id)+'">Pubblica</button>':'')+
    (d.document_status==='published'?'<button class="lcd-btn" data-lcd-retire="'+esc(d.id)+'">Ritira</button>':'')+
    '</div></div>').join(''):'<p class="lcd-note">Non ci sono documenti: inizia caricando l’attestato.</p>')+'</div>'+
-   '<h3>Nuovo documento</h3><form id="lcdAdminForm" class="lcd-admin">'+
+   '<h3>Nuovo documento — stampa libera</h3><form id="lcdAdminForm" class="lcd-admin">'+
    '<div class="lcd-fieldgrid"><label>Tipo<select name="kind">'+Object.entries(KINDS).map(([k,v])=>'<option value="'+esc(k)+'">'+esc(v)+'</option>').join('')+'</select></label>'+
    '<label>Titolo<input name="title" required minlength="3" maxlength="180" placeholder="Titolo documento"></label></div>'+
-   '<label>PDF firmato / validato (massimo 15 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required></label>'+
-   '<div class="lcd-fieldgrid"><label>Data documento<input name="issued_at" type="date"></label><label>Verificato / approvato da<input name="approved_by" required placeholder="Nominativo del verificatore"></label></div>'+
+   '<label>PDF da rendere stampabile (massimo 15 MB)<input name="pdf" type="file" accept="application/pdf,.pdf" required></label>'+
+   '<div class="lcd-fieldgrid"><label>Data documento<input name="issued_at" type="date"></label><label>Verificato / approvato da (facoltativo)<input name="approved_by" placeholder="Nominativo, se già approvato"></label></div>'+
    '<label class="lcd-checkbox"><input name="is_required" type="checkbox"> Documento obbligatorio per questo caso (secondo verifica aziendale / normativa)</label>'+
-   '<label class="lcd-checkbox"><input name="verified_signature" type="checkbox" required> Confermo di aver verificato firme, dati, titolarità e adeguatezza del documento prima della pubblicazione.</label>'+
+   '<label class="lcd-checkbox"><input name="verified_signature" type="checkbox"> Documento già sottoscritto/verificato (informazione facoltativa, non blocca la stampa)</label>'+
    '<label>Note interne<textarea name="notes" rows="2" placeholder="Eventuali verifiche o condizioni"></textarea></label>'+
-   '<button type="submit" class="lcd-btn">Carica come bozza</button><p class="lcd-note">Dopo il caricamento verifica l’anteprima e scegli «Pubblica». Per gli allegati, pubblica prima l’attestato. I documenti rimangono privati fino alla pubblicazione.</p></form>';
+   '<button type="submit" class="lcd-btn">Carica come bozza</button><p class="lcd-note">Carica una bozza, aprila e stampala subito; pubblicala quando vuoi renderla visibile al corsista. Non è necessario un attestato precedente né un corso completato.</p></form>';
   host.querySelectorAll('[data-lcd-preview]').forEach(b=>b.onclick=()=>act(async()=>openDocument(docs.find(d=>d.id===b.dataset.lcdPreview))));
   host.querySelectorAll('[data-lcd-publish]').forEach(b=>b.onclick=()=>act(async()=>{
    const d=docs.find(x=>x.id===b.dataset.lcdPublish);
-   if(d.kind!=='attestato'&&!docs.some(x=>x.kind==='attestato'&&x.document_status==='published'))throw Error('Pubblica prima l’attestato.');
-   if(!confirm('Pubblicare il documento per il corsista? Verifica prima che sia firmato e valido.'))return;
+   if(!confirm('Rendere questo PDF visibile e stampabile al corsista?'))return;
    const {error}=await db().from('learner_course_documents').update({document_status:'published'}).eq('id',d.id);if(error)throw error;
    await renderAdminRecords();
   }));
@@ -225,9 +220,8 @@ async function upload(form,e){
  if(!platformAdmin())throw Error('Accesso non autorizzato.');
  const v=new FormData(form),file=v.get('pdf'),kind=String(v.get('kind')||'');
  if(!(file instanceof File)||file.size===0||file.size>15728640||file.type!=='application/pdf'||!file.name.toLowerCase().endsWith('.pdf'))throw Error('Selezionare un PDF valido di massimo 15 MB.');
- if(!v.get('verified_signature'))throw Error('Verificare la firma prima di procedere.');
  const id=crypto.randomUUID(),path=e.id+'/'+id+'/documento.pdf',title=String(v.get('title')||'').trim();
- const row={id,enrollment_id:e.id,learner_id:e.learner_id,kind,title,is_required:v.get('is_required')==='on',verified_signature:true,approved_by:String(v.get('approved_by')||'').trim(),issued_at:v.get('issued_at')||null,notes:String(v.get('notes')||'').trim(),document_status:'draft'};
+ const row={id,enrollment_id:e.id,learner_id:e.learner_id,kind,title,is_required:v.get('is_required')==='on',verified_signature:v.get('verified_signature')==='on',approved_by:String(v.get('approved_by')||'').trim(),issued_at:v.get('issued_at')||null,notes:String(v.get('notes')||'').trim(),document_status:'draft'};
  const created=await db().from('learner_course_documents').insert(row);if(created.error)throw created.error;
  try{
   const uploaded=await db().storage.from(BUCKET).upload(path,file,{cacheControl:'0',upsert:false,contentType:'application/pdf'});
