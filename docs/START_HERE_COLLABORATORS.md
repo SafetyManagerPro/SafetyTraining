@@ -1,6 +1,6 @@
 # SafetyTraining — START HERE per collaboratori
 
-Aggiornato: 15 ottobre 2026
+Aggiornato: 23 ottobre 2026 — autonomia applicazioni
 
 Questo documento è la fonte operativa principale per chi entra nel progetto o deve riprendere lo sviluppo senza conoscere le conversazioni precedenti. I documenti `ARCHITECTURE_V19.md`, `CURRENT_SUPABASE_AUDIT.md`, `COURSE_SCOPE.md` e il vecchio `IMPLEMENTATION_PLAN.md` descrivono fasi storiche importanti, ma alcune decisioni lì contenute sono state superate. In caso di conflitto, usare questo documento e `VERSION_HISTORY_V20.md` come riferimento più recente.
 
@@ -8,13 +8,16 @@ Questo documento è la fonte operativa principale per chi entra nel progetto o d
 
 SafetyTraining non deve essere una semplice raccolta di slide. È la piattaforma didattica del sistema SafetyManager e deve poter gestire percorsi di salute e sicurezza sul lavoro in modo professionale, tracciabile e progressivamente compatibile con D.Lgs. 81/08, Accordo Stato-Regioni 17/04/2025 e normative specialistiche.
 
-Architettura concettuale:
+Architettura attuale e vincolante (verificata nel codice e nei due DB il 23/10/2026):
 
-- **SafetyManager** = catalogo master, anagrafiche, aziende, rischi, progetti/edizioni, presenze, fascicoli, attestati, scadenze e contesto organizzativo;
-- **SafetyTraining** = Blueprint -> Learning Unit -> regole di erogazione -> prerequisiti -> aggiornamenti -> verifiche -> qualificazione;
-- database condiviso Supabase;
-- front-end distinti ma dati e identità condivisi;
-- Learning Unit riutilizzabili, versionate e componibili in più corsi.
+- **SafetyManager Pro** = gestionale autonomo, repository e database Supabase propri; corsi, aziende, corsisti, progetti, presenze, fascicoli, attestati, nomine e documenti gestiti indipendentemente.
+- **SafetyTraining** = LMS autonomo, repository e database Supabase propri; anagrafiche, aziende, corsisti, corsi, edizioni, materiale formativo, test, attestati e documentazione autonomi.
+- **NON condividono** database Supabase, `auth.users`, account o archivi. Non creare nuove dipendenze obbligatorie né dare per scontato che un record esista nell'altra app.
+- Il catalogo importato/derivato da SafetyManager è una **copia locale storica** di codici e mappature in SafetyTraining, non un catalogo interrogato in tempo reale. SafetyTraining può creare corsi ed edizioni nativi, senza import.
+- Unica integrazione applicativa prevista: esportazione JSON manuale da SafetyManager e importazione manuale opzionale in SafetyTraining. Non avviare automaticamente sincronizzazioni, né imporre requisiti incrociati.
+- Stampa e preparazione di attestati, nomine, incarichi e altri modelli **non sono subordinati all'altra app**; distinguere sempre facsimile/bozza da documento emesso.
+- `docs/ARCHITECTURE_V19.md` e le vecchie dichiarazioni di DB/identità condivisi sono riferimenti storici **superati**: non implementarli.
+
 
 ## 2. Principi NON negoziabili emersi durante lo sviluppo
 
