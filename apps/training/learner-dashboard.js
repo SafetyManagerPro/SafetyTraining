@@ -194,6 +194,9 @@
       </article>`;
     }).join('');
     host.querySelectorAll('[data-enrollment-id]').forEach(btn=>btn.onclick=()=>{void openCourse(btn.dataset.enrollmentId);});
+    if (window.SAFETY_COURSE_DOCUMENTS?.renderForAssignments) {
+      await window.SAFETY_COURSE_DOCUMENTS.renderForAssignments(host, assignments);
+    }
     updateAssignedSidebar();
   }
 
