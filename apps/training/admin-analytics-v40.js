@@ -13,6 +13,14 @@ const num=v=>Number(v)||0;
 let currentReportSeq=0,reportState={company:'',course:'',status:'',query:'',learner:'',includeRevoked:false,all:null,filtered:[]};
 const CSS='.a40-root{display:grid;gap:16px}.a40-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px}.a40-kpi{border:1px solid rgba(255,255,255,.11);background:#102439;border-radius:12px;padding:15px}.a40-kpi strong{display:block;font-size:25px;color:#e7f9ff}.a40-kpi small{color:#afc2d2;font-size:12px}.a40-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:15px}.a40-bar{display:grid;grid-template-columns:minmax(94px,140px) minmax(0,1fr) 50px;align-items:center;gap:9px;padding:7px 0;font-size:12px}.a40-bar label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d0deea}.a40-track{height:15px;background:#142a40;border-radius:8px;overflow:hidden}.a40-fill{height:100%;background:linear-gradient(90deg,#288caa,#44cdaa);min-width:0}.a40-bar b{text-align:right;font-variant-numeric:tabular-nums}.a40-filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.a40-filters label{display:grid;gap:5px;min-width:180px;flex:1;font-size:12px}.a40-filters input,.a40-filters select{padding:10px;border:1px solid #496076;border-radius:9px;background:#0d2031;color:#fff;width:100%}.a40-actions{display:flex;gap:8px;flex-wrap:wrap}.a40-actions button,.a40-btn{padding:9px 12px;border-radius:8px;border:1px solid #55728a;background:#1a4059;color:#fff;font-weight:730;cursor:pointer}.a40-actions button:disabled{opacity:.45}.a40-table{overflow-x:auto}.a40-table table{width:100%;border-collapse:collapse;min-width:650px;font-size:12px}.a40-table th,.a40-table td{padding:10px;border-bottom:1px solid #304156;text-align:left}.a40-table th{color:#b9c9db}.a40-note{font-size:12px;color:#adbece;line-height:1.5}.a40-error{color:#ffadad}.a40-badge{display:inline-block;font-size:11px;padding:3px 7px;background:#28445b;border-radius:8px}.a40-badge.done{background:#165e50}.a40-badge.revoked{background:#68383f}.a40-student{padding:12px;border:1px solid #3b4d61;border-radius:10px;background:#102236}.a40-student dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.a40-student dt{font-size:11px;color:#afc5d7}.a40-student dd{margin:3px 0;font-weight:730}.a40-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}.a40-loading{padding:14px;color:#bdd4e4}';
 function initStyle(){if(document.getElementById('a40Style'))return;const s=document.createElement('style');s.id='a40Style';s.textContent=CSS;document.head.appendChild(s);}
+function renderRetry(target,message,retry){
+ target.innerHTML='<div class="a40-root"><p class="a40-error">'+esc(message)+'</p><div class="a40-actions"><button type="button" data-a40-retry>Riprova</button></div></div>';
+ target.dataset.a40Loaded='error';
+ target.querySelector('[data-a40-retry]')?.addEventListener('click',()=>{
+  delete target.dataset.a40Loaded;
+  void retry();
+ },{once:true});
+}
 async function paged(table,columns,{max=3000,filters=[]}={}){
  let rows=[],page=500,truncated=false;
  for(let start=0;start<max;start+=page){
@@ -91,7 +99,7 @@ async function renderDashboard(args={}){
   const data=await dataset();if(!target.isConnected||actor()!==id)return;
   target.innerHTML=dashboardMarkup(data);target.dataset.a40Loaded='1';
  } catch(e){
-  if(target.isConnected){target.innerHTML='<p class="a40-error">Grafici non disponibili: '+esc(e.message||e)+'</p>';target.dataset.a40Loaded='error';}
+  if(target.isConnected)renderRetry(target,'Grafici non disponibili: '+(e.message||e),()=>renderDashboard(args));
  } finally {
   if(target.isConnected)delete target.dataset.a40Loading;
  }
@@ -126,7 +134,7 @@ async function renderControlSummary(args={}){
   target.innerHTML=controlMarkup(data);target.dataset.a40Loaded='1';
   target.querySelector('[data-a40-open-reports]')?.addEventListener('click',()=>void renderReports());
  }catch(e){
-  if(target.isConnected){target.innerHTML='<p class="a40-error">Controlli non disponibili: '+esc(e.message||e)+'</p>';target.dataset.a40Loaded='error';}
+  if(target.isConnected)renderRetry(target,'Controlli non disponibili: '+(e.message||e),()=>renderControlSummary(args));
  }finally{
   if(target.isConnected)delete target.dataset.a40Loading;
  }
@@ -317,3 +325,4 @@ function boot(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 window.SAFETY_ADMIN_ANALYTICS_V40={renderDashboard,renderControlSummary,renderReports,dashboardMarkup,controlMarkup,csvCell,hydrateVisibleAdminAnalytics};
 })();
+
