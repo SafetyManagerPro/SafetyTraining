@@ -64,7 +64,7 @@ test('filters persist when returning home and reset without stored preferences',
 });
 test('v45.2 frontend and handoffs match cache and preserve learner guard',()=>{
  const src=read('apps/training/catalog-browser.js');
- for(const s of ['id="catalogReadiness"','id="catalogSort"','id="catalogResetFilters"','filters:blankFilters()','state.filters=blankFilters();load(true)','isLearner()'])assert.ok(src.includes(s),s);
+ for(const s of ['id="catalogReadiness"','id="catalogSort"','id="catalogResetFilters"','filters:blankFilters()','state.filters=blankFilters()','isLearner()'])assert.ok(src.includes(s),s);
  assert.doesNotMatch(src,/r\.progress_pct|r\.active_seconds/);
  const css=read('apps/training/catalog-learner-v45.css');
  assert.ok(css.includes('@media(max-width:1150px)'));

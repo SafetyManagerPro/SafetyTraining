@@ -27,7 +27,7 @@ function scene(){
  const toolbar=element();toolbar.map=controls;
  const root=element();
  root.map={'.v45-library-toolbar':null,'.library-module':[sectionA,sectionB]};
- const doc={createElement:()=>{if(!doc.created){doc.created=toolbar;return toolbar;}return element();}};
+ const doc={createElement:tag=>tag==='section'?toolbar:element()};
  const win={};
  runInNewContext(read('apps/training/library-navigator-v45-3.js'),{document:doc,window:win,String,Array,Map,Set});
  const modules=[
