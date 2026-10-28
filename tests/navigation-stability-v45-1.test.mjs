@@ -22,7 +22,7 @@ test('catalog renders escaped identifiers and safely dispatches a course click',
   catalogCards:cards,
   catalogResultCount:{set textContent(v){counter=v;}}
  };
- const documentMock={readyState:'loading',addEventListener(){},getElementById:id=>elements[id]||null};
+ const documentMock={readyState:'loading',body:{classList:{remove(){},add(){},toggle(){return false;}}},addEventListener(){},getElementById:id=>elements[id]||null};
  const locationMock={get hash(){return hash;},set hash(v){hash=v;}};
  const windowMock={SAFETY_CLOUD:{state:{client:{rpc:async()=>({data:[row],error:null})},user:{id:'admin'},learner:null}},SAFETY_DATA:[]};
  runInNewContext(read('apps/training/catalog-browser.js'),{window:windowMock,document:documentMock,location:locationMock,console,setTimeout,encodeURIComponent,decodeURIComponent,Number,Set,String});
