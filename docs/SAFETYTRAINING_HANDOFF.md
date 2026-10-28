@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-28
-Stato corrente: **v45.3 consultazione Learning Unit in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.3-unit-explorer`.
+Stato corrente: **v45.3 LIVE · CI #644 SUCCESS · smoke browser strumenti Learning Unit pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.3-unit-explorer`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1061,3 +1061,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Modulo frontend `library-navigator-v45-3.js`, CSS responsive e stampa, test `library-navigator-v45-3.test.mjs`, PWA `safety-training-v45.3-unit-explorer`.
 - Nessuna modifica a permessi, 27 corsi frozen, versione/unità, progressi, report, attestazioni, RLS, database o bridge SafetyManager. `company_admin` resta non abilitato.
 - Smoke browser con account reali 1440/820/390 (ricerca, Espandi/Comprimi, stampa, cambio pagina durante RPC) e E2E multi-ruolo da confermare. Nessuna attestazione normativa introdotta.
+
+
+## 2026-10-28 — v45.3 — Verifica release automatica
+- PR #10 merged, commit applicativo `main` `1e1c1df0776775604b866b076ee7746f4ed1e940`; GitHub Actions `#644` (run `40647688685`) **SUCCESS** sullo stesso SHA.
+- Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_Fur9U9n4nWgZGiXj47qQw9fyhb8V` **READY** con `githubCommitSha=1e1c1df0776775604b866b076ee7746f4ed1e940`; cache `safety-training-v45.3-unit-explorer`.
+- Confermata integrità del rilascio dal punto di vista CI/deployment; **collaudo interattivo dei nuovi strumenti Learning Unit in browser reale ancora da effettuare** (desktop/tablet/mobile e credenziali admin/docente).
+- Nessun dato storico, 27 frozen, RLS, ruoli, contenuto didattico o bridge SafetyManager modificato.
