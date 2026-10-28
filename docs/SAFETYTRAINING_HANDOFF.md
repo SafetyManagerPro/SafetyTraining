@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-28
-Stato corrente: **v45 upgrade UI v1-v3 pubblicazione in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-ui-navigation`.
+Stato corrente: **v45 UI v1-v3 LIVE (smoke browser pendente) / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-ui-navigation`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1012,3 +1012,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Nessuna scrittura dati, migration, variazione permessi, SafetyManager bridge o contenuti didattici; 27 frozen intatti.
 - Cache PWA `safety-training-v45-ui-navigation`; nuovi test `admin-navigation-v45.test.mjs` e suite v45 riallineata; aggiornamento dei due handoff contemporaneo.
 - Validazione da effettuare per questo commit tramite PR CI, deployment Vercel ed esame UI con account reali; fino a browser smoke 1440/820/390 e ruolo docente/corsista non dichiarare completata la validazione interattiva.
+
+## 2026-10-28 — v45 — Rilascio e collaudo automatico
+- Tranche 1 `PR #2`: dashboard e collegamenti rapidi; `main` `0ba4370d82aedafc0172755acfb12c6fe90a5482`, CI #625 SUCCESS.
+- Tranche 2 `PR #3`: catalogo, avanzamento corsista e tablet; `main` `63475c997ab2ee2da6afa1bb391c51cd37ddc631`, CI #627 SUCCESS.
+- Tranche 3 `PR #4`: menu, filtri e popup coerenti; `main` `1137c83fbec15b55381bb0e78fd96849a9eb9242`, CI #629 (`40645022546`) SUCCESS.
+- Produzione verificata con Vercel `get_deployment`: `dpl_E33EKfMc95AJT2LqdWqYvZ1hHFnp` READY sull'alias `safety-training-safety-manager.vercel.app`; metadata `githubCommitSha` identico a `1137c83fbec15b55381bb0e78fd96849a9eb9242`.
+- Asset PWA finali: `safety-training-v45-ui-navigation`; versione verificata nel repository e inclusa negli handoff. Implementazione v45 esclusivamente frontend, CSS, test e documentazione.
+- Nessuna alterazione di 27 catalog entry frozen, dati storici, ruoli/permessi amministrativi, abilitazione `company_admin`, RLS, iscrizioni, attestazioni o separazione SafetyManager. Nessuna migration v45.
+- **NON ancora collaudato visivamente in browser reale**: percorsi autenticati Amministrazione, catalogo docente e schede corsista a 1440 / 820 / 390 px, verifiche touch/focus/iOS e test E2E multi-ruolo. L'esito CI non li sostituisce. Non considerare concluso il collaudo interattivo fino a prova manuale o browser automation con account di test.
