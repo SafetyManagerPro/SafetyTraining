@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.4 indice slide in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.4-deck-index`.
+Stato: **v45.4 LIVE · CI #648 SUCCESS · collaudo indice slide pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.4-deck-index`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1079,3 +1079,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Dialog con gestore focus `SAFETY_MODAL_ACCESS`; chiude su route o cambio autenticazione, compatibile con tastiera/Tab/Escape. Layout responsive per tablet/smartphone e pulsanti accessibili.
 - Solo UI: nessuna scrittura a progressi, presenze, frequenza, test o DB. Nessuna modifica a Learning Unit, contenuti, 27 frozen, RLS, amministrazione, company_admin o SafetyManager bridge.
 - Asset `deck-index-v45-4.js` / CSS, test `tests/deck-index-v45-4.test.mjs` in npm run check, PWA `safety-training-v45.4-deck-index`. Smoke browser reale richiesto su 1440, 820, 390 px, tastiera e Safari.
+
+
+## 2026-10-28 — v45.4 — Release verificata
+- PR #12 merged in `main`, commit applicativo `779f7c57c159c5ededefa5004294a86b58f7eb7f`; suite GitHub Actions **#648 SUCCESS** (run `40653338037`) sullo stesso SHA.
+- Vercel produzione `https://safety-training-safety-manager.vercel.app/`, deployment `dpl_9Qjo9Mk86QWf8M73BkcNkQg5iBod` **READY** con `githubCommitSha=779f7c57c159c5ededefa5004294a86b58f7eb7f`.
+- PWA `safety-training-v45.4-deck-index`. Nessuna migration, DB/RLS/ruoli o dati storici modificati; 27 frozen e separazione SafetyManager invariati.
+- I test di funzionalità e compatibilità sono automatizzati; **smoke browser reale dei nuovi controlli Indice, I/Escape/Tab e tablet/Safari ancora da confermare**.
