@@ -42,3 +42,31 @@
 @media(max-width:760px){#adminContent .v45-dashboard .a40-grid{grid-template-columns:1fr}#adminContent .v45-dashboard .a40-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}#adminContent .v45-hero{padding:20px}#adminContent .v45-quicklinks{width:100%}#adminContent .v45-quicklinks button{flex:1 1 120px}}
 @media(max-width:520px){#adminContent .v45-dashboard{gap:13px}#adminContent .v45-dashboard .admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#adminContent .v45-dashboard .admin-stat{padding:14px;min-height:88px}#adminContent .v45-dashboard .a40-kpi{padding:12px}#adminContent .v45-dashboard .a40-bar{grid-template-columns:minmax(70px,96px) minmax(0,1fr) 40px;font-size:11px;gap:6px}#adminContent .v45-dashboard .admin-step-list{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){#adminContent .v45-quicklinks button{transition:none}}
+
+/* v45 tranche 3: uniformazione visiva non invasiva di menu, filtri, azioni, popup. */
+.admin-shell .admin-nav nav .admin-menu-group{border-color:rgba(149,182,221,.13);padding-bottom:10px;margin-bottom:7px}
+.admin-shell .admin-nav nav .admin-menu-group summary{border-radius:11px;line-height:1.35;user-select:none}
+.admin-shell .admin-nav nav .admin-menu-items{gap:4px;padding:4px 0 6px}
+.admin-shell .admin-nav nav .admin-menu-items button{min-height:44px;border-radius:9px;line-height:1.4;padding:9px 12px;text-align:left}
+.admin-shell .admin-nav nav .admin-menu-items button:hover{background:rgba(116,175,251,.11)}
+.admin-shell .admin-nav nav .admin-menu-items button.active{border-left:3px solid #91c0ff;color:#fff;background:rgba(110,170,245,.15)}
+.admin-shell .admin-nav nav .admin-menu-group summary:focus-visible,.admin-shell .admin-nav nav .admin-menu-items button:focus-visible{outline:2px solid #96c6ff;outline-offset:2px}
+.admin-shell #adminContent .admin-search,.admin-shell #adminContent .admin-list-tools{border-color:rgba(149,182,221,.17);background:rgba(22,44,69,.55);box-shadow:0 5px 18px rgba(0,0,0,.07)}
+.admin-shell #adminContent .admin-search{max-width:500px;min-height:44px;box-sizing:border-box}
+.admin-shell #adminContent .admin-search input{min-height:30px;min-width:0;font-size:13px}
+.admin-shell #adminContent .admin-list-search input,.admin-shell #adminContent .admin-list-control select,.admin-shell #adminContent .admin-list-reset,.admin-shell #adminContent .admin-list-direction{box-sizing:border-box;min-height:44px;border-radius:10px}
+.admin-shell #adminContent .admin-list-count{line-height:1.5}
+.admin-shell #adminContent .admin-row-btn,.admin-shell #adminContent .admin-primary,.admin-shell #adminContent .admin-card-head>button{min-height:40px;line-height:1.35}
+.admin-shell #adminContent .admin-row-btn:hover,.admin-shell #adminContent .admin-card-head>button:hover{border-color:rgba(148,197,255,.42)}
+.admin-shell .admin-modal-overlay{backdrop-filter:blur(9px);background:rgba(3,9,20,.82)}
+.admin-shell .admin-modal{border-color:rgba(152,190,239,.22);box-shadow:0 30px 95px rgba(0,0,0,.5)}
+.admin-shell .admin-modal>header{gap:15px;border-color:rgba(152,190,239,.15)}
+.admin-shell .admin-modal h2{line-height:1.25;overflow-wrap:anywhere}
+.admin-shell .admin-modal-body{line-height:1.5}
+.admin-shell .admin-modal-close{min-width:44px;min-height:44px;flex:none;border-radius:12px}
+.admin-shell .admin-modal button:not(:disabled){cursor:pointer}
+.admin-shell .admin-modal :is(input,select,textarea){min-height:42px}
+.admin-shell .admin-modal :is(button,input,select,textarea):focus-visible{outline:2px solid #9bcaff;outline-offset:2px}
+@media(max-width:860px){.admin-shell #adminContent .admin-list-tools{padding:12px}.admin-shell .admin-modal{max-height:calc(100dvh - 24px)}}
+@media(max-width:560px){.admin-shell .admin-modal{max-height:94dvh}.admin-shell .admin-modal>header{padding:16px}.admin-shell #adminContent .admin-list-tools{padding:10px}.admin-shell #adminContent .admin-search{max-width:none}.admin-shell .admin-nav nav .admin-menu-items button{min-height:46px}}
+@media(prefers-reduced-motion:reduce){.admin-shell .admin-modal-overlay,.admin-shell .admin-nav nav .admin-menu-items button{scroll-behavior:auto;transition:none}}
