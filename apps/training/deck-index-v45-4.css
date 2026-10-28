@@ -1,0 +1,31 @@
+/* SafetyTraining v45.4: indice presentazione, standalone, read-only. */
+.deck-top .deck-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.deck-top .deck-actions button{min-height:40px;min-width:40px;padding:7px 10px;cursor:pointer;border:1px solid rgba(140,187,234,.3);border-radius:9px;background:#19324d;color:#edf6ff}
+.deck-top .deck-actions .deck-index-btn{min-width:87px;font-size:12px;font-weight:850;white-space:nowrap}
+.deck-top .deck-actions button:hover{border-color:#86c5ff;background:#285578}
+.deck-index-overlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(3,8,18,.85)}
+.deck-index-overlay.hidden{display:none!important}
+.deck-index-panel{display:flex;flex-direction:column;width:min(740px,100%);max-height:92dvh;min-height:0;overflow:hidden;background:#0e2035;color:#f3f8ff;border:1px solid rgba(150,193,238,.4);border-radius:18px;box-shadow:0 30px 100px rgba(0,0,0,.65)}
+.deck-index-header{display:flex;justify-content:space-between;gap:12px;padding:19px 21px 8px}
+.deck-index-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;color:#9fcffe}
+.deck-index-header h2{font-size:25px;margin:5px 0}
+.deck-index-header p,.deck-index-count{font-size:12px;color:#bad4e9;margin:0}
+.deck-index-close{flex-shrink:0;width:44px;height:44px;border:1px solid #5c7996;border-radius:10px;background:#243e59;color:white;font-size:25px;cursor:pointer}
+.deck-index-filters{display:grid;grid-template-columns:1fr 1.3fr;gap:12px;padding:12px 21px}
+.deck-index-filters label{display:grid;gap:7px;min-width:0;font-size:12px;font-weight:800;color:#cae0f4}
+.deck-index-filters :is(input,select){width:100%;min-width:0;box-sizing:border-box;min-height:46px;padding:10px 12px;border:1px solid #506e8d;border-radius:10px;background:#0b1829;color:#f1f7ff;font:inherit}
+.deck-index-count{padding:0 21px 10px}
+.deck-index-list{display:grid;align-content:start;gap:7px;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 20px 20px;scrollbar-gutter:stable}
+.deck-index-item{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:11px;align-items:center;min-height:54px;width:100%;padding:8px 11px;text-align:left;cursor:pointer;border-radius:10px;border:1px solid rgba(151,195,235,.2);background:#152e47;color:#f1f7ff}
+.deck-index-item:hover,.deck-index-item[aria-current="step"]{background:#224967;border-color:#84bff5}
+.deck-index-number{display:grid;place-items:center;min-height:32px;border-radius:8px;background:#2f4e70;font-size:12px;font-weight:900}
+.deck-index-item[aria-current="step"] .deck-index-number{background:#15796b}
+.deck-index-description{display:grid;gap:3px;min-width:0;font-size:13px}
+.deck-index-description strong{overflow-wrap:anywhere}
+.deck-index-description small{font-size:11px;color:#afcee6}
+.deck-index-type{font-size:11px;color:#bcd4e9}
+.deck-index-empty{color:#f1d19c;padding:15px}
+.deck-index-panel footer{font-size:11px;line-height:1.45;color:#b7cee2;border-top:1px solid rgba(160,200,240,.18);padding:11px 21px}
+.deck-index-overlay :is(button,input,select):focus-visible{outline:2px solid #a5d6ff;outline-offset:2px}
+@media(max-width:700px){.deck-top .deck-actions{gap:4px}.deck-top .deck-actions button{min-width:42px;padding:7px}.deck-top .deck-actions .deck-index-btn{min-width:65px;font-size:11px}.deck-index-overlay{padding:7px;align-items:end}.deck-index-panel{max-height:94dvh;border-radius:13px}.deck-index-header{padding:14px 14px 7px}.deck-index-filters{grid-template-columns:1fr;padding:9px 14px}.deck-index-count{padding:0 14px 8px}.deck-index-list{padding:4px 12px 12px}.deck-index-item{grid-template-columns:34px minmax(0,1fr)}.deck-index-type{display:none}.deck-index-panel footer{padding:9px 14px}}
+@media print{.deck-index-overlay,.deck-index-btn{display:none!important}}

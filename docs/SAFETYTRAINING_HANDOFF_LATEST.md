@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.3 LIVE · CI #644 SUCCESS · smoke browser strumenti Learning Unit pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.3-unit-explorer`.
+Stato: **v45.4 indice slide in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.4-deck-index`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1070,3 +1070,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_Fur9U9n4nWgZGiXj47qQw9fyhb8V` **READY** con `githubCommitSha=1e1c1df0776775604b866b076ee7746f4ed1e940`; cache `safety-training-v45.3-unit-explorer`.
 - Confermata integrità del rilascio dal punto di vista CI/deployment; **collaudo interattivo dei nuovi strumenti Learning Unit in browser reale ancora da effettuare** (desktop/tablet/mobile e credenziali admin/docente).
 - Nessun dato storico, 27 frozen, RLS, ruoli, contenuto didattico o bridge SafetyManager modificato.
+
+
+## 2026-10-28 — v45.4 — Indice slide docente
+- Utente ha verificato con OK la vista tecnica v45.3. Baseline `eae414dad8842fb3a8b763260df721af5e1a79ca`, CI #646 SUCCESS, produzione READY.
+- Presentazioni: tasto ☷ Indice accanto a schermo intero, dialog con scelta modulo, ricerca su tutti i titoli/argomenti, numerazione e salto diretto alle slide. Evidenzia la slide corrente.
+- Scorciatoia I fuori dai controlli interattivi per aprire. Frecce/Spazio già esistenti non avanzano quando si scrive, si usa un pulsante/link oppure si ha aperto il dialog indice. Il normale avanzamento resta disponibile quando il dialog è chiuso.
+- Dialog con gestore focus `SAFETY_MODAL_ACCESS`; chiude su route o cambio autenticazione, compatibile con tastiera/Tab/Escape. Layout responsive per tablet/smartphone e pulsanti accessibili.
+- Solo UI: nessuna scrittura a progressi, presenze, frequenza, test o DB. Nessuna modifica a Learning Unit, contenuti, 27 frozen, RLS, amministrazione, company_admin o SafetyManager bridge.
+- Asset `deck-index-v45-4.js` / CSS, test `tests/deck-index-v45-4.test.mjs` in npm run check, PWA `safety-training-v45.4-deck-index`. Smoke browser reale richiesto su 1440, 820, 390 px, tastiera e Safari.
