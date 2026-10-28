@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
-Ultimo aggiornamento: 2026-10-23
-Stato: **v43.4 Amministrazione ripristinata / 65 corsi non frozen** · guard anti re-entry analytics verificato in produzione · doppia verifica tecnico/diritti invariata · PWA `safety-training-v43.4-admin-analytics-guard`.
+Ultimo aggiornamento: 2026-10-28
+Stato: **v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v44.1-stabilization`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -977,3 +977,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - `js/utils.js` (`6ca8e2b34e`) etichetta come `FACSIMILE` anche le dichiarazioni docente senza docenti assegnati; rimane disponibile l'apertura della stampa.
 - **SafetyTraining:** `apps/training/learner-course-documents-v44.js` (`e4837d4062`) aggiunge la stampa in bianco nella schermata admin **anche senza alcuna iscrizione selezionata**; accesso riservato all'amministratore, nessun controllo di esito/firma per stampare.
 - I controlli di destinatario e riservatezza dei file pubblicati restano attivi; nessun modello in bianco vale come atto emesso.
+
+
+## 2026-10-28 — v44.1 Fase 1 stabilizzazione Amministrazione
+- **Baseline produzione:** commit `c382144` e deployment Vercel `dpl_J5jSUUAgAMSvcAY4jq974QhekPw4` READY. Accesso platform admin e apertura Panoramica riusciti; analytics conclusa con `data-a40-loaded="1"`, nessun flag loading residuo e 0 errori/warning console.
+- **Supabase e rete:** progetto SafetyTraining `ejkwvatmzdqqjozpxntk` ACTIVE_HEALTHY; nessuna risposta edge 4xx/5xx nelle 24 ore analizzate e nessun errore runtime Vercel nei 7 giorni analizzati. Gli advisor esistenti restano debito di baseline e non sono stati risolti allargando ruoli o RLS.
+- **Causa del difetto rilevato:** la suite falliva perché gli header dei due handoff dichiaravano ancora la cache v43.4 mentre il service worker era già a v44. Inoltre gli errori analytics erano terminali per evitare la re-entry automatica, ma non offrivano recupero esplicito all'utente.
+- **Correzione circoscritta:** dashboard e Controllo operativo mantengono `data-a40-loaded="error"` per bloccare retry automatici, mostrano un pulsante **Riprova** accessibile e rilanciano la sola richiesta su azione esplicita. Cache PWA aggiornata a `safety-training-v44.1-stabilization`; header handoff riallineati.
+- **Test:** aggiunta regressione comportamentale per stato errore, escaping del messaggio, cleanup del guard e retry esplicito. Suite completa e deployment post-modifica da registrare dopo la verifica finale.
+- **Integrità:** nessuna migration o mutazione dati; nessuna modifica a corsi frozen, ruoli/capability admin, separazione da SafetyManager, Learning Unit, iscrizioni, attestati o revisioni immagini.
+
