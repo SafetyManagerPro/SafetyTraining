@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.5 leggibilità slide in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.5-readability`.
+Stato: **v45.5 LIVE · CI #653 SUCCESS · smoke browser leggibilità pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.5-readability`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1096,3 +1096,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Modulo frontend `deck-readability-v45-5.js`, CSS responsive/scoped, test runtime `tests/deck-readability-v45-5.test.mjs` inserito nella suite, PWA `safety-training-v45.5-readability`.
 - Nessuna migration, scrittura DB, nuovo permesso o modifica a contenuti, slide, unità, frequenze, progressi, attestazioni, report, bridge SafetyManager, company_admin o 27 corsi frozen.
 - Browser smoke da verificare a 1440/820/390: contrasto, pulsanteria e scroll di inizio slide, soprattutto Safari iPad/iPhone.
+
+
+## 2026-10-28 — v45.5 — CI e produzione verificati
+- PR #14 merged in `main` `2faef7afdd9e6b367e27b68452df5844e15310dd`; suite GitHub Actions **#653 SUCCESS** (run `40655350904`) sullo stesso SHA.
+- Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_6CgWy4oJnUfY26HWYWKrcAZWZtCw` **READY**, `githubCommitSha=2faef7afdd9e6b367e27b68452df5844e15310dd`.
+- PWA `safety-training-v45.5-readability`. Nessuna migration o scrittura dati; 27 frozen, RLS, ruoli, `company_admin` e SafetyManager bridge invariati.
+- L'utente ha verificato e confermato la v45.4 ("fatto funziona"). **Collaudo manuale di Aa Leggibilità e ritorno all'inizio su tablet/smartphone resta pendente**; la CI non sostituisce una prova reale di resa visiva.
