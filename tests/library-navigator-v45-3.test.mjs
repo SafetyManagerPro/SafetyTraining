@@ -71,7 +71,7 @@ test('expands/collapses visible units; reset restores full list',()=>{
 });
 test('v45.3 is wired to library only, preserves frozen assets and new cache',()=>{
  const cat=read('apps/training/catalog-browser.js'),index=read('apps/training/index.html');
- const sw=read('apps/training/sw.js'),cache='safety-training-v45.3-unit-explorer';
+ const sw=read('apps/training/sw.js'),cache='safety-training-v45.4-deck-index';
  assert.ok(cat.includes("window.SAFETY_LIBRARY_UX?.mount?.(root,mods)"));
  assert.ok(cat.includes('libraryRouteIs(key)'));
  assert.ok(cat.includes('state.libraryRequest++'));
