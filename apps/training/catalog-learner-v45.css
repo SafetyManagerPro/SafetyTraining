@@ -32,3 +32,10 @@
 @media(min-width:601px) and (max-width:1100px){.learner-shell .learner-panel{width:min(900px,100%);max-height:94dvh}.learner-shell .learner-courses{grid-template-columns:repeat(2,minmax(0,1fr))}.learner-shell .learner-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.mode button{min-height:44px}.deck-actions button,.deck-exit{min-height:46px;min-width:46px}}
 @media(max-width:680px){#catalogBrowserRoot .v45-catalog-toolbar{grid-template-columns:minmax(0,1fr)}#catalogBrowserRoot .catalog-grid{grid-template-columns:minmax(0,1fr)}.learner-shell .learner-courses{grid-template-columns:minmax(0,1fr)}.learner-shell .learner-course-top{gap:10px}.learner-shell .learner-course-top>strong{font-size:20px}}
 @media(prefers-reduced-motion:reduce){#catalogBrowserRoot .catalog-card{transition:none}}
+
+/* v45.1: stato filtri e messaggi di recupero senza annunciare ogni scheda agli screen reader */
+#catalogBrowserRoot .v45-catalog-result-count{font-size:12px;color:#c3d6ec;margin:2px 0 12px;font-weight:750}
+#catalogBrowserRoot .catalog-load-error{display:grid;gap:10px;padding:18px;border:1px solid rgba(245,188,101,.35);border-radius:14px;background:rgba(245,188,101,.07)}
+#catalogBrowserRoot .catalog-load-error p{margin:0;color:#f0d3b4;overflow-wrap:anywhere}
+#catalogBrowserRoot .catalog-load-error button{justify-self:start;min-height:44px;padding:9px 14px;border:1px solid rgba(164,202,249,.34);border-radius:10px;background:#1b3958;color:#f3f8ff;font-weight:780;cursor:pointer}
+#catalogBrowserRoot .catalog-load-error button:focus-visible{outline:2px solid #92c5ff;outline-offset:3px}

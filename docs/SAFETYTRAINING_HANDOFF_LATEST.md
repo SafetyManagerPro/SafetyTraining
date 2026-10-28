@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45 UI v1-v3 LIVE (smoke browser pendente) / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-ui-navigation`.
+Stato: **v45.1 stabilizzazione navigazione in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.1-navigation-stability`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1023,3 +1023,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Asset PWA finali: `safety-training-v45-ui-navigation`; versione verificata nel repository e inclusa negli handoff. Implementazione v45 esclusivamente frontend, CSS, test e documentazione.
 - Nessuna alterazione di 27 catalog entry frozen, dati storici, ruoli/permessi amministrativi, abilitazione `company_admin`, RLS, iscrizioni, attestazioni o separazione SafetyManager. Nessuna migration v45.
 - **NON ancora collaudato visivamente in browser reale**: percorsi autenticati Amministrazione, catalogo docente e schede corsista a 1440 / 820 / 390 px, verifiche touch/focus/iOS e test E2E multi-ruolo. L'esito CI non li sostituisce. Non considerare concluso il collaudo interattivo fino a prova manuale o browser automation con account di test.
+
+## 2026-10-28 — v45.1 — Stabilizzazione navigazione e accessibilità
+- Baseline v45: `59f7bd364a7a927bf7910c5cb50d27b4385cca4a`, CI `#631` SUCCESS, Vercel `dpl_93c5FwY8383sruB8YZ4iSgCTJXBR` READY con metadata SHA coerente.
+- `catalog-browser.js`: azioni schede tramite listener delegato su attributi dati (niente JavaScript inline con identificativi corso); hash course/library con encodeURIComponent; decodifica esplicita della route library; gestione fallimento caricamento con errore visibile e pulsante Riprova manuale; stato dei risultati annunciato senza ripetere l'intero elenco; errore/cache catalogo azzerati al cambio auth.
+- Menu tablet: la chiusura dopo un click segue le stesse media query del reader (1100 px / touch fino a 1366 px); attributi `aria-controls`/`aria-expanded` e testo del pulsante mantenuti coerenti all'apertura/chiusura.
+- `learner-dashboard.js`: dialog `I miei corsi` collegato all'esistente `SAFETY_MODAL_ACCESS` per focus, tasto Esc e Tab; non aggiunge MutationObserver o polling.
+- Cache `safety-training-v45.1-navigation-stability`, CSS di feedback e suite `tests/navigation-stability-v45-1.test.mjs` aggiunta a `npm run check`; aggiornamento sincronizzato dei due handoff.
+- Nessuna migration o modifica dati, 27 corsi frozen, ruoli/RLS/permessi, report, attestazioni, SafetyManager bridge o `company_admin`.
+- Prima della dichiarazione di pieno collaudo servono ancora browser smoke interattivi con account admin/docente/corsista (1440 / 820 / 390 px) ed E2E, non sostituibili dalla suite CI.

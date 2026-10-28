@@ -3,7 +3,7 @@
    Database-backed courses are adapted into the same presentation model used by app.js. */
 (() => {
   'use strict';
-  const state={rows:[],loaded:false,loading:false,opening:new Set()};
+  const state={rows:[],loaded:false,loading:false,opening:new Set(),error:''};
   const cloud=()=>window.SAFETY_CLOUD;
   const db=()=>cloud()?.state?.client;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -21,11 +21,24 @@
     try{
       const {data,error}=await client.rpc('training_catalog_summary');
       if(error)throw error;
-      state.rows=Array.isArray(data)?data:[];state.loaded=true;
+      state.rows=Array.isArray(data)?data:[];state.loaded=true;state.error='';
       syncSidebar();renderHome();
-    }catch(e){console.warn('[Catalog browser]',e?.message||e);}
+    }catch(e){
+      state.error=String(e?.message||'Errore temporaneo di caricamento.');
+      console.warn('[Catalog browser]',state.error);
+      const host=document.getElementById('catalogBrowserRoot');
+      if(host)showLoadError(host);
+    }
     finally{state.loading=false;}
     return state.rows;
+  }
+
+  function showLoadError(host){
+    host.innerHTML='<div class="notice catalog-load-error" role="alert"><strong>Catalogo temporaneamente non disponibile.</strong><p>'+esc(state.error)+'</p><button type="button" data-catalog-retry>Riprova caricamento</button></div>';
+    host.querySelector('[data-catalog-retry]')?.addEventListener('click',()=>{
+      state.error='';host.innerHTML='<div class="catalog-loading">Caricamento catalogo didattico…</div>';
+      void load(true);
+    },{once:true});
   }
 
   function materialLabel(row){return Number(row.unit_count||0)>0?'Presentazione disponibile':'Materiale da completare';}
@@ -41,7 +54,7 @@
   async function openCourse(row){
     if(!row)return;
     closeMobileMenu();
-    if(Number(row.unit_count||0)<=0){location.hash=`library/${row.stable_key}`;return;}
+    if(Number(row.unit_count||0)<=0){location.hash=`library/${encodeURIComponent(row.stable_key)}`;return;}
     if(state.opening.has(row.stable_key))return;
     state.opening.add(row.stable_key);
     const root=document.getElementById('app');
@@ -49,14 +62,14 @@
     try{
       const course=await ensurePresentation(row.stable_key);
       if(!course)throw new Error('Corso non presentabile.');
-      location.hash=`course/${row.stable_key}`;
+      location.hash=`course/${encodeURIComponent(row.stable_key)}`;
     }catch(e){
       console.warn('[Catalog presentation]',row.stable_key,e?.message||e);
-      location.hash=`library/${row.stable_key}`;
+      location.hash=`library/${encodeURIComponent(row.stable_key)}`;
     }finally{state.opening.delete(row.stable_key);}
   }
   window.openCatalogCourse=key=>{const row=state.rows.find(x=>x.stable_key===key);if(row)return openCourse(row);};
-  window.openCatalogLibrary=key=>{closeMobileMenu();location.hash=`library/${key}`;};
+  window.openCatalogLibrary=key=>{closeMobileMenu();location.hash=`library/${encodeURIComponent(key)}`;};
 
   function syncSidebar(){
     if(isLearner())return;
@@ -79,19 +92,33 @@
       host.innerHTML='<div class="notice"><strong>Catalogo completo:</strong> accedi come amministratore/docente per consultare tutti i corsi e il relativo materiale. I corsisti vedono soltanto i percorsi assegnati.</div>';
       return;
     }
-    if(!state.loaded){host.innerHTML='<div class="catalog-loading">Caricamento catalogo didattico…</div>';load();return;}
+    if(state.error){showLoadError(host);return;}
+    if(!state.loaded){host.innerHTML='<div class="catalog-loading">Caricamento catalogo didattico…</div>';void load();return;}
     const ready=state.rows.filter(x=>Number(x.unit_count||0)>0).length,missing=state.rows.length-ready;
     const families=[...new Set(state.rows.map(x=>x.family||'Altro'))];
     host.innerHTML=`
       <section class="catalog-heading"><div><span class="pill">LIBRERIA DIDATTICA COMPLETA</span><h2>Tutti i corsi predisposti</h2><p>I corsi con Learning Unit si aprono ora nella stessa modalità agenda + slide delle prime presentazioni. La vista tecnica resta disponibile separatamente. I vincoli di presenza, pratica, videoconferenza o e-learning restano regole organizzative e normative e non vengono alterati dalla proiezione digitale.</p></div><div class="catalog-summary"><strong>${state.rows.length}</strong><span>corsi attivi</span><strong>${ready}</strong><span>presentabili</span><strong>${missing}</strong><span>da completare</span></div></section>
       <div class="catalog-toolbar v45-catalog-toolbar"><label class="v45-catalog-filter" for="catalogSearch">Cerca corso<input id="catalogSearch" type="search" autocomplete="off" placeholder="Titolo, codice o famiglia…"></label><label class="v45-catalog-filter" for="catalogFamily">Famiglia<select id="catalogFamily"><option value="">Tutte le famiglie</option>${families.map(f=>`<option>${esc(f)}</option>`).join('')}</select></label></div>
-      <div id="catalogCards" class="catalog-grid" aria-live="polite" aria-label="Risultati catalogo corsi"></div>`;
+      <p id="catalogResultCount" class="v45-catalog-result-count" role="status" aria-live="polite"></p>
+      <div id="catalogCards" class="catalog-grid" aria-label="Risultati catalogo corsi"></div>`;
     const search=document.getElementById('catalogSearch'),family=document.getElementById('catalogFamily');
     const draw=()=>{
       const q=(search?.value||'').trim().toLowerCase(),f=family?.value||'';
       const rows=state.rows.filter(r=>(!f||r.family===f)&&(!q||[r.title,r.stable_key,r.family].some(v=>String(v||'').toLowerCase().includes(q))));
-      document.getElementById('catalogCards').innerHTML=rows.map(r=>`<article class="catalog-card ${statusClass(r)}"><div class="catalog-card-top"><span>${esc(r.family||'Altro')}</span><b aria-label="Stato versione">${esc(r.version_status||'draft')}</b></div><h3>${esc(r.title)}</h3><div class="catalog-meta"><span>⏱ ${fmtMin(r.nominal_minutes)}</span><span>🧩 ${Number(r.unit_count||0)} unità</span></div><p class="v45-catalog-state ${statusClass(r)}-text"><span aria-hidden="true">●</span> ${materialLabel(r)}</p><div class="catalog-card-actions"><button class="softbtn" onclick="openCatalogCourse('${esc(r.stable_key)}')">${Number(r.unit_count||0)>0?'▶ Apri presentazione':'Vedi stato'}</button>${Number(r.unit_count||0)>0?`<button class="ghost" onclick="openCatalogLibrary('${esc(r.stable_key)}')">Vista tecnica</button>`:''}</div></article>`).join('')||'<div class="notice">Nessun corso corrisponde ai filtri.</div>';
+      const cards=document.getElementById('catalogCards');
+      if(!cards)return;
+      cards.innerHTML=rows.map(r=>`<article class="catalog-card ${statusClass(r)}"><div class="catalog-card-top"><span>${esc(r.family||'Altro')}</span><b aria-label="Stato versione">${esc(r.version_status||'draft')}</b></div><h3>${esc(r.title)}</h3><div class="catalog-meta"><span>⏱ ${fmtMin(r.nominal_minutes)}</span><span>🧩 ${Number(r.unit_count||0)} unità</span></div><p class="v45-catalog-state ${statusClass(r)}-text"><span aria-hidden="true">●</span> ${materialLabel(r)}</p><div class="catalog-card-actions"><button type="button" class="softbtn" data-catalog-action="open" data-course-key="${esc(r.stable_key)}">${Number(r.unit_count||0)>0?'▶ Apri presentazione':'Vedi stato'}</button>${Number(r.unit_count||0)>0?`<button type="button" class="ghost" data-catalog-action="library" data-course-key="${esc(r.stable_key)}">Vista tecnica</button>`:''}</div></article>`).join('')||'<div class="notice">Nessun corso corrisponde ai filtri.</div>';
+      const count=document.getElementById('catalogResultCount');if(count)count.textContent=rows.length===1?'1 corso trovato':rows.length+' corsi trovati';
     };
+    const cards=document.getElementById('catalogCards');
+    cards?.addEventListener('click',event=>{
+      const button=event.target.closest('[data-catalog-action]');
+      if(!button||!cards.contains(button))return;
+      const row=state.rows.find(r=>r.stable_key===button.dataset.courseKey);
+      if(!row)return;
+      if(button.dataset.catalogAction==='open')void openCourse(row);
+      else if(button.dataset.catalogAction==='library')window.openCatalogLibrary(row.stable_key);
+    });
     search.oninput=draw;family.onchange=draw;draw();
   }
 
@@ -115,13 +142,18 @@
     const {data,error}=await client.rpc('training_course_bundle',{p_stable_key:key});
     if(error||!data){root.innerHTML=`<div class="admin-error">${esc(error?.message||'Corso non trovato.')}</div>`;return;}
     const c=data.course||{},mods=Array.isArray(data.modules)?data.modules:[],units=mods.flatMap(m=>m.units||[]);
-    root.innerHTML=`<div class="breadcrumb"><button onclick="location.hash=''">Home</button><span>›</span><span>${esc(c.title)}</span></div><section class="hero"><span class="pill">VISTA TECNICA DEL MATERIALE</span><h1>${esc(c.title)}</h1><p>${esc(c.description||'Percorso didattico predisposto nella libreria SafetyTraining.')}</p><div class="coursemeta"><span>${esc(c.family||'Altro')}</span><span>⏱ ${fmtMin(c.nominal_minutes)}</span><span>🧩 ${units.length} unità</span><span>v${esc(data.version?.version_number||1)} · ${esc(data.version?.status||'draft')}</span></div>${units.length?`<button class="openbtn big" onclick="openCatalogCourse('${esc(key)}')">▶ Apri come presentazione</button>`:''}</section>${!units.length?'<div class="notice"><strong>Materiale da completare:</strong> il corso è censito e resta visibile, ma non contiene ancora Learning Unit.</div>':mods.map((m,mi)=>`<section class="section library-module"><h2>${mi+1}. ${esc(m.title||'Modulo')}</h2><div class="library-units">${(m.units||[]).map((u,ui)=>{const blocks=normalizeContent(u.content);return `<details class="library-unit" ${ui===0?'open':''}><summary><div><strong>${esc(u.title)}</strong><span>${fmtMin(u.default_minutes)} · ${esc(u.source_group||'Learning Unit')}</span></div></summary><div class="library-unit-body"><p class="summary">${esc(u.summary||u.content?.summary||'')}</p>${blocks.map(b=>`<section><h3>${esc(b.title)}</h3>${b.html}</section>`).join('')}</div></details>`;}).join('')}</div></section>`).join('')}`;
+    root.innerHTML=`<div class="breadcrumb"><button type="button" data-catalog-home>Home</button><span>›</span><span>${esc(c.title)}</span></div><section class="hero"><span class="pill">VISTA TECNICA DEL MATERIALE</span><h1>${esc(c.title)}</h1><p>${esc(c.description||'Percorso didattico predisposto nella libreria SafetyTraining.')}</p><div class="coursemeta"><span>${esc(c.family||'Altro')}</span><span>⏱ ${fmtMin(c.nominal_minutes)}</span><span>🧩 ${units.length} unità</span><span>v${esc(data.version?.version_number||1)} · ${esc(data.version?.status||'draft')}</span></div>${units.length?`<button type="button" class="openbtn big" data-catalog-open>▶ Apri come presentazione</button>`:''}</section>${!units.length?'<div class="notice"><strong>Materiale da completare:</strong> il corso è censito e resta visibile, ma non contiene ancora Learning Unit.</div>':mods.map((m,mi)=>`<section class="section library-module"><h2>${mi+1}. ${esc(m.title||'Modulo')}</h2><div class="library-units">${(m.units||[]).map((u,ui)=>{const blocks=normalizeContent(u.content);return `<details class="library-unit" ${ui===0?'open':''}><summary><div><strong>${esc(u.title)}</strong><span>${fmtMin(u.default_minutes)} · ${esc(u.source_group||'Learning Unit')}</span></div></summary><div class="library-unit-body"><p class="summary">${esc(u.summary||u.content?.summary||'')}</p>${blocks.map(b=>`<section><h3>${esc(b.title)}</h3>${b.html}</section>`).join('')}</div></details>`;}).join('')}</div></section>`).join('')}`;
+    root.querySelector('[data-catalog-home]')?.addEventListener('click',()=>{location.hash='';});
+    root.querySelector('[data-catalog-open]')?.addEventListener('click',()=>{window.openCatalogCourse(key);});
   }
 
   async function route(){
     const parsed=window.SAFETY_LEARNER_NAV_V22?.route(location.hash);
     const p=location.hash.replace(/^#/,'').split('/').filter(Boolean);
-    if(p[0]==='library'&&p[1]){renderLibrary(p[1]);return;}
+    if(p[0]==='library'&&p[1]){
+      let libraryKey;try{libraryKey=decodeURIComponent(p[1]);}catch{return;}
+      void renderLibrary(libraryKey);return;
+    }
     if(!parsed?.key||!['course','topic','deck','lab','resources'].includes(parsed.kind)||localCourse(parsed.key)) {
       if(!p.length)setTimeout(renderHome,0);
       return;
@@ -155,16 +187,22 @@
       }
     }finally{state.opening.delete(key);}
   }
-  function closeMobileMenu(){document.body.classList.remove('mobile-nav-open');document.getElementById('mobileNavBackdrop')?.classList.remove('open');}
+  function closeMobileMenu(){
+    document.body.classList.remove('mobile-nav-open');
+    document.getElementById('mobileNavBackdrop')?.classList.remove('open');
+    const button=document.getElementById('mobileMenuBtn');
+    button?.setAttribute('aria-expanded','false');button?.setAttribute('aria-label','Apri menu');
+  }
+  const usesMobileNavigation=()=>window.matchMedia?.('(max-width: 1100px), ((pointer: coarse) and (max-width: 1366px))').matches??window.innerWidth<=1100;
   function initMobile(){
     const b=document.getElementById('mobileMenuBtn'),back=document.getElementById('mobileNavBackdrop');
-    if(b)b.onclick=()=>{const open=document.body.classList.toggle('mobile-nav-open');back?.classList.toggle('open',open);};
+    if(b){b.setAttribute('aria-expanded','false');b.onclick=()=>{const open=document.body.classList.toggle('mobile-nav-open');back?.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open));b.setAttribute('aria-label',open?'Chiudi menu':'Apri menu');};}
     if(back)back.onclick=closeMobileMenu;
-    document.querySelector('.sidebar')?.addEventListener('click',e=>{if(e.target.closest('button')&&innerWidth<=900)closeMobileMenu();});
+    document.querySelector('.sidebar')?.addEventListener('click',e=>{if(e.target.closest('button')&&usesMobileNavigation())closeMobileMenu();});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileMenu();});
   }
 
-  async function boot(){initMobile();await waitCloud();await load();route();cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;load(true);route();},350));window.addEventListener('hashchange',route);}
+  async function boot(){initMobile();await waitCloud();await load();route();cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;state.error='';state.rows=[];load(true);route();},350));window.addEventListener('hashchange',route);}
   window.SAFETY_CATALOG={load,renderHome,syncSidebar,renderLibrary,ensurePresentation};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
