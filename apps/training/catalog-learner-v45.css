@@ -1,0 +1,34 @@
+/* SafetyTraining v45 — catalogo e interfaccia corsista/docente. Solo aspetto; RLS e dati invariati. */
+#catalogBrowserRoot .v45-catalog-toolbar{display:grid;grid-template-columns:minmax(200px,2fr) minmax(170px,1fr);align-items:end;gap:12px;margin:18px 0 20px}
+#catalogBrowserRoot .v45-catalog-filter{display:grid;gap:7px;color:#b9cbdf;font-size:12px;font-weight:800;min-width:0}
+#catalogBrowserRoot .v45-catalog-filter :is(input,select){box-sizing:border-box;width:100%;min-height:46px;padding:10px 13px;border:1px solid rgba(150,185,225,.24);border-radius:12px;background:#0e1d30;color:#edf5ff;font:inherit}
+#catalogBrowserRoot .v45-catalog-filter :is(input,select):focus-visible{outline:2px solid #92c5ff;outline-offset:2px}
+#catalogBrowserRoot .catalog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:16px}
+#catalogBrowserRoot .catalog-card{min-width:0;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(157,184,220,.17);border-radius:18px;padding:19px;background:linear-gradient(160deg,rgba(24,44,69,.94),rgba(13,25,41,.98));box-shadow:0 12px 30px rgba(0,0,0,.1);transition:border-color .15s,transform .15s}
+#catalogBrowserRoot .catalog-card:hover{border-color:rgba(123,178,248,.4)}
+#catalogBrowserRoot .catalog-card h3{font-size:clamp(18px,1.7vw,22px);line-height:1.25;overflow-wrap:anywhere;min-height:2.5em;margin:0}
+#catalogBrowserRoot .catalog-card-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center}
+#catalogBrowserRoot .catalog-card-top b{font-size:11px;border-radius:999px;padding:5px 9px;background:rgba(118,170,230,.13);color:#d2e6ff}
+#catalogBrowserRoot .catalog-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:#b8cee4}
+#catalogBrowserRoot .catalog-meta span{padding:6px 9px;border:1px solid rgba(255,255,255,.07);border-radius:8px}
+#catalogBrowserRoot .v45-catalog-state{font-size:12px;display:flex;gap:7px;align-items:center;margin:0;line-height:1.4}
+#catalogBrowserRoot .catalog-ready .v45-catalog-state{color:#9bf0c7}
+#catalogBrowserRoot .catalog-missing .v45-catalog-state{color:#f4cc8f}
+#catalogBrowserRoot .catalog-card-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:auto}
+#catalogBrowserRoot .catalog-card-actions button{min-height:44px;flex:1 1 110px;border-radius:10px;cursor:pointer}
+#catalogBrowserRoot :is(button,input,select):focus-visible{outline:2px solid #92c5ff;outline-offset:3px}
+.learner-shell .learner-panel{scrollbar-gutter:stable;border-color:rgba(154,185,223,.2)}
+.learner-shell .learner-head h1{line-height:1.1}
+.learner-shell .learner-courses{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:stretch}
+.learner-shell .learner-course{border-color:rgba(137,177,220,.2);background:linear-gradient(160deg,#13273e,#0d1a2b);box-shadow:0 13px 30px rgba(0,0,0,.13)}
+.learner-shell .learner-course[data-course-status="passed"] .learner-status,.learner-shell .learner-course[data-course-status="completed"] .learner-status{background:rgba(77,211,168,.16);color:#a9f4d8}
+.learner-shell .learner-course[data-course-status="failed"] .learner-status,.learner-shell .learner-course[data-course-status="revoked"] .learner-status{background:rgba(255,146,146,.13);color:#ffbfc0}
+.learner-shell .learner-course-top h2{overflow-wrap:anywhere;line-height:1.25}
+.learner-shell .v45-progress-caption{display:flex;align-items:baseline;justify-content:space-between;gap:10px;color:#c2d4e9;font-size:12px;line-height:1.4}
+.learner-shell .v45-progress-caption strong{color:#eff8ff;font-variant-numeric:tabular-nums}
+.learner-shell .learner-progress{height:10px;border-radius:999px}
+.learner-shell .learner-start{min-height:46px;font-size:13px;border-radius:12px}
+.learner-shell :is(button,input,select):focus-visible{outline:2px solid #92c5ff;outline-offset:3px}
+@media(min-width:601px) and (max-width:1100px){.learner-shell .learner-panel{width:min(900px,100%);max-height:94dvh}.learner-shell .learner-courses{grid-template-columns:repeat(2,minmax(0,1fr))}.learner-shell .learner-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.mode button{min-height:44px}.deck-actions button,.deck-exit{min-height:46px;min-width:46px}}
+@media(max-width:680px){#catalogBrowserRoot .v45-catalog-toolbar{grid-template-columns:minmax(0,1fr)}#catalogBrowserRoot .catalog-grid{grid-template-columns:minmax(0,1fr)}.learner-shell .learner-courses{grid-template-columns:minmax(0,1fr)}.learner-shell .learner-course-top{gap:10px}.learner-shell .learner-course-top>strong{font-size:20px}}
+@media(prefers-reduced-motion:reduce){#catalogBrowserRoot .catalog-card{transition:none}}

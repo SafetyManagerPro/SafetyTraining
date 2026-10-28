@@ -186,9 +186,10 @@
       const av = availability(a);
       const due = a.availableUntil ? `Scadenza ${new Date(a.availableUntil).toLocaleDateString('it-IT')}` : 'Nessuna scadenza impostata';
       const score = a.finalScorePct == null ? '' : `<span>Esito ${Number(a.finalScorePct).toFixed(0)}%</span>`;
-      return `<article class="learner-course ${!av.usable ? 'disabled' : ''}">
+      return `<article class="learner-course ${!av.usable ? 'disabled' : ''}" data-course-status="${esc(a.status)}">
         <div class="learner-course-top"><div><span class="learner-status">${esc(statusLabel(a.status))}</span><h2>${esc(a.courseTitle || a.editionTitle || 'Percorso')}</h2><p>${esc(a.editionTitle && a.editionTitle !== a.courseTitle ? a.editionTitle : '')}</p></div><strong>${pct.toFixed(0)}%</strong></div>
-        <div class="learner-progress"><span style="width:${pct}%"></span></div>
+        <div class="v45-progress-caption"><span>Avanzamento dei contenuti</span><strong>${pct.toFixed(0)}%</strong></div>
+        <div class="learner-progress" role="progressbar" aria-label="Avanzamento dei contenuti" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct.toFixed(0)}"><span style="width:${pct}%"></span></div>
         <div class="learner-meta"><span>⏱ ${esc(fmtTime(a.activeSeconds))} attivi</span><span>📅 ${esc(due)}</span>${score}</div>
         <button class="learner-start" data-enrollment-id="${esc(a.id)}" ${!av.usable ? 'disabled' : ''}>${esc(av.label)}</button>
       </article>`;

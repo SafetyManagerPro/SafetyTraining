@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-28
-Stato corrente: **v45 tranche 1 UI in collaudo / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-admin-overview`.
+Stato corrente: **v45 tranche 1 UI in collaudo / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-catalog-navigation`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -995,3 +995,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Dati storici, 27 frozen, ruoli e privilegi, `company_admin`, separazione SafetyManager, RLS e Supabase invariati; nessuna migration.
 - Stato: modifica proposta su branch di collaudo; CI, deploy e smoke grafico interattivo non ancora convalidati al momento del commit.
 - Tranche successive: filtri e popup, catalogo, docente/corsista tablet, verifica browser.
+
+## 2026-10-28 — v45 — Tranche 2: catalogo e corsista/docente
+- Catalogo didattico `catalog-browser.js`: ricerca e famiglia con label semantiche, risultati annunciabili, schede con titolo, stato versione, disponibilità reale della presentazione, durata nominale e numero di unità già forniti da `training_catalog_summary`.
+- Distinzione esplicita: il catalogo tecnico NON contiene percentuali di avanzamento per chi non è iscritto; le percentuali appaiono soltanto nelle proprie assegnazioni del corsista.
+- `learner-dashboard.js`: barra progresso con ruolo ARIA e valore ricavato dall'iscrizione, label del progresso e stato visuale distinto; nessuna nuova query o modifica di accesso ai corsi.
+- `catalog-learner-v45.css`: carte responsive, area filtri, pulsanti da almeno 44 px, evidenza focus, leggibilità tablet e rispetto delle preferenze riduzione movimento.
+- `index.html` e `sw.js`: asset aggiunto e cache `safety-training-v45-catalog-navigation`.
+- Test `catalog-learner-v45.test.mjs` aggiunto al `npm run check`; test v45 dashboard riallineato alla nuova cache.
+- Nessuna migration, modifica RLS, attestazioni, dati storici, 27 frozen, privilegi admin, `company_admin`, né bridge SafetyManager.
+- Rimangono necessari smoke interattivi autenticati admin/corsista/docente a 1440, 820, 390 px prima di certificare il collaudo visivo finale.
