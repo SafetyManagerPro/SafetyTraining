@@ -66,5 +66,35 @@ test('analytics hydration prevents MutationObserver re-entry storms',()=>{
  assert.equal((s.match(/dataset\.a40Loading='1'/g)||[]).length,2);
  assert.equal((s.match(/dataset\.a40Loading==='1'/g)||[]).length,2);
  assert.equal((s.match(/delete target\.dataset\.a40Loading/g)||[]).length,2);
- assert.equal((s.match(/dataset\.a40Loaded='error'/g)||[]).length,2);
+ assert.equal((s.match(/dataset\.a40Loaded='error'/g)||[]).length,1);
 });
+
+test('analytics errors stay terminal until the user explicitly retries',async()=>{
+ let calls=0,retryHandler;
+ const retryButton={addEventListener(type,handler,options){assert.equal(type,'click');assert.equal(options?.once,true);retryHandler=handler;}};
+ const target={dataset:{},isConnected:true,innerHTML:'',querySelector(selector){return selector==='[data-a40-retry]'?retryButton:null;}};
+ const style={};
+ const documentMock={
+  readyState:'loading',head:{appendChild(){}},addEventListener(){},
+  createElement(){return style;},
+  getElementById(id){return id==='adminDashboardAnalytics'?target:null;}
+ };
+ const client={from(){calls++;throw Error('<errore transitorio>');}};
+ const windowMock={
+  SAFETY_CLOUD:{state:{client,user:{id:'admin-test'}}},
+  SAFETY_ADMIN_CAPABILITIES_STATE:{platform_admin:true,capabilities:{}}
+ };
+ runInNewContext(read('apps/training/admin-analytics-v40.js'),{window:windowMock,document:documentMock,Intl,Date,Math,Number,String,Map,Set,Error});
+ await windowMock.SAFETY_ADMIN_ANALYTICS_V40.renderDashboard();
+ assert.equal(calls,6);
+ assert.equal(target.dataset.a40Loaded,'error');
+ assert.equal(target.dataset.a40Loading,undefined);
+ assert.match(target.innerHTML,/Riprova/);
+ assert.match(target.innerHTML,/&lt;errore transitorio&gt;/);
+ assert.equal(typeof retryHandler,'function');
+ retryHandler();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(calls,12);
+ assert.equal(target.dataset.a40Loaded,'error');
+});
+
