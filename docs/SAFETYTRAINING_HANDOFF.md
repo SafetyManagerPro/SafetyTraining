@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-28
-Stato corrente: **v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v44.1-stabilization`.
+Stato corrente: **v45 tranche 1 UI in collaudo / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-admin-overview`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -985,3 +985,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - **Test e rilascio:** aggiunta regressione comportamentale per stato errore, escaping del messaggio, cleanup del guard e retry esplicito. Suite completa: **112/112 comandi superati**. Preview Vercel `dpl_di2162dKqW2y7uWhan2ZRT4J4xYj` READY; commit applicativo `ed32228b512b17b9c2b56329461d7d3f2f4383ca`; produzione funzionale `dpl_5Yq9tNiip2EFmYxy9fgJzD4prCkG` READY. Verifica autenticata post-deploy: Panoramica `data-a40-loaded="1"`, Controllo operativo `data-a40-loaded="1"`, Report formazione senza loading/errori residui, console 0 errori e 0 warning; asset pubblico contiene `data-a40-retry` e service worker `safety-training-v44.1-stabilization`.
 - **Integrità:** nessuna migration o mutazione dati; nessuna modifica a corsi frozen, ruoli/capability admin, separazione da SafetyManager, Learning Unit, iscrizioni, attestati o revisioni immagini.
 
+
+## 2026-10-28 — v45 — Tranche 1: dashboard e navigazione
+- Baseline: `main` `4dc1f9f71a5a91c6d6a5af221e15bec67aa28505`; Actions #622 / run `40641834852` SUCCESS; Vercel `dpl_6UYMDMkNvdEPxCoxTyTKUKwaNDza` READY e SHA allineato.
+- `admin.js`: nuova cornice grafica Panoramica e accessi diretti alle schede esistenti tramite `data-jump` senza cambiare handler, calcoli o query.
+- `admin-visual-v45.css`: KPI, grafici, menu e focus tastiera; responsive a 1180/760/520 px.
+- `index.html` e `sw.js`: nuovo asset visuale, cache `safety-training-v45-admin-overview`.
+- `tests/admin-visual-v45.test.mjs`: regressioni di routing, asset, focus e retry analytics, incluse nel check CI.
+- Dati storici, 27 frozen, ruoli e privilegi, `company_admin`, separazione SafetyManager, RLS e Supabase invariati; nessuna migration.
+- Stato: modifica proposta su branch di collaudo; CI, deploy e smoke grafico interattivo non ancora convalidati al momento del commit.
+- Tranche successive: filtri e popup, catalogo, docente/corsista tablet, verifica browser.

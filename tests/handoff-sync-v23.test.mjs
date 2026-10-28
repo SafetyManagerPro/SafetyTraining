@@ -21,7 +21,7 @@ test('most recent dated handoff entries are the same across both files',()=>{
  assert.ok(dates.every(Boolean));
  assert.equal(dates[0],dates[1]);
  assert.equal(headings[0].at(-1),headings[1].at(-1));
- assert.match(headings[0].at(-1),/v(?:22|24|43|44)(?:\.[0-9]+)?/);
+ assert.match(headings[0].at(-1),/v(?:22|24|43|44|45)(?:\.[0-9]+)?/);
 });
 test('latest handoffs preserve safety and course freeze constraints',()=>{
  for(const path of docs){
