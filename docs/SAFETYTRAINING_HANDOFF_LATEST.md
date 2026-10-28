@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45 tranche 1 UI in collaudo / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-catalog-navigation`.
+Stato: **v45 upgrade UI v1-v3 pubblicazione in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45-ui-navigation`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1007,3 +1007,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Test `catalog-learner-v45.test.mjs` aggiunto al `npm run check`; test v45 dashboard riallineato alla nuova cache.
 - Nessuna migration, modifica RLS, attestazioni, dati storici, 27 frozen, privilegi admin, `company_admin`, né bridge SafetyManager.
 - Rimangono necessari smoke interattivi autenticati admin/corsista/docente a 1440, 820, 390 px prima di certificare il collaudo visivo finale.
+
+## 2026-10-28 — v45 — Tranche 3: filtri, popup e navigazione
+- Rifinitura CSS della console senza cambiare event handler: pulsanti menu raggruppati, stato attivo, altezza comandi touch, ricerca, strumenti di filtro, azioni tabella e popup.
+- Visibilità focus tastiera e spaziatura migliorate; responsive popup su 860/560 px, senza introdurre nuovi osservatori DOM o polling.
+- Nessuna scrittura dati, migration, variazione permessi, SafetyManager bridge o contenuti didattici; 27 frozen intatti.
+- Cache PWA `safety-training-v45-ui-navigation`; nuovi test `admin-navigation-v45.test.mjs` e suite v45 riallineata; aggiornamento dei due handoff contemporaneo.
+- Validazione da effettuare per questo commit tramite PR CI, deployment Vercel ed esame UI con account reali; fino a browser smoke 1440/820/390 e ruolo docente/corsista non dichiarare completata la validazione interattiva.
