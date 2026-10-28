@@ -3,7 +3,8 @@
    Database-backed courses are adapted into the same presentation model used by app.js. */
 (() => {
   'use strict';
-  const state={rows:[],loaded:false,loading:false,opening:new Set(),error:''};
+  const blankFilters=()=>({query:'',family:'',readiness:'all',sort:'title'});
+  const state={rows:[],loaded:false,loading:false,opening:new Set(),error:'',filters:blankFilters()};
   const cloud=()=>window.SAFETY_CLOUD;
   const db=()=>cloud()?.state?.client;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -98,17 +99,38 @@
     const families=[...new Set(state.rows.map(x=>x.family||'Altro'))];
     host.innerHTML=`
       <section class="catalog-heading"><div><span class="pill">LIBRERIA DIDATTICA COMPLETA</span><h2>Tutti i corsi predisposti</h2><p>I corsi con Learning Unit si aprono ora nella stessa modalità agenda + slide delle prime presentazioni. La vista tecnica resta disponibile separatamente. I vincoli di presenza, pratica, videoconferenza o e-learning restano regole organizzative e normative e non vengono alterati dalla proiezione digitale.</p></div><div class="catalog-summary"><strong>${state.rows.length}</strong><span>corsi attivi</span><strong>${ready}</strong><span>presentabili</span><strong>${missing}</strong><span>da completare</span></div></section>
-      <div class="catalog-toolbar v45-catalog-toolbar"><label class="v45-catalog-filter" for="catalogSearch">Cerca corso<input id="catalogSearch" type="search" autocomplete="off" placeholder="Titolo, codice o famiglia…"></label><label class="v45-catalog-filter" for="catalogFamily">Famiglia<select id="catalogFamily"><option value="">Tutte le famiglie</option>${families.map(f=>`<option>${esc(f)}</option>`).join('')}</select></label></div>
+      <div class="catalog-toolbar v45-catalog-toolbar"><label class="v45-catalog-filter v45-catalog-filter--search" for="catalogSearch">Cerca corso<input id="catalogSearch" type="search" autocomplete="off" placeholder="Titolo, codice o famiglia…"></label><label class="v45-catalog-filter" for="catalogFamily">Famiglia<select id="catalogFamily"><option value="">Tutte le famiglie</option>${families.map(f=>`<option>${esc(f)}</option>`).join('')}</select></label><label class="v45-catalog-filter" for="catalogReadiness">Materiale<select id="catalogReadiness"><option value="all">Tutti</option><option value="ready">Presentazione disponibile</option><option value="missing">Da completare</option></select></label><label class="v45-catalog-filter" for="catalogSort">Ordina per<select id="catalogSort"><option value="title">Titolo A–Z</option><option value="duration">Durata crescente</option><option value="units">Più unità didattiche</option></select></label><button type="button" id="catalogResetFilters" class="v45-catalog-reset">Azzera filtri</button></div>
       <p id="catalogResultCount" class="v45-catalog-result-count" role="status" aria-live="polite"></p>
       <div id="catalogCards" class="catalog-grid" aria-label="Risultati catalogo corsi"></div>`;
     const search=document.getElementById('catalogSearch'),family=document.getElementById('catalogFamily');
+    const readiness=document.getElementById('catalogReadiness'),sort=document.getElementById('catalogSort');
+    const reset=document.getElementById('catalogResetFilters');
+    if(search)search.value=state.filters.query;
+    if(family)family.value=state.filters.family;
+    if(readiness)readiness.value=state.filters.readiness;
+    if(sort)sort.value=state.filters.sort;
+    const byTitle=(a,b)=>String(a.title||'').localeCompare(String(b.title||''),'it',{sensitivity:'base'})||String(a.stable_key||'').localeCompare(String(b.stable_key||''));
     const draw=()=>{
-      const q=(search?.value||'').trim().toLowerCase(),f=family?.value||'';
-      const rows=state.rows.filter(r=>(!f||r.family===f)&&(!q||[r.title,r.stable_key,r.family].some(v=>String(v||'').toLowerCase().includes(q))));
+      const q=(search?.value||'').trim().toLocaleLowerCase('it'),f=family?.value||'';
+      const availability=readiness?.value||'all',order=sort?.value||'title';
+      state.filters={query:search?.value||'',family:f,readiness:availability,sort:order};
+      const filtered=!!(q||f||availability!=='all'||order!=='title');
+      const rows=state.rows.filter(r=>(!f||r.family===f)
+        &&(availability==='all'||(availability==='ready'?Number(r.unit_count||0)>0:Number(r.unit_count||0)<=0))
+        &&(!q||[r.title,r.stable_key,r.family].some(v=>String(v||'').toLocaleLowerCase('it').includes(q))));
+      rows.sort((a,b)=>{
+        if(order==='duration'){
+          const x=Number(a.nominal_minutes)||Infinity,y=Number(b.nominal_minutes)||Infinity;
+          return x-y||byTitle(a,b);
+        }
+        if(order==='units')return Number(b.unit_count||0)-Number(a.unit_count||0)||byTitle(a,b);
+        return byTitle(a,b);
+      });
       const cards=document.getElementById('catalogCards');
       if(!cards)return;
       cards.innerHTML=rows.map(r=>`<article class="catalog-card ${statusClass(r)}"><div class="catalog-card-top"><span>${esc(r.family||'Altro')}</span><b aria-label="Stato versione">${esc(r.version_status||'draft')}</b></div><h3>${esc(r.title)}</h3><div class="catalog-meta"><span>⏱ ${fmtMin(r.nominal_minutes)}</span><span>🧩 ${Number(r.unit_count||0)} unità</span></div><p class="v45-catalog-state ${statusClass(r)}-text"><span aria-hidden="true">●</span> ${materialLabel(r)}</p><div class="catalog-card-actions"><button type="button" class="softbtn" data-catalog-action="open" data-course-key="${esc(r.stable_key)}">${Number(r.unit_count||0)>0?'▶ Apri presentazione':'Vedi stato'}</button>${Number(r.unit_count||0)>0?`<button type="button" class="ghost" data-catalog-action="library" data-course-key="${esc(r.stable_key)}">Vista tecnica</button>`:''}</div></article>`).join('')||'<div class="notice">Nessun corso corrisponde ai filtri.</div>';
-      const count=document.getElementById('catalogResultCount');if(count)count.textContent=rows.length===1?'1 corso trovato':rows.length+' corsi trovati';
+      const count=document.getElementById('catalogResultCount');if(count)count.textContent=(rows.length===1?'1 corso trovato':rows.length+' corsi trovati')+(filtered?' su '+state.rows.length:'');
+      if(reset)reset.disabled=!filtered;
     };
     const cards=document.getElementById('catalogCards');
     cards?.addEventListener('click',event=>{
@@ -119,7 +141,19 @@
       if(button.dataset.catalogAction==='open')void openCourse(row);
       else if(button.dataset.catalogAction==='library')window.openCatalogLibrary(row.stable_key);
     });
-    search.oninput=draw;family.onchange=draw;draw();
+    if(search)search.oninput=draw;
+    if(family)family.onchange=draw;
+    if(readiness)readiness.onchange=draw;
+    if(sort)sort.onchange=draw;
+    if(reset)reset.onclick=()=>{
+      state.filters=blankFilters();
+      if(search)search.value='';
+      if(family)family.value='';
+      if(readiness)readiness.value='all';
+      if(sort)sort.value='title';
+      draw();search?.focus();
+    };
+    draw();
   }
 
   function normalizeContent(content){
@@ -202,7 +236,7 @@
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileMenu();});
   }
 
-  async function boot(){initMobile();await waitCloud();await load();route();cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;state.error='';state.rows=[];load(true);route();},350));window.addEventListener('hashchange',route);}
+  async function boot(){initMobile();await waitCloud();await load();route();cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;state.error='';state.rows=[];state.filters=blankFilters();load(true);route();},350));window.addEventListener('hashchange',route);}
   window.SAFETY_CATALOG={load,renderHome,syncSidebar,renderLibrary,ensurePresentation};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
