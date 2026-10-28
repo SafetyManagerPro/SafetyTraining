@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-28
-Stato corrente: **v45.1 stabilizzazione navigazione in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.1-navigation-stability`.
+Stato corrente: **v45.1 LIVE, CI #634 SUCCESS, browser smoke pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.1-navigation-stability`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1030,3 +1030,9 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Cache `safety-training-v45.1-navigation-stability`, CSS di feedback e suite `tests/navigation-stability-v45-1.test.mjs` aggiunta a `npm run check`; aggiornamento sincronizzato dei due handoff.
 - Nessuna migration o modifica dati, 27 corsi frozen, ruoli/RLS/permessi, report, attestazioni, SafetyManager bridge o `company_admin`.
 - Prima della dichiarazione di pieno collaudo servono ancora browser smoke interattivi con account admin/docente/corsista (1440 / 820 / 390 px) ed E2E, non sostituibili dalla suite CI.
+
+## 2026-10-28 — v45.1 — CI e produzione verificati
+- PR #6 merged in `main` `009455cba9212d25dc4c0f54cf300779194c5d93` dopo regressioni; CI `#634` / run `40646019723` **SUCCESS** sul commit finale.
+- Vercel production alias `safety-training-safety-manager.vercel.app`: deployment `dpl_vJzzLfnQQUtJGzoXwk7j3w1RaXkx` **READY** con `githubCommitSha=009455cba9212d25dc4c0f54cf300779194c5d93`.
+- PWA `safety-training-v45.1-navigation-stability`. Invariati i permessi, SafetyManager bridge, 27 corsi frozen, il database e i dati storici.
+- Collaudo browser autenticato a 1440/820/390 e test end-to-end ruolo corsista/docente restano **pendenti**. La CI comprende prove simulate e controlli statici: non attesta clic reali, resa grafica o comportamento Safari/tablet.
