@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-28
-Stato corrente: **v45.2 catalogo in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.2-catalog-discovery`.
+Stato corrente: **v45.2 LIVE · CI #639 SUCCESS · collaudo nuovi filtri pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.2-catalog-discovery`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1046,3 +1046,8 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Test `tests/catalog-discovery-v45-2.test.mjs` (filtro, sort, ricerca, reset, ritorno home) aggiunto a npm run check. Cache PWA `safety-training-v45.2-catalog-discovery`.
 - Nessuna migration o scrittura DB. Invariati 27 frozen, ruoli, RLS, company_admin, report, dati storici e SafetyManager bridge.
 - Rimane da verificare l'interazione con account reali e touch/tastiera a 1440/820/390. La suite CI non sostituisce E2E multi-ruolo.
+
+## 2026-10-28 — v45.2 — Release verificata
+- PR #8 merged su `main` `2f6f7efa70dd3e06f79df8975e68072ecc1b706b`; suite GitHub Actions **#639 SUCCESS** (run `40646906683`) sul commit di release.
+- Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_2d7L5ggzy6j2iF7cAUVYAe3uJ7C6` READY con `githubCommitSha=2f6f7efa70dd3e06f79df8975e68072ecc1b706b`.
+- Cache `safety-training-v45.2-catalog-discovery`; nessuna migration, nessuna variazione a dati, RLS, ruoli, 27 frozen o separazione SafetyManager. Test Node/CI verificati; **smoke browser dei nuovi filtri non ancora ricevuto**.
