@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.1 LIVE, CI #634 SUCCESS, browser smoke pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.1-navigation-stability`.
+Stato: **v45.2 catalogo in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.2-catalog-discovery`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1038,3 +1038,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Vercel production alias `safety-training-safety-manager.vercel.app`: deployment `dpl_vJzzLfnQQUtJGzoXwk7j3w1RaXkx` **READY** con `githubCommitSha=009455cba9212d25dc4c0f54cf300779194c5d93`.
 - PWA `safety-training-v45.1-navigation-stability`. Invariati i permessi, SafetyManager bridge, 27 corsi frozen, il database e i dati storici.
 - Collaudo browser autenticato a 1440/820/390 e test end-to-end ruolo corsista/docente restano **pendenti**. La CI comprende prove simulate e controlli statici: non attesta clic reali, resa grafica o comportamento Safari/tablet.
+
+
+## 2026-10-28 — v45.2 — Ricerca e filtri catalogo
+- Baseline verificata dall'utente: v45.1 `main` `9790d0957a3824e67aaabd866b971fbea1a99a8f`, CI #636 SUCCESS, Vercel READY. Feedback manuale **OK**, non qualificato come collaudo formale multi-ruolo.
+- Catalogo amministrazione/docente: filtro Materiale (presentazione disponibile o da completare), ordinamento per titolo/durata/unità, pulsante Azzera filtri, conteggio risultati filtrati sul totale.
+- Ricerca/famiglia/materiale/ordine mantenuti **solo in memoria** quando si torna alla home da una presentazione; azzerati al cambio autenticazione. Nessun salvataggio cross-account. I corsisti vedono soltanto i percorsi assegnati.
+- Toolbar responsive desktop/tablet/mobile e focus; disponibilità presentazione non implica completamento, certificazione o validazione normativa.
+- Test `tests/catalog-discovery-v45-2.test.mjs` (filtro, sort, ricerca, reset, ritorno home) aggiunto a npm run check. Cache PWA `safety-training-v45.2-catalog-discovery`.
+- Nessuna migration o scrittura DB. Invariati 27 frozen, ruoli, RLS, company_admin, report, dati storici e SafetyManager bridge.
+- Rimane da verificare l'interazione con account reali e touch/tastiera a 1440/820/390. La suite CI non sostituisce E2E multi-ruolo.
