@@ -1,0 +1,32 @@
+/* SafetyTraining v45.5: explicit opt-in high readability. No edits to teaching material. */
+.deck-top .deck-actions .deck-readable-btn{min-height:40px;min-width:111px;padding:7px 10px;font-size:12px;font-weight:850;white-space:nowrap}
+.deck-top .deck-actions .deck-readable-btn[aria-pressed="true"]{border-color:#92efcc;background:#14594a;color:#fff}
+body.deckmode.deck-readable .projector-slide{background:#071426!important;border-color:#89bde5!important;color:#fff!important}
+body.deckmode.deck-readable .projector-slide :is(h1,h2,h3,p,li){color:#fff!important;letter-spacing:normal}
+body.deckmode.deck-readable .projector-slide .slide-kicker{color:#a9f4d8!important}
+body.deckmode.deck-readable .projector-slide .slide-callout{background:#173348!important;border-left-color:#8cf3cf!important}
+body.deckmode.deck-readable .projector-slide :is(.slide-visual figcaption,.st-gallery-label){color:#f0f6ff!important}
+body.deckmode.deck-readable .projector-slide .slide-visual{border-color:#8eaccd!important}
+body.deckmode.deck-readable .deck-progress span{background:#85f0ca!important}
+body.deckmode.deck-readable .deck-footer{border-top-color:#456d82}
+@media (max-width:1100px), ((pointer:coarse) and (max-width:1366px)){
+  body.deckmode.deck-readable .projector-slide :is(p,li),
+  body.deckmode.deck-readable .projector-slide.compact :is(p,li),
+  body.deckmode.deck-readable .projector-slide.compact2 :is(p,li){font-size:clamp(20px,2.8vw,26px)!important;line-height:1.52!important}
+  body.deckmode.deck-readable .projector-slide :is(.slide-lead,.opening-statement){font-size:clamp(25px,3.6vw,34px)!important;line-height:1.4!important}
+  body.deckmode.deck-readable .projector-slide :is(.slide-callout,.quiz-question){line-height:1.5!important}
+  body.deckmode.deck-readable .projector-slide :is(.slide-columns,.case-slide,.guided-project,.operational-slide-grid){gap:20px!important}
+  body.deckmode.deck-readable .projector-slide :is(.slide-visual figcaption,.st-slide-figure-caption){font-size:16px!important;line-height:1.45!important}
+}
+@media(max-width:700px){
+ .deck-top .deck-actions .deck-readable-btn{min-width:56px;max-width:66px;white-space:normal;line-height:1.1;font-size:10px;padding:5px 4px}
+ body.deckmode.deck-readable .projector-slide :is(p,li),
+ body.deckmode.deck-readable .projector-slide.compact :is(p,li),
+ body.deckmode.deck-readable .projector-slide.compact2 :is(p,li){font-size:19px!important;line-height:1.53!important}
+ body.deckmode.deck-readable .projector-slide :is(.slide-lead,.opening-statement){font-size:25px!important;line-height:1.4!important}
+}
+@media print{
+ .deck-top .deck-actions .deck-readable-btn{display:none!important}
+ body.deckmode.deck-readable .projector-slide{background:white!important;color:#111!important;border-color:#bbb!important}
+ body.deckmode.deck-readable .projector-slide :is(h1,h2,h3,p,li,figcaption){color:#111!important}
+}

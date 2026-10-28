@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.4 LIVE · CI #648 SUCCESS · collaudo indice slide pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.4-deck-index`.
+Stato: **v45.5 leggibilità slide in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.5-readability`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1086,3 +1086,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Vercel produzione `https://safety-training-safety-manager.vercel.app/`, deployment `dpl_9Qjo9Mk86QWf8M73BkcNkQg5iBod` **READY** con `githubCommitSha=779f7c57c159c5ededefa5004294a86b58f7eb7f`.
 - PWA `safety-training-v45.4-deck-index`. Nessuna migration, DB/RLS/ruoli o dati storici modificati; 27 frozen e separazione SafetyManager invariati.
 - I test di funzionalità e compatibilità sono automatizzati; **smoke browser reale dei nuovi controlli Indice, I/Escape/Tab e tablet/Safari ancora da confermare**.
+
+
+## 2026-10-28 — v45.5 — Leggibilità slide
+- Utente ha testato v45.4 confermando "fatto funziona"; baseline `a50e2b544de95c69ed27e1b6ccf72f79fff6814b`, CI #650 SUCCESS, produzione READY. Il feedback riguarda l'indice, non costituisce E2E completo multi-ruolo.
+- Presentazione: bottone reversibile `Aa Leggibilità` con `aria-pressed`, contrasto più elevato in modalità proiezione, tipografia più leggibile nel reader nativo tablet/telefono. Il tasto torna a `Aa Standard` quando attivo.
+- Il layout mobile già esistente è a scroll verticale: quando si passa alla slide successiva o precedente viene ripristinato l'inizio del documento **solo** al cambio di route `#deck/...` nei viewport touch/narrow; non causa scroll su PC, né mentre si interagisce con i contenuti della stessa slide.
+- La preferenza è temporanea e non è persistita; viene azzerata all'uscita dal deck e al cambio autenticazione. Print resetta colori per evitare pagine illeggibili.
+- Modulo frontend `deck-readability-v45-5.js`, CSS responsive/scoped, test runtime `tests/deck-readability-v45-5.test.mjs` inserito nella suite, PWA `safety-training-v45.5-readability`.
+- Nessuna migration, scrittura DB, nuovo permesso o modifica a contenuti, slide, unità, frequenze, progressi, attestazioni, report, bridge SafetyManager, company_admin o 27 corsi frozen.
+- Browser smoke da verificare a 1440/820/390: contrasto, pulsanteria e scroll di inizio slide, soprattutto Safari iPad/iPhone.
