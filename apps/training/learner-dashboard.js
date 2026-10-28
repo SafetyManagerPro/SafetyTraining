@@ -45,15 +45,21 @@
 
   function open() {
     ensureUi();
+    const wasOpen=state.open;
     state.open = true;
-    document.getElementById('learnerShell')?.classList.remove('hidden');
+    const shell=document.getElementById('learnerShell');
+    shell?.classList.remove('hidden');
     document.body.classList.add('learner-dashboard-open');
+    if(!wasOpen)window.SAFETY_MODAL_ACCESS?.opened?.(shell,close);
     render().catch(console.warn);
   }
   function close() {
+    const wasOpen=state.open;
     state.open = false;
-    document.getElementById('learnerShell')?.classList.add('hidden');
+    const shell=document.getElementById('learnerShell');
+    shell?.classList.add('hidden');
     document.body.classList.remove('learner-dashboard-open');
+    if(wasOpen)window.SAFETY_MODAL_ACCESS?.closed?.(shell);
   }
 
   async function claimIfNeeded() {

@@ -11,7 +11,7 @@ test('v45 admin UI shares menu, filter and popup surface styles without new rout
 });
 test('v45 final handoffs and service worker share same cache id',()=>{
  const sw=read('apps/training/sw.js'),cache=/const CACHE='([^']+)'/.exec(sw)?.[1];
- assert.equal(cache,'safety-training-v45-ui-navigation');
+ assert.equal(cache,'safety-training-v45.1-navigation-stability');
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const c=read(p);
   assert.ok(c.slice(0,800).includes(cache),p);
