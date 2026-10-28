@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.2 LIVE · CI #639 SUCCESS · collaudo nuovi filtri pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.2-catalog-discovery`.
+Stato: **v45.3 consultazione Learning Unit in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.3-unit-explorer`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1053,3 +1053,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - PR #8 merged su `main` `2f6f7efa70dd3e06f79df8975e68072ecc1b706b`; suite GitHub Actions **#639 SUCCESS** (run `40646906683`) sul commit di release.
 - Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_2d7L5ggzy6j2iF7cAUVYAe3uJ7C6` READY con `githubCommitSha=2f6f7efa70dd3e06f79df8975e68072ecc1b706b`.
 - Cache `safety-training-v45.2-catalog-discovery`; nessuna migration, nessuna variazione a dati, RLS, ruoli, 27 frozen o separazione SafetyManager. Test Node/CI verificati; **smoke browser dei nuovi filtri non ancora ricevuto**.
+
+
+## 2026-10-28 — v45.3 — Esplorazione Learning Unit nella vista tecnica
+- Baseline v45.2 `main` `893267c8b1be88419efec72e0e1d2b218ae4d38e`, CI #641 SUCCESS e Vercel READY. L'utente ha dato OK e richiesto di proseguire; questo non equivale a collaudo E2E multi-ruolo.
+- Vista tecnica `#library/<course>` admin/docente: ricerca locale fra titolo modulo, titolo Learning Unit, sintesi, origine e contenuto didattico restituito dal bundle RPC. Conteggio unità trovate su totale e per modulo, messaggio per ricerca vuota, controlli Apri tutte/Chiudi tutte/Ripristina. Primo risultato di ogni modulo viene aperto per orientarvisi.
+- I filtri sono temporanei, DOM-only e non effettuano query aggiuntive al server. `hidden` non rimuove mai Learning Unit o materiali dal database.
+- Protezione contro risposte RPC tardive (route cambiata, cambio account o nuova richiesta): non sovrascrivere altre schermate o mostrare dati a sessione diversa. Fallback Riprova per errori della vista tecnica.
+- Modulo frontend `library-navigator-v45-3.js`, CSS responsive e stampa, test `library-navigator-v45-3.test.mjs`, PWA `safety-training-v45.3-unit-explorer`.
+- Nessuna modifica a permessi, 27 corsi frozen, versione/unità, progressi, report, attestazioni, RLS, database o bridge SafetyManager. `company_admin` resta non abilitato.
+- Smoke browser con account reali 1440/820/390 (ricerca, Espandi/Comprimi, stampa, cambio pagina durante RPC) e E2E multi-ruolo da confermare. Nessuna attestazione normativa introdotta.

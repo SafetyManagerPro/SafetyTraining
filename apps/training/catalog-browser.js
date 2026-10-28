@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const blankFilters=()=>({query:'',family:'',readiness:'all',sort:'title'});
-  const state={rows:[],loaded:false,loading:false,opening:new Set(),error:'',filters:blankFilters()};
+  const state={rows:[],loaded:false,loading:false,opening:new Set(),error:'',filters:blankFilters(),libraryRequest:0};
   const cloud=()=>window.SAFETY_CLOUD;
   const db=()=>cloud()?.state?.client;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -168,17 +168,36 @@
     return blocks;
   }
 
+  function libraryRouteIs(key){
+    const parts=location.hash.replace(/^#/,'').split('/');
+    try{return parts[0]==='library'&&decodeURIComponent(parts[1]||'')===key;}
+    catch{return false;}
+  }
   async function renderLibrary(key){
     if(isLearner()){location.hash='';return;}
     const root=document.getElementById('app');if(!root)return;
+    const request=++state.libraryRequest,viewer=cloud()?.state?.user?.id;
     root.innerHTML='<div class="catalog-loading">Caricamento materiale didattico…</div>';
-    const client=await waitCloud();if(!client||!isAuthenticated()){root.innerHTML='<div class="notice">Accedi come amministratore/docente per consultare la libreria completa.</div>';return;}
-    const {data,error}=await client.rpc('training_course_bundle',{p_stable_key:key});
-    if(error||!data){root.innerHTML=`<div class="admin-error">${esc(error?.message||'Corso non trovato.')}</div>`;return;}
+    const client=await waitCloud();
+    if(request!==state.libraryRequest||!libraryRouteIs(key))return;
+    if(!client||!isAuthenticated()||isLearner()||cloud()?.state?.user?.id!==viewer){
+      root.innerHTML='<div class="notice">Accedi come amministratore/docente per consultare la libreria completa.</div>';
+      return;
+    }
+    let data,error;
+    try{({data,error}=await client.rpc('training_course_bundle',{p_stable_key:key}));}
+    catch(e){error=e;}
+    if(request!==state.libraryRequest||!libraryRouteIs(key)||!isAuthenticated()||isLearner()||cloud()?.state?.user?.id!==viewer)return;
+    if(error||!data){
+      root.innerHTML='<div class="admin-error" role="alert">'+esc(error?.message||'Corso non trovato.')+' <button type="button" data-library-retry>Riprova</button></div>';
+      root.querySelector('[data-library-retry]')?.addEventListener('click',()=>{void renderLibrary(key);},{once:true});
+      return;
+    }
     const c=data.course||{},mods=Array.isArray(data.modules)?data.modules:[],units=mods.flatMap(m=>m.units||[]);
     root.innerHTML=`<div class="breadcrumb"><button type="button" data-catalog-home>Home</button><span>›</span><span>${esc(c.title)}</span></div><section class="hero"><span class="pill">VISTA TECNICA DEL MATERIALE</span><h1>${esc(c.title)}</h1><p>${esc(c.description||'Percorso didattico predisposto nella libreria SafetyTraining.')}</p><div class="coursemeta"><span>${esc(c.family||'Altro')}</span><span>⏱ ${fmtMin(c.nominal_minutes)}</span><span>🧩 ${units.length} unità</span><span>v${esc(data.version?.version_number||1)} · ${esc(data.version?.status||'draft')}</span></div>${units.length?`<button type="button" class="openbtn big" data-catalog-open>▶ Apri come presentazione</button>`:''}</section>${!units.length?'<div class="notice"><strong>Materiale da completare:</strong> il corso è censito e resta visibile, ma non contiene ancora Learning Unit.</div>':mods.map((m,mi)=>`<section class="section library-module"><h2>${mi+1}. ${esc(m.title||'Modulo')}</h2><div class="library-units">${(m.units||[]).map((u,ui)=>{const blocks=normalizeContent(u.content);return `<details class="library-unit" ${ui===0?'open':''}><summary><div><strong>${esc(u.title)}</strong><span>${fmtMin(u.default_minutes)} · ${esc(u.source_group||'Learning Unit')}</span></div></summary><div class="library-unit-body"><p class="summary">${esc(u.summary||u.content?.summary||'')}</p>${blocks.map(b=>`<section><h3>${esc(b.title)}</h3>${b.html}</section>`).join('')}</div></details>`;}).join('')}</div></section>`).join('')}`;
     root.querySelector('[data-catalog-home]')?.addEventListener('click',()=>{location.hash='';});
     root.querySelector('[data-catalog-open]')?.addEventListener('click',()=>{window.openCatalogCourse(key);});
+    if(units.length)window.SAFETY_LIBRARY_UX?.mount?.(root,mods);
   }
 
   async function route(){
@@ -236,7 +255,7 @@
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileMenu();});
   }
 
-  async function boot(){initMobile();await waitCloud();await load();route();cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;state.error='';state.rows=[];state.filters=blankFilters();load(true);route();},350));window.addEventListener('hashchange',route);}
+  async function boot(){initMobile();await waitCloud();await load();route();cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;state.error='';state.rows=[];state.filters=blankFilters();state.libraryRequest++;load(true);route();},350));window.addEventListener('hashchange',()=>{state.libraryRequest++;route();});}
   window.SAFETY_CATALOG={load,renderHome,syncSidebar,renderLibrary,ensurePresentation};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
