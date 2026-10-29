@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-29
-Stato: **v45.7 LIVE · CI #662 SUCCESS · smoke strumenti aula pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.7-teacher-tools`.
+Stato: **v45.8 controllo visivo in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.8-visual-audit`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1136,3 +1136,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Vercel produzione `https://safety-training-safety-manager.vercel.app/`, deployment `dpl_GzYY6SubsnLHuJskLgpHh7FqjKsN` **READY**, `githubCommitSha=1eb90e8ffa420950bd3586ee7cb88fff78660d00`.
 - Cache PWA `safety-training-v45.7-teacher-tools`. Nessuna migration, modifica ai dati/RLS/ruoli, 27 frozen, avanzamenti, presenze, attestati o ponte SafetyManager.
 - Test automatizzati `npm run check` superati; la funzionalità di cronometro/pausa va ancora verificata manualmente in browser autenticato e su tablet/mobile. Nessun E2E di proiezione reale dichiarato.
+
+
+## 2026-10-29 — v45.8 — Verifica visiva slide
+- Baseline `7d61084a7cd0b19b0d014b20da06c4d41026ba86`, CI #664 SUCCESS e produzione READY. L'upgrade aggiunge un preflight visivo puntuale e non duplica il report generale `presentation-quality-ui.js` né l'editor admin delle immagini.
+- `⏱ Aula → 🔎 Controlla figure slide`: pannello read-only che verifica *solo le immagini già renderizzate nella slide corrente*: caricate, non caricate o in attesa, didascalie e testo alternativo. Consente ricontrollo e apertura nel visualizzatore v45.6.
+- Nessun controllo nascosto su immagini non visualizzate. Aggiorna allo scatto degli eventi image load/error; chiude su cambio slide, account, route o modifica/review media.
+- Non certifica pertinenza didattica, diritti d'uso, approvazione tecnica o conformità; nessun salvataggio o modifica alle fonti.
+- Nuovi asset `deck-visual-audit-v45-8.js` e CSS, test di comportamento `tests/deck-visual-audit-v45-8.test.mjs`, cache `safety-training-v45.8-visual-audit`.
+- Invariati 27 frozen, DB, RLS/ruoli, company_admin, storico, frequenza, progressi, attestati, corsi e bridge SafetyManager. Browser smoke autenticato desktop/tablet/mobile ancora da verificare.
