@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-29
-Stato corrente: **v45.8 controllo visivo in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.8-visual-audit`.
+Stato corrente: **v45.8 LIVE · CI #666 SUCCESS · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.8-visual-audit`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1143,3 +1143,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Non certifica pertinenza didattica, diritti d'uso, approvazione tecnica o conformità; nessun salvataggio o modifica alle fonti.
 - Nuovi asset `deck-visual-audit-v45-8.js` e CSS, test di comportamento `tests/deck-visual-audit-v45-8.test.mjs`, cache `safety-training-v45.8-visual-audit`.
 - Invariati 27 frozen, DB, RLS/ruoli, company_admin, storico, frequenza, progressi, attestati, corsi e bridge SafetyManager. Browser smoke autenticato desktop/tablet/mobile ancora da verificare.
+
+
+## 2026-10-29 — v45.8 — Verifica release automatica
+- PR #20 merged su `main`, commit applicativo `e4f9a24f28c60dee01a4b55dc3c038c366c0ac6b`; GitHub Actions **#666 SUCCESS** (run `40927180068`) sul commit di produzione.
+- Vercel produzione `https://safety-training-safety-manager.vercel.app/`, deployment `dpl_9BFJ74fokq6usfT9T7B21deYbLtT` **READY**, `githubCommitSha=e4f9a24f28c60dee01a4b55dc3c038c366c0ac6b`.
+- Cache PWA `safety-training-v45.8-visual-audit`, esclusivamente modifiche frontend, nessuna migration, modifica a dati/RLS/ruoli, 27 corsi frozen, progressi, presenze, attestati o bridge SafetyManager.
+- Suite automatizzata superata, inclusi test di immagini caricate/rotte/in attesa, didascalie/alt, escape HTML, navigazione verso viewer e chiusura. **Smoke manuale interattivo su browser autenticato e dispositivi touch ancora da eseguire**; test automatizzati e stato READY non sostituiscono la prova visuale.
