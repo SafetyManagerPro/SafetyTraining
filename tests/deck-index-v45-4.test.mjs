@@ -60,9 +60,9 @@ test('assets and both handoffs report v45.4',()=>{
  const html=read('apps/training/index.html'),sw=read('apps/training/sw.js');
  for(const p of ['deck-index-v45-4.js','deck-index-v45-4.css'])assert.ok(html.includes(p)&&sw.includes(p),p);
  assert.ok(html.indexOf('app.js')<html.indexOf('deck-index-v45-4.js'));
- assert.ok(sw.includes('safety-training-v45.7-teacher-tools'));
+ assert.ok(sw.includes('safety-training-v45.8-visual-audit'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  const d=read(p);assert.ok(d.slice(0,800).includes('safety-training-v45.7-teacher-tools'));assert.ok(d.includes('v45.4 — Indice slide docente'));
+  const d=read(p);assert.ok(d.slice(0,800).includes('safety-training-v45.8-visual-audit'));assert.ok(d.includes('v45.4 — Indice slide docente'));
  }
  assert.ok(read('package.json').includes('tests/deck-index-v45-4.test.mjs'));
 });
