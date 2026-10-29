@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.5 LIVE · CI #653 SUCCESS · smoke browser leggibilità pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.5-readability`.
+Stato: **v45.6 figure ingrandite in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.6-figure-viewer`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1103,3 +1103,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_6CgWy4oJnUfY26HWYWKrcAZWZtCw` **READY**, `githubCommitSha=2faef7afdd9e6b367e27b68452df5844e15310dd`.
 - PWA `safety-training-v45.5-readability`. Nessuna migration o scrittura dati; 27 frozen, RLS, ruoli, `company_admin` e SafetyManager bridge invariati.
 - L'utente ha verificato e confermato la v45.4 ("fatto funziona"). **Collaudo manuale di Aa Leggibilità e ritorno all'inizio su tablet/smartphone resta pendente**; la CI non sostituisce una prova reale di resa visiva.
+
+
+## 2026-10-29 — v45.6 — Figure ingrandite nelle slide
+- Baseline v45.5 `66d1d3b32c2daccc97b7f5f35700ec9cadd082aa`, GitHub Actions #655 SUCCESS, Vercel READY. User has requested further SafetyTraining upgrades.
+- Viewer delle figure in modalità slide: pulsante `🔍 Figure` disabilitato se non sono presenti immagini; clic sull'immagine per aprire ingrandimento 100–300%, didascalia e navigazione tra le immagini della stessa slide (anche da tastiera). `Esc` e chiusura visibile con focus manager `SAFETY_MODAL_ACCESS`.
+- Usa gli URL già caricati dalla presentazione senza modificarli né conservarli. Esclude i poster-video usati come pulsanti e i loghi. Si chiude quando cambia slide, rotta, account o review immagini; non modifica bookmark o posizione del corso.
+- Risorse frontend `deck-figure-viewer-v45-6.js`/CSS, test di comportamento `tests/deck-figure-viewer-v45-6.test.mjs`, nuova cache PWA `safety-training-v45.6-figure-viewer`.
+- Nessuna migrazione o modifica a DB, ruoli, RLS, corsi frozen (27), dati storici, learning progress, frequenze, attestati, SafetyManager bridge o `company_admin`.
+- Verifica browser interattiva ancora da fare su computer, tablet e smartphone; test automatizzati e deploy READY non la sostituiscono.

@@ -422,17 +422,19 @@ function deckView(c,index=0){
        if(button){button.disabled=index+offset<0||index+offset>=deck.length;button.onclick=()=>deckGo(c.id,index+offset);}
      }
      window.__deck={cid:c.id,index,total:deck.length};window.__deckSlides=deck;
+     document.dispatchEvent(new Event('safety:deck-slide-rendered'));
      void window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.visit?.(c,s,index);
      requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});
      return;
    }
  }
- app.innerHTML=`<div class="deck-shell"><div class="deck-top"><div class="deck-top-navigation"><button type="button" class="deck-home-btn" onclick="setHash('')" title="Torna alla Home; la posizione viene ricordata">⌂ Home</button><button class="deck-exit" onclick="setHash('course/${c.id}')">← Agenda</button></div><div class="deck-course">${c.icon} ${esc(c.title)}</div><div class="deck-actions"><button type="button" class="deck-index-btn" data-deck-index-open aria-label="Apri indice delle slide" title="Vai a una slide">☷ Indice</button><button type="button" class="deck-readable-btn" data-deck-readable aria-pressed="false" title="Aumenta contrasto e leggibilità" aria-label="Attiva alta leggibilità delle slide">Aa Leggibilità</button><button type="button" aria-label="Attiva o disattiva schermo intero" title="Schermo intero" onclick="toggleFullscreen()">⛶</button></div></div>
+ app.innerHTML=`<div class="deck-shell"><div class="deck-top"><div class="deck-top-navigation"><button type="button" class="deck-home-btn" onclick="setHash('')" title="Torna alla Home; la posizione viene ricordata">⌂ Home</button><button class="deck-exit" onclick="setHash('course/${c.id}')">← Agenda</button></div><div class="deck-course">${c.icon} ${esc(c.title)}</div><div class="deck-actions"><button type="button" class="deck-figure-btn" data-deck-figure-open aria-label="Ingrandisci figure della slide" title="Ingrandisci figure della slide" disabled>🔍 Figure</button><button type="button" class="deck-index-btn" data-deck-index-open aria-label="Apri indice delle slide" title="Vai a una slide">☷ Indice</button><button type="button" class="deck-readable-btn" data-deck-readable aria-pressed="false" title="Aumenta contrasto e leggibilità" aria-label="Attiva alta leggibilità delle slide">Aa Leggibilità</button><button type="button" aria-label="Attiva o disattiva schermo intero" title="Schermo intero" onclick="toggleFullscreen()">⛶</button></div></div>
  <div class="deck-stage" id="deckStage"><article class="projector-slide type-${s.type}" id="projectorSlide">${deckSlideBody(s,index)}</article></div>
  <div class="deck-footer"><div><strong>${esc(s.module.title)}</strong>${s.topic?`<span>${esc(s.topic.title)}</span>`:''}</div><div class="deck-time"><span>tempo corso ${clockMin(s.start)}–${clockMin(s.topic?s.end:(s.displayEnd||s.module.end_minute))}</span>${s.topic?`<b>${Math.max(0,s.end-s.start)} min slide</b>`:`<b>${s.module.minutes} min modulo</b>`}</div><div class="deck-pager"><button type="button" class="deck-pager-prev" aria-label="Slide precedente" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">← Indietro</button><span class="deck-counter" aria-live="polite">${index+1} / ${deck.length}</span><button type="button" class="deck-pager-next" aria-label="Slide successiva" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">Avanti →</button></div></div>
  <div class="deck-progress"><span style="width:${pct}%"></span></div>
  <button class="deck-nav prev" aria-label="Slide precedente" title="Slide precedente" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">‹</button><button class="deck-nav next" aria-label="Slide successiva" title="Slide successiva" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">›</button></div>`;
  window.__deck={cid:c.id,index,total:deck.length}; window.__deckSlides=deck;
+ document.dispatchEvent(new Event('safety:deck-slide-rendered'));
  void window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.visit?.(c,s,index);
  requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});
 }
