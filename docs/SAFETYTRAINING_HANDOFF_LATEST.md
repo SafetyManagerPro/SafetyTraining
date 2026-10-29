@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-29
-Stato: **v45.7 strumenti aula in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.7-teacher-tools`.
+Stato: **v45.7 LIVE · CI #662 SUCCESS · smoke strumenti aula pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.7-teacher-tools`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1129,3 +1129,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Frontend `deck-teacher-tools-v45-7.js` e CSS dedicato, test runtime `tests/deck-teacher-tools-v45-7.test.mjs`, cache PWA `safety-training-v45.7-teacher-tools`; mobile toolbar mantiene comandi in riga separata. Le operazioni sono solo UI e non sostituiscono il sistema formativo.
 - Nessuna modifica ai 27 frozen, Learning Unit, storico, quiz/prove, registrazioni presenze, progressi, attestati, report, backend, RLS/ruoli, `company_admin` o ponte SafetyManager.
 - Smoke manuale richiesto: browser autenticato 1440/820/390, avvio/pausa/azzeramento, cambio slide con timer attivo, Esc, uscita/cambio account. CI automatizzata non equivale a verifica interattiva.
+
+
+## 2026-10-29 — v45.7 — Verifica release automatica
+- PR #18 merged su `main`, commit applicativo `1eb90e8ffa420950bd3586ee7cb88fff78660d00`, GitHub Actions **#662 SUCCESS** (run `40924950242`) sul medesimo SHA.
+- Vercel produzione `https://safety-training-safety-manager.vercel.app/`, deployment `dpl_GzYY6SubsnLHuJskLgpHh7FqjKsN` **READY**, `githubCommitSha=1eb90e8ffa420950bd3586ee7cb88fff78660d00`.
+- Cache PWA `safety-training-v45.7-teacher-tools`. Nessuna migration, modifica ai dati/RLS/ruoli, 27 frozen, avanzamenti, presenze, attestati o ponte SafetyManager.
+- Test automatizzati `npm run check` superati; la funzionalità di cronometro/pausa va ancora verificata manualmente in browser autenticato e su tablet/mobile. Nessun E2E di proiezione reale dichiarato.
