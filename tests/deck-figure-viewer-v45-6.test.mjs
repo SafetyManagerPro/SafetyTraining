@@ -15,7 +15,7 @@ function fixture(){
  Object.assign(root.children,{'#figureImage':img,'#figureCaption':caption,'#figureCounter':counter,'#figureZoom':zoom,
   '[data-figure-prev]':prev,'[data-figure-next]':next,'[data-figure-minus]':node(),
   '[data-figure-plus]':node(),'[data-figure-close]':node(),'.figure-scroller':node()});
- const images=[node(),node()];images.forEach((n,i)=>{n.src='assets/figure-'+i+'.svg';n.currentSrc=n.src;n.alt='Figura '+i;n.closest=()=>({querySelector:()=>({textContent:'Didascalia '+i})});});
+ const images=[node(),node()];images.forEach((n,i)=>{n.src='assets/figure-'+i+'.svg';n.currentSrc=n.src;n.alt='Figura '+i;n.closest=selector=>selector==='button,a'?null:{querySelector:()=>({textContent:'Didascalia '+i})};});
  const control=node(),events={},winds={},body=node();body.classList.add('deckmode');body.appendChild=()=>{};
  const document={body,createElement:()=>root,querySelector:k=>k==='[data-deck-figure-open]'?control:null,querySelectorAll:()=>images,
   addEventListener:(k,fn)=>{events[k]=fn}};
