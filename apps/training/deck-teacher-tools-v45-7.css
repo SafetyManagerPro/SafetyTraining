@@ -1,0 +1,34 @@
+/* SafetyTraining v45.7 — teacher-only projection UI, no curriculum alterations. */
+.deck-top .deck-actions .deck-tools-btn{min-height:40px;min-width:79px;padding:7px 8px;font-size:12px;font-weight:850;white-space:nowrap;font-variant-numeric:tabular-nums}
+.deck-tools-overlay{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:18px;background:rgba(2,8,17,.82)}
+.deck-tools-overlay.hidden,.deck-tools-blank.hidden{display:none!important}
+.deck-tools-dialog{width:min(480px,100%);max-height:94dvh;overflow-y:auto;box-sizing:border-box;background:#12263d;color:#f0f7ff;border:1px solid #587b9d;border-radius:18px;box-shadow:0 26px 90px rgba(0,0,0,.63)}
+.deck-tools-dialog header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 10px}
+.deck-tools-kicker{color:#a9d6ff;font-size:10px;font-weight:900;letter-spacing:.11em}
+.deck-tools-dialog h2{font-size:24px;margin:6px 0 0}
+.deck-tools-dialog button,.deck-tools-blank button{min-height:44px;padding:9px 13px;border:1px solid #7ca9cd;border-radius:10px;background:#204362;color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+.deck-tools-dialog header button{min-width:44px;font-size:26px;padding:3px}
+.deck-tools-dialog button:disabled{opacity:.4;cursor:default}
+.deck-tools-content{display:grid;gap:14px;padding:14px 20px 20px}
+.deck-tools-label{font-size:12px;color:#bbd5ec;margin:0;font-weight:800}
+#deckTeacherClock{display:block;text-align:center;font-variant-numeric:tabular-nums;font-size:clamp(44px,7vw,64px);font-weight:900;letter-spacing:.02em;color:#fff;background:#07192c;border:1px solid #436685;border-radius:16px;padding:14px}
+.deck-tools-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.deck-tools-dialog .deck-tools-blackout-btn{background:#080f1a;border-color:#829ebc;min-height:50px}
+.deck-tools-disclaimer{margin:0;font-size:12px;line-height:1.5;color:#c3d6e8;border-top:1px solid #39526b;padding-top:13px}
+.deck-tools-blank{position:fixed;inset:0;z-index:1200;background:#000;color:#fff;display:grid;place-items:center;padding:20px}
+.deck-tools-blank-inner{display:grid;justify-items:center;gap:15px;text-align:center;width:min(760px,100%)}
+.deck-tools-blank-inner>span{letter-spacing:.14em;color:#e4ecf4;font-size:12px;font-weight:850}
+.deck-tools-blank-inner h2{font-size:clamp(26px,4vw,44px);margin:0;color:#fff}
+.deck-tools-blank-inner p{font-size:16px;color:#d6e0ed;margin:0}
+.deck-tools-blank-inner small{font-size:12px;color:#b9cce2}
+.deck-tools-blank-inner button{background:#1c5445;border-color:#65bd9c;min-height:56px;padding:12px 22px;font-size:17px}
+.deck-tools-overlay button:focus-visible,.deck-tools-blank button:focus-visible{outline:3px solid #9ad7ff;outline-offset:3px}
+@media(max-width:700px){
+ body.deckmode .deck-top .deck-actions .deck-tools-btn{flex:1 1 62px;max-width:none;min-width:0;padding:6px 4px;font-size:11px}
+ .deck-tools-overlay{padding:8px;align-items:center}
+ .deck-tools-dialog{border-radius:14px}
+ .deck-tools-dialog header{padding:15px 14px 8px}
+ .deck-tools-content{padding:12px 14px 18px}
+ .deck-tools-row{grid-template-columns:1fr 1fr}
+}
+@media print{.deck-tools-overlay,.deck-tools-blank,.deck-top .deck-actions .deck-tools-btn{display:none!important}}
