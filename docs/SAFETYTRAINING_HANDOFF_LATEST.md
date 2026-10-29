@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
-Ultimo aggiornamento: 2026-10-28
-Stato: **v45.6 LIVE · CI #658 SUCCESS · verifica browser figure pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.6-figure-viewer`.
+Ultimo aggiornamento: 2026-10-29
+Stato: **v45.7 strumenti aula in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.7-teacher-tools`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1119,3 +1119,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_B1aBLoW5PQEKAJ7gKXFoyifRgXoD` **READY** con `githubCommitSha=b7b98a724179cb29a9689cc18eab30df8dad731a`.
 - PWA `safety-training-v45.6-figure-viewer`, nessuna migration, modifica ai ruoli/RLS, 27 frozen, dati storici, progressi o SafetyManager bridge.
 - Test UI automatizzati superati: apertura, didascalie, avanzamento delle figure, zoom, chiusura senza cambiare slide e cambio di pagina. **Smoke browser autenticato, mobile, touch e Safari non ancora verificato manualmente.**
+
+
+## 2026-10-29 — v45.7 — Strumenti aula e pausa proiezione
+- Baseline `e7afad681cfd59952f68bc1c0ca35190503e6c77`, GitHub Actions #660 SUCCESS, produzione Vercel READY. Il nuovo upgrade continua la roadmap docente, dopo zoom figure v45.6; smoke interattivo v45.6 ancora da confermare.
+- Un pulsante `⏱ Aula` nella barra delle presentazioni apre un pannello accessibile con **cronometro di sessione** (avvia, ferma, azzera) e comando **Oscura slide**.
+- Timer solo per orientamento del docente, opt-in e locale in memoria, non persistente, non è accreditamento di ore o presenze; continua tra slide della stessa presentazione e si resetta su uscita dal deck, cambio corso o account. Nessuna lettura/scrittura database.
+- Oscuramento temporaneo copre interamente la proiezione; `Riprendi slide` o Esc ripristina lo stesso punto senza avanzare. Intercetta frecce/Spazio durante l'oscuramento per non far navigare la slide sotto il velo. Dialog e focus tramite `SAFETY_MODAL_ACCESS`.
+- Frontend `deck-teacher-tools-v45-7.js` e CSS dedicato, test runtime `tests/deck-teacher-tools-v45-7.test.mjs`, cache PWA `safety-training-v45.7-teacher-tools`; mobile toolbar mantiene comandi in riga separata. Le operazioni sono solo UI e non sostituiscono il sistema formativo.
+- Nessuna modifica ai 27 frozen, Learning Unit, storico, quiz/prove, registrazioni presenze, progressi, attestati, report, backend, RLS/ruoli, `company_admin` o ponte SafetyManager.
+- Smoke manuale richiesto: browser autenticato 1440/820/390, avvio/pausa/azzeramento, cambio slide con timer attivo, Esc, uscita/cambio account. CI automatizzata non equivale a verifica interattiva.
