@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-28
-Stato: **v45.6 figure ingrandite in verifica / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.6-figure-viewer`.
+Stato: **v45.6 LIVE · CI #658 SUCCESS · verifica browser figure pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.6-figure-viewer`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1112,3 +1112,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Risorse frontend `deck-figure-viewer-v45-6.js`/CSS, test di comportamento `tests/deck-figure-viewer-v45-6.test.mjs`, nuova cache PWA `safety-training-v45.6-figure-viewer`.
 - Nessuna migrazione o modifica a DB, ruoli, RLS, corsi frozen (27), dati storici, learning progress, frequenze, attestati, SafetyManager bridge o `company_admin`.
 - Verifica browser interattiva ancora da fare su computer, tablet e smartphone; test automatizzati e deploy READY non la sostituiscono.
+
+
+## 2026-10-29 — v45.6 — Release verificata
+- PR #16 merged su `main` nel commit applicativo `b7b98a724179cb29a9689cc18eab30df8dad731a`, GitHub Actions **#658 SUCCESS** (run `40922418723`) sul commit di produzione.
+- Vercel produzione `safety-training-safety-manager.vercel.app`: deployment `dpl_B1aBLoW5PQEKAJ7gKXFoyifRgXoD` **READY** con `githubCommitSha=b7b98a724179cb29a9689cc18eab30df8dad731a`.
+- PWA `safety-training-v45.6-figure-viewer`, nessuna migration, modifica ai ruoli/RLS, 27 frozen, dati storici, progressi o SafetyManager bridge.
+- Test UI automatizzati superati: apertura, didascalie, avanzamento delle figure, zoom, chiusura senza cambiare slide e cambio di pagina. **Smoke browser autenticato, mobile, touch e Safari non ancora verificato manualmente.**
