@@ -19,6 +19,6 @@ test('responsive visual styles and PWA cache are registered',()=>{
  const html=read('apps/training/index.html'),sw=read('apps/training/sw.js');
  assert.ok(html.includes('catalog-learner-v45.css'));
  assert.ok(sw.includes('"./catalog-learner-v45.css"'));
- assert.ok(sw.includes('safety-training-v45.9-course-visual-audit'));
+ assert.ok(sw.includes('safety-training-v46-0-teacher-guide'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md'])assert.ok(read(p).includes('v45 — Tranche 2: catalogo e corsista/docente'));
 });

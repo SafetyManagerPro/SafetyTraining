@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-31
-Stato corrente: **v45.9 GitHub main · CI #670 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.9-course-visual-audit`.
+Stato corrente: **v46.0 in collaudo GitHub · CI precedente #674 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-0-teacher-guide`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1173,3 +1173,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - La suite GitHub include il nuovo test `tests/stabilization-v45-10.test.mjs`; il controllo browser autenticato, tablet, Safari e smartphone resta **smoke manuale da eseguire**.
 - Workflow esclusivamente GitHub, **senza consultare @Vercel** per espressa richiesta. Stato di pubblicazione non verificato.
 - Invariati i 27 frozen, storico, RLS/ruoli, presenze, attestati e integrazione SafetyManager.
+
+
+## 2026-10-31 — v46.0 — Guida docente contestuale
+- Base GitHub `758f6bf39a630c1ef1400aea2a7d61d7271d15bf` dopo merge PR #24 v45.10 (CI PR #673 SUCCESS e main #674 SUCCESS). Intervento **frontend didattico di sola lettura** senza cambiare contenuti delle Learning Unit.
+- Nuovo `⏱ Aula → 🎓 Guida didattica` per ogni slide proiettata: pannello separato con obiettivo/messaggio, note del docente, approfondimenti, domanda per l'aula, caso/esempio, scaletta indicativa e applicazione pratica **solo se già presenti nei dati dell'argomento/slide**. Nessuna generazione automatica di procedure o suggerimenti non verificati.
+- Evita deliberatamente di mostrare le risposte ai quiz nel pannello. I dati sono escapati e limitati; per le slide senza note segnala onestamente l'assenza di approfondimenti. Timer slide illustrativo dai minuti compilati, non un dato certificativo.
+- L'overlay usa il gestore accessibile dei dialog, si chiude al cambio di slide/corso/account e non registra alcun dato. Sull'uso di un videoproiettore il docente deve evitare di mostrare note riservate all'aula; non è una seconda schermata fisicamente separata.
+- Guida Gestione immagini aggiornata con punto d'accesso. Asset `teacher-didactic-guide-v46.js` / CSS, test VM `teacher-didactic-guide-v46.test.mjs`, cache PWA `safety-training-v46-0-teacher-guide`.
+- Invariati 27 corsi frozen, i testi didattici originari, storico, RLS/ruoli, company_admin, presenze, ore ufficiali, progressi, attestati e SafetyManager bridge. Nessuna migrazione o scrittura DB.
+- **Solo GitHub**: non consultare @Vercel salvo richiesta espressa. CI e smoke browser autenticato desktop/tablet/mobile da verificare prima di dichiarare la stabilizzazione completa.
