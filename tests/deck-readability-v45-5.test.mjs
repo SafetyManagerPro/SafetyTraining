@@ -45,9 +45,9 @@ test('slide controls, responsive CSS, cache and handoffs include v45.5',()=>{
  assert.ok(html.indexOf('deck-index-v45-4.js')<html.indexOf('deck-readability-v45-5.js'));
  const style=read('apps/training/deck-readability-v45-5.css');
  for(const marker of ['deck-readable','max-width:1100px','max-width:700px','@media print',':focus']){if(marker!==':focus')assert.ok(style.includes(marker),marker)}
- assert.ok(sw.includes('safety-training-v45.8-visual-audit'));
+ assert.ok(sw.includes('safety-training-v45.9-course-visual-audit'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  const doc=read(p);assert.ok(doc.slice(0,750).includes('safety-training-v45.8-visual-audit'));assert.ok(doc.includes('v45.5 — Leggibilità slide'));
+  const doc=read(p);assert.ok(doc.slice(0,750).includes('safety-training-v45.9-course-visual-audit'));assert.ok(doc.includes('v45.5 — Leggibilità slide'));
  }
  assert.ok(read('package.json').includes('tests/deck-readability-v45-5.test.mjs'));
 });
