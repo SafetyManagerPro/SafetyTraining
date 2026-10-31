@@ -77,7 +77,9 @@ function forSlide(slide,courseId=''){
   push('Domanda di trasferimento alla mansione',[extra.prompt]);
  }
  const original=s.img&&typeof s.img==='object'?s.img:{};
- const src=safeVisual(original.src)?original.src:extra&&safeVisual(extra.visual)?extra.visual:'';
+ const curatedSrc=extra&&safeVisual(extra.visual)?extra.visual:'';
+ const originalSrc=safeVisual(original.src)?original.src:'';
+ const src=curatedSrc||originalSrc;
  const figure=src?{src,alt:src===extra?.visual?extra.imageCaption:txt(original.caption,220)||'Figura tematica della slide',caption:src===extra?.visual?extra.imageCaption:txt(original.caption,220)||'Figura associata alla slide',origin:src===extra?.visual?'Illustrazione tematica curata per Formazione generale':'Figura già associata alla slide — pertinenza da verificare dal docente'}:null;
  return {sections,figure,editorial:!!extra};
 }

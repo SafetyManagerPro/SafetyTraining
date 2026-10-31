@@ -21,7 +21,8 @@ test('v46.2 uses specific, curated cases only for Formazione generale',()=>{
 });
 test('v46.2 select figures only from already paired or curated local SVGs',()=>{
  const a=api(),slide={type:'concept',topic:{id:'rischio'},img:{src:'assets/gp03-matrice-rischio.svg',caption:'Matrice originale della slide'}};
- assert.equal(a.forSlide(slide,'generale').figure.src,'assets/gp03-matrice-rischio.svg');
+ assert.equal(a.forSlide(slide,'generale').figure.src,'assets/modello-farfalla-rischio.svg');
+ assert.equal(a.forSlide(slide,'other').figure.src,'assets/gp03-matrice-rischio.svg');
  const fallback=a.forSlide({type:'concept',topic:slide.topic,img:{src:'https://example.com/x.svg'}},'generale');
  assert.equal(fallback.figure.src,'assets/modello-farfalla-rischio.svg');
  assert.equal(a.forSlide({type:'concept',topic:{id:'unknown'},img:{src:'../../bad.svg'}},'other').figure,null);
