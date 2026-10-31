@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
-Ultimo aggiornamento: 2026-10-29
-Stato corrente: **v45.8 LIVE · CI #666 SUCCESS · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.8-visual-audit`.
+Ultimo aggiornamento: 2026-10-31
+Stato corrente: **v45.9 IN TEST · ultima CI main #668 SUCCESS (v45.8) · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.9-course-visual-audit`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1150,3 +1150,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Vercel produzione `https://safety-training-safety-manager.vercel.app/`, deployment `dpl_9BFJ74fokq6usfT9T7B21deYbLtT` **READY**, `githubCommitSha=e4f9a24f28c60dee01a4b55dc3c038c366c0ac6b`.
 - Cache PWA `safety-training-v45.8-visual-audit`, esclusivamente modifiche frontend, nessuna migration, modifica a dati/RLS/ruoli, 27 corsi frozen, progressi, presenze, attestati o bridge SafetyManager.
 - Suite automatizzata superata, inclusi test di immagini caricate/rotte/in attesa, didascalie/alt, escape HTML, navigazione verso viewer e chiusura. **Smoke manuale interattivo su browser autenticato e dispositivi touch ancora da eseguire**; test automatizzati e stato READY non sostituiscono la prova visuale.
+
+
+## 2026-10-31 — v45.9 — Report immagini intero corso
+- `⏱ Aula → 📋 Controlla figure del corso`: inventario **sola lettura della presentazione compilata**, conta tutte le slide e le figure previste senza scaricare o precaricare immagini. Ricerca per testo, filtro per modulo e anomalie, accesso diretto alla slide; limite a 100 righe renderizzate per filtro.
+- Evidenzia sorgente originale mancante (con eventuale grafica di fallback), didascalie originali non specificate (anche quando il testo automatico è visibile), e per le figure dell'atlante gli alt/didascalie mancanti. Esclude i poster video cliccabili e le slide testuali senza immagini previste.
+- Limiti dichiarati in UI: **nessuna verifica HTTP su immagini di slide non aperte**, nessuna valutazione delle sostituzioni asincrone dell'editor. Aprire la slide e poi usare il preflight v45.8 per controllare la figura effettivamente visualizzata. Pertinenza didattica, diritti e approvazione restano umani.
+- Guida in-app `Gestione immagini` aggiornata, asset `deck-course-audit-v45-9.js` e CSS, test `tests/deck-course-audit-v45-9.test.mjs`, PWA `safety-training-v45.9-course-visual-audit`.
+- Invariati 27 frozen, contenuti sorgente, RLS/ruoli, company_admin, storico, frequenza, progressi, attestati, collegamento SafetyManager. Nessuna migrazione o scrittura database.
+- Pubblicazione dal solo GitHub. @Vercel **non consultato**, su richiesta dell'utente. Stato deployment non verificato; prova interattiva autenticata browser/tablet/mobile ancora da eseguire.

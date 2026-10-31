@@ -69,7 +69,7 @@ test('v45.2 frontend and handoffs match cache and preserve learner guard',()=>{
  const css=read('apps/training/catalog-learner-v45.css');
  assert.ok(css.includes('@media(max-width:1150px)'));
  assert.ok(css.includes('@media(max-width:680px)'));
- const cache='safety-training-v45.8-visual-audit';
+ const cache='safety-training-v45.9-course-visual-audit';
  assert.ok(read('apps/training/sw.js').includes(cache));
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const h=read(path);assert.ok(h.slice(0,750).includes(cache));assert.ok(h.includes('v45.2 — Ricerca e filtri catalogo'));
