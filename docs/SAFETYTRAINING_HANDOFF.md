@@ -1166,3 +1166,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - GitHub Actions PR **#669 SUCCESS**; GitHub Actions `main` **#670 SUCCESS** (run `41180329843`) su SHA applicativo.
 - Verifica di deployment online e browser smoke manuale **non eseguite**: su richiesta espressa non accedere a @Vercel. Il merge di GitHub non equivale a una verifica READY.
 - Versione PWA nel repository `safety-training-v45.9-course-visual-audit`; regressioni frontend passate, senza migration o modifiche a corsi frozen (27), DB, permessi, progressi, frequenza o bridge SafetyManager.
+
+
+## 2026-10-31 — v45.10 — Stabilizzazione e regressioni (fase automatizzata)
+- Aggiunti test di regressione per report immagini v45.9: input incompleti, slide senza figure, dati ripetibili e assenza di operazioni su rete o progressi. Nessuna modifica all'esperienza dell'utente o ai dati.
+- La suite GitHub include il nuovo test `tests/stabilization-v45-10.test.mjs`; il controllo browser autenticato, tablet, Safari e smartphone resta **smoke manuale da eseguire**.
+- Workflow esclusivamente GitHub, **senza consultare @Vercel** per espressa richiesta. Stato di pubblicazione non verificato.
+- Invariati i 27 frozen, storico, RLS/ruoli, presenze, attestati e integrazione SafetyManager.
