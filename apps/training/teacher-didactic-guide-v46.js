@@ -37,7 +37,7 @@ function guide(slide,index=0,courseId=''){
   module:first(s.module?.title),duration:Number.isFinite(duration)&&duration>0?Math.round(duration*10)/10:null};
 }
 function markup(info){
- const safeFigure=info.figure&&/^assets\\\/[a-z0-9-]+\\.svg$/.test(info.figure.src||'')?info.figure:null;
+ const safeFigure=info.figure&&/^assets[/][a-z0-9-]+[.]svg$/.test(info.figure.src||'')?info.figure:null;
  const figure=safeFigure?'<figure class="v46-guide-figure"><img loading="lazy" src="'+escape(safeFigure.src)+'" alt="'+escape(safeFigure.alt||'Illustrazione didattica')+'"><figcaption>'+escape(safeFigure.caption||'')+'<small>'+escape(safeFigure.origin||'Figura del corso')+'</small></figcaption></figure>':'';
  const parts=info.sections.map(section=>'<section class="v46-guide-card"><h3>'+escape(section.label)+'</h3>'+
   (section.items.length===1?'<p>'+escape(section.items[0])+'</p>':'<ul>'+section.items.map(item=>'<li>'+escape(item)+'</li>').join('')+'</ul>')+
