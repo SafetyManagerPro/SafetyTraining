@@ -70,7 +70,7 @@ function forSlide(slide,courseId=''){
  ]);
  push('Condizioni di arresto o escalation',o.stop_conditions);
  push('Ruoli da coinvolgere',o.who_to_involve);
- const id=txt(t.id,100),extra=String(courseId)==='generale'?curated[id]:null;
+ const id=txt(t.id,100),extra=String(courseId)==='generale'?curated[id]:(window.SAFETY_EQUIPMENT_CASES_V46_3?.forSlide?.(s,courseId)||null);
  if(extra){
   push('Caso integrativo da discutere in aula',[extra.case]);
   push('Lettura critica del caso',extra.analysis);
@@ -80,8 +80,8 @@ function forSlide(slide,courseId=''){
  const curatedSrc=extra&&safeVisual(extra.visual)?extra.visual:'';
  const originalSrc=safeVisual(original.src)?original.src:'';
  const src=curatedSrc||originalSrc;
- const figure=src?{src,alt:src===extra?.visual?extra.imageCaption:txt(original.caption,220)||'Figura tematica della slide',caption:src===extra?.visual?extra.imageCaption:txt(original.caption,220)||'Figura associata alla slide',origin:src===extra?.visual?'Illustrazione tematica curata per Formazione generale':'Figura già associata alla slide — pertinenza da verificare dal docente'}:null;
+ const figure=src?{src,alt:src===extra?.visual?extra.imageCaption:txt(original.caption,220)||'Figura tematica della slide',caption:src===extra?.visual?extra.imageCaption:txt(original.caption,220)||'Figura associata alla slide',origin:src===extra?.visual?(extra.origin||'Illustrazione tematica curata per Formazione generale'):'Figura già associata alla slide — pertinenza da verificare dal docente'}:null;
  return {sections,figure,editorial:!!extra};
 }
-window.SAFETY_DIDACTIC_DEPTH_V46_2={forSlide,safeVisual,version:'v46.2'};
+window.SAFETY_DIDACTIC_DEPTH_V46_2={forSlide,safeVisual,version:'v46.3'};
 })();
