@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-31
-Stato: **v46.3 GitHub feature in test · baseline v46.2 PR #29 merged · CI #690 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-3-equipment-depth`.
+Stato: **v46.3 GitHub main · PR #30 merged · CI #701 SUCCESS (PR), #702 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-3-equipment-depth`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1229,3 +1229,9 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Fondamento di riferimento per la revisione esperta: INAIL InforMO carrelli (`https://www.inail.it/content/dam/inail-hub-site/documenti/2023/10/Scheda%2021%20InforMO%2C0.pdf`), INAIL PLE EN 280 (`https://www.inail.it/content/dam/inail-hub-site/documenti/2024/05/PiattaformeDiLavoroElevabili.pdf`), INAIL Smart DPI (`https://www.inail.it/content/dam/inail-hub-site/documenti/catalogo-generale/2025/05/Smart%20DPI.pdf`). Le fonti costituiscono riferimenti per la verifica, non un'attestazione automatica della completezza dei corsi.
 - Nessuna migrazione, scrittura DB, modifica Learning Unit/slide originarie, 27 frozen, RLS/ruoli, company_admin, progressi, attestati, SafetyManager bridge o test finali. Nuovi file `teacher-equipment-cases-v46-3.js` e test; aggiornati guida, cache PWA `safety-training-v46-3-equipment-depth` e package CI.
 - **Solo GitHub; nessun accesso a @Vercel**. Prima di dichiarare rilasciata la funzionalità in produzione servono CI, verifica deploy e smoke visuale autenticato. **Prossimo passo**: revisione esperta slide per slide, matrice immagini–argomento con approvazione amministrativa e aggiornamento editoriale versionato delle sole LU non frozen.
+
+## 2026-10-31 — v46.3 — Verifica merge e GitHub CI
+- PR #30 merged con squash su `main` al commit `500dc942b2d8a6edd1f2d83835a8a62d287a9d53`.
+- GitHub Actions **PR #701 SUCCESS** e **main #702 SUCCESS** (`41185723191`), inclusi test su pertinenza degli SVG, isolamento dei corsi e assenza scritture.
+- PWA sorgente `safety-training-v46-3-equipment-depth`. @Vercel non consultato e produzione non verificata; smoke autenticato 1440/820/390 e valutazione esperta su temi e immagini ancora da completare.
+- Resta invariato il freeze delle 27 entry, la separazione da SafetyManager, RLS/permessi e i dati storici.
