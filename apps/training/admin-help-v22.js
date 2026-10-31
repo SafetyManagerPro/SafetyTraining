@@ -12,7 +12,8 @@
        'Scegli Corso e, successivamente, Modulo. Gli elenchi provengono dai corsi attivi pubblicati e non congelati. I filtri cercano in tutto l’archivio, non soltanto nelle 24 figure visibili.',
        'Per modificare gli esiti apri Esamina / cambia stato di revisione nella scheda, indicando la motivazione tecnica e i documenti relativi ai diritti.',
        'Se una figura non è pertinente, scegli Escludi dalle presentazioni; usa Ripristina per tornare indietro senza cancellare il file originale.',
-       'Usa le frecce Precedenti e Successive per sfogliare il risultato filtrato; la voce Cerca per tema restringe ulteriormente la ricerca.'
+       'Usa le frecce Precedenti e Successive per sfogliare il risultato filtrato; la voce Cerca per tema restringe ulteriormente la ricerca.',
+       'Nella presentazione apri ⏱ Aula → Controlla figure del corso: filtra per modulo, individua i metadati da rivedere e usa Apri slide. Poi apri ⏱ Aula → Controlla figure slide per verificare il caricamento reale. Nessuno dei controlli approva pertinenza, autorizzazioni o diritti.'
       ],
       note:'Esaminata ≠ approvata ≠ associata. Le associazioni proposte e le pagine private non vengono pubblicate ai corsisti. Le verifiche tecniche, cliniche e dei diritti restano sotto responsabilità del revisore.'
     },
