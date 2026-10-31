@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-31
-Stato corrente: **v46.4 GitHub feature in test · baseline v46.3 PR #30 merged · main CI #703 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-4-lesson-enrichment`.
+Stato corrente: **v46.4 GitHub main · PR #31 merged · CI #706 SUCCESS (PR), #707 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-4-lesson-enrichment`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1243,3 +1243,9 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Nuovi file: `lesson-enrichment-v46-4.js/css`, test `lesson-enrichment-v46-4.test.mjs` e `course-topic-coverage-v46-4.test.mjs`; aggiornati `app.js`, entrypoint, selezione didattica, guida docente (guard frozen), `package.json` e cache PWA `safety-training-v46-4-lesson-enrichment`.
 - **Fase editoriale successiva**, distinta dalla mera visualizzazione: verifica tecnica e diritti delle immagini per singola Learning Unit, approvazione amministrativa e creazione di nuove versioni di contenuto; **nessun contenuto ufficiale pubblicato o attestato in questa tranche**.
 - Stato: codice GitHub feature da validare con CI e collaudo browser autenticato desktop/tablet/iPhone; **non accedere a @Vercel** salvo richiesta dell'utente.
+
+## 2026-10-31 — v46.4 — Esito merge e GitHub CI
+- PR #31 merged con squash su `main`: commit applicativo `02717c10c221ad9fc6bcf7379a5262f756b2044d`.
+- GitHub Actions `SafetyTraining checks` **#706 SUCCESS** (PR) e **#707 SUCCESS** (main, run `41186828038`) per suite completa inclusi test di coerenza dei contenuti, fonti e isolamento delle entry frozen.
+- La cache sorgente è `safety-training-v46-4-lesson-enrichment`; il deploy Vercel **non è stato verificato** perché l'utente ha chiesto di non accedere a @Vercel. La prova browser autenticata e su proiettore/tablet/mobile è ancora pendente; gli SVG restano da validare editorialmente per ogni LU.
+- Nessuna modifica a Database Supabase (consultazione sola lettura), RLS, storici, durate ufficiali, report, quiz, attestati, corsi frozen o integrazione SafetyManager.
