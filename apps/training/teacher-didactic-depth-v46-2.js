@@ -70,7 +70,9 @@ function forSlide(slide,courseId=''){
  ]);
  push('Condizioni di arresto o escalation',o.stop_conditions);
  push('Ruoli da coinvolgere',o.who_to_involve);
- const id=txt(t.id,100),extra=String(courseId)==='generale'?curated[id]:(window.SAFETY_EQUIPMENT_CASES_V46_3?.forSlide?.(s,courseId)||null);
+ const course=Array.isArray(window.SAFETY_DATA)?window.SAFETY_DATA.find(c=>c?.id===String(courseId)):null;
+ const frozen=!!(course?.frozen||course?.metadata?.frozen||course?.metadata?.freeze_scope||course?.metadata?.is_frozen||course?.metadata?.course_frozen);
+ const id=txt(t.id,100),extra=frozen?null:(String(courseId)==='generale'?curated[id]:(window.SAFETY_EQUIPMENT_CASES_V46_3?.forSlide?.(s,courseId)||null));
  if(extra){
   push('Caso integrativo da discutere in aula',[extra.case]);
   push('Lettura critica del caso',extra.analysis);

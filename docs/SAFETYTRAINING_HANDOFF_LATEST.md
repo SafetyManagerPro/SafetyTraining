@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-31
-Stato: **v46.3 GitHub main · PR #30 merged · CI #701 SUCCESS (PR), #702 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-3-equipment-depth`.
+Stato: **v46.4 GitHub feature in test · baseline v46.3 PR #30 merged · main CI #703 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-4-lesson-enrichment`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1235,3 +1235,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - GitHub Actions **PR #701 SUCCESS** e **main #702 SUCCESS** (`41185723191`), inclusi test su pertinenza degli SVG, isolamento dei corsi e assenza scritture.
 - PWA sorgente `safety-training-v46-3-equipment-depth`. @Vercel non consultato e produzione non verificata; smoke autenticato 1440/820/390 e valutazione esperta su temi e immagini ancora da completare.
 - Resta invariato il freeze delle 27 entry, la separazione da SafetyManager, RLS/permessi e i dati storici.
+
+
+## 2026-10-31 — v46.4 — Approfondimenti contestuali nelle lezioni
+- Le schede argomento DB-backed **pubblicate e non frozen** mostrano un riquadro «Approfondimento · caso didattico» nel corpo della lezione, con descrizione del rischio, analisi causale, domanda per l'aula e uno schema SVG locale pertinente. La presentazione espone «📖 Caso e analisi» sulla barra della **slide corrente** quando esiste un abbinamento verificabile per il tema: apertura accessibile, chiusura su cambio slide/account/background. Nessun cambio a numero/ordine slide, minuti ufficiali, test o progresso.
+- La libreria curata passa da 12 a **17 casi originali** con aggiunte specifiche su ricarica dei carrelli, controlli PLE, controlli preuso e posizionamento gru, e DPI anticaduta. Migliorato il matching degli **effettivi titoli pubblicati** delle Learning Unit: esempio audit SQL sola lettura, carrelli industriali 6/8 argomenti, gru 4/4, PLE 3/4, lavoro in quota 4/8, lavoro rischio alto 1/3 titoli campione; le schede senza corrispondenza non ricevono un caso non pertinente. Questi conteggi descrivono matching dei titoli, non conformità didattica o approvazione tecnica.
+- Provenienza visibile nelle schede: link INAIL per famiglia (Infor.MO carrelli, pubblicazione PLE, schede su sollevamento e DPI, pagina INAIL su sistemi anticaduta per lavoro in quota). I testi sono originali, prudenti, non costituiscono istruzioni per la macchina, attestazione di conformità o completamento di addestramento; la scelta delle misure resta riferita a DVR, manuale e docente competente.
+- Isolamento: autorizzazione di visualizzazione basata esclusivamente sul corso già caricato (`presentation_generated_from_db`, `db_status=published`, stato non frozen e `topic.db_backed`). Nessun accesso aggiuntivo, RPC, SQL di scrittura, migration, nuovo ruolo, modifica contenuti delle Learning Unit, edizioni, test, storico, iscrizioni o SafetyManager bridge. Le 27 voci frozen restano immutate.
+- Nuovi file: `lesson-enrichment-v46-4.js/css`, test `lesson-enrichment-v46-4.test.mjs` e `course-topic-coverage-v46-4.test.mjs`; aggiornati `app.js`, entrypoint, selezione didattica, guida docente (guard frozen), `package.json` e cache PWA `safety-training-v46-4-lesson-enrichment`.
+- **Fase editoriale successiva**, distinta dalla mera visualizzazione: verifica tecnica e diritti delle immagini per singola Learning Unit, approvazione amministrativa e creazione di nuove versioni di contenuto; **nessun contenuto ufficiale pubblicato o attestato in questa tranche**.
+- Stato: codice GitHub feature da validare con CI e collaudo browser autenticato desktop/tablet/iPhone; **non accedere a @Vercel** salvo richiesta dell'utente.
