@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-31
-Stato corrente: **v46.1 GitHub main · CI #683 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-1-guide-privacy`.
+Stato corrente: **v46.2 branch in validazione GitHub · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-2-didactic-depth`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1207,3 +1207,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - GitHub Actions **PR #682 SUCCESS** e **main #683 SUCCESS** (run `41181928754`), con test espliciti per note nascoste prima della conferma e ripulite alla chiusura, al cambio slide, alla perdita di visibilità e al cambio di modalità fullscreen.
 - Aggiornamento PWA sorgente `safety-training-v46-1-guide-privacy`; configurazioni, corsi e dati storici non cambiati.
 - **NON è stato effettuato alcun accesso a @Vercel**. Lo stato effettivo del deployment in produzione non è verificato. Restano pendenti lo smoke manuale autenticato desktop/tablet/mobile, la prova su videoproiettore e Safari.
+
+## 2026-10-31 — v46.2 — Analisi didattica e supporti visivi contestuali
+- Upgrade **sola lettura** per `⏱ Aula → Guida didattica`; nuovo file `teacher-didactic-depth-v46-2.js` caricato prima della guida. Nessun aggiornamento alle Learning Unit o al database, nessuna modifica alle 27 entry frozen.
+- Analisi strutturata derivata esclusivamente dai campi realmente presenti nell'argomento: rischi, misure/barriere, prima–durante–dopo, condizioni di stop e ruoli coinvolti, senza generare false procedure o risposte alle verifiche.
+- Per **Formazione generale** (`generale`) integrati **sette microcasi didattici originali** selezionati per ID argomento: rischio, prevenzione-protezione, organizzazione, diritti-doveri, incidenti, emergenze, segnaletica. Ogni caso contiene analisi causale e domanda di trasferimento alla mansione; è esplicitamente esercizio non prescrittivo, da contestualizzare con DVR/piano aziendale e docente. Non viene mostrato per altre classi/corsi, inclusi frozen.
+- La guida mostra **una figura SVG locale** solo se già associata alla slide e appartenente alle famiglie grafiche ammesse, oppure una delle sette figure specifiche del microcaso, tutte presenti nel repo. Didascalia e origine esplicite, senza immagini remote, PDF riservati, attribuzioni automatiche di pertinenza tecnica o licenza.
+- Mantiene l'oscuramento v46.1: nessun testo o immagine aggiuntiva in DOM prima della scelta consapevole «Mostra note», pulizia su cambi slide/account/background. Non tocca progressi, frequenza, attestati, quiz, RLS, `company_admin` o ponte SafetyManager.
+- File: `teacher-didactic-guide-v46.js/css`, `teacher-didactic-depth-v46-2.js`, `index.html`, `sw.js`, `package.json`, test v46 e `tests/teacher-didactic-depth-v46-2.test.mjs`. PWA `safety-training-v46-2-didactic-depth`. Convalida CI GitHub e collaudo visuale autenticato da controllare separatamente; **non consultare @Vercel**.
+- Prossimo miglioramento contenutistico: revisione esperta per singolo corso/tema, matrice di pertinenza immagini–slide con approvazione umana e aggiunte verificate alle LU non frozen; l'estensione di questa guida non equivale a una revisione editoriale dei 65 corsi.

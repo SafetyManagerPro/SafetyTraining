@@ -9,7 +9,7 @@ const first=(...values)=>values.map(value=>text(value)).find(Boolean)||'';
 const active=()=>document.body.classList.contains('deckmode')&&!!window.__deck?.cid&&Array.isArray(window.__deckSlides);
 const currentKey=()=>String(window.__deck?.cid)+':'+String(window.__deck?.index);
 const visible=()=>!!panel&&!panel.classList.contains('hidden');
-function guide(slide,index=0){
+function guide(slide,index=0,courseId=''){
  const s=slide&&typeof slide==='object'?slide:{},t=s.topic&&typeof s.topic==='object'?s.topic:{};
  const title=first(s.title,t.title,'Slide '+(index+1)),sections=[];
  const push=(label,content)=>{const value=text(content);if(value)sections.push({label,items:[value]});};
@@ -30,15 +30,19 @@ function guide(slide,index=0){
   if(operational.length)sections.push({label:'Applicazione pratica dai contenuti esistenti',items:operational});
   pushList('Errori da evitare',s.errors||t.common_errors);
  }
+ const depth=window.SAFETY_DIDACTIC_DEPTH_V46_2?.forSlide?.(s,courseId)||{sections:[],figure:null};
+ if(Array.isArray(depth.sections))sections.push(...depth.sections);
  const duration=Number(s.end)-Number(s.start);
- return {title,type:text(s.type,50)||'slide',index,sections,
+ return {title,type:text(s.type,50)||'slide',index,sections,figure:depth.figure||null,
   module:first(s.module?.title),duration:Number.isFinite(duration)&&duration>0?Math.round(duration*10)/10:null};
 }
 function markup(info){
+ const safeFigure=info.figure&&/^assets[/][a-z0-9-]+[.]svg$/.test(info.figure.src||'')?info.figure:null;
+ const figure=safeFigure?'<figure class="v46-guide-figure"><img loading="lazy" src="'+escape(safeFigure.src)+'" alt="'+escape(safeFigure.alt||'Illustrazione didattica')+'"><figcaption>'+escape(safeFigure.caption||'')+'<small>'+escape(safeFigure.origin||'Figura del corso')+'</small></figcaption></figure>':'';
  const parts=info.sections.map(section=>'<section class="v46-guide-card"><h3>'+escape(section.label)+'</h3>'+
   (section.items.length===1?'<p>'+escape(section.items[0])+'</p>':'<ul>'+section.items.map(item=>'<li>'+escape(item)+'</li>').join('')+'</ul>')+
   '</section>').join('');
- return parts||'<p class="v46-guide-empty">Per questa slide non sono disponibili note didattiche aggiuntive. Consulta i materiali della lezione e le procedure aziendali applicabili.</p>';
+ return (figure+parts)||'<p class="v46-guide-empty">Per questa slide non sono disponibili note didattiche aggiuntive. Consulta i materiali della lezione e le procedure aziendali applicabili.</p>';
 }
 function protect(){
  if(!panel)return;
@@ -49,7 +53,7 @@ function protect(){
 function reveal(){
  if(!visible()||!active()||openedKey!==currentKey())return false;
  const slide=window.__deckSlides[window.__deck.index];if(!slide)return false;
- panel.querySelector('#v46GuideSections').innerHTML=markup(guide(slide,window.__deck.index));
+ panel.querySelector('#v46GuideSections').innerHTML=markup(guide(slide,window.__deck.index,window.__deck.cid));
  panel.querySelector('#v46GuideSections').hidden=false;panel.querySelector('#v46GuideCover').hidden=true;
  panel.querySelector('[data-v46-hide]').hidden=false;panel.querySelector('[data-v46-hide]').focus();return true;
 }
@@ -57,7 +61,7 @@ function hideNotes(){if(!visible())return;protect();panel.querySelector('[data-v
 function ensure(){
  if(panel)return panel;
  panel=document.createElement('div');panel.id='v46TeacherGuideOverlay';panel.className='v46-guide-overlay hidden';
- panel.innerHTML='<section class="v46-guide-dialog" role="dialog" aria-modal="true" aria-labelledby="v46GuideTitle"><header><div><small>SUPPORTO DOCENTE · CONSULTAZIONE</small><h2 id="v46GuideTitle">Guida didattica</h2><p id="v46GuideContext"></p></div><button type="button" data-v46-close aria-label="Chiudi guida">×</button></header><div class="v46-guide-body"><div id="v46GuideCover" class="v46-guide-cover" role="status"><strong>Attenzione: note visibili anche sul proiettore</strong><p>Se lo schermo è condiviso con i partecipanti, le note saranno visibili anche alla classe. Sospendi la condivisione o la proiezione prima di consultarle in privato.</p><button type="button" data-v46-reveal>Mostra note su questo schermo</button></div><div id="v46GuideSections" hidden></div><p class="v46-guide-disclaimer">Le indicazioni provengono soltanto dai materiali già presenti nel corso. Non sono una nuova procedura di sicurezza, non certificano la formazione e non sostituiscono la verifica normativa o le istruzioni del luogo di lavoro. Non vengono mostrate soluzioni dei quiz.</p></div><footer><button type="button" data-v46-hide hidden>Nascondi note</button><button type="button" data-v46-close>Chiudi</button></footer></section>';
+ panel.innerHTML='<section class="v46-guide-dialog" role="dialog" aria-modal="true" aria-labelledby="v46GuideTitle"><header><div><small>SUPPORTO DOCENTE · CONSULTAZIONE</small><h2 id="v46GuideTitle">Guida didattica</h2><p id="v46GuideContext"></p></div><button type="button" data-v46-close aria-label="Chiudi guida">×</button></header><div class="v46-guide-body"><div id="v46GuideCover" class="v46-guide-cover" role="status"><strong>Attenzione: note visibili anche sul proiettore</strong><p>Se lo schermo è condiviso con i partecipanti, le note saranno visibili anche alla classe. Sospendi la condivisione o la proiezione prima di consultarle in privato.</p><button type="button" data-v46-reveal>Mostra note su questo schermo</button></div><div id="v46GuideSections" hidden></div><p class="v46-guide-disclaimer">I contenuti comprendono dati già presenti e casi integrativi di discussione non prescrittivi, da contestualizzare con il docente. Le figure non equivalgono ad approvazione tecnica o dei diritti. Non sono una nuova procedura di sicurezza, non certificano la formazione e non sostituiscono la verifica normativa o le istruzioni del luogo di lavoro. Non vengono mostrate soluzioni dei quiz.</p></div><footer><button type="button" data-v46-hide hidden>Nascondi note</button><button type="button" data-v46-close>Chiudi</button></footer></section>';
  panel.addEventListener('click',event=>{
  if(event.target===panel||event.target?.closest?.('[data-v46-close]')){close();return;}
  if(event.target?.closest?.('[data-v46-hide]')){hideNotes();return;}
