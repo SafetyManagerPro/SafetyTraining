@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-10-31
-Stato: **v45.9 IN TEST · ultima CI main #668 SUCCESS (v45.8) · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.9-course-visual-audit`.
+Stato: **v45.9 GitHub main · CI #670 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v45.9-course-visual-audit`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1161,3 +1161,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Guida in-app `Gestione immagini` aggiornata, asset `deck-course-audit-v45-9.js` e CSS, test `tests/deck-course-audit-v45-9.test.mjs`, PWA `safety-training-v45.9-course-visual-audit`.
 - Invariati 27 frozen, contenuti sorgente, RLS/ruoli, company_admin, storico, frequenza, progressi, attestati, collegamento SafetyManager. Nessuna migrazione o scrittura database.
 - Pubblicazione dal solo GitHub. @Vercel **non consultato**, su richiesta dell'utente. Stato deployment non verificato; prova interattiva autenticata browser/tablet/mobile ancora da eseguire.
+
+
+## 2026-10-31 — v45.9 — Verifica merge e CI GitHub
+- PR #22 merged con squash su `main`, SHA applicativo `c9acc28dc2005dd505d7deec090f78b4d44f567c`.
+- GitHub Actions PR **#669 SUCCESS**; GitHub Actions `main` **#670 SUCCESS** (run `41180329843`) su SHA applicativo.
+- Verifica di deployment online e browser smoke manuale **non eseguite**: su richiesta espressa non accedere a @Vercel. Il merge di GitHub non equivale a una verifica READY.
+- Versione PWA nel repository `safety-training-v45.9-course-visual-audit`; regressioni frontend passate, senza migration o modifiche a corsi frozen (27), DB, permessi, progressi, frequenza o bridge SafetyManager.
