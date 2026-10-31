@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-31
-Stato corrente: **v46.0 in collaudo GitHub · CI precedente #674 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-0-teacher-guide`.
+Stato corrente: **v46.0 GitHub main · CI #678 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-0-teacher-guide`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1183,3 +1183,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Guida Gestione immagini aggiornata con punto d'accesso. Asset `teacher-didactic-guide-v46.js` / CSS, test VM `teacher-didactic-guide-v46.test.mjs`, cache PWA `safety-training-v46-0-teacher-guide`.
 - Invariati 27 corsi frozen, i testi didattici originari, storico, RLS/ruoli, company_admin, presenze, ore ufficiali, progressi, attestati e SafetyManager bridge. Nessuna migrazione o scrittura DB.
 - **Solo GitHub**: non consultare @Vercel salvo richiesta espressa. CI e smoke browser autenticato desktop/tablet/mobile da verificare prima di dichiarare la stabilizzazione completa.
+
+
+## 2026-10-31 — v46.0 — Verifica merge e CI GitHub
+- PR #25 merged squash su `main`: SHA applicativo `4fe07be257f30bcb7bcdf17ef3172b50183514ba`.
+- GitHub Actions **PR #677 SUCCESS** e **main #678 SUCCESS** (run `41181354036`) sullo stesso SHA applicativo.
+- PWA sorgente `safety-training-v46-0-teacher-guide`, con test di contenuto preesistente, escaping HTML, assenza soluzioni quiz, accessibilità focus/chiusura e isolamento dei dati didattici.
+- Test automatizzati soddisfatti, ma **smoke manuale autenticato** (ruoli, desktop, tablet, iPhone/Safari, proiezione) ancora non eseguito. Se la Guida è utilizzata sullo schermo proiettato, i contenuti sono visibili agli astanti: chiudere prima di mostrarla.
+- Conforme alla richiesta: nessun accesso o chiamata a @Vercel, nessuna verifica di deploy READY effettuata. Merge GitHub e test CI non equivalgono a pubblicazione verificata.
+- DB, frozen, RLS/ruoli, registri, presenze, completamenti, attestati e ponte SafetyManager invariati.
