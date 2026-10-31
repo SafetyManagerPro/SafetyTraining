@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-31
-Stato corrente: **v46.0 GitHub main · CI #678 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-0-teacher-guide`.
+Stato corrente: **v46.1 in verifica GitHub · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-1-guide-privacy`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1192,3 +1192,11 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Test automatizzati soddisfatti, ma **smoke manuale autenticato** (ruoli, desktop, tablet, iPhone/Safari, proiezione) ancora non eseguito. Se la Guida è utilizzata sullo schermo proiettato, i contenuti sono visibili agli astanti: chiudere prima di mostrarla.
 - Conforme alla richiesta: nessun accesso o chiamata a @Vercel, nessuna verifica di deploy READY effettuata. Merge GitHub e test CI non equivalgono a pubblicazione verificata.
 - DB, frozen, RLS/ruoli, registri, presenze, completamenti, attestati e ponte SafetyManager invariati.
+
+
+## 2026-10-31 — v46.1 — Note docente protette durante la proiezione
+- Aprendo `⏱ Aula → 🎓 Guida didattica`, le note **non vengono inserite nel DOM**: compare prima un avviso sul rischio di condivisione con la classe e il pulsante `Mostra note su questo schermo`.
+- Solo dopo conferma esplicita i testi preesistenti vengono mostrati. `Nascondi note`, chiusura, cambio slide/corso/account, passaggio in background, fullscreenchange e pagehide ripuliscono i testi dal DOM. Nessun automatismo può riconoscere un proiettore esterno: il docente deve interrompere la proiezione se le note sono riservate.
+- Aggiornati guida in-app e test automatici di regressione e privacy. PWA `safety-training-v46-1-guide-privacy`.
+- Nessuna modifica a Learning Unit, 27 frozen, database, RLS/ruoli, dati storici, progressi, frequenze, attestati, ore ufficiali o collegamento SafetyManager.
+- **Solo GitHub**, senza consultare @Vercel. Smoke manuale autenticato, proiezione, desktop/tablet/mobile da completare; produzione non verificata.

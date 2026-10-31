@@ -12,15 +12,15 @@ function element(){
  trigger:(k,e)=>handlers[k]?.(e),focus(){this.focused=true}};
 }
 function setup(){
- const panel=element(),context=element(),sections=element(),close=element(),body=element(),events={},winds={};
- Object.assign(panel.children,{'#v46GuideContext':context,'#v46GuideSections':sections,'[data-v46-close]':close});
+ const panel=element(),context=element(),sections=element(),cover=element(),reveal=element(),hide=element(),close=element(),body=element(),events={},winds={};
+ Object.assign(panel.children,{'#v46GuideContext':context,'#v46GuideSections':sections,'#v46GuideCover':cover,'[data-v46-reveal]':reveal,'[data-v46-hide]':hide,'[data-v46-close]':close});
  body.classList.add('deckmode');body.appendChild=()=>{};
  const document={body,createElement:()=>panel,addEventListener:(k,fn)=>events[k]=fn};
  let opened=0,closed=0;
  const window={__deck:{cid:'c1',index:0},__deckSlides:[],addEventListener:(k,fn)=>winds[k]=fn,
  SAFETY_MODAL_ACCESS:{opened:()=>opened++,closed:()=>closed++}};
  runInNewContext(code,{document,window,location:{hash:'#deck/c1/0'}});
- return {panel,context,sections,close,body,events,winds,window,getOpened:()=>opened,getClosed:()=>closed};
+ return {panel,context,sections,cover,reveal,hide,close,body,events,winds,window,getOpened:()=>opened,getClosed:()=>closed};
 }
 test('v46 derives teacher guide from existing authored data without inventing instructions',()=>{
  const x=setup(),api=x.window.SAFETY_TEACHER_GUIDE_V46;
@@ -55,8 +55,13 @@ test('v46 focus-managed panel closes when slide or account changes and never per
  x.window.__deckSlides=[{type:'explain',title:'Prova',explain:'Spiegazione corretta',module:{title:'Base'},end:5,start:3}];
  assert.equal(a.open(),true);assert.equal(x.getOpened(),1);
  assert.match(x.context.textContent,/Slide 1/);
+ assert.equal(x.sections.innerHTML,'');
+ assert.equal(x.sections.hidden,true);
+ assert.equal(x.reveal.focused,true);
+ x.panel.trigger('click',{target:{closest:k=>k==='[data-v46-reveal]'?{}:null}});
  assert.match(x.sections.innerHTML,/Spiegazione corretta/);
- assert.equal(x.close.focused,true);
+ assert.equal(x.cover.hidden,true);
+ assert.equal(x.sections.hidden,false);
  x.window.__deck.index=1;x.events['safety:deck-slide-rendered']();
  assert.ok(x.panel.classList.contains('hidden'));assert.equal(x.getClosed(),1);
  x.window.__deck.index=0;a.open();x.events['safety:auth-changed']();
@@ -72,11 +77,11 @@ test('v46 modules, PWA, guide and handoffs synchronized without Vercel calls',()
  assert.ok(teacher.includes('data-tools-teacher-guide'));
  assert.ok(teacher.includes('SAFETY_TEACHER_GUIDE_V46?.open?.()'));
  assert.ok(html.indexOf('deck-course-audit-v45-9.js')<html.indexOf('teacher-didactic-guide-v46.js'));
- assert.match(sw,/const CACHE='safety-training-v46-0-teacher-guide'/);
+ assert.match(sw,/const CACHE='safety-training-v46-1-guide-privacy'/);
  assert.ok(help.includes('Guida didattica'));
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(path);
-  assert.ok(doc.slice(0,850).includes('safety-training-v46-0-teacher-guide'));
+  assert.ok(doc.slice(0,850).includes('safety-training-v46-1-guide-privacy'));
   assert.ok(doc.includes('v46.0 — Guida docente contestuale'));
  }
  assert.ok(read('package.json').includes('tests/teacher-didactic-guide-v46.test.mjs'));

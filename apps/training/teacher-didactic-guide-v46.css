@@ -23,3 +23,12 @@
 .v46-guide-dialog footer{padding:11px 20px;border-top:1px solid #426278;display:flex;justify-content:flex-end}
 @media(max-width:700px){.v46-guide-overlay{padding:6px}.v46-guide-dialog{max-height:97dvh;border-radius:12px}.v46-guide-dialog header{padding:13px}.v46-guide-dialog h2{font-size:20px}.v46-guide-body{padding:12px}#v46GuideSections{grid-template-columns:1fr}.v46-guide-card{padding:12px}.v46-guide-dialog footer{padding:9px 13px}}
 @media print{.v46-guide-overlay,.v46-teacher-guide-btn{display:none!important}}
+
+/* v46.1 — default obscured guide, no note content in DOM before explicit reveal. */
+#v46GuideCover[hidden],#v46GuideSections[hidden],.v46-guide-dialog [data-v46-hide][hidden]{display:none!important}
+.v46-guide-cover{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:18px;border:1px solid #c5a55d;background:#273445;border-radius:13px}
+.v46-guide-cover strong{font-size:16px;line-height:1.4;color:#ffe3a1}
+.v46-guide-cover p{font-size:13px;line-height:1.6;color:#ecf3fd;margin:0;max-width:65ch}
+.v46-guide-cover button{background:#34556a;border-color:#b7e4f6}
+.v46-guide-dialog footer{gap:8px;flex-wrap:wrap}
+.v46-guide-dialog footer [data-v46-hide]{background:#36475d}
