@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-10-31
-Stato corrente: **v46.1 in verifica GitHub · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-1-guide-privacy`.
+Stato corrente: **v46.1 GitHub main · CI #683 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-1-guide-privacy`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1200,3 +1200,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Aggiornati guida in-app e test automatici di regressione e privacy. PWA `safety-training-v46-1-guide-privacy`.
 - Nessuna modifica a Learning Unit, 27 frozen, database, RLS/ruoli, dati storici, progressi, frequenze, attestati, ore ufficiali o collegamento SafetyManager.
 - **Solo GitHub**, senza consultare @Vercel. Smoke manuale autenticato, proiezione, desktop/tablet/mobile da completare; produzione non verificata.
+
+
+## 2026-10-31 — v46.1 — Verifica merge e CI GitHub
+- PR #27 merged squash sul commit applicativo `3835af787aca8fe9fc8a2d878b37e8bd6a88e681`.
+- GitHub Actions **PR #682 SUCCESS** e **main #683 SUCCESS** (run `41181928754`), con test espliciti per note nascoste prima della conferma e ripulite alla chiusura, al cambio slide, alla perdita di visibilità e al cambio di modalità fullscreen.
+- Aggiornamento PWA sorgente `safety-training-v46-1-guide-privacy`; configurazioni, corsi e dati storici non cambiati.
+- **NON è stato effettuato alcun accesso a @Vercel**. Lo stato effettivo del deployment in produzione non è verificato. Restano pendenti lo smoke manuale autenticato desktop/tablet/mobile, la prova su videoproiettore e Safari.
