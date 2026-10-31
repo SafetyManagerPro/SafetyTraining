@@ -53,7 +53,7 @@ test('learner dialog reuses existing shared focus and escape manager',()=>{
  assert.ok(manager.includes("e.key!=='Tab'"));
 });
 test('PWA and synchronized handoffs identify v45.1',()=>{
- const cache='safety-training-v46-1-guide-privacy';
+ const cache='safety-training-v46-2-didactic-depth';
  const sw=read('apps/training/sw.js');assert.ok(sw.includes(cache));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const c=read(p);assert.ok(c.slice(0,780).includes(cache),p);assert.ok(c.includes('v45.1 — Stabilizzazione navigazione e accessibilità'));
