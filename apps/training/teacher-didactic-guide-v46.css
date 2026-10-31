@@ -2,7 +2,7 @@
 .deck-tools-dialog .v46-teacher-guide-btn{min-height:50px;background:#244b48;border-color:#84d4be}
 .v46-guide-overlay{position:fixed;inset:0;z-index:1160;display:grid;place-items:center;padding:14px;background:rgba(3,11,18,.88)}
 .v46-guide-overlay.hidden{display:none!important}
-.v46-guide-dialog{box-sizing:border-box;width:min(790px,100%);max-height:min(94dvh,960px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #74a9b2;border-radius:18px;background:#112637;color:#f5f9ff;box-shadow:0 25px 85px rgba(0,0,0,.65)}
+.v46-guide-dialog{box-sizing:border-box;width:min(940px,100%);max-height:min(94dvh,960px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #74a9b2;border-radius:18px;background:#112637;color:#f5f9ff;box-shadow:0 25px 85px rgba(0,0,0,.65)}
 .v46-guide-dialog header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #426278;padding:17px 20px}
 .v46-guide-dialog header small{font-weight:850;font-size:10px;letter-spacing:.09em;color:#98ead9}
 .v46-guide-dialog h2{margin:5px 0;font-size:23px}
@@ -13,8 +13,8 @@
 .v46-guide-body{overflow-y:auto;overscroll-behavior:contain;min-height:0;padding:16px 20px}
 #v46GuideSections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
 .v46-guide-card{padding:15px;background:#193449;border:1px solid #47667e;border-radius:13px;min-width:0}
-.v46-guide-card h3{margin:0 0 8px;font-size:13px;font-weight:900;color:#aff0df}
-.v46-guide-card p,.v46-guide-card li{font-size:13px;line-height:1.58;color:#e7f2fc;overflow-wrap:anywhere}
+.v46-guide-card h3{margin:0 0 8px;font-size:15px;font-weight:900;color:#aff0df}
+.v46-guide-card p,.v46-guide-card li{font-size:15px;line-height:1.58;color:#e7f2fc;overflow-wrap:anywhere}
 .v46-guide-card p,.v46-guide-card ul{margin:0}
 .v46-guide-card ul{padding-left:18px}
 .v46-guide-card li+li{margin-top:6px}
@@ -34,8 +34,11 @@
 .v46-guide-dialog footer [data-v46-hide]{background:#36475d}
 
 /* v46.2 — immagine contestuale e approfondimenti a contrasto elevato. */
-.v46-guide-figure{grid-column:1/-1;display:grid;grid-template-columns:minmax(150px,210px) 1fr;gap:16px;align-items:center;margin:0;padding:14px;border:1px solid #6897ac;background:#1a384a;border-radius:13px}
-.v46-guide-figure img{display:block;width:100%;max-height:160px;object-fit:contain;background:#edf5f8;border-radius:9px}
+.v46-guide-figure{grid-column:1/-1;display:grid;grid-template-columns:minmax(170px,250px) 1fr;gap:16px;align-items:center;margin:0;padding:14px;border:1px solid #6897ac;background:#1a384a;border-radius:13px}
+.v46-guide-figure img{display:block;width:100%;max-height:190px;object-fit:contain;background:#edf5f8;border-radius:9px}
 .v46-guide-figure figcaption{font-size:14px;font-weight:650;line-height:1.5;color:#f1f7fd}
 .v46-guide-figure small{display:block;margin-top:9px;color:#b4e6df;font-size:11px;font-weight:600}
 @media(max-width:540px){.v46-guide-figure{grid-template-columns:1fr}.v46-guide-figure img{max-height:190px}}
+
+/* v46.3 — azioni didattiche leggibili anche su tablet/monitor ad alta densità. */
+@media(max-width:700px){.v46-guide-card p,.v46-guide-card li{font-size:15px;line-height:1.65}.v46-guide-card h3{font-size:15px}}
