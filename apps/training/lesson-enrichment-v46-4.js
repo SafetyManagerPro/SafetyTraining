@@ -8,6 +8,7 @@ const SOURCES=Object.freeze({
  carrelli:{title:'INAIL · Infor.MO scheda 21: utilizzo dei carrelli elevatori',url:'https://www.inail.it/content/dam/inail-hub-site/documenti/2023/10/Scheda%2021%20InforMO%2C0.pdf'},
  ple:{title:'INAIL · Piattaforme di lavoro elevabili, confronto EN 280',url:'https://www.inail.it/content/dam/inail-hub-site/documenti/2024/05/PiattaformeDiLavoroElevabili.pdf'},
  gru:{title:'INAIL · Apparecchi di sollevamento materiali di tipo mobile',url:'https://www.inail.it/portale/prevenzione-e-sicurezza/it/come-fare-per/conoscere-il-rischio/attrezzature-di-lavoro/manutenzione%2C-controllo-e-verifica-di-un-attrezzatura.html'},
+ quota:{title:'INAIL · Ancoraggi e sistemi di protezione individuale dalle cadute',url:'https://www.inail.it/portale/ricerca-e-tecnologia/it/ambiti-di-ricerca/area-sicurezza-sul-lavoro/cantieristica/ancoraggi-e-sistemi-di-protezione-individuale-dalle-cadute.html'},
  dpi:{title:'INAIL · Misure di prevenzione e protezione: DPI',url:'https://www.inail.it/portale/prevenzione-e-sicurezza/it/come-fare-per/conoscere-il-rischio/agenti-chimici/misure-di-prevenzione-e-protezione.html'}
 });
 const allowedSlides=new Set(['concept','explain','deep','risks','prevention','procedure','actionPlan','guided','case']);
@@ -21,7 +22,7 @@ function forTopic(c,t){
  if(!eligible(c)||!t||t.db_backed!==true)return null;
  const entry=window.SAFETY_EQUIPMENT_CASES_V46_3?.forSlide?.({type:'concept',title:t.title,topic:t},c.id);
  if(!entry||!validVisual(entry.visual)||!Array.isArray(entry.analysis)||!entry.analysis.length)return null;
- const source=SOURCES[entry.family];if(!source)return null;
+ const source=(c.id==='lav_quota'?SOURCES.quota:SOURCES[entry.family]);if(!source)return null;
  return {caseId:entry.caseId,family:entry.family,title:t.title,case:entry.case,
   analysis:entry.analysis.slice(0,4),prompt:entry.prompt,src:entry.visual,
   caption:entry.imageCaption,source};

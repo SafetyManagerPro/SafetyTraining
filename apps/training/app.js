@@ -632,6 +632,7 @@ function topicView(c,t){
  <div class="section"><h3>📚 Riassunto da INAIL / Napo</h3><p class="muted">Sintesi rielaborate per uso didattico a partire da materiali ufficiali esterni.</p>${sourceDigestHtml(t.source_digest||[])}</div>
  ${videoPlanHtml(t.video_plan)}
  ${teacherExpansionHtml(t)}
+ ${window.SAFETY_LESSON_ENRICHMENT_V46_4?.renderForTopic?.(c,t)||''}
  <div class="two"><div class="section"><h3>⚠️ Rischi / danni</h3>${listHtml(t.risks)}</div><div class="section"><h3>🛡️ Prevenzione</h3>${listHtml(t.prevention)}</div></div>
  <div class="section"><h3>🥽 DPI / protezioni</h3>${listHtml(t.dpi)}</div>
  <div class="section"><h3>🧭 Procedura operativa</h3>${stepsHtml(t.procedure)}</div>
