@@ -75,7 +75,7 @@ test('feature is loaded in teacher panel with PWA cache, guide and both handoffs
  assert.ok(help.includes('Controlla figure del corso'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(p);
-  assert.ok(doc.slice(0,800).includes('safety-training-v46-0-teacher-guide'));
+  assert.ok(doc.slice(0,800).includes('safety-training-v46-1-guide-privacy'));
   assert.ok(doc.includes('v45.9 — Report immagini intero corso'));
  }
  assert.ok(read('package.json').includes('tests/deck-course-audit-v45-9.test.mjs'));
