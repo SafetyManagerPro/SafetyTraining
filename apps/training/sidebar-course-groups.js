@@ -49,7 +49,9 @@
   }
 
   function render(rows){
-    if(isLearner())return;
+    const gate=window.SAFETY_ACCESS_V46_10;
+    if(!gate?.canBrowse?.())return;
+    rows=gate.rowsForViewer(rows);
     const root=host();if(!root)return;
     const data=[...new Map((rows||[]).filter(r=>r?.stable_key).map(r=>[r.stable_key,r])).values()];
     const grouped=new Map(GROUPS.map(g=>[g.id,[]]));
@@ -103,6 +105,7 @@
 
   async function waitCloud(){for(let i=0;i<40&&!db();i++)await new Promise(r=>setTimeout(r,150));return db();}
   async function loadFull(){
+    if(!window.SAFETY_ACCESS_V46_10?.canBrowse?.())return;
     render(localRows());
     const client=await waitCloud();
     if(!client||!isAuthenticated()||isLearner())return;
@@ -114,7 +117,8 @@
   }
 
   function boot(){
-    render(localRows());loadFull();
+    if(window.SAFETY_ACCESS_V46_10?.canBrowse?.())render(localRows());loadFull();
+    document.addEventListener('safety:access-ready',()=>{if(window.SAFETY_ACCESS_V46_10?.canBrowse?.())void loadFull();});
     window.addEventListener('hashchange',syncActive);
     cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(loadFull,250));
   }
