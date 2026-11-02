@@ -22,7 +22,8 @@ function ensureNav(){
  button.addEventListener('click',()=>{root()?.classList.remove('admin-mobile-nav-open');void render();});
  window.SAFETY_ADMIN_MENU_V39?.reconcile?.();
 }
-const editable=u=>!!(state.canReview&&u&&u.course_active===true&&!u.frozen&&u.unit_status==='published');
+const mayEdit=(u,allow)=>!!(allow&&u&&u.course_active===true&&!u.frozen&&u.unit_status==='published');
+const editable=u=>mayEdit(u,state.canReview);
 const score=u=>{
  const warnings=[];
  if(Number(u.summary_chars||0)<60||Number(u.detail_chars||0)<140)warnings.push('Testo: verificare chiarezza e completezza');
@@ -236,6 +237,6 @@ async function boot(){
  document.addEventListener('safety:admin-capabilities',ensureNav);
  document.addEventListener('safety:auth-changed',reset);
 }
-window.SAFETY_LU_EDITORIAL_V46_5={ensureNav,render,score,editable,csv,filtered,version:'v46.5'};
+window.SAFETY_LU_EDITORIAL_V46_5={ensureNav,render,score,editable,mayEdit,csv,filtered,version:'v46.5'};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else void boot();
 })();
