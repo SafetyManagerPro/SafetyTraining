@@ -80,6 +80,18 @@
       title:'Guida · Qualità didattica',
       steps:['Individua il corso con ricerca e filtri.','Verifica contenuti operativi, scenari specifici, Practice Lab, fonti e percorso di verifica.','Intervieni sui gap reali prima di dichiarare un corso didatticamente completo.'],
       note:'Il punteggio da solo non basta: per il livello Gold servono almeno 85 punti e zero gap.'},
+    'Iscrizioni pubbliche':{
+      title:'Guida · Iscrizione tramite QR e link pubblico',
+      steps:[
+        'Apri Iscrizioni pubbliche, seleziona l’edizione aperta e premi Crea link e QR. Il QR apre una richiesta di iscrizione, non attiva subito l’account.',
+        'Premi Verifica link: il server deve confermare che il modulo è disponibile. In caso di rigenerazione, il precedente QR non funziona più.',
+        'Il corsista compila il modulo; visualizza ricevuta a schermo ma NON riceve subito un’email automatica. La richiesta entra in Da approvare.',
+        'Verifica i dati della richiesta e premi Approva, iscrivi e invia email. L’iscrizione viene salvata e il sistema tenta automaticamente l’email di accesso.',
+        'Controlla il messaggio di esito: richiesta invio accettata da Auth non significa consegna verificata. Se fallisce, dalla richiesta approvata usa Invia / reinvia email di accesso, senza iscrivere nuovamente.',
+        'Se il corsista non riceve la mail controlla l’indirizzo e la cartella Spam, quindi configurazione SMTP personalizzata e redirect URL di Supabase Auth. Per alternative usa Accessi & import (link personale, WhatsApp, SMS, QR).'
+      ],
+      note:'Il QR di iscrizione pubblica è diverso dal QR di invito personale. Senza approvazione amministrativa non c’è iscrizione attiva. La consegna delle email richiede SMTP configurato e non può essere certificata dalla sola risposta API.'
+    },
     'Accessi & import':{
       title:'Guida · Accessi e import',
       steps:['Verifica anagrafiche e indirizzi email dei corsisti prima di inviare gli accessi.','Gestisci gli inviti personali e i canali alternativi già disponibili.','Controlla la consegna e il collegamento dell’account, evitando invii duplicati.'],
