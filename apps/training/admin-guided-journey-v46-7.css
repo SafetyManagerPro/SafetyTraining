@@ -1,0 +1,75 @@
+/* SafetyTraining v46.7 — unambiguous guided enrollment timeline and review console. */
+#adminShell .admin-nav [data-tab="wizard"]{
+  border:1px solid #4f9b8b;
+  background:linear-gradient(110deg,#174b42,#193e50);
+  color:#eafff7;
+  font-weight:850;
+}
+#adminShell .admin-nav [data-tab="wizard"].active{
+  outline:2px solid #80e3c2;
+  outline-offset:-2px;
+  background:linear-gradient(115deg,#205f51,#1d556b);
+}
+.gw-shell{max-width:1180px}
+.gw-shell .gw-steps{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.gw-shell .gw-steps span{min-width:0;line-height:1.45}
+.gw-shell .gw-steps span.is-active{border-color:#65e2b8}
+.gw-shell .gw-steps span.is-done{color:#defcef;border-color:#3c7767}
+.gw-shell .gw-steps span.is-done b{background:#27795e;color:white}
+.gw-unified-intro{padding:12px 15px;border:1px solid rgba(86,212,175,.38);border-radius:12px;background:#112e2d;color:#e5fbf6;line-height:1.6;font-size:13px}
+.gw-unified-intro b{color:#b4ffe5}
+.gw-monitor-lead{border:1px solid #375b77;border-radius:12px;padding:14px;display:grid;gap:9px;background:#0d2336}
+.gw-monitor-lead h4{margin:0;font-size:15px;color:#d0f7ea}
+.gw-monitor-lead p{margin:0;line-height:1.55;color:#bed5ea}
+.gw-monitor-lead .gw-actions{justify-content:flex-start}
+.gw-journey-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.gw-journey-stats>div{min-width:0;display:flex;flex-direction:column;gap:6px;padding:13px;border-radius:12px;background:#142c41;border:1px solid #365a73}
+.gw-journey-stats strong{font-size:24px;font-weight:900;color:#dbfff3;font-variant-numeric:tabular-nums}
+.gw-journey-stats span{font-size:12px;line-height:1.4;color:#c5d7e9}
+.gw-journey-cards{display:grid;gap:15px}
+.gw-journey-card{min-width:0;border:1px solid #3c6a80;border-radius:14px;padding:16px;background:#102a3e;display:grid;gap:14px}
+.gw-journey-title{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.gw-journey-title h4{font-size:17px;color:#f5ffff;margin:0 0 5px}
+.gw-journey-title p{font-size:12px;line-height:1.5;margin:0;color:#d0e5f4}
+.gw-journey-overall{display:inline-block;border-radius:99px;padding:6px 10px;background:#215d53;color:#d3fff0;font-size:11px;font-weight:800}
+.gw-journey-steps{list-style:none;padding:0;margin:0;display:grid;gap:0}
+.gw-journey-steps li{min-width:0;display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid rgba(129,178,210,.15)}
+.gw-journey-steps li:last-child{border-bottom:0}
+.gw-journey-steps strong{font-size:13px;color:#f0f8ff;line-height:1.35}
+.gw-journey-steps small{display:block;font-size:12px;line-height:1.5;color:#bfcfdf;margin-top:3px;overflow-wrap:anywhere}
+.gw-journey-icon{width:27px;height:27px;display:grid;place-items:center;border-radius:50%;border:1px solid #54738a;background:#1b3a4e;color:#d7eafa;font-size:15px;font-weight:800}
+.gw-journey-done .gw-journey-icon{background:#245a4c;border-color:#71d4a4;color:#deffec}
+.gw-journey-warn .gw-journey-icon{background:#573c25;border-color:#efc37a;color:#ffefcf}
+.gw-journey-now .gw-journey-icon{background:#214d67;border-color:#78beee;color:#e0f5ff}
+.gw-journey-state{color:#d9e7f5;font-size:11px;font-weight:800;white-space:nowrap}
+.gw-journey-next{display:grid;gap:8px;padding:13px;border:1px solid #479b86;background:#153f3d;border-radius:11px}
+.gw-journey-next strong{font-size:13px;color:#d1fff0}
+.gw-journey-next p{line-height:1.45;color:#e0f4f0;font-size:13px}
+.gw-journey-next button{justify-self:start;cursor:pointer;min-height:40px;padding:8px 13px;background:#c4f1e5;color:#0d312b;font-weight:850;border:0;border-radius:9px}
+.gw-journey-next button:focus-visible{outline:3px solid #f2d484;outline-offset:2px}
+.gw-journey-legal{font-size:12px;color:#c3d6e7;line-height:1.6;padding:10px 12px;border-left:3px solid #85b7d7;background:#12283e}
+.gw-monitor-progress{padding:18px;border:1px dashed #5f9fb5;border-radius:12px;line-height:1.6;color:#dbedf8}
+.gw-unified-preview{display:grid;gap:7px;margin:12px 0;padding:0;list-style:none}
+.gw-unified-preview li{display:flex;align-items:center;gap:10px;line-height:1.5;padding:9px 11px;background:#14283d;border:1px solid rgba(145,190,220,.16);border-radius:9px;color:#e0edfa;font-size:13px}
+.gw-unified-preview b{display:grid;place-items:center;min-width:25px;min-height:25px;background:#24584b;color:#d7fdef;border-radius:50%;font-size:12px}
+.gw-unified-cta{display:block;width:100%;min-height:44px;border:1px solid #56c5a5;border-radius:9px;background:#277b64;color:#fff;cursor:pointer;font-weight:850;padding:10px 14px}
+.gw-unified-cta:focus-visible{outline:3px solid #f2d484;outline-offset:3px}
+@media(max-width:900px){
+  .gw-shell .gw-steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .gw-journey-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .gw-shell .gw-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gw-journey-steps li{grid-template-columns:28px minmax(0,1fr);gap:9px}
+  .gw-journey-state{grid-column:2}
+  .gw-journey-card{padding:12px}
+  .gw-journey-stats strong{font-size:20px}
+}
+@media(max-width:370px){
+  .gw-shell .gw-steps{grid-template-columns:1fr}
+  .gw-journey-stats{grid-template-columns:1fr}
+}
+@media print{
+  .gw-unified-cta,.gw-journey-next button,.gw-monitor-lead .gw-actions{display:none!important}
+  .gw-journey-card{break-inside:avoid}
+}
