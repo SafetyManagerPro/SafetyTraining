@@ -11,7 +11,7 @@ function mount({id=null,learner=null,assignments=[],admin=false,roles=[],courses
  const classList={add(...xs){xs.forEach(x=>classes.add(x));},remove(...xs){xs.forEach(x=>classes.delete(x));},contains(x){return classes.has(x);}};
  const doc={readyState:'loading',body:{classList},getElementById:()=>null,addEventListener(){},dispatchEvent(){}};
  const state={client:null,user:id?{id}:null,learner,assignments,identityReady:true};
- const window={SAFETY_CLOUD:{state},SAFETY_LEARNER_NAV_V22:{assigned(rows,key){return rows.find(a=>a.courseStableKey===key&&a.status!=='revoked')||null;}}};
+ const window={dispatchEvent(){},SAFETY_CLOUD:{state},SAFETY_LEARNER_NAV_V22:{assigned(rows,key){return rows.find(a=>a.courseStableKey===key&&a.status!=='revoked')||null;}}};
  state.client={from(table){
    const filters=[];
    const q={
