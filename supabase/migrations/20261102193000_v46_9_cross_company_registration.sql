@@ -5,7 +5,7 @@ do $guard$
 declare original text;patched text;
   needle text:='or (v_company is not null and v_learner_company is distinct from v_company) then';
   replacement text:=$new$or (v_company is not null and v_learner_company is distinct from v_company
-    and not (
+    and not coalesce((
       new.metadata->>'enrollment_source'='public_registration_cross_company_v46_9'
       and new.metadata->>'company_review_confirmed'='true'
       and new.metadata->>'company_reviewed_by'=auth.uid()::text
@@ -20,7 +20,7 @@ declare original text;patched text;
           and lower(btrim(coalesce(ll.email,'')))=r.email
           and r.fiscal_code is not null and ll.fiscal_code_normalized=r.fiscal_code
       )
-    )
+    ),false)
   ) then$new$;
 begin
   original:=pg_catalog.pg_get_functiondef('private.validate_admin_enrollment_write()'::regprocedure);

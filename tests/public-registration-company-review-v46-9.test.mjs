@@ -41,6 +41,7 @@ test('v46.9 keeps existing enrollment guard and requires a session-local one-tim
   "unexpected_enrollment_guardrail_version",
   "v_company is not null and v_learner_company is distinct from v_company",
   "pg_catalog.current_setting('safetytraining.cross_company_request',true)",
+  "and not coalesce((",
   "pg_catalog.set_config('safetytraining.cross_company_request',p_request_id::text,true)",
   "new.metadata->>'company_review_confirmed'='true'",
   "new.metadata->>'company_reviewed_by'=auth.uid()::text",
