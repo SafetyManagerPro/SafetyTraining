@@ -10,19 +10,21 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const fmtMin=m=>{m=Number(m||0);const h=Math.floor(m/60),mm=m%60;return h?`${h} h${mm?` ${mm} min`:''}`:`${mm} min`;};
   const localCourse=key=>(window.SAFETY_DATA||[]).find(c=>c.id===key);
-  const isLearner=()=>!!cloud()?.state?.learner;
-  const isAuthenticated=()=>!!cloud()?.state?.user;
+  const gate=()=>window.SAFETY_ACCESS_V46_10;
+  const isLearner=()=>gate()?.state?.phase==='learner';
+  const isAuthenticated=()=>gate()?.isAuthenticated?.()===true;
 
   async function waitCloud(){for(let i=0;i<40&&!db();i++)await new Promise(r=>setTimeout(r,150));return db();}
   async function load(force=false){
     if(state.loading||(!force&&state.loaded)) return state.rows;
-    if(!isAuthenticated()||isLearner()) return [];
+    if(!gate()?.canBrowse?.()) return [];
     const client=await waitCloud(); if(!client)return [];
     state.loading=true;
     try{
       const {data,error}=await client.rpc('training_catalog_summary');
       if(error)throw error;
-      state.rows=Array.isArray(data)?data:[];state.loaded=true;state.error='';
+      if(!gate()?.canBrowse?.())return [];
+      state.rows=gate().rowsForViewer(Array.isArray(data)?data:[]);state.loaded=true;state.error='';
       syncSidebar();renderHome();
     }catch(e){
       state.error=String(e?.message||'Errore temporaneo di caricamento.');
@@ -46,6 +48,7 @@
   function statusClass(row){return Number(row.unit_count||0)>0?'catalog-ready':'catalog-missing';}
 
   async function ensurePresentation(key){
+    if(!gate()?.canOpen?.(key))throw Error('Accesso al corso non autorizzato.');
     if(localCourse(key)) return localCourse(key);
     const adapter=window.SAFETY_DB_SLIDES;
     if(!adapter?.ensureCourse) throw new Error('Adapter presentazione non disponibile.');
@@ -53,7 +56,7 @@
   }
 
   async function openCourse(row){
-    if(!row)return;
+    if(!row||!gate()?.canOpen?.(row.stable_key))return;
     closeMobileMenu();
     if(Number(row.unit_count||0)<=0){location.hash=`library/${encodeURIComponent(row.stable_key)}`;return;}
     if(state.opening.has(row.stable_key))return;
@@ -70,13 +73,13 @@
     }finally{state.opening.delete(row.stable_key);}
   }
   window.openCatalogCourse=key=>{const row=state.rows.find(x=>x.stable_key===key);if(row)return openCourse(row);};
-  window.openCatalogLibrary=key=>{closeMobileMenu();location.hash=`library/${encodeURIComponent(key)}`;};
+  window.openCatalogLibrary=key=>{if(!gate()?.canBrowse?.()||!gate()?.canOpen?.(key))return;closeMobileMenu();location.hash=`library/${encodeURIComponent(key)}`;};
 
   function syncSidebar(){
-    if(isLearner())return;
+    if(!gate()?.canBrowse?.())return;
     const host=document.getElementById('sideCourses');if(!host)return;
     const existing=new Set([...host.querySelectorAll('[data-course-key]')].map(x=>x.dataset.courseKey));
-    [...host.querySelectorAll('.navbtn')].forEach((b,i)=>{const c=(window.SAFETY_DATA||[])[i];if(c){b.dataset.courseKey=c.id;existing.add(c.id);}});
+    [...host.querySelectorAll('.navbtn')].forEach(b=>{if(b.dataset.courseKey)existing.add(b.dataset.courseKey);});
     state.rows.forEach(row=>{
       if(existing.has(row.stable_key))return;
       const b=document.createElement('button');b.className='navbtn catalog-navbtn';b.dataset.courseKey=row.stable_key;
@@ -87,7 +90,7 @@
   }
 
   function renderHome(){
-    if(isLearner())return;
+    if(!gate()?.canBrowse?.())return;
     const host=document.getElementById('catalogBrowserRoot');if(!host)return;
     if(!isAuthenticated()){
       host.innerHTML='<div class="notice"><strong>Catalogo completo:</strong> accedi come amministratore/docente per consultare tutti i corsi e il relativo materiale. I corsisti vedono soltanto i percorsi assegnati.</div>';
@@ -174,20 +177,20 @@
     catch{return false;}
   }
   async function renderLibrary(key){
-    if(isLearner()){location.hash='';return;}
+    if(!gate()?.canBrowse?.()||!gate()?.canOpen?.(key)){gate()?.guardRoute?.();return;}
     const root=document.getElementById('app');if(!root)return;
     const request=++state.libraryRequest,viewer=cloud()?.state?.user?.id;
     root.innerHTML='<div class="catalog-loading">Caricamento materiale didattico…</div>';
     const client=await waitCloud();
     if(request!==state.libraryRequest||!libraryRouteIs(key))return;
-    if(!client||!isAuthenticated()||isLearner()||cloud()?.state?.user?.id!==viewer){
+    if(!client||!gate()?.canBrowse?.()||!gate()?.canOpen?.(key)||cloud()?.state?.user?.id!==viewer){
       root.innerHTML='<div class="notice">Accedi come amministratore/docente per consultare la libreria completa.</div>';
       return;
     }
     let data,error;
     try{({data,error}=await client.rpc('training_course_bundle',{p_stable_key:key}));}
     catch(e){error=e;}
-    if(request!==state.libraryRequest||!libraryRouteIs(key)||!isAuthenticated()||isLearner()||cloud()?.state?.user?.id!==viewer)return;
+    if(request!==state.libraryRequest||!libraryRouteIs(key)||!gate()?.canBrowse?.()||!gate()?.canOpen?.(key)||cloud()?.state?.user?.id!==viewer)return;
     if(error||!data){
       root.innerHTML='<div class="admin-error" role="alert">'+esc(error?.message||'Corso non trovato.')+' <button type="button" data-library-retry>Riprova</button></div>';
       root.querySelector('[data-library-retry]')?.addEventListener('click',()=>{void renderLibrary(key);},{once:true});
@@ -211,7 +214,7 @@
       if(!p.length)setTimeout(renderHome,0);
       return;
     }
-    if(!isAuthenticated())return;
+    if(!isAuthenticated()||!gate()?.canOpen?.(parsed.key))return;
     const key=parsed.key;
     const assignment=isLearner()?window.SAFETY_LEARNER_NAV_V22?.assigned(cloud()?.state?.assignments,key):null;
     if(isLearner()&&!assignment){
@@ -227,7 +230,7 @@
       if(assignment?.versionNumber!=null&&course?.db_version!=null&&Number(assignment.versionNumber)!==Number(course.db_version)){
         throw new Error('Versione assegnata non corrispondente al materiale didattico disponibile.');
       }
-      if(location.hash===routeAtStart&&isAuthenticated()&&(!isLearner()||window.SAFETY_LEARNER_NAV_V22?.assigned(cloud()?.state?.assignments,key))){
+      if(location.hash===routeAtStart&&isAuthenticated()&&gate()?.canOpen?.(key)){
         window.dispatchEvent(new Event('hashchange'));
       }
     }catch(e){
@@ -255,7 +258,8 @@
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileMenu();});
   }
 
-  async function boot(){initMobile();await waitCloud();await load();route();cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;state.error='';state.rows=[];state.filters=blankFilters();state.libraryRequest++;load(true);route();},350));window.addEventListener('hashchange',()=>{state.libraryRequest++;route();});}
+  async function boot(){initMobile();await waitCloud();await load();route();
+    document.addEventListener('safety:access-ready',()=>{state.loaded=false;state.rows=[];state.filters=blankFilters();state.libraryRequest++;if(gate()?.canBrowse?.())void load(true);});cloud()?.state?.client?.auth?.onAuthStateChange(()=>setTimeout(()=>{state.loaded=false;state.error='';state.rows=[];state.filters=blankFilters();state.libraryRequest++;load(true);route();},350));window.addEventListener('hashchange',()=>{state.libraryRequest++;route();});}
   window.SAFETY_CATALOG={load,renderHome,syncSidebar,renderLibrary,ensurePresentation};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
