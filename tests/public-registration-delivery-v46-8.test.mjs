@@ -47,7 +47,7 @@ test('resend is restricted to previously approved requests and never creates enr
  assert.doesNotMatch(block,/admin_registration_decide_v36|admin_bulk_enroll|insert\(|update\(/);
  assert.match(admin,/data-ar36-resend/);
  assert.match(admin,/from\('learner_account_invitations'\)/);
- assert.match(admin,/Email non ancora verificata/);
+ assert.match(admin,/Email di attivazione non verificata/);
  assert.match(admin,/La consegna effettiva dipende dalla configurazione SMTP/);
  assert.match(admin,/error\.context\.clone\(\)\.json\(\)/);
 });
