@@ -85,7 +85,7 @@ test('v46.6 entrypoint, PWA, CI and handoffs include navigation scrollbar releas
  assert.ok(html.includes('admin-scrollbars-v46-6.js'));
  assert.ok(html.indexOf('admin-menu-v39.js')<html.indexOf('admin-scrollbars-v46-6.js'));
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-7-unified-journey'/);
+ assert.match(sw,/const CACHE='safety-training-v46-8-registration-email'/);
  assert.ok(sw.includes('./admin-scrollbars-v46-6.css'));
  assert.ok(sw.includes('./admin-scrollbars-v46-6.js'));
  assert.match(read('package.json'),/tests\/admin-scrollbars-v46-6\.test\.mjs/);
@@ -93,7 +93,7 @@ test('v46.6 entrypoint, PWA, CI and handoffs include navigation scrollbar releas
  assert.match(guide,/Per scorrere il menu laterale/);
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(path);
-  assert.ok(doc.slice(0,950).includes('safety-training-v46-7-unified-journey'),path);
+  assert.ok(doc.slice(0,950).includes('safety-training-v46-8-registration-email'),path);
   assert.match(doc,/v46\.6 — Barre di scorrimento in Amministrazione/);
  }
 });
