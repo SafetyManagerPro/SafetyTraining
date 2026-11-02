@@ -87,6 +87,9 @@
         'Premi Verifica link: il server deve confermare che il modulo è disponibile. In caso di rigenerazione, il precedente QR non funziona più.',
         'Il corsista compila il modulo; visualizza ricevuta a schermo ma NON riceve subito un’email automatica. La richiesta entra in Da approvare.',
         'Verifica i dati della richiesta e premi Approva, iscrivi e invia email. L’iscrizione viene salvata e il sistema tenta automaticamente l’email di accesso.',
+        'Iscrizione in un’altra azienda: se un corsista esiste già nello stesso ente ma presso un’altra azienda, la richiesta non viene approvata automaticamente. Il sistema presenta una verifica manuale con le due aziende e il numero di corsi precedenti.',
+        'Controlla che email e codice fiscale appartengano alla stessa persona, spunta la conferma e scrivi una motivazione di almeno 20 caratteri. Premi Conferma associazione e invia email: la nuova edizione si aggiunge senza spostare l’anagrafica o alterare lo storico.',
+        'Se l’identità non coincide, esistono più profili o la nuova iscrizione esiste già, non forzare l’approvazione: verifica prima le anagrafiche.',
         'Controlla il messaggio di esito: richiesta invio accettata da Auth non significa consegna verificata. Se fallisce, dalla richiesta approvata usa Invia / reinvia email di accesso, senza iscrivere nuovamente.',
         'Se il corsista non riceve la mail controlla l’indirizzo e la cartella Spam, quindi configurazione SMTP personalizzata e redirect URL di Supabase Auth. Per alternative usa Accessi & import (link personale, WhatsApp, SMS, QR).'
       ],
