@@ -1,0 +1,286 @@
+/* SafetyTraining v46.6 — scrollbars accessible in the administration, without changing course data.
+ * The sidebar, page, tables and dialogs scroll independently; print output is unchanged. */
+#adminShell.admin-shell{
+  block-size:100dvh;
+  max-block-size:100dvh;
+  min-block-size:0;
+}
+#adminShell .admin-nav{
+  box-sizing:border-box;
+  block-size:100%;
+  max-block-size:100dvh;
+  min-block-size:0;
+  overflow:hidden;
+}
+#adminShell .admin-brand,
+#adminShell .admin-nav-foot{flex:0 0 auto;min-inline-size:0}
+#adminShell .admin-nav>nav{
+  flex:1 1 auto;
+  min-block-size:0;
+  min-inline-size:0;
+  align-content:start;
+  grid-auto-rows:max-content;
+  overflow-x:auto;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  scroll-padding-block:12px;
+}
+#adminShell .admin-nav nav .admin-menu-group,
+#adminShell .admin-nav nav .admin-menu-items,
+#adminShell .admin-nav nav button{
+  min-inline-size:0;
+  max-inline-size:100%;
+  box-sizing:border-box;
+}
+#adminShell .admin-nav nav button,
+#adminShell .admin-nav nav summary{overflow-wrap:anywhere}
+#adminShell .admin-nav-foot{margin-block-start:0}
+#adminShell .admin-main{
+  box-sizing:border-box;
+  block-size:100%;
+  min-block-size:0;
+  min-inline-size:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior-y:auto;
+  scrollbar-gutter:stable;
+}
+#adminShell #adminContent{
+  box-sizing:border-box;
+  min-inline-size:0;
+  inline-size:100%;
+  max-inline-size:1600px;
+}
+#adminShell #adminContent :is(.admin-card,.admin-grid,.admin-card-head,.admin-bulk-grid,.a40-root,.a40-grid,.st-v465-head,.st-v465-detail-grid){min-inline-size:0}
+#adminShell #adminContent :is(
+  .admin-table-wrap,
+  .bp-table-wrap,
+  .readiness-table-wrap,
+  .a40-table,
+  .st-v465-tablewrap,
+  .st-v466-scroll-table
+){
+  box-sizing:border-box;
+  display:block;
+  min-inline-size:0;
+  max-inline-size:100%;
+  max-block-size:min(68dvh,760px);
+  overflow-x:auto;
+  overflow-y:auto;
+  overscroll-behavior-x:contain;
+  overscroll-behavior-y:auto;
+  scrollbar-gutter:stable;
+  -webkit-overflow-scrolling:touch;
+}
+#adminShell #adminContent :is(
+  .admin-table-wrap,.bp-table-wrap,.readiness-table-wrap,.a40-table,.st-v465-tablewrap,.st-v466-scroll-table
+) :is(table){border-collapse:collapse}
+#adminShell #adminContent :is(.admin-table-wrap,.a40-table,.st-v466-scroll-table) table thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#10243a;
+}
+#adminShell #adminContent .st-v466-scroll-table{
+  margin-block:10px 16px;
+  border:1px solid rgba(145,181,217,.24);
+  border-radius:12px;
+}
+#adminShell #adminContent .st-v466-scroll-table>table{
+  width:100%;
+  min-inline-size:680px;
+  overflow-wrap:anywhere;
+}
+#adminShell #adminContent .st-v466-scroll-table[data-st-v466-cols="3"]>table{
+  min-inline-size:540px;
+}
+#adminShell #adminContent .st-v466-scroll-table table :is(th,td){
+  padding:10px 12px;
+  border-bottom:1px solid rgba(145,181,217,.13);
+  text-align:start;
+}
+#adminShell #adminContent .st-v466-scroll-table table th{
+  color:#e1efff;
+  font-weight:800;
+}
+#adminShell #adminContent :is(.admin-check-list,.admin-delete-review,.admin-delete-entries,.lp39-list,.st-v465-history){
+  overflow-y:auto;
+  overscroll-behavior-y:auto;
+  scrollbar-gutter:stable;
+}
+#adminShell .admin-modal-overlay,
+#adminDetailOverlay.admin-detail-overlay,
+#smCompositionOverlay.sm-comp-overlay{
+  box-sizing:border-box;
+  max-block-size:100dvh;
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+#adminShell .admin-modal,
+#adminModal .admin-modal,
+#adminDetailOverlay .admin-detail-modal,
+#smCompositionOverlay .sm-comp-modal{
+  box-sizing:border-box;
+  min-inline-size:0;
+  max-inline-size:100%;
+  max-block-size:min(94dvh,100%);
+  overflow-x:auto;
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+  scrollbar-gutter:stable;
+}
+#adminModal .admin-modal-body,
+#adminDetailOverlay .admin-detail-body,
+#smCompositionOverlay .sm-comp-body{
+  min-inline-size:0;
+  max-inline-size:100%;
+}
+#adminModal .admin-modal-body{overflow-x:auto}
+#adminDetailOverlay .admin-detail-body div:has(>table),
+#smCompositionOverlay .sm-comp-body div:has(>table){
+  box-sizing:border-box;
+  min-inline-size:0;
+  max-inline-size:100%;
+  max-block-size:min(62dvh,680px);
+  overflow-x:auto;
+  overflow-y:auto;
+  scrollbar-gutter:stable;
+  -webkit-overflow-scrolling:touch;
+}
+#adminDetailOverlay .admin-detail-body div:has(>table) table,
+#smCompositionOverlay .sm-comp-body div:has(>table) table{min-inline-size:680px}
+#adminDetailOverlay .admin-detail-body div:has(>table) table thead th,
+#smCompositionOverlay .sm-comp-body div:has(>table) table thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#152c41;
+}
+:where(
+  #adminShell .admin-main,
+  #adminShell .admin-nav>nav,
+  #adminShell .admin-table-wrap,
+  #adminShell .bp-table-wrap,
+  #adminShell .readiness-table-wrap,
+  #adminShell .a40-table,
+  #adminShell .st-v465-tablewrap,
+  #adminShell .st-v466-scroll-table,
+  #adminShell .admin-check-list,
+  #adminShell .admin-delete-review,
+  #adminShell .admin-delete-entries,
+  #adminShell .lp39-list,
+  #adminShell .st-v465-history,
+  #adminModal .admin-modal,
+  #adminModal .admin-modal-body,
+  #adminDetailOverlay .admin-detail-modal,
+  #adminDetailOverlay .admin-detail-body div,
+  #smCompositionOverlay .sm-comp-modal,
+  #smCompositionOverlay .sm-comp-body div
+){
+  scrollbar-width:auto;
+  scrollbar-color:#80b6e2 #14283d;
+}
+:where(
+  #adminShell .admin-main,
+  #adminShell .admin-nav>nav,
+  #adminShell .admin-table-wrap,
+  #adminShell .bp-table-wrap,
+  #adminShell .readiness-table-wrap,
+  #adminShell .a40-table,
+  #adminShell .st-v465-tablewrap,
+  #adminShell .st-v466-scroll-table,
+  #adminShell .admin-check-list,
+  #adminShell .admin-delete-review,
+  #adminShell .admin-delete-entries,
+  #adminShell .lp39-list,
+  #adminShell .st-v465-history,
+  #adminModal .admin-modal,
+  #adminModal .admin-modal-body,
+  #adminDetailOverlay .admin-detail-modal,
+  #adminDetailOverlay .admin-detail-body div,
+  #smCompositionOverlay .sm-comp-modal,
+  #smCompositionOverlay .sm-comp-body div
+)::-webkit-scrollbar{width:12px;height:12px}
+:where(
+  #adminShell .admin-main,
+  #adminShell .admin-nav>nav,
+  #adminShell .admin-table-wrap,
+  #adminShell .bp-table-wrap,
+  #adminShell .readiness-table-wrap,
+  #adminShell .a40-table,
+  #adminShell .st-v465-tablewrap,
+  #adminShell .st-v466-scroll-table,
+  #adminShell .admin-check-list,
+  #adminShell .admin-delete-review,
+  #adminShell .admin-delete-entries,
+  #adminShell .lp39-list,
+  #adminShell .st-v465-history,
+  #adminModal .admin-modal,
+  #adminModal .admin-modal-body,
+  #adminDetailOverlay .admin-detail-modal,
+  #adminDetailOverlay .admin-detail-body div,
+  #smCompositionOverlay .sm-comp-modal,
+  #smCompositionOverlay .sm-comp-body div
+)::-webkit-scrollbar-thumb{
+  background:#80b6e2;
+  border:2px solid #14283d;
+  border-radius:10px;
+}
+:where(
+  #adminShell .admin-main,
+  #adminShell .admin-nav>nav,
+  #adminShell .admin-table-wrap,
+  #adminShell .bp-table-wrap,
+  #adminShell .readiness-table-wrap,
+  #adminShell .a40-table,
+  #adminShell .st-v465-tablewrap,
+  #adminShell .st-v466-scroll-table,
+  #adminShell .admin-check-list,
+  #adminShell .admin-delete-review,
+  #adminShell .admin-delete-entries,
+  #adminShell .lp39-list,
+  #adminShell .st-v465-history,
+  #adminModal .admin-modal,
+  #adminModal .admin-modal-body,
+  #adminDetailOverlay .admin-detail-modal,
+  #adminDetailOverlay .admin-detail-body div,
+  #smCompositionOverlay .sm-comp-modal,
+  #smCompositionOverlay .sm-comp-body div
+)::-webkit-scrollbar-track{background:#14283d;border-radius:10px}
+#adminShell :is(nav,main,.admin-table-wrap,.a40-table,.st-v465-tablewrap,.st-v466-scroll-table):focus-visible{
+  outline:2px solid #9bd0ff;
+  outline-offset:-3px;
+}
+@media(max-width:860px){
+  #adminShell .admin-nav{
+    block-size:100dvh;
+    max-block-size:100dvh;
+    inline-size:min(300px,84vw);
+    padding-block-end:max(14px,env(safe-area-inset-bottom));
+  }
+  #adminShell #adminContent :is(.admin-table-wrap,.bp-table-wrap,.readiness-table-wrap,.a40-table,.st-v465-tablewrap,.st-v466-scroll-table){
+    max-block-size:min(63dvh,620px);
+  }
+}
+@media(max-width:520px){
+  #adminShell .admin-main{scrollbar-gutter:auto}
+  #adminShell .admin-nav>nav{scrollbar-gutter:stable}
+  #adminShell #adminContent :is(.admin-table-wrap,.bp-table-wrap,.readiness-table-wrap,.a40-table,.st-v465-tablewrap,.st-v466-scroll-table){
+    max-block-size:min(58dvh,540px);
+    scrollbar-gutter:auto;
+  }
+}
+@media print{
+  #adminShell.admin-shell{block-size:auto!important;max-block-size:none!important}
+  #adminShell :is(.admin-main,.admin-nav,.admin-nav>nav,.admin-table-wrap,.bp-table-wrap,.readiness-table-wrap,.a40-table,.st-v465-tablewrap,.st-v466-scroll-table,.admin-check-list,.st-v465-history),
+  #adminModal :is(.admin-modal,.admin-modal-body),
+  #adminDetailOverlay :is(.admin-detail-modal,.admin-detail-body),
+  #smCompositionOverlay :is(.sm-comp-modal,.sm-comp-body){
+    max-block-size:none!important;
+    block-size:auto!important;
+    overflow:visible!important;
+    scrollbar-gutter:auto!important;
+  }
+  #adminShell #adminContent .st-v466-scroll-table>table{min-inline-size:0!important}
+}
