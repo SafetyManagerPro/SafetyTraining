@@ -144,7 +144,13 @@
   async function isAdmin() {
     if (!db() || !user()) return false;
     const {data,error} = await db().from('platform_admins').select('user_id').eq('user_id', user().id).maybeSingle();
-    if (error) throw error; return !!data;
+    if (error) throw error;
+    if(data)return true;
+    const scoped=await db().from('organization_memberships').select('role')
+      .eq('user_id',user().id).eq('active',true)
+      .in('role',['organization_admin','training_manager']).limit(1);
+    if(scoped.error)throw scoped.error;
+    return (scoped.data||[]).length>0;
   }
   async function refreshRole() {
     invalidateProgress();
