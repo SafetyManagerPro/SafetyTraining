@@ -146,13 +146,13 @@ function paint(){
   rows()+'</section>';
  const h=host();
  h.querySelector('#stV465Course').addEventListener('change',e=>{state.course=e.target.value;state.page=0;state.search='';state.expanded='';void loadCourse();});
- h.querySelector('#stV465Search').addEventListener('input',e=>{state.search=e.target.value;state.page=0;paint();h.querySelector('#stV465Search')?.focus();});
+ h.querySelector('#stV465Search').addEventListener('input',e=>{const caret=e.target.selectionStart;state.search=e.target.value;state.page=0;paint();const next=h.querySelector('#stV465Search');next?.focus();if(Number.isInteger(caret))next?.setSelectionRange(caret,caret);});
  h.querySelector('#stV465Filter').addEventListener('change',e=>{state.filter=e.target.value;state.page=0;paint();});
  h.querySelector('[data-v465-refresh]').addEventListener('click',()=>void loadCourse());
  h.querySelector('[data-v465-export]').addEventListener('click',exportCsv);
  h.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{state.page+=Number(b.dataset.page);paint();}));
  h.querySelectorAll('[data-toggle-editor]').forEach(b=>b.addEventListener('click',()=>{state.expanded=state.expanded===b.dataset.toggleEditor?'':b.dataset.toggleEditor;paint();}));
- h.addEventListener('submit',event=>{if(event.target.closest('[data-review-unit]'))void save(event);});
+ h.querySelectorAll('form[data-review-unit]').forEach(form=>form.addEventListener('submit',event=>void save(event)));
  h.querySelectorAll('[data-review-history]').forEach(b=>b.addEventListener('click',()=>void history(b.dataset.reviewHistory)));
 }
 async function history(id){
