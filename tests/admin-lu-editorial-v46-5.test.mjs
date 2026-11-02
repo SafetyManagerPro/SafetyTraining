@@ -42,7 +42,7 @@ test('v46.5 CSV export scopes to current rows and escapes spreadsheet formula in
  assert.equal(csv.trim().split('\r\n').length,2);
 });
 test('v46.5 preserves closed publication boundaries and requires explicit recorded human approval',()=>{
- const sql=read('supabase/migrations/20261102070835_v46_5_editorial_matrix.sql');
+ const sql=read('supabase/migrations/20261102071929_v46_5_editorial_matrix.sql');
  assert.match(sql,/create table if not exists public\.training_lu_editorial_reviews_v46_5/i);
  assert.match(sql,/create table if not exists public\.training_lu_editorial_events_v46_5/i);
  assert.match(sql,/enable row level security/i);
