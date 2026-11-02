@@ -24,7 +24,7 @@ test('catalog renders escaped identifiers and safely dispatches a course click',
  };
  const documentMock={readyState:'loading',body:{classList:{remove(){},add(){},toggle(){return false;}}},addEventListener(){},getElementById:id=>elements[id]||null};
  const locationMock={get hash(){return hash;},set hash(v){hash=v;}};
- const windowMock={SAFETY_CLOUD:{state:{client:{rpc:async()=>({data:[row],error:null})},user:{id:'admin'},learner:null}},SAFETY_DATA:[]};
+ const windowMock={SAFETY_CLOUD:{state:{client:{rpc:async()=>({data:[row],error:null})},user:{id:'admin'},learner:null}},SAFETY_DATA:[],SAFETY_ACCESS_V46_10:{isAuthenticated:()=>true,canBrowse:()=>true,canOpen:()=>true,rowsForViewer:rows=>rows}};
  runInNewContext(read('apps/training/catalog-browser.js'),{window:windowMock,document:documentMock,location:locationMock,console,setTimeout,encodeURIComponent,decodeURIComponent,Number,Set,String});
  await windowMock.SAFETY_CATALOG.load();
  assert.match(cardHtml,/slug&#039; onclick=&#039;alert\(1\)/);
