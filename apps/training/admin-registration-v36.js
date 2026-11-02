@@ -5,7 +5,7 @@
  const host=()=>document.getElementById('adminContent');
  const shell=()=>document.getElementById('adminShell');
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
- const state={editionId:'',seq:0,busy:false,qrLoading:null,notice:'',noticeKind:'info',requests:new Map()};
+ const state={editionId:'',seq:0,busy:false,qrLoading:null,notice:'',noticeKind:'info',requests:new Map(),companyReview:null};
  const PUBLIC_ORIGIN='https://safety-training-safety-manager.vercel.app/';
  const registrationUrl=token=>{const url=new URL(PUBLIC_ORIGIN);url.searchParams.set('registration',token);return url.toString();};
  // Use the canonical recipient URL, never a localhost/admin preview origin.
@@ -43,6 +43,9 @@
    '.ar36-request{border-bottom:1px solid #39465a;padding:11px 2px}.ar36-request small{display:block;color:#9fafc0}',
    '.ar36-qr{width:max-content;max-width:100%;background:white;padding:12px;border-radius:12px;margin:12px 0}',
    '.ar36-note{line-height:1.5;font-size:13px;color:#b5c7d7}.ar36-muted{color:#b6c8d8}.ar36-delivery{margin-top:9px;border-left:3px solid #6cc4b1;padding-left:11px}.ar36-notice{border:1px solid #4d9f87;background:#163b36;color:#e4fff6;border-radius:9px;padding:12px;margin:12px 0;line-height:1.55}.ar36-notice.warn{border-color:#d5a55a;background:#49391f;color:#fff2cd}',
+   '.ar36-cross-review{margin:12px 0;padding:16px;border:1px solid #c89f68;border-radius:12px;background:#30281f;color:#fff4de;display:grid;gap:12px}',
+   '.ar36-cross-review h3{font-size:16px;color:#fff4d9;margin:0}.ar36-cross-review p{margin:0;line-height:1.5}.ar36-cross-review dl{display:grid;gap:8px;margin:0}.ar36-cross-review dl>div{display:grid;grid-template-columns:minmax(130px,1fr) 2fr;gap:8px;align-items:start}.ar36-cross-review dt{font-size:12px;color:#e6cfad}.ar36-cross-review dd{margin:0;font-weight:800;overflow-wrap:anywhere}',
+   '.ar36-cross-review .ar36-verify,.ar36-cross-review .ar36-review-note{display:grid;gap:8px;line-height:1.45}.ar36-cross-review .ar36-verify{grid-template-columns:auto 1fr}.ar36-cross-review .ar36-verify input{width:18px;height:18px;margin:4px 0 0}.ar36-cross-review textarea{box-sizing:border-box;width:100%;max-width:100%;min-width:0;resize:vertical;font:inherit;padding:10px;border:1px solid #bda17f;border-radius:9px;background:#fff;color:#152638}.ar36-cross-review .ar36-error{color:#ffe2b7;font-weight:800}',
    '#adminRegistrationNav{white-space:normal}'
   ].join('');document.head.appendChild(css);
  }
@@ -94,10 +97,25 @@
   return (editions.data||[]).map(x=>({...x,display:[x.title||cm.get(vm.get(x.course_version_id))||'Corso',cm.get(vm.get(x.course_version_id))].filter(Boolean).join(' · ')}));
  }
  const choice=(edition)=>'<option value="'+esc(edition.id)+'"'+(edition.id===state.editionId?' selected':'')+'>'+esc(edition.display)+'</option>';
- const requestRows=(requests,invites=new Map())=>{
+ const requestRows=(requests,invites=new Map(),activeReview=null)=>{
   const pending=requests.filter(r=>r.status==='pending');
   const history=requests.filter(r=>r.status!=='pending').slice(0,30);
   const entry=(r,isPending)=>{
+   const review=activeReview?.requestId===r.id?activeReview:null;
+   const reviewPanel=review?'<div class="ar36-cross-review" role="group" aria-label="Verifica azienda differente">'+
+     '<h3>Verifica manuale: corsista già presente in altra azienda</h3>'+
+     '<p>È stato trovato un solo profilo nella stessa organizzazione. <strong>Non cambierà l’azienda dell’anagrafica</strong> e non modificherà i corsi precedenti.</p>'+
+     '<dl><div><dt>Azienda attuale</dt><dd>'+esc(review.existing_company)+'</dd></div>'+
+     '<div><dt>Azienda dell’edizione</dt><dd>'+esc(review.edition_company)+'</dd></div>'+
+     '<div><dt>Iscrizioni precedenti</dt><dd>'+esc(review.historical_enrollments)+'</dd></div></dl>'+
+     (!review.eligible||review.already_enrolled?
+       '<p class="ar36-error">Identità non verificabile automaticamente oppure iscrizione già presente. Non duplicare il corsista; verifica l’anagrafica e le iscrizioni.</p>':
+       '<p><strong>Attenzione:</strong> conferma soltanto dopo aver verificato l’identità del corsista e l’azienda dell’edizione.</p>'+
+       '<label class="ar36-verify"><input type="checkbox" id="ar36ConfirmIdentity"> Confermo che email e codice fiscale appartengono alla stessa persona e che questa deve seguire il corso per l’azienda selezionata.</label>'+
+       '<label class="ar36-review-note">Motivazione obbligatoria (almeno 20 caratteri)<textarea id="ar36ReviewNote" minlength="20" maxlength="500" rows="3" placeholder="Motiva l’iscrizione senza spostare l’anagrafica" required></textarea></label>'+
+       '<div class="ar36-actions"><button type="button" class="ar36-primary" data-ar36-cross-approve="'+esc(r.id)+'">Conferma associazione e invia email</button>'+
+       '<button type="button" data-ar36-cross-cancel="'+esc(r.id)+'">Annulla verifica</button></div>')+
+     '</div>':'';
    const status=invites.get(r.learner_id)?.status||'';
    const mailText=status==='accepted'?'Account già collegato':
     status==='sent'?'Richiesta invio email accettata da Auth; consegna da verificare':
@@ -106,7 +124,7 @@
    return '<div class="ar36-request"><strong>'+esc(r.last_name)+' '+esc(r.first_name)+'</strong> · '+esc(r.email)+
     '<small>Telefono: '+esc(r.phone||'—')+' · CF: '+esc(r.fiscal_code||'—')+' · '+esc(new Date(r.created_at).toLocaleString('it-IT'))+'</small>'+
     (isPending?'<div class="ar36-actions"><button class="ar36-primary" data-ar36-approve="'+esc(r.id)+'">Approva, iscrivi e invia email</button>'+
-     '<button class="ar36-danger" data-ar36-reject="'+esc(r.id)+'">Rifiuta</button></div>':
+     '<button class="ar36-danger" data-ar36-reject="'+esc(r.id)+'">Rifiuta</button></div>'+reviewPanel:
      '<small>Esito: '+esc(r.status==='approved'?'Iscrizione approvata':'Richiesta rifiutata')+'</small>'+
      (r.status==='approved'&&r.learner_id?'<div class="ar36-delivery"><small>'+esc(mailText)+'</small>'+
       '<div class="ar36-actions"><button type="button" data-ar36-resend="'+esc(r.id)+'">Invia / reinvia email di accesso</button></div></div>':''))+
@@ -155,9 +173,9 @@
      '<p class="ar36-muted">Nessun link attivo per questa edizione.</p>')+
     '<div class="ar36-actions"><button class="ar36-primary" id="ar36Create">'+(live?'Rigenera link':'Crea link e QR')+'</button>'+
     '<button id="ar36Refresh">Aggiorna richieste</button></div></section>'+
-    requestRows(Array.isArray(requests)?requests:[],invites);
+    requestRows(Array.isArray(requests)?requests:[],invites,state.companyReview);
    if(live)void showQr(url).catch(()=>{const area=root.querySelector('#ar36Qr');if(area)area.textContent='QR temporaneamente non disponibile: utilizza il link.';});
-   root.querySelector('#ar36Edition').onchange=e=>{state.editionId=e.target.value;state.notice='';void render();};
+   root.querySelector('#ar36Edition').onchange=e=>{state.editionId=e.target.value;state.notice='';state.companyReview=null;void render();};
    root.querySelector('#ar36Create').onclick=()=>void operate(async()=>{
     if(live&&!confirm('Rigenerare il link? Il vecchio link e relativo QR smetteranno di funzionare.'))return;
     await rpc('admin_create_registration_link_v36',{p_edition_id:state.editionId,p_expires_days:Number(root.querySelector('#ar36Duration').value)});
@@ -177,6 +195,10 @@
    root.querySelectorAll('[data-ar36-approve]').forEach(b=>b.onclick=()=>void decide(b.dataset.ar36Approve,true));
    root.querySelectorAll('[data-ar36-reject]').forEach(b=>b.onclick=()=>void decide(b.dataset.ar36Reject,false));
    root.querySelectorAll('[data-ar36-resend]').forEach(b=>b.onclick=()=>void resend(b.dataset.ar36Resend));
+   root.querySelectorAll('[data-ar36-cross-approve]').forEach(b=>b.onclick=()=>void approveCrossCompany(b.dataset.ar36CrossApprove));
+   root.querySelectorAll('[data-ar36-cross-cancel]').forEach(b=>b.onclick=()=>{
+    state.companyReview=null;state.notice='';void render();
+   });
   }catch(e){if(current(seq,who))root.innerHTML='<section class="admin-card"><p class="admin-error">'+esc(e?.message||e)+'</p><button id="ar36Retry">Riprova</button></section>';root.querySelector('#ar36Retry')?.addEventListener('click',()=>void render());}
  }
  async function operate(job){if(state.busy)return;state.busy=true;host()?.querySelectorAll('button').forEach(x=>x.disabled=true);try{await job();}catch(e){explain(e);}finally{state.busy=false;host()?.querySelectorAll('button').forEach(x=>x.disabled=false);}}
@@ -194,20 +216,62 @@
    await render();
   });
  }
- async function decide(id,approve){
-  if(!confirm(approve?'Confermi di aver verificato i dati? Il corsista verrà iscritto e il sistema invierà automaticamente l’invito email.':'Rifiutare questa richiesta?'))return;
-  await operate(async()=>{
-   const result=await rpc('admin_registration_decide_v36',{p_request_id:id,p_approve:approve});
-   if(!approve){notice('Richiesta rifiutata. Nessuna email di attivazione inviata.');await render();return;}
-   // Enrollment is committed first; email errors never cause re-approval or duplicate enrollments.
-   try{
-    const email=await inviteLearner(result?.learner_id);
-    notice('Iscrizione approvata. '+inviteResult(email));
-   }catch(error){
+ async function finishApprovedEnrollment(result){
+  // The registration and its audit record already exist. Email failures never re-enroll.
+  state.companyReview=null;
+  try{
+    const response=await inviteLearner(result?.learner_id);
+    notice('Iscrizione approvata. '+inviteResult(response));
+  }catch(error){
     notice('Iscrizione approvata, ma email NON inviata: '+(error?.message||error)+
      '. Usa «Invia / reinvia email di accesso» nella richiesta approvata. Non ripetere l’iscrizione.','warn');
-   }
-   await render();
+  }
+  await render();
+ }
+ async function approveCrossCompany(id){
+  const review=state.companyReview;
+  if(!review||review.requestId!==id||!review.eligible||review.already_enrolled){
+    return explain(Error('Verifica azienda non valida o scaduta. Aggiorna le richieste.'));
+  }
+  const root=host(),confirmed=root?.querySelector('#ar36ConfirmIdentity')?.checked,
+    note=root?.querySelector('#ar36ReviewNote')?.value?.trim()||'';
+  if(!confirmed||note.length<20||note.length>500){
+    alert('Conferma l’identità e inserisci una motivazione tra 20 e 500 caratteri.');
+    return;
+  }
+  if(!confirm('Confermi di associare il corsista all’edizione della nuova azienda, mantenendo invariati anagrafica e storico dei corsi precedenti?'))return;
+  await operate(async()=>{
+    const result=await rpc('admin_registration_company_approve_v46_9',{
+      p_request_id:id,p_existing_learner_id:review.existing_learner_id,
+      p_confirm_identity:true,p_note:note});
+    await finishApprovedEnrollment(result);
+  });
+ }
+ async function decide(id,approve){
+  if(approve){
+    try{
+      const review=await rpc('admin_registration_company_review_v46_9',{p_request_id:id});
+      if(review?.review_needed){
+        state.companyReview={...review,requestId:id};
+        notice(review.eligible?
+          'Corsista già presente presso un’altra azienda: effettua la verifica manuale qui sotto, senza duplicare l’anagrafica.':
+          'Identità o dati aziendali non verificabili automaticamente: controlla l’anagrafica prima di approvare.','warn');
+        await render();return;
+      }
+      if(review?.reason_code==='multiple_matching_learners_manual_review')
+        throw Error('Più anagrafiche corrispondenti: risolvi i duplicati prima di approvare.');
+      if(review?.reason_code==='request_already_reviewed'){
+        notice('La richiesta risulta già esaminata. Aggiorna le richieste.','warn');await render();return;
+      }
+    }catch(error){explain(error);return;}
+  }
+  if(!confirm(approve?
+    'Confermi di aver verificato i dati? Il corsista sarà iscritto e il sistema tenterà automaticamente l’invio email.':
+    'Rifiutare questa richiesta?'))return;
+  await operate(async()=>{
+    const result=await rpc('admin_registration_decide_v36',{p_request_id:id,p_approve:approve});
+    if(!approve){state.companyReview=null;notice('Richiesta rifiutata. Nessuna email inviata.');await render();return;}
+    await finishApprovedEnrollment(result);
   });
  }
  function start(){
