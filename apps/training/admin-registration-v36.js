@@ -18,7 +18,16 @@
   if(!learnerId)throw Error('Corsista approvato non valido. Ricarica le richieste.');
   const {data,error}=await client().functions.invoke('invite-learner',
    {body:{learner_id:learnerId,redirect_to:activationRedirect()}});
-  if(error||data?.error)throw Error(error?.message||data?.message||data?.error||'Invio non riuscito.');
+  if(error||data?.error){
+    let detail=data?.message||data?.error||error?.message||'Invio non riuscito.';
+    if(error?.context?.json){
+      try{
+        const body=await error.context.clone().json();
+        detail=body?.message||body?.error||detail;
+      }catch{ /* API may respond without JSON: retain a safe generic error. */ }
+    }
+    throw Error(String(detail).slice(0,300));
+  }
   return data;
  }
  const explain=e=>{const msg=e?.message||String(e);alert('Operazione non riuscita: '+msg);};
