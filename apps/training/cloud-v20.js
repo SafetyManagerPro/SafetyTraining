@@ -177,7 +177,7 @@
     state.assignments = assignments;
     updateBadge();
     renderPanel();
-    await syncRouteContext();
+    try{await syncRouteContext();}catch(error){console.warn('[SafetyTraining Cloud] route context:',error?.message||error);}
     if(identityCurrent(requestId,currentUserId)){
       state.identityReady = true;
       notifyCloudState();
