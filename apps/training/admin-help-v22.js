@@ -3,6 +3,16 @@
   'use strict';
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const guides={
+    'Gestione rapida corsisti':{
+      title:'Guida · Gestione rapida corsisti',
+      steps:['Scegli il corsista. Se non appare, crealo dalla scheda Corsisti.',
+      'Seleziona un’edizione aperta e premi Iscrivi / riattiva il corso. Se non esiste, crea un’edizione interna da una versione pubblicata, poi premi Iscrivi.',
+      'Per accedere online serve un’email: inseriscila e premi Salva email.',
+      'Premi Attiva accesso subito. Copia le credenziali mostrate una sola volta e consegnale in modo riservato al corsista; l’email automatica non è necessaria.',
+      'Se il corsista perde la password, usa Reimposta password. Non puoi leggere la vecchia password: verrà sostituita.',
+      'Per eliminare premi Elimina / rimuovi. I profili senza frequenze vengono cancellati; se lo storico esiste vengono rimossi dalla lista attiva e le prove restano conservate.'],
+      note:'Percorso interno e accesso online sono separati dalla certificazione di corsi regolamentati. La password temporanea va cambiata dal corsista; non salvarla in documenti condivisi.'
+    },
     'Gestione immagini':{
       title:'Guida · Gestione immagini e filtri',
       steps:[

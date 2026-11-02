@@ -166,10 +166,23 @@
     }
     if(!identityCurrent(requestId,currentUserId))return;
 
-    const { data: learner, error } = await state.client.from('learners')
+    let { data: learner, error } = await state.client.from('learners')
       .select('id,organization_id,company_id,auth_user_id,first_name,last_name,email,job_title')
       .eq('auth_user_id', currentUserId).eq('active', true).maybeSingle();
     if (error) console.warn('[SafetyTraining Cloud] learner lookup:', error.message);
+    if(!learner && !error && identityCurrent(requestId,currentUserId)){
+      // Existing, confirmed account matches an invited learner by email:
+      // link it before the role gate decides this user has no permissions.
+      const claim=await state.client.rpc('claim_learner_account');
+      if(claim.error)console.warn('[SafetyTraining Cloud] learner self-claim:',claim.error.message);
+      if(claim.data && identityCurrent(requestId,currentUserId)){
+        const found=await state.client.from('learners')
+          .select('id,organization_id,company_id,auth_user_id,first_name,last_name,email,job_title')
+          .eq('auth_user_id',currentUserId).eq('active',true).maybeSingle();
+        if(found.error)console.warn('[SafetyTraining Cloud] post-claim lookup:',found.error.message);
+        else learner=found.data;
+      }
+    }
     if(!identityCurrent(requestId,currentUserId))return;
     const assignments=learner ? await loadAssignments(learner.id) : [];
     if(!identityCurrent(requestId,currentUserId))return;
