@@ -104,7 +104,7 @@ function rows(){
  (view.length?view.map(u=>{
   const frozen=!editable(u),flags=score(u);
   const candidate=window.SAFETY_EQUIPMENT_CASES_V46_3?.forSlide?.({type:'concept',title:u.unit_title,topic:{id:u.unit_key,title:u.unit_title}},state.course);
-  const suggested=candidate&&/^assets\\/gp0[1-4]-[a-z0-9-]+\\.svg$/.test(candidate.visual)
+  const suggested=candidate&&new RegExp('^assets/gp0[1-4]-[a-z0-9-]+[.]svg$').test(candidate.visual)
    ?'<figure class="st-v465-editor-figure"><img loading="lazy" src="'+esc(candidate.visual)+'" alt="'+esc(candidate.imageCaption||'Schema originale proposto')+'"><figcaption>Figura tematica proposta, non approvata: '+esc(candidate.imageCaption||'Verificare pertinenza e diritti')+'</figcaption></figure>'
    :'';
   const row='<tr><td data-label="Unità / Modulo"><strong>'+esc(u.unit_title)+'</strong><small>'+esc(u.module_title)+' · LU v'+esc(u.unit_version)+' · '+esc(u.unit_status)+'</small>'+
