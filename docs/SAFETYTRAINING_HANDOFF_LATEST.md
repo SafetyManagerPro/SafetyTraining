@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-11-02
-Stato: **v46.8 GitHub feature in review · baseline v46.7 PR #34 merged · main CI #721 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-8-registration-email`.
+Stato: **v46.8 GitHub main · PR #35 merged · CI #723 SUCCESS (PR), #724 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-8-registration-email`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1319,3 +1319,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - **QR invito personale / account**: se `auth.signUp` non produce sessione, il corsista vede istruzioni esplicite, «Ho già un account» e «Rinvia email di conferma» con `auth.resend({type:'signup'})` solo tramite azione volontaria; link scaduti/rate limit spiegati. Il link di invito personale resta soggetto a verifica dell’identità.
 - **SMTP da verificare dall’amministratore**: Supabase Auth richiede **SMTP personalizzato** per la consegna a indirizzi esterni al team e una configurazione di URL di reindirizzamento; risposta `sent` dell'Edge Function indica accettazione da Supabase Auth, non prova della consegna. La configurazione SMTP non è accessibile dai tool correnti, quindi non affermare che sia corretta.
 - Nessuna migrazione SQL né modifica a dati corsisti, corsi frozen, frequenze, attestati o app SafetyManager. Solo frontend e test `tests/public-registration-delivery-v46-8.test.mjs`. Cache PWA `safety-training-v46-8-registration-email`. Manca prova sul browser autenticato e prova di consegna verso una casella esterna autorizzata. Nessun accesso a @Vercel.
+
+## 2026-11-02 — v46.8 — Merge, verifica QR e limiti email
+- Pull request [#35](https://github.com/SafetyManagerPro/SafetyTraining/pull/35) merged in GitHub `main`, SHA applicativo `ab93d57e6a350ebcd3641ce62017cc2d2fac0cea`.
+- GitHub Actions **#723 SUCCESS** sul ramo PR e **#724 SUCCESS** sul main applicativo (controlli funzionali della regola di approvazione, invio automatico e reinvio senza duplicati).
+- Supabase: lettura di **2 link QR attivi e validi**, **1 richiesta pubblica pending**, e **0 richieste approvate** alla diagnosi. Test eseguito senza approvare corsisti reali o inviare email. Le due RPC pubbliche sono accessibili ad anon con autorizzazioni circoscritte; l'invito resta permesso solo al backend admin e alla Edge Function JWT-protected.
+- Da collaudare manualmente in app: QR → modulo pubblico → richiesta pending → amministratore Approva, iscrivi e invia email → verifica stato invito; riprova da richiesta approved senza duplicare iscrizione; signup/confirmation/resend con casella di test; errore SMTP gestito. L'email `sent` non dimostra la consegna, per la quale occorre verificare SMTP e ricezione effettiva.
+- **@Vercel non consultato**, produzione non verificata; per il momento nessuna richiesta email di ricevuta viene generata all'invio pubblico (solo ricevuta a schermo). Nessuna migrazione DB o cambiamento a dati storici, corsi frozen, attestati, permessi, SafetyManager.
