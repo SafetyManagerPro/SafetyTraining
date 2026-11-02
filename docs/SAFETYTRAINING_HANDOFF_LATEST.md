@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-11-02
-Stato: **v46.7 GitHub feature in test · baseline v46.6 PR #33 merged · main CI #718 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-7-unified-journey`.
+Stato: **v46.7 GitHub main · PR #34 merged · CI #719 SUCCESS (PR), #720 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-7-unified-journey`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1302,3 +1302,9 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Protezioni: validazione del corso approvato, dell'edizione compatibile e del roster della stessa azienda; niente dati personali nella bozza oltre agli ID già presenti; check di sessione e seriale per letture asincrone; lettura ricaricabile via «Aggiorna stato». Non altera account, inviti già inviati, frequenza, prove, ruoli, frozen (27), pubblichi/attestati, separazione SafetyManager.
 - UI accessibile e responsive `admin-guided-journey-v46-7.css`, menu «Avvia percorso» evidenziato, guida «?» aggiornata; nuova PWA `safety-training-v46-7-unified-journey`. Regressioni nuove `tests/admin-guided-journey-v46-7.test.mjs` e legacy aggiornate.
 - Stato operativo: repository GitHub branch in collaudo; **nessun accesso a @Vercel**, nessuna verifica visuale autenticata o test con veri corsisti. Controllare il percorso completo desktop/tablet/mobile prima di dichiarare produzione validata.
+
+## 2026-11-02 — v46.7 — Release GitHub (flusso unico)
+- PR [#34](https://github.com/SafetyManagerPro/SafetyTraining/pull/34) merged (squash) in `main`, commit applicativo `36d52fe34d1bc00dd36958c3981c7dac5441d5cb`.
+- Suite GitHub Actions **#719 SUCCESS (PR)** e **#720 SUCCESS (main)**; inclusi test di monitoraggio read-only, segregazione per azienda/edizione, stato invito, data disponibilità, revoca iscrizione, distinzione digitale/attestato, sanificazione HTML e integrazione nel wizard.
+- **Punto unico:** menu Amministrazione → «Avvia percorso». La dashboard mostra la stessa cronologia e conduce al wizard; dopo iscrizione o su corsista esistente, fase 5 espone la timeline e i collegamenti alle operazioni. Nessuna nuova migrazione DB.
+- **Collaudo manuale ancora necessario** con amministratore e corsista di prova: azienda → corso/edizione → corsista nuovo → conferma e invito → account collegato → attività → aggiornamento timeline; caso separato «Controlla stato esistente» senza scritture; verifica schermi 390/820/1440; verifica separata di eventuali requisiti pratici e attestato. Nessun accesso a @Vercel e nessuna conferma della disponibilità in produzione.
