@@ -66,7 +66,7 @@ test('v46.5 frontend is mounted in administrative scope with an accessible guide
  assert.ok(html.includes('admin-lu-editorial-v46-5.js'));
  assert.ok(html.includes('admin-lu-editorial-v46-5.css'));
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-7-unified-journey'/);
+ assert.match(sw,/const CACHE='safety-training-v46-8-registration-email'/);
  assert.ok(sw.includes('./admin-lu-editorial-v46-5.js'));
  assert.ok(sw.includes('./admin-lu-editorial-v46-5.css'));
  const menu=read('apps/training/admin-menu-v39.js');
@@ -81,7 +81,7 @@ test('v46.5 frontend is mounted in administrative scope with an accessible guide
  assert.match(read('package.json'),/tests\/admin-lu-editorial-v46-5\.test\.mjs/);
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(p);
-  assert.ok(doc.slice(0,900).includes('safety-training-v46-7-unified-journey'));
+  assert.ok(doc.slice(0,900).includes('safety-training-v46-8-registration-email'));
   assert.ok(doc.includes('v46.5 — Matrice di revisione editoriale delle Learning Unit'));
  }
 });

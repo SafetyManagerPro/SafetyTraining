@@ -54,9 +54,9 @@ test('viewer excludes persisted evidence and preserves image editor and captions
 test('v45.6 assets, PWA and handoffs are synchronized',()=>{
  const html=read('apps/training/index.html'),sw=read('apps/training/sw.js');
  for(const s of ['deck-figure-viewer-v45-6.js','deck-figure-viewer-v45-6.css'])assert.ok(html.includes(s)&&sw.includes(s));
- assert.ok(sw.includes('safety-training-v46-7-unified-journey'));
+ assert.ok(sw.includes('safety-training-v46-8-registration-email'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  const h=read(p);assert.ok(h.slice(0,800).includes('safety-training-v46-7-unified-journey'));assert.ok(h.includes('v45.6 — Figure ingrandite nelle slide'));
+  const h=read(p);assert.ok(h.slice(0,800).includes('safety-training-v46-8-registration-email'));assert.ok(h.includes('v45.6 — Figure ingrandite nelle slide'));
  }
  assert.ok(read('package.json').includes('tests/deck-figure-viewer-v45-6.test.mjs'));
 });

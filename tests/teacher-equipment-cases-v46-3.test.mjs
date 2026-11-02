@@ -54,10 +54,10 @@ test('v46.3 scripts, PWA and handoffs are consistent',()=>{
  const html=read('apps/training/index.html'),sw=read('apps/training/sw.js'),packageText=read('package.json');
  assert.ok(html.indexOf('teacher-equipment-cases-v46-3.js')<html.indexOf('teacher-didactic-depth-v46-2.js'));
  assert.ok(sw.includes('./teacher-equipment-cases-v46-3.js'));
- assert.ok(sw.includes('safety-training-v46-7-unified-journey'));
+ assert.ok(sw.includes('safety-training-v46-8-registration-email'));
  assert.ok(packageText.includes('teacher-equipment-cases-v46-3.test.mjs'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  assert.ok(read(p).slice(0,900).includes('safety-training-v46-7-unified-journey'));
+  assert.ok(read(p).slice(0,900).includes('safety-training-v46-8-registration-email'));
   assert.ok(read(p).includes('v46.3 — Casi ragionati attrezzature'));
  }
 });

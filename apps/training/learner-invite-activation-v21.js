@@ -4,7 +4,7 @@
 
   const cloud=()=>window.SAFETY_CLOUD;
   const db=()=>cloud()?.state?.client;
-  const state={token:null,info:null,mode:'signup',busy:false};
+  const state={token:null,info:null,mode:'signup',busy:false,resending:false,lastEmail:''};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 
   function tokenFromUrl(){return new URL(location.href).searchParams.get('learner_invite')||'';}
@@ -58,7 +58,19 @@
       if(state.mode==='signup'){
         const confirm=document.getElementById('li21Password2')?.value||'';if(password.length<10)throw new Error('La password deve avere almeno 10 caratteri.');if(password!==confirm)throw new Error('Le due password non coincidono.');
         message('Creazione account…');const redirect=new URL(location.href);const {data,error}=await db().auth.signUp({email,password,options:{emailRedirectTo:redirect.toString()}});if(error)throw error;
-        if(!data?.session){message('Controlla la tua email e conferma l’account. Poi riapri questo stesso link per completare l’attivazione.','ok');return;}
+        if(!data?.session){
+          state.lastEmail=email;
+          message('Se il tuo account è nuovo, controlla l’email di conferma (anche Spam) e riapri questo link personale. Se avevi già un account, usa «Ho già un account».','ok');
+          const area=document.getElementById('li21Auth')?.querySelector('.li21-actions');
+          if(area&&!area.querySelector('[data-li21-resend]')){
+            const resend=document.createElement('button');resend.type='button';
+            resend.className='li21-secondary';resend.dataset.li21Resend='1';
+            resend.textContent='Rinvia email di conferma';
+            resend.onclick=()=>void resendSignup(state.lastEmail,resend);
+            area.appendChild(resend);
+          }
+          return;
+        }
       }else{
         message('Accesso in corso…');const {error}=await db().auth.signInWithPassword({email,password});if(error)throw error;
       }
@@ -72,7 +84,19 @@
     window.setTimeout(()=>location.reload(),350);
   }
 
-  function friendly(code){const map={invalid_invitation_token:'Link di invito non valido.',invitation_revoked:'Questo invito è stato revocato.',invitation_already_used:'Questo invito è già stato utilizzato.',invitation_expired:'Questo invito è scaduto.',identity_verification_failed:'I dati di verifica non coincidono.',invitation_email_mismatch:'Questo account email non corrisponde all’invito.',auth_account_already_linked:'Questo account è già collegato a un altro corsista.',learner_linked_to_other_account:'Questo corsista è già collegato a un altro account.'};return map[code]||String(code||'Impossibile completare l’attivazione.');}
+  async function resendSignup(email,button){
+    if(state.resending||state.busy||!email||!requested())return;
+    state.resending=true;if(button)button.disabled=true;
+    message('Richiesta di un nuovo link di conferma…');
+    try{
+      const {error}=await db().auth.resend({type:'signup',email,
+       options:{emailRedirectTo:new URL(location.href).toString()}});
+      if(error)throw error;
+      message('Nuova richiesta inviata al servizio email. Controlla la casella e lo Spam. Se non ricevi nulla, contatta l’organizzatore: la consegna non è garantita.','ok');
+    }catch(error){message('Non è stato possibile richiedere un nuovo messaggio: '+friendly(error?.message||error)+'. Rivolgiti all’organizzatore.','error');}
+    finally{state.resending=false;if(button?.isConnected)button.disabled=false;}
+  }
+  function friendly(code){const map={invalid_invitation_token:'Link di invito non valido.',invitation_revoked:'Questo invito è stato revocato.',invitation_already_used:'Questo invito è già stato utilizzato.',invitation_expired:'Questo invito è scaduto.',identity_verification_failed:'I dati di verifica non coincidono.',invitation_email_mismatch:'Questo account email non corrisponde all’invito.',email_rate_limit_exceeded:'Limite invio email raggiunto. Riprova più tardi.',otp_expired:'Il link email è scaduto o già utilizzato. Richiedi una nuova conferma.',auth_account_already_linked:'Questo account è già collegato a un altro corsista.',learner_linked_to_other_account:'Questo corsista è già collegato a un altro account.'};return map[code]||String(code||'Impossibile completare l’attivazione.');}
 
   async function boot(){
     if(!requested())return;ensureUi();show();for(let i=0;i<50&&!db();i++)await new Promise(r=>setTimeout(r,120));if(!db())return message('Servizio di accesso non disponibile.','error');
