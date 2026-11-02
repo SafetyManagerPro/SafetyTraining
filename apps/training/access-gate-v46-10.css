@@ -44,4 +44,5 @@ body.st-access-error #stAccessEntry .st-access-loading{display:none}
 body.st-access-learner :is(#modeTeacher,.mode,#search,#showFav,#showRecent,#showDpi,#showRefs,#showChecklist){display:none!important}
 body.st-access-learner .sidebar h3:last-of-type{display:none}
 body.st-access-learner:not(.admin-open) #adminConsoleBtn{display:none!important}
+body.st-access-learner :is(.teacher,.teacher-only,.teacher-expansion,.teacher-notes,.detail-only.teacher){display:none!important}
 @media print{body:not(.st-access-admin):not(.st-access-staff):not(.st-access-learner) #stAccessEntry{display:none!important}}
