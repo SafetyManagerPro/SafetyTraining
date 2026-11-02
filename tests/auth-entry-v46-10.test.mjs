@@ -133,7 +133,7 @@ test('route render and sidebar never expose course content before auth or after 
  assert.match(cloud,/notifyCloudState\(\)/);
 });
 test('backend catalog RPCs have explicit learner enrollment and staff scope',()=>{
- const sql=read('supabase/migrations/20261102195500_v46_10_catalog_rpc_scope.sql');
+ const sql=read('supabase/migrations/20261102194705_v46_10_catalog_rpc_scope.sql');
  for(const term of ["pg_get_functiondef('public.training_catalog_summary()'",
   "pg_get_functiondef('public.training_course_bundle(text)'",
   "unexpected_catalog_rpc_version","learner_l.auth_user_id=auth.uid()",
