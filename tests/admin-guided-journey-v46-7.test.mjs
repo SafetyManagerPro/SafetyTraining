@@ -121,7 +121,7 @@ test('dashboard, help, PWA and both handoffs share the unified flow',()=>{
   assert.doesNotMatch(src,/data-jump="companies"><b>1<\/b><span>Azienda/);
  }
  const help=read('apps/training/admin-help-v22.js');
- assert.match(help,/riprendi un corso già assegnato/i);
+ assert.match(help,/riprendere un corso già assegnato/i);
  const html=read('apps/training/index.html');
  assert.ok(html.includes('admin-guided-journey-v46-7.js'));
  assert.ok(html.includes('admin-guided-journey-v46-7.css'));

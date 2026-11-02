@@ -22,7 +22,7 @@
     'Controllo percorsi':{title:'Guida · Controllo percorsi',steps:['Seleziona l’edizione da esaminare.','Controlla iscrizioni, qualità didattica, frequenze, test ed evidenze.','Riconcilia anomalie e documenti con docente e registri prima di emettere un attestato.'],note:'I dati sono indicativi e limitati dall’accesso RLS. Nessun rilascio automatico di attestati.'},
     'Dashboard':{
       title:'Guida · Dashboard amministrativa',
-      steps:['Consulta i contatori di aziende, corsisti, edizioni e iscrizioni.','Per una nuova formazione o per riprendi un corso già assegnato, usa «Avvia percorso» come punto unico: azienda → corso/edizione → corsisti → iscrizione → stato e prossima azione.','Per corsisti già iscritti, seleziona azienda, edizione e nominativo e premi «Controlla stato esistente» senza creare duplicati.','Le sezioni laterali rimangono disponibili per correzioni amministrative, dettagli e gestione avanzata.'],
+      steps:['Consulta i contatori di aziende, corsisti, edizioni e iscrizioni.','Per una nuova formazione o per riprendere un corso già assegnato, usa «Avvia percorso» come punto unico: azienda → corso/edizione → corsisti → iscrizione → stato e prossima azione.','Per corsisti già iscritti, seleziona azienda, edizione e nominativo e premi «Controlla stato esistente» senza creare duplicati.','Le sezioni laterali rimangono disponibili per correzioni amministrative, dettagli e gestione avanzata.'],
       note:'I contatori sono indicatori operativi, non certificano da soli frequenza, verifiche o completamento.'},
     'Organizzazioni':{
       title:'Guida · Organizzazioni',
