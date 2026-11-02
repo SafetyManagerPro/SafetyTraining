@@ -44,12 +44,12 @@ test('v46.2 graphically and operationally wired to guide without touching freeze
  const html=read('apps/training/index.html'),sw=read('apps/training/sw.js'),guide=read('apps/training/teacher-didactic-guide-v46.js');
  assert.ok(html.indexOf('teacher-didactic-depth-v46-2.js')<html.indexOf('teacher-didactic-guide-v46.js'));
  assert.ok(sw.includes('./teacher-didactic-depth-v46-2.js'));
- assert.ok(sw.includes("safety-training-v46-5-editorial-matrix"));
+ assert.ok(sw.includes("safety-training-v46-6-admin-scrollbars"));
  assert.match(guide,/SAFETY_DIDACTIC_DEPTH_V46_2/);
  assert.match(guide,/figure\+parts/);
  assert.match(read('apps/training/teacher-didactic-guide-v46.css'),/v46-guide-figure/);
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  assert.ok(read(p).slice(0,850).includes('safety-training-v46-5-editorial-matrix'));
+  assert.ok(read(p).slice(0,850).includes('safety-training-v46-6-admin-scrollbars'));
   assert.ok(read(p).includes('v46.2 — Analisi didattica'));
  }
 });

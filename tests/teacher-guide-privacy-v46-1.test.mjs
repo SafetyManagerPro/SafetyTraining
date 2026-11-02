@@ -44,8 +44,8 @@ test('privacy rules and PWA documentation stay synchronized',()=>{
  assert.match(css,/#v46GuideSections\[hidden\]/);
  assert.doesNotMatch(js,/localStorage|sessionStorage|fetch\s*\(|\.rpc\s*\(|learning_events|active_seconds/);
  const help=read('apps/training/admin-help-v22.js');assert.ok(help.includes('schermo proiettato'));
- const sw=read('apps/training/sw.js');assert.match(sw,/const CACHE='safety-training-v46-5-editorial-matrix'/);
+ const sw=read('apps/training/sw.js');assert.match(sw,/const CACHE='safety-training-v46-6-admin-scrollbars'/);
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  const s=read(p);assert.ok(s.slice(0,850).includes('safety-training-v46-5-editorial-matrix'));assert.ok(s.includes('v46.1 — Note docente protette'));
+  const s=read(p);assert.ok(s.slice(0,850).includes('safety-training-v46-6-admin-scrollbars'));assert.ok(s.includes('v46.1 — Note docente protette'));
  }
 });

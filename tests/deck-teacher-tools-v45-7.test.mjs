@@ -74,9 +74,9 @@ test('v45.7 assets, cache and handoffs match; earlier modules load first',()=>{
  for(const asset of ['deck-teacher-tools-v45-7.js','deck-teacher-tools-v45-7.css'])assert.ok(html.includes(asset)&&sw.includes(asset),asset);
  assert.ok(html.indexOf('deck-figure-viewer-v45-6.js')<html.indexOf('deck-teacher-tools-v45-7.js'));
  assert.ok(read('apps/training/app.js').includes('data-deck-tools-open'));
- assert.ok(sw.includes('safety-training-v46-5-editorial-matrix'));
+ assert.ok(sw.includes('safety-training-v46-6-admin-scrollbars'));
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
- const content=read(path);assert.ok(content.slice(0,850).includes('safety-training-v46-5-editorial-matrix'));
+ const content=read(path);assert.ok(content.slice(0,850).includes('safety-training-v46-6-admin-scrollbars'));
  assert.ok(content.includes('v45.7 — Strumenti aula e pausa proiezione'));
  }
  assert.ok(read('package.json').includes('tests/deck-teacher-tools-v45-7.test.mjs'));

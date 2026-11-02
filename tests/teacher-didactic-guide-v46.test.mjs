@@ -78,11 +78,11 @@ test('v46 modules, PWA, guide and handoffs synchronized without Vercel calls',()
  assert.ok(teacher.includes('SAFETY_TEACHER_GUIDE_V46?.open?.()'));
  assert.ok(html.indexOf('deck-course-audit-v45-9.js')<html.indexOf('teacher-didactic-depth-v46-2.js'));
  assert.ok(html.indexOf('teacher-didactic-depth-v46-2.js')<html.indexOf('teacher-didactic-guide-v46.js'));
- assert.match(sw,/const CACHE='safety-training-v46-5-editorial-matrix'/);
+ assert.match(sw,/const CACHE='safety-training-v46-6-admin-scrollbars'/);
  assert.ok(help.includes('Guida didattica'));
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(path);
-  assert.ok(doc.slice(0,850).includes('safety-training-v46-5-editorial-matrix'));
+  assert.ok(doc.slice(0,850).includes('safety-training-v46-6-admin-scrollbars'));
   assert.ok(doc.includes('v46.0 — Guida docente contestuale'));
  }
  assert.ok(read('package.json').includes('tests/teacher-didactic-guide-v46.test.mjs'));
