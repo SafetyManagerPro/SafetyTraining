@@ -20,7 +20,7 @@ function setup(){
   catalogBrowserRoot:{innerHTML:'',querySelector:()=>null}
  };
  const doc={readyState:'loading',getElementById:id=>controls[id]||null,addEventListener(){},body:{classList:{remove(){}}}};
- const win={SAFETY_DATA:[],SAFETY_CLOUD:{state:{user:{id:'admin'},learner:null,client:{rpc:async()=>({data:rows,error:null})}}}};
+ const win={SAFETY_DATA:[],SAFETY_CLOUD:{state:{user:{id:'admin'},learner:null,client:{rpc:async()=>({data:rows,error:null})}}},SAFETY_ACCESS_V46_10:{isAuthenticated:()=>true,canBrowse:()=>true,canOpen:()=>true,rowsForViewer:items=>items}};
  runInNewContext(read('apps/training/catalog-browser.js'),{window:win,document:doc,console,setTimeout,Number,Set,String,encodeURIComponent,decodeURIComponent});
  const names=()=>[...html.matchAll(/<h3>(.*?)<\/h3>/g)].map(m=>m[1]);
  return {win,controls,names,getCount:()=>count};
