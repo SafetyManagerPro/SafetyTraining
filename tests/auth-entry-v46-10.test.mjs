@@ -146,14 +146,14 @@ test('backend catalog RPCs have explicit learner enrollment and staff scope',()=
 });
 test('PWA, test suite and both handoffs are synchronized',()=>{
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-10-auth-gate'/);
+ assert.match(sw,/const CACHE='safety-training-v46-11-internal-access'/);
  assert.ok(sw.includes('./access-gate-v46-10.js'));
  assert.ok(sw.includes('./access-gate-v46-10.css'));
  const pkg=read('package.json');
  assert.match(pkg,/tests\/auth-entry-v46-10\.test\.mjs/);
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const c=read(p);
-  assert.ok(c.slice(0,950).includes('safety-training-v46-10-auth-gate'),p);
+  assert.ok(c.slice(0,950).includes('safety-training-v46-11-internal-access'),p);
   assert.match(c,/v46\.10 — Login obbligatorio e contenuti per ruolo/);
  }
 });
