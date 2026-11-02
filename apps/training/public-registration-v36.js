@@ -24,7 +24,17 @@
  ].join('');document.head.appendChild(styles);
  (document.body||document.documentElement).appendChild(root);
  const content=root.querySelector('#sprContent');
- const renderUnavailable=()=>{content.innerHTML='<p class="spr-error">Questo link non è disponibile o è scaduto.</p><p class="spr-small">Richiedi all’organizzatore un nuovo link d’iscrizione.</p>';};
+ const renderUnavailable=()=>{content.innerHTML='<p class="spr-error">Questo link non è disponibile o è scaduto.</p><p class="spr-small">Richiedi all’organizzatore un nuovo link o QR code d’iscrizione. Il vecchio QR potrebbe essere stato rigenerato.</p>';};
+ const friendlyError=error=>{
+  const code=String(error?.message||error||'');
+  if(/invalid_or_expired_link|link.*expired/i.test(code))return 'Il QR o il link non è più valido. Richiedi all’organizzatore un nuovo codice.';
+  if(/registration_limit_reached/i.test(code))return 'Troppe richieste per questa edizione: contatta l’organizzatore.';
+  if(/privacy_acknowledgement_required/i.test(code))return 'Per continuare devi accettare l’informativa privacy.';
+  if(/invalid_registration_fields/i.test(code))return 'Controlla nome, cognome e indirizzo email.';
+  if(/failed to fetch|network|timeout/i.test(code))return 'Impossibile contattare il servizio: verifica la connessione e prova ad aggiornare.';
+  return 'Non è stato possibile registrare la richiesta. Contatta l’organizzatore e indica l’errore visualizzato.';
+ };
+
  async function boot(){
   if(!/^[a-f0-9]{48}$/.test(token)){renderUnavailable();return;}
   for(let i=0;i<50&&!client();i++)await new Promise(r=>setTimeout(r,150));
@@ -34,7 +44,8 @@
    if(error)throw error;
    if(!data?.available){renderUnavailable();return;}
    content.innerHTML='<div class="spr-course">'+esc(data.course_title)+'<div class="spr-small">'+esc(data.edition_title)+'</div></div>'+
-    '<p>Inserisci i tuoi dati per richiedere l’iscrizione. Un amministratore dovrà verificare e approvare la richiesta prima di attivare il corso.</p>'+
+    '<p>Inserisci i dati per <strong>richiedere l’iscrizione tramite QR o link pubblico</strong>. La richiesta deve essere approvata dall’organizzatore: non attiva subito il corso e non genera un account.</p>'+
+    '<p class="spr-small"><strong>Email:</strong> il sistema non invia un’email automatica al momento della richiesta. Dopo l’approvazione l’organizzatore avvia l’email personale di attivazione. Per confermare la ricezione della richiesta, contatta l’organizzatore.</p>'+
     '<form id="sprForm" autocomplete="on"><div class="spr-fields">'+
     '<label>Nome *<input name="first_name" maxlength="90" minlength="2" autocomplete="given-name" required></label>'+
     '<label>Cognome *<input name="last_name" maxlength="90" minlength="2" autocomplete="family-name" required></label>'+
@@ -58,8 +69,10 @@
      });
      if(error)throw error;
      if(data?.status!=='received')throw Error('Risposta del servizio inattesa.');
-     content.innerHTML='<div class="spr-course spr-good"><h2>Richiesta ricevuta</h2><p>Se i dati sono corretti, l’amministratore potrà approvare l’iscrizione. Riceverai le istruzioni di accesso tramite l’organizzatore.</p></div><p class="spr-small">Non occorre inviare nuovamente il modulo.</p>';
-    }catch(error){feedback.className='spr-error';feedback.textContent='Invio non riuscito: '+(error.message||error);button.disabled=false;button.textContent='Invia richiesta d’iscrizione';}
+     content.innerHTML='<div class="spr-course spr-good"><h2>Richiesta ricevuta dal sistema</h2><p>La richiesta è stata acquisita o era già stata inviata: <strong>non significa che il corso sia attivo.</strong></p></div>'+
+      '<p><strong>Prossimo passaggio:</strong> l’organizzatore verifica i dati e approva l’iscrizione. Soltanto dopo l’approvazione il sistema tenta di inviare l’email di attivazione. Controlla anche la cartella Spam.</p>'+
+      '<p class="spr-small">Se non ricevi informazioni, contatta l’organizzatore indicando il corso e il tuo indirizzo email. Non ripetere la richiesta: l’invio duplicato non crea una nuova iscrizione.</p>';
+    }catch(error){feedback.className='spr-error';feedback.textContent=friendlyError(error);button.disabled=false;button.textContent='Riprova richiesta';}
     finally{busy=false;}
    });
   }catch(error){content.innerHTML='<p class="spr-error">Impossibile aprire il modulo. '+esc(error?.message||error)+'</p>';}
