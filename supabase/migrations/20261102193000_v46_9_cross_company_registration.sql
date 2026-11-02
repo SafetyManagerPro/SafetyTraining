@@ -75,6 +75,8 @@ begin
     'reason_code',case when v_valid then 'same_person_different_company'
                        else 'identity_or_edition_requires_manual_review' end,
     'existing_learner_id',v_l.id,
+    'existing_company_id',v_l.company_id,
+    'edition_company_id',v_ed.company_id,
     'existing_company',coalesce(v_old,'Senza azienda assegnata'),
     'edition_company',coalesce(v_new,'Azienda non disponibile'),
     'historical_enrollments',v_history,
@@ -84,7 +86,8 @@ end;
 $review$;
 
 create or replace function public.admin_registration_company_approve_v46_9(
-  p_request_id uuid,p_existing_learner_id uuid,p_confirm_identity boolean,p_note text)
+  p_request_id uuid,p_existing_learner_id uuid,p_confirm_identity boolean,p_note text,
+  p_expected_existing_company_id uuid,p_expected_edition_company_id uuid)
 returns jsonb language plpgsql security definer set search_path=''
 as $approve$
 declare
@@ -103,7 +106,10 @@ begin
   if not found or not private.can_manage_training_org(v_ed.organization_id) then
     raise exception 'admin_required' using errcode='42501';end if;
   if v_req.status<>'pending' then raise exception 'request_already_reviewed' using errcode='22023';end if;
-  if v_ed.status<>'open' or v_ed.company_id is null then
+  if not exists(select 1 from public.organizations where id=v_ed.organization_id and active) then
+    raise exception 'organization_inactive' using errcode='22023';end if;
+  if v_ed.status<>'open' or v_ed.company_id is null
+    or v_ed.company_id is distinct from p_expected_edition_company_id then
     raise exception 'edition_must_be_open_and_company_scoped' using errcode='22023';end if;
   select count(*) into v_count from public.learners l
     where l.organization_id=v_ed.organization_id
@@ -115,6 +121,7 @@ begin
   if not found or v_l.organization_id is distinct from v_ed.organization_id
     or not v_l.active
     or v_l.company_id is not distinct from v_ed.company_id
+    or v_l.company_id is distinct from p_expected_existing_company_id
     or lower(btrim(coalesce(v_l.email,''))) is distinct from v_req.email
     or v_req.fiscal_code is null
     or v_l.fiscal_code_normalized is distinct from v_req.fiscal_code then
@@ -148,6 +155,6 @@ end;
 $approve$;
 
 revoke all on function public.admin_registration_company_review_v46_9(uuid) from public,anon;
-revoke all on function public.admin_registration_company_approve_v46_9(uuid,uuid,boolean,text) from public,anon;
+revoke all on function public.admin_registration_company_approve_v46_9(uuid,uuid,boolean,text,uuid,uuid) from public,anon;
 grant execute on function public.admin_registration_company_review_v46_9(uuid),
-  public.admin_registration_company_approve_v46_9(uuid,uuid,boolean,text) to authenticated;
+  public.admin_registration_company_approve_v46_9(uuid,uuid,boolean,text,uuid,uuid) to authenticated;

@@ -243,7 +243,9 @@
   await operate(async()=>{
     const result=await rpc('admin_registration_company_approve_v46_9',{
       p_request_id:id,p_existing_learner_id:review.existing_learner_id,
-      p_confirm_identity:true,p_note:note});
+      p_confirm_identity:true,p_note:note,
+      p_expected_existing_company_id:review.existing_company_id,
+      p_expected_edition_company_id:review.edition_company_id});
     await finishApprovedEnrollment(result);
   });
  }
