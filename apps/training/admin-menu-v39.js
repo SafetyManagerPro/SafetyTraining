@@ -4,7 +4,7 @@
   {id:'home',label:'PANORAMICA',icon:'▦',keys:['dashboard']},
   {id:'people',label:'ANAGRAFICHE E ACCESSI',icon:'👥',keys:['organizations','companies','learners','permissions','memberships']},
   {id:'enroll',label:'ISCRIZIONI E FORMAZIONE',icon:'✅',keys:['wizard','enrollments','registrations','access']},
-  {id:'courses',label:'CORSI E DIDATTICA',icon:'📚',keys:['courses','editions','catalog','blueprint','readiness','quality','pathaudit']},
+  {id:'courses',label:'CORSI E DIDATTICA',icon:'📚',keys:['courses','editions','catalog','blueprint','readiness','quality','editorial','pathaudit']},
   {id:'assets',label:'MATERIALI E STAMPA',icon:'▤',keys:['images','lessons','slides','documents']},
   {id:'monitor',label:'CONTROLLO E REPORT',icon:'📊',keys:['reports','activity','misc']}
  ];
@@ -16,7 +16,7 @@
   registrations:'#adminRegistrationNav',access:'#adminAccessImportNav',
   courses:'[data-tab="courses"]',editions:'[data-tab="editions"]',
   catalog:'[data-sm-course-catalog]',blueprint:'[data-blueprint-admin]',
-  readiness:'[data-readiness-admin]',quality:'[data-quality-v22]',
+  readiness:'[data-readiness-admin]',quality:'[data-quality-v22]',editorial:'[data-editorial-matrix-v46-5]',
   pathaudit:'[data-path-audit]',images:'[data-image-library-v25]',
   lessons:'[data-print-lessons-nav]',slides:'[data-print-slides-nav]',documents:'#adminCourseDocumentsNav',
   reports:'#adminReportsV40Nav',activity:'[data-tab="activity"]'

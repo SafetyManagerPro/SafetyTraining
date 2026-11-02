@@ -1,0 +1,54 @@
+/* SafetyTraining v46.5: admin editorial matrix; high contrast and responsive. */
+.st-v465-head{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:center}
+.st-v465-head h2{font-size:24px;line-height:1.25;margin:7px 0 10px}
+.st-v465-head small{letter-spacing:.09em;color:#8ee3ce;font-weight:850}
+.st-v465-head p{line-height:1.65;margin:5px 0;color:inherit}
+.st-v465-toolbar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.st-v465-toolbar label{display:grid;gap:6px;font-weight:700;min-width:min(240px,100%);flex:1}
+.st-v465-toolbar input,.st-v465-toolbar select,.st-v465-form textarea,.st-v465-form select{box-sizing:border-box;max-width:100%;width:100%;min-height:43px;border:1px solid #7b9eb4;border-radius:9px;padding:8px 10px;font:inherit;color:inherit;background:#183246}
+.st-v465-tools{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.st-v465-tools button,.st-v465-pagination button,.st-v465-table button,.st-v465-form button{border:1px solid #87bdd4;border-radius:9px;min-height:42px;padding:7px 12px;background:#244a60;color:#f6ffff;font:inherit;font-weight:750;cursor:pointer}
+.st-v465-tools button:disabled,.st-v465-pagination button:disabled,.st-v465-form button:disabled{opacity:.52;cursor:default}
+.st-v465-scope{font-size:15px;font-weight:700;margin:0 0 14px}
+.st-v465-note{font-size:13px;line-height:1.65;opacity:.95}
+.st-v465-metrics{display:grid;grid-template-columns:repeat(5,minmax(115px,1fr));gap:10px;margin-bottom:17px}
+.st-v465-metric{border:1px solid #54788e;border-radius:12px;padding:14px;background:#18384b;display:grid;gap:7px}
+.st-v465-metric strong{font-size:25px;color:#d7fff0;font-variant-numeric:tabular-nums}
+.st-v465-metric span{font-size:12px;line-height:1.4;color:#e7f2fb}
+.st-v465-tablewrap{max-width:100%;overflow:auto;border-radius:12px;border:1px solid #4a7189}
+.st-v465-table{border-collapse:collapse;width:100%;min-width:950px;font-size:13px}
+.st-v465-table th{text-align:left;background:#183c51;color:#e7fff7;padding:11px;position:sticky;top:0;z-index:1}
+.st-v465-table td{vertical-align:top;padding:12px 10px;border-top:1px solid #41677d}
+.st-v465-table td strong{display:block;font-size:13px;line-height:1.4}
+.st-v465-table td small{display:block;line-height:1.45;opacity:.8;margin-top:5px}
+.st-v465-badge{display:inline-block;font-size:12px;line-height:1.35;font-weight:750;border-radius:8px;border:1px solid #7897aa;padding:5px 8px;background:#274557;color:#f4f8fb}
+.st-v465-badge.approved{background:#183f32;border-color:#68c59f;color:#c7ffe5}
+.st-v465-badge.changes_requested{background:#56342c;border-color:#e6ab72;color:#fff0ce}
+.st-v465-badge.not_applicable{background:#383d57;border-color:#a4abd2;color:#e9ecff}
+.st-v465-locked{display:block;margin-top:7px;color:#ffdfb5;font-size:11px}
+.st-v465-details{background:#102c3c}
+.st-v465-detail-grid{display:grid;grid-template-columns:minmax(220px,1fr) minmax(340px,1.5fr);gap:22px;padding:15px 9px}
+.st-v465-detail-grid section{min-width:0}
+.st-v465-detail-grid h3{font-size:17px;margin:0 0 12px;color:#ccf4e7}
+.st-v465-detail-grid h4{margin:14px 0 7px}
+.st-v465-detail-grid p,.st-v465-detail-grid li{line-height:1.62;overflow-wrap:anywhere}
+.st-v465-detail-grid dl{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 12px}
+.st-v465-detail-grid dt{font-weight:800}.st-v465-detail-grid dd{margin:0}
+.st-v465-form{display:grid;gap:13px}
+.st-v465-form>label{display:grid;gap:6px;font-weight:700}
+.st-v465-formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.st-v465-formgrid label{display:grid;gap:7px;font-weight:750}
+.st-v465-form textarea{min-height:90px;resize:vertical;line-height:1.5}
+.st-v465-actions{display:grid;gap:12px}
+.st-v465-checkbox{display:flex;gap:10px;align-items:start;font-size:14px;line-height:1.55}
+.st-v465-checkbox input{margin-top:4px;min-width:17px;min-height:17px}
+.st-v465-pagination{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:15px}
+.st-v465-history{font-size:13px;max-height:250px;overflow:auto}
+.st-v465-history li{padding-bottom:7px}
+.st-v465-saved{color:#80f2b4;font-weight:750}
+.st-v465-editor-figure{margin:16px 0;border:1px solid #607b96;border-radius:10px;max-width:370px;overflow:hidden;background:#eaf2f5;color:#1b3443}
+.st-v465-editor-figure img{display:block;max-height:210px;max-width:100%;width:100%;object-fit:contain}
+.st-v465-editor-figure figcaption{font-size:12px;padding:9px;color:#1b3443;line-height:1.5}
+@media(max-width:1000px){.st-v465-head{grid-template-columns:1fr}.st-v465-metrics{grid-template-columns:repeat(3,1fr)}.st-v465-detail-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.st-v465-metrics{grid-template-columns:repeat(2,1fr)}.st-v465-formgrid{grid-template-columns:1fr}.st-v465-toolbar label{min-width:100%}.st-v465-table{min-width:880px}.st-v465-detail-grid dl{grid-template-columns:1fr}.st-v465-head h2{font-size:20px}}
+@media print{.st-v465-tools,.st-v465-pagination,.st-v465-form button,.st-v465-form select,.st-v465-form textarea{display:none!important}.st-v465-tablewrap{overflow:visible}.st-v465-table{min-width:0;width:100%}}

@@ -82,13 +82,13 @@ test('v46.4 is loaded in the actual topic/deck frontend, precached and tracked i
  const app=read('apps/training/app.js');
  assert.ok(app.includes('SAFETY_LESSON_ENRICHMENT_V46_4?.renderForTopic?.(c,t)'));
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-4-lesson-enrichment'/);
+ assert.match(sw,/const CACHE='safety-training-v46-5-editorial-matrix'/);
  assert.ok(sw.includes('./lesson-enrichment-v46-4.js'));
  assert.ok(sw.includes('./lesson-enrichment-v46-4.css'));
  const packageFile=read('package.json');
  assert.ok(packageFile.includes('tests/lesson-enrichment-v46-4.test.mjs'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  const doc=read(p);assert.ok(doc.slice(0,900).includes('safety-training-v46-4-lesson-enrichment'));
+  const doc=read(p);assert.ok(doc.slice(0,900).includes('safety-training-v46-5-editorial-matrix'));
   assert.ok(doc.includes('v46.4 — Approfondimenti contestuali nelle lezioni'));
  }
 });
