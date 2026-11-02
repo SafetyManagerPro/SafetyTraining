@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-11-02
-Stato: **v46.6 GitHub feature in test · baseline v46.5 PR #32 merged · main CI #715 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-6-admin-scrollbars`.
+Stato: **v46.6 GitHub main · PR #33 merged · CI #716 SUCCESS (PR), #717 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-6-admin-scrollbars`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1285,3 +1285,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - **Popup**: finestre amministrative, anteprima composizione e dettaglio con scorrimento su contenuti lunghi, incluso orizzontale per tabelle. Focus da tastiera sui contenitori (Tab e frecce), nomi di regione accessibili e contrasto barre. Impostazioni di stampa mantengono overflow visibile per non tagliare documenti.
 - **Guide aggiornate**: indicazioni valide in ogni pagina su uso della rotella/trackpad e scorrimento orizzontale, incluse le tabelle. Nessuna nuova funzione server, nessuna migrazione, nessuna mutazione corsi, frozen, progressi, permessi o SafetyManager.
 - File nuovi: `admin-scrollbars-v46-6.css/js` e `tests/admin-scrollbars-v46-6.test.mjs`. Nuova PWA cache `safety-training-v46-6-admin-scrollbars`. Richiesto collaudo desktop, tablet, mobile con browser autentico; **no @Vercel** finché l’utente non lo richiede.
+
+
+## 2026-11-02 — v46.6 — Merge e verifica CI
+- PR GitHub [#33](https://github.com/SafetyManagerPro/SafetyTraining/pull/33) merged in `main`, commit applicativo `2c798a4284bf5268c5c9a0878280ce56d3c4c00e`.
+- **GitHub Actions #716 SUCCESS** (PR, `41489381232`) e **#717 SUCCESS** (main, `41489545623`). Test della nuova funzionalità inclusi nella suite completa.
+- Nuovi scroller contenuti in `admin-scrollbars-v46-6.css/js` (nessuna migrazione SQL): sidebar verticale indipendente con footer visibile, pagina amministrativa, tabelle lunghe e modali con scroll orizzontale/verticale. Adattamento a schermi desktop/tablet/mobile e disabilitazione dei limiti durante la stampa.
+- **@Vercel non consultato**: stato di deploy in produzione non verificato. Da fare prova manuale autenticata: menu laterale con molti gruppi aperti, tabella Corsisti e Corsi, Report con molte righe, matrice Revisione Learning Unit e modal di dettaglio su desktop e su mobile.
