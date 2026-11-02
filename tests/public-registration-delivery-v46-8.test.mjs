@@ -28,11 +28,13 @@ test('admin approval sends an activation invitation without a second optional co
  assert.ok(start>0&&end>start);
  assert.match(method,/const result=await rpc\('admin_registration_decide_v36'/);
  assert.match(method,/if\(!approve\)/);
- assert.match(method,/const email=await inviteLearner\(result\?\.learner_id\)/);
+ const helper=admin.slice(admin.indexOf('async function finishApprovedEnrollment'),start);
+ assert.match(method,/await finishApprovedEnrollment\(result\)/);
+ assert.match(helper,/const response=await inviteLearner\(result\?\.learner_id\)/);
  assert.doesNotMatch(method,/if\(approve&&result\?\.learner_id&&confirm\(/);
- assert.ok(method.indexOf("admin_registration_decide_v36")<method.indexOf('inviteLearner(result?.learner_id)'));
- assert.match(method,/Iscrizione approvata, ma email NON inviata/);
- assert.match(method,/Non ripetere l’iscrizione/);
+ assert.ok(method.indexOf("admin_registration_decide_v36")<method.indexOf('finishApprovedEnrollment(result)'));
+ assert.match(helper,/Iscrizione approvata, ma email NON inviata/);
+ assert.match(helper,/Non ripetere l’iscrizione/);
  assert.match(admin,/const activationRedirect=\(\)=>new URL\('\?onboarding=1',PUBLIC_ORIGIN\)\.toString\(\)/);
  assert.doesNotMatch(admin,/redirect_to:new URL\('\?onboarding=1',location.href\)/);
 });
