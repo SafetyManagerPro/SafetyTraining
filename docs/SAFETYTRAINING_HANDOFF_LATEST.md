@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
 Ultimo aggiornamento: 2026-11-02
-Stato: **v46.6 GitHub main · PR #33 merged · CI #716 SUCCESS (PR), #717 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-6-admin-scrollbars`.
+Stato: **v46.7 GitHub feature in test · baseline v46.6 PR #33 merged · main CI #718 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-7-unified-journey`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1242,14 +1242,14 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - La libreria curata passa da 12 a **17 casi originali** con aggiunte specifiche su ricarica dei carrelli, controlli PLE, controlli preuso e posizionamento gru, e DPI anticaduta. Migliorato il matching degli **effettivi titoli pubblicati** delle Learning Unit: esempio audit SQL sola lettura, carrelli industriali 6/8 argomenti, gru 4/4, PLE 3/4, lavoro in quota 4/8, lavoro rischio alto 1/3 titoli campione; le schede senza corrispondenza non ricevono un caso non pertinente. Questi conteggi descrivono matching dei titoli, non conformità didattica o approvazione tecnica.
 - Provenienza visibile nelle schede: link INAIL per famiglia (Infor.MO carrelli, pubblicazione PLE, schede su sollevamento e DPI, pagina INAIL su sistemi anticaduta per lavoro in quota). I testi sono originali, prudenti, non costituiscono istruzioni per la macchina, attestazione di conformità o completamento di addestramento; la scelta delle misure resta riferita a DVR, manuale e docente competente.
 - Isolamento: autorizzazione di visualizzazione basata esclusivamente sul corso già caricato (`presentation_generated_from_db`, `db_status=published`, stato non frozen e `topic.db_backed`). Nessun accesso aggiuntivo, RPC, SQL di scrittura, migration, nuovo ruolo, modifica contenuti delle Learning Unit, edizioni, test, storico, iscrizioni o SafetyManager bridge. Le 27 voci frozen restano immutate.
-- Nuovi file: `lesson-enrichment-v46-4.js/css`, test `lesson-enrichment-v46-4.test.mjs` e `course-topic-coverage-v46-4.test.mjs`; aggiornati `app.js`, entrypoint, selezione didattica, guida docente (guard frozen), `package.json` e cache PWA `safety-training-v46-6-admin-scrollbars`.
+- Nuovi file: `lesson-enrichment-v46-4.js/css`, test `lesson-enrichment-v46-4.test.mjs` e `course-topic-coverage-v46-4.test.mjs`; aggiornati `app.js`, entrypoint, selezione didattica, guida docente (guard frozen), `package.json` e cache PWA `safety-training-v46-7-unified-journey`.
 - **Fase editoriale successiva**, distinta dalla mera visualizzazione: verifica tecnica e diritti delle immagini per singola Learning Unit, approvazione amministrativa e creazione di nuove versioni di contenuto; **nessun contenuto ufficiale pubblicato o attestato in questa tranche**.
 - Stato: codice GitHub feature da validare con CI e collaudo browser autenticato desktop/tablet/iPhone; **non accedere a @Vercel** salvo richiesta dell'utente.
 
 ## 2026-10-31 — v46.4 — Esito merge e GitHub CI
 - PR #31 merged con squash su `main`: commit applicativo `02717c10c221ad9fc6bcf7379a5262f756b2044d`.
 - GitHub Actions `SafetyTraining checks` **#706 SUCCESS** (PR) e **#707 SUCCESS** (main, run `41186828038`) per suite completa inclusi test di coerenza dei contenuti, fonti e isolamento delle entry frozen.
-- La cache sorgente è `safety-training-v46-6-admin-scrollbars`; il deploy Vercel **non è stato verificato** perché l'utente ha chiesto di non accedere a @Vercel. La prova browser autenticata e su proiettore/tablet/mobile è ancora pendente; gli SVG restano da validare editorialmente per ogni LU.
+- La cache sorgente è `safety-training-v46-7-unified-journey`; il deploy Vercel **non è stato verificato** perché l'utente ha chiesto di non accedere a @Vercel. La prova browser autenticata e su proiettore/tablet/mobile è ancora pendente; gli SVG restano da validare editorialmente per ogni LU.
 - Nessuna modifica a Database Supabase (consultazione sola lettura), RLS, storici, durate ufficiali, report, quiz, attestati, corsi frozen o integrazione SafetyManager.
 
 
@@ -1259,7 +1259,7 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Valutazione per ambito: **testo, immagini, fonti, analisi, diritti**, ciascuno con esito individuale. Il responsabile può richiedere correzioni, tenere la pratica pendente o approvare motivando l’esame. Nessuna approvazione massiva; **per l’approvazione definitiva** sono necessarie le verifiche richieste, almeno 40 caratteri di motivazione, prova dei diritti di almeno 30 caratteri quando necessari e conferma esplicita.
 - Registro dedicato e **audit eventi immutabile** per versione di composizione (`course_module_units.id`): revisioni con controllo di concorrenza, utente, timestamp e motivazione. Le scritture avvengono esclusivamente tramite funzione DB **owner-only** (`private.can_edit_slide_images_v33()`), lettura amministratori autenticati con RLS; nessun accesso diretto a INSERT/UPDATE/DELETE delle tabelle di review.
 - Inclusi in sola lettura gli elementi frozen, non attivi o le unità draft; il backend rifiuta salvataggi su frozen, vecchie versioni pubblicate, unità non pubblicate o corsi non attivi. Il nuovo workflow **non pubblica nuove versioni**, non modifica Learning Unit ufficiali, durate, esami, dati corsisti, attestati, storico delle immagini o SafetyManager.
-- Interfaccia `admin-lu-editorial-v46-5.js/css`; migrazione additiva `20261102071929_v46_5_editorial_matrix.sql`, test `tests/admin-lu-editorial-v46-5.test.mjs`, guida contestuale «?», PWA `safety-training-v46-6-admin-scrollbars`.
+- Interfaccia `admin-lu-editorial-v46-5.js/css`; migrazione additiva `20261102071929_v46_5_editorial_matrix.sql`, test `tests/admin-lu-editorial-v46-5.test.mjs`, guida contestuale «?», PWA `safety-training-v46-7-unified-journey`.
 - Operatività: migrazione Supabase **applicata e collaudata**; resta da completare il merge GitHub e il collaudo browser autenticato. Resta pendente lo smoke visuale autenticato (desktop/tablet/iPhone) e la revisione per ciascuna illustrazione. **Non accedere a @Vercel** senza richiesta.
 
 ## 2026-11-02 — v46.5 — Migrazione applicata e verificata
@@ -1274,7 +1274,7 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - GitHub Actions **PR #713 SUCCESS** e **main #714 SUCCESS** (run `41406102615`) sul codice applicativo.
 - Migrazione Supabase applicata e allineata allo storico remoto `20261102071929_v46_5_editorial_matrix.sql`. Verificati 2 tabelle con RLS, 2 RPC amministrative, lettura negata ad anon, scrittura diretta negata ad authenticated, salvataggio owner-only e assenza di revisioni/eventi al deploy.
 - Il server blocca revisioni per versioni non correnti, corsi frozen o disattivati, LU non pubblicate; prova diritti e motivazione obbligatorie per approvazione. Nessuna pubblicazione automatica e nessuna modifica a test, Learning Unit, progressi, frequenze, attestati o collegamento SafetyManager.
-- PWA sorgente `safety-training-v46-6-admin-scrollbars`; **@Vercel non consultato**. Lo stato di distribuzione in produzione non è verificato; manca collaudo browser autenticato desktop/tablet/mobile, revisione visiva per LU e verifica di uso di produzione.
+- PWA sorgente `safety-training-v46-7-unified-journey`; **@Vercel non consultato**. Lo stato di distribuzione in produzione non è verificato; manca collaudo browser autenticato desktop/tablet/mobile, revisione visiva per LU e verifica di uso di produzione.
 
 
 ## 2026-11-02 — v46.6 — Barre di scorrimento in Amministrazione
@@ -1284,7 +1284,7 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - **Tabelle senza contenitore**: modulo `admin-scrollbars-v46-6.js` aggiunge un wrapper soltanto a tabelle amministrative non già scorrevoli (>=3 colonne, o colonne che eccedono la larghezza disponibile), usando MutationObserver mirato al solo `#adminContent`, con scansione coalescente per non introdurre loop negli analytics. Non tocca tavole/formati di stampa, pagine dei corsisti né presentazione.
 - **Popup**: finestre amministrative, anteprima composizione e dettaglio con scorrimento su contenuti lunghi, incluso orizzontale per tabelle. Focus da tastiera sui contenitori (Tab e frecce), nomi di regione accessibili e contrasto barre. Impostazioni di stampa mantengono overflow visibile per non tagliare documenti.
 - **Guide aggiornate**: indicazioni valide in ogni pagina su uso della rotella/trackpad e scorrimento orizzontale, incluse le tabelle. Nessuna nuova funzione server, nessuna migrazione, nessuna mutazione corsi, frozen, progressi, permessi o SafetyManager.
-- File nuovi: `admin-scrollbars-v46-6.css/js` e `tests/admin-scrollbars-v46-6.test.mjs`. Nuova PWA cache `safety-training-v46-6-admin-scrollbars`. Richiesto collaudo desktop, tablet, mobile con browser autentico; **no @Vercel** finché l’utente non lo richiede.
+- File nuovi: `admin-scrollbars-v46-6.css/js` e `tests/admin-scrollbars-v46-6.test.mjs`. Nuova PWA cache `safety-training-v46-7-unified-journey`. Richiesto collaudo desktop, tablet, mobile con browser autentico; **no @Vercel** finché l’utente non lo richiede.
 
 
 ## 2026-11-02 — v46.6 — Merge e verifica CI
@@ -1292,3 +1292,13 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - **GitHub Actions #716 SUCCESS** (PR, `41489381232`) e **#717 SUCCESS** (main, `41489545623`). Test della nuova funzionalità inclusi nella suite completa.
 - Nuovi scroller contenuti in `admin-scrollbars-v46-6.css/js` (nessuna migrazione SQL): sidebar verticale indipendente con footer visibile, pagina amministrativa, tabelle lunghe e modali con scroll orizzontale/verticale. Adattamento a schermi desktop/tablet/mobile e disabilitazione dei limiti durante la stampa.
 - **@Vercel non consultato**: stato di deploy in produzione non verificato. Da fare prova manuale autenticata: menu laterale con molti gruppi aperti, tabella Corsisti e Corsi, Report con molte righe, matrice Revisione Learning Unit e modal di dettaglio su desktop e su mobile.
+
+
+## 2026-11-02 — v46.7 — Avvia percorso come punto unico
+- **Punto di riferimento**: Amministrazione → Avvia percorso. La Panoramica espone la stessa sequenza visibile nel wizard: 1) Azienda; 2) Corso ed edizione; 3) Corsisti; 4) Riepilogo e iscrizione; 5) Stato corsisti. Rimosso il riquadro cronologico incompatibile Azienda → Corsisti → Corsi → Edizioni → Iscrizioni; link legacy ad Anagrafiche, Corsi, Edizioni, Iscrizioni rimangono come gestione avanzata.
+- Wizard esistente `admin-guided-flow-v22.js` ampliato in maniera additiva con il passo 5 **«Stato corsisti»**. Due ingressi in un unico flusso: nuova iscrizione (dopo il risultato, «Visualizza stato e prossime azioni») e corsista **già iscritto** (dopo la selezione del nominativo, «Controlla stato esistente», lettura soltanto, **senza nuova iscrizione**).
+- Nuovo modulo `admin-guided-journey-v46-7.js` (nessuna modifica di Supabase): lettura RLS-scoped delle `enrollments` limitata a **edizione selezionata + soli ID corsisti selezionati**, e delle `learner_account_invitations` per gli stessi ID; account e anagrafica letti dal wizard, già limitati all'azienda. Nessuna RPC di scrittura nel monitoraggio; in caso di errore si dichiara stato non disponibile, senza supporre iscrizioni mancanti.
+- Timeline per ogni persona: anagrafica, edizione, iscrizione, invito e account, periodo di accesso, frequenza, verifiche; note su progresso e minuti realmente registrati; prossima azione mirata (iscrizione, Accessi & import, Controllo operativo, gestione edizione). Revoche esplicitate. Scadenze effettive rispettate. Lo stato digitale «completato/superato» NON equivale a certificazione pratica, idoneità o attestato; tutte queste verifiche restano da convalidare fuori dalla timeline.
+- Protezioni: validazione del corso approvato, dell'edizione compatibile e del roster della stessa azienda; niente dati personali nella bozza oltre agli ID già presenti; check di sessione e seriale per letture asincrone; lettura ricaricabile via «Aggiorna stato». Non altera account, inviti già inviati, frequenza, prove, ruoli, frozen (27), pubblichi/attestati, separazione SafetyManager.
+- UI accessibile e responsive `admin-guided-journey-v46-7.css`, menu «Avvia percorso» evidenziato, guida «?» aggiornata; nuova PWA `safety-training-v46-7-unified-journey`. Regressioni nuove `tests/admin-guided-journey-v46-7.test.mjs` e legacy aggiornate.
+- Stato operativo: repository GitHub branch in collaudo; **nessun accesso a @Vercel**, nessuna verifica visuale autenticata o test con veri corsisti. Controllare il percorso completo desktop/tablet/mobile prima di dichiarare produzione validata.

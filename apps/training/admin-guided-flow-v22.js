@@ -6,9 +6,9 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const norm=v=>String(v||'').trim().toLocaleLowerCase('it-IT');
   const normalizeCf=v=>norm(v).replace(/[^a-z0-9]/g,'');
-  const steps=['Azienda','Corso ed edizione','Corsisti','Riepilogo'];
-  const empty=()=>({step:0,organizationId:'',companyId:'',companyMode:'existing',companyName:'',vat:'',ateco:'',fiscal:'',editionMode:'existing',editionId:'',versionId:'',editionTitle:'',learningMode:'elearning_internal',availableFrom:'',availableUntil:'',selectedIds:[],newLearners:[],sendInvites:true,result:null});
-  const s={data:empty(),userId:null,records:null,busy:false,rendering:0,serial:0,host:null,notice:'',helpOpen:false,isCurrent:null};
+  const steps=['Azienda','Corso ed edizione','Corsisti','Riepilogo','Stato corsisti'];
+  const empty=()=>({step:0,organizationId:'',companyId:'',companyMode:'existing',companyName:'',vat:'',ateco:'',fiscal:'',editionMode:'existing',editionId:'',versionId:'',editionTitle:'',learningMode:'elearning_internal',availableFrom:'',availableUntil:'',selectedIds:[],newLearners:[],sendInvites:true,result:null,monitor:null,monitorIds:[]});
+  const s={data:empty(),userId:null,records:null,busy:false,rendering:0,serial:0,host:null,notice:'',helpOpen:false,isCurrent:null,monitorSeq:0};
   const wizardVisible=()=>!s.isCurrent||s.isCurrent();
   const ACTIVE=()=>user()?.id&&user().id===s.userId;
   function readyVersions(courses,versions){
@@ -43,7 +43,7 @@
       st.companyId=chosen;st.companyMode=mode;
     }
     st.editionId='';st.editionMode='existing';st.versionId='';st.editionTitle='';
-    st.selectedIds=[];st.newLearners=[];st.result=null;
+    st.selectedIds=[];st.newLearners=[];st.result=null;st.monitor=null;st.monitorIds=[];
     return true;
   }
   function validateRoster(st,records){
@@ -92,7 +92,12 @@
     {title:'Guida · Risultato',items:[
       'Il riepilogo distingue nuove iscrizioni, iscrizioni già presenti e inviti email riusciti.',
       'Per inviti falliti puoi riprovare; se manca l’email aggiorna prima l’anagrafica in Corsisti. In caso di esito incerto controlla Accessi & import.',
-      'I pulsanti finali aprono le sezioni esistenti. Il percorso non sostituisce registri cartacei, firme o verifiche.']}
+      'Scegli Visualizza stato e prossime azioni: consulti le attività registrate per ogni corsista, senza creare nuove iscrizioni.']},
+    {title:'Guida · Stato corsisti',items:[
+      'Controlla la timeline: anagrafica, edizione, iscrizione, invito/account, disponibilità, frequenza e verifiche.',
+      'Seleziona un corsista già iscritto, poi usa Controlla stato esistente: nessuna iscrizione aggiuntiva viene creata.',
+      'Usa Aggiorna stato per rileggere il database dopo l’accesso del corsista o un’attività didattica.',
+      'I risultati digitali non certificano pratica, frequenza ufficiale o attestato; queste verifiche restano separate.']}
   ];
   const helpFor=step=>GUIDES[step]||GUIDES[0];
   window.SAFETY_GUIDED_FLOW_RULES_V22={readyVersions,eligibleEditions,eligibleLearners,duplicateLearner,draftSafe,changeScope,validateRoster,restoredDraft,helpFor};
@@ -132,10 +137,11 @@
   const btn=(title,action,extra='')=>'<button type="button" data-gw="'+action+'" '+extra+'>'+esc(title)+'</button>';
   function shell(){
     if(!s.host||!wizardVisible())return; // An in-flight request must not replace another admin tab.
-    const tabs=steps.map((label,i)=>'<span class="'+(s.data.step===i?'is-active':s.data.step>i?'is-done':'')+'"><b>'+(i+1)+'</b>'+esc(label)+'</span>').join('');
+    const phaseIndex=Math.min(4,s.data.step);
+    const tabs=steps.map((label,i)=>'<span class="'+(phaseIndex===i?'is-active':phaseIndex>i?'is-done':'')+'"><b>'+(i+1)+'</b>'+esc(label)+'</span>').join('');
     const guide=helpFor(s.data.step);
     const help='<section class="gw-help" id="gwHelp" aria-labelledby="gwHelpTitle" '+(s.helpOpen?'':'hidden')+'><h3 id="gwHelpTitle" tabindex="-1">'+esc(guide.title)+'</h3><ol>'+guide.items.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ol>'+btn('Chiudi guida','help')+'</section>';
-    s.host.innerHTML='<section class="gw-shell"><div class="gw-top"><div><h2>Avvia un percorso formativo</h2><p>Una sola procedura per azienda, corso, corsisti e accessi. Le sezioni amministrative avanzate restano disponibili.</p></div><button type="button" class="gw-help-trigger" data-gw="help" aria-label="Guida per questo passaggio" aria-controls="gwHelp" aria-expanded="'+s.helpOpen+'" title="Apri o chiudi la guida">?</button></div>'+help+'<nav class="gw-steps" aria-label="Passaggi di iscrizione">'+tabs+'</nav><div id="gwNotice" class="gw-notice" role="status" aria-live="polite">'+esc(s.notice)+'</div><div id="gwStage"></div><footer class="gw-footer">'+btn('Salva selezioni come bozza','draft')+btn('Ricomincia','reset')+'</footer></section>';
+    s.host.innerHTML='<section class="gw-shell"><div class="gw-top"><div><h2>Avvia percorso · guida unica</h2><p>Nuova assegnazione o controllo di un corso già iscritto: tutti i passaggi e la prossima azione da un unico punto.</p></div><button type="button" class="gw-help-trigger" data-gw="help" aria-label="Guida per questo passaggio" aria-controls="gwHelp" aria-expanded="'+s.helpOpen+'" title="Apri o chiudi la guida">?</button></div>'+help+'<div class="gw-unified-intro"><b>Sequenza unica:</b> azienda → corso ed edizione → corsisti → iscrizione → invito, frequenza e verifiche. Se il corsista è già iscritto, vai alla fase Corsisti e premi «Controlla stato esistente».</div><nav class="gw-steps" aria-label="Passaggi di iscrizione">'+tabs+'</nav><div id="gwNotice" class="gw-notice" role="status" aria-live="polite">'+esc(s.notice)+'</div><div id="gwStage"></div><footer class="gw-footer">'+btn('Salva selezioni come bozza','draft')+btn('Ricomincia','reset')+'</footer></section>';
     draw();
   }
   function draw(){
@@ -145,6 +151,7 @@
     if(st.step===2)target.innerHTML=stepLearners(r,st);
     if(st.step===3)target.innerHTML=stepReview(r,st);
     if(st.step===4)target.innerHTML=stepResult(st);
+    if(st.step===5)target.innerHTML=stepMonitor(st);
   }
   function navigation(back=true,next=true,label='Continua'){
     return '<div class="gw-actions">'+(back?btn('← Indietro','back'):'')+
@@ -193,6 +200,7 @@
       '<div class="gw-persons">'+(cards||'<p>Nessun corsista presente in questa azienda.</p>')+'</div></div>'+
       '<div class="gw-sub"><div class="gw-sub-head"><h4>Nuovi corsisti</h4>'+btn('+ Aggiungi corsista','add-person')+'</div>'+newRows+
       info('I nuovi corsisti saranno creati soltanto nella conferma finale. I possibili duplicati vengono bloccati.')+'</div>'+
+      '<div class="gw-monitor-lead"><h4>Il corsista è già iscritto?</h4><p>Seleziona il corsista esistente e premi «Controlla stato esistente» per vedere accesso, frequenza e prossime operazioni. Nessuna nuova iscrizione viene creata.</p><div class="gw-actions">'+btn('Controlla stato esistente','monitor')+'</div></div>'+
       navigation(true,true,'Rivedi iscrizioni')+'</div>';
   }
   function stepReview(r,st){
@@ -217,8 +225,53 @@
       (r.inviteNotice?'<p class="gw-warning">'+esc(r.inviteNotice)+'</p>':'')+
       (fail?'<p class="gw-warning">Le iscrizioni restano valide. Un invito può essere già arrivato anche se non è stato possibile verificarlo: controlla Accessi & import prima di riprovare.</p>'+btn('Riprova inviti da verificare','retry-invites'):'')+
       (missing?'<p class="gw-warning">Per i corsisti senza email, completa i recapiti in Corsisti e usa Accessi & import.</p>':'')+
-      '<div class="gw-actions">'+btn('Apri Iscrizioni','go-enrollments')+btn('Accessi & import / SMS / WhatsApp','go-access')+
+      '<div class="gw-actions">'+btn('Visualizza stato e prossime azioni','monitor')+btn('Apri Iscrizioni','go-enrollments')+btn('Accessi & import / SMS / WhatsApp','go-access')+
       '<button class="gw-primary" type="button" data-gw="reset">Nuovo percorso →</button></div></div>';
+  }
+  function stepMonitor(st){
+    const edition=s.records?.editions?.find(e=>e.id===st.editionId);
+    const ids=new Set(st.monitorIds||[]);
+    const roster=s.records?.learners?.filter(l=>ids.has(l.id))||[];
+    const model=window.SAFETY_GUIDED_JOURNEY_V46_7;
+    return '<div class="gw-panel"><h3>5. Stato corsisti e prossime azioni</h3>'+
+      '<p>Questa timeline legge i dati registrati nella specifica edizione. Non modifica corsi, progressi o attestati.</p>'+
+      (st.monitor?.loading?'<div class="gw-monitor-progress" role="status">Caricamento di iscrizioni, account e frequenza…</div>':
+        st.monitor?.error?'<div class="admin-warning" role="alert">'+esc(st.monitor.error)+'</div>':
+        model?.render?.({learners:roster,edition,snapshot:st.monitor?.snapshot,companyId:st.companyId,orgId:st.organizationId})||'<div class="admin-warning">Monitoraggio non disponibile.</div>')+
+      '<div class="gw-actions">'+btn('← Torna alla selezione corsisti','back-to-learners')+
+      btn('↻ Aggiorna stato','refresh-monitor')+
+      (st.result?btn('Riepilogo iscrizioni','go-result'):'')+
+      btn('Accessi & import','go-access')+btn('Controllo operativo','go-control')+
+      btn('Nuovo percorso','reset')+'</div></div>';
+  }
+  async function monitor(){
+    const st=s.data,model=window.SAFETY_GUIDED_JOURNEY_V46_7;
+    if(!ACTIVE()||!wizardVisible()||!model?.read)throw Error('Monitoraggio non disponibile nella sessione.');
+    const ids=st.step===5&&st.monitorIds?.length?st.monitorIds:
+      [...new Set(st.selectedIds.concat(st.newLearners.map(x=>x.createdId).filter(Boolean)))];
+    if(!ids.length)throw Error('Seleziona almeno un corsista esistente prima di controllare lo stato.');
+    const seq=++s.monitorSeq,identity=s.userId,editionId=st.editionId,companyId=st.companyId,organizationId=st.organizationId;
+    st.monitorIds=ids;st.monitor={loading:true,error:'',snapshot:null};st.step=5;shell();
+    try{
+      await load();
+      if(!ACTIVE()||!wizardVisible()||s.monitorSeq!==seq||user()?.id!==identity||
+        st.editionId!==editionId||st.companyId!==companyId||st.organizationId!==organizationId)return;
+      const edition=s.records?.editions?.find(e=>e.id===editionId);
+      const ready=new Set(readyVersions(s.records.courses,s.records.versions).map(x=>x.id));
+      if(!edition||edition.organization_id!==organizationId||
+        (edition.company_id&&edition.company_id!==companyId)||!ready.has(edition.course_version_id))
+        throw Error('L’edizione non è più approvata o non appartiene all’azienda.');
+      const allowed=new Map(eligibleLearners(s.records.learners,companyId,organizationId).map(x=>[x.id,x]));
+      if(ids.some(id=>!allowed.has(id)))throw Error('Corsista non associato all’azienda: aggiorna l’anagrafica.');
+      const snapshot=await model.read(db(),{editionId,learners:ids.map(id=>allowed.get(id))});
+      if(!ACTIVE()||!wizardVisible()||s.monitorSeq!==seq||user()?.id!==identity||
+        st.editionId!==editionId||st.companyId!==companyId)return;
+      st.monitor={loading:false,error:'',snapshot};
+    }catch(e){
+      if(!ACTIVE()||!wizardVisible()||s.monitorSeq!==seq)return;
+      st.monitor={loading:false,error:'Impossibile leggere lo stato: '+String(e?.message||e),snapshot:null};
+    }
+    shell();
   }
   function rememberInput(target){
     if(s.busy)return; // Do not allow scope changes while mutations are in flight.
@@ -230,7 +283,7 @@
         s.notice=wasSaved?'Le anagrafiche già salvate restano nel database. Ricontrolla la nuova azienda.':'';
         shell();return;
       }
-      if(field==='editionId'){s.data.editionId=target.value==='new'?'':target.value;s.data.editionMode=target.value==='new'?'new':'existing';draw();return;}
+      if(field==='editionId'){s.data.editionId=target.value==='new'?'':target.value;s.data.editionMode=target.value==='new'?'new':'existing';s.data.monitor=null;s.data.monitorIds=[];draw();return;}
       s.data[field]=target.type==='checkbox'?target.checked:target.value;return;
     }
     const l=s.data.newLearners.find(x=>x.localId===target?.dataset?.person);
@@ -238,6 +291,7 @@
     if(target?.dataset?.existing){
       const key=target.dataset.existing;
       s.data.selectedIds=target.checked?[...new Set(s.data.selectedIds.concat([key]))]:s.data.selectedIds.filter(x=>x!==key);
+      s.data.monitor=null;s.data.monitorIds=[];
     }
   }
   async function refreshThenDraw(){
@@ -351,10 +405,12 @@
       return toast('Selezioni salvate in questa sessione. Per privacy, i dati dei nuovi corsisti non vengono salvati nella bozza.');
     }
     if(type==='reset'){
-      if(s.data.step!==4&&!confirm('Ricominciare? I dati già creati sul server restano disponibili.'))return;
+      if(!s.data.result&&!confirm('Ricominciare? I dati già creati sul server restano disponibili.'))return;
       s.data=empty();s.notice='';await load();shell();return;
     }
-    if(type==='back'){s.data.step=Math.max(0,s.data.step-1);s.notice='';shell();return;}
+    if(type==='back'){s.data.step=s.data.step===5?(s.data.result?4:2):Math.max(0,s.data.step-1);s.notice='';shell();return;}
+    if(type==='back-to-learners'){s.data.step=2;s.data.monitor=null;s.data.monitorIds=[];shell();return;}
+    if(type==='go-result'&&s.data.result){s.data.step=4;shell();return;}
     if(type==='select-all'){
       s.data.selectedIds=eligibleLearners(s.records.learners,s.data.companyId,s.data.organizationId).map(x=>x.id);draw();return;
     }
@@ -362,6 +418,7 @@
       s.data.newLearners.push({localId:'new-'+(++s.serial),first_name:'',last_name:'',email:'',fiscal_code:'',job_title:''});draw();return;
     }
     if(type==='go-enrollments'){await window.SAFETY_ADMIN?.setTab?.('enrollments');return;}
+    if(type==='go-control'){await window.SAFETY_ADMIN?.setTab?.('activity');return;}
     if(type==='go-access'){
       document.getElementById('adminAccessImportNav')?.click();
       await window.SAFETY_ADMIN_ACCESS_IMPORT_V21?.openCompany?.(s.data.companyId);
@@ -372,6 +429,7 @@
     try{
       if(type==='next')await next();
       if(type==='submit')await submit();
+      if(type==='monitor'||type==='refresh-monitor')await monitor();
       if(type==='retry-invites'){
         const ids=s.data.result?.failedIds||[];
         if(!ids.length)return;
@@ -418,6 +476,7 @@
           const b=e.target.closest('[data-gw]');if(b)void action(b.dataset.gw,b);
         });
       }
+      if(s.data.step===5&&!s.busy)void monitor();
     }catch(e){if(generation===s.rendering&&wizardVisible())host.innerHTML='<div class="admin-error">'+esc(e.message||e)+'</div>';}
   }
   window.SAFETY_ADMIN_GUIDED_FLOW_V22={render};
