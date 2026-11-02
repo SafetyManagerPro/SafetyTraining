@@ -80,7 +80,7 @@
  }
  function hasNewContent(records){
   return records.some(entry=>[...entry.addedNodes].some(node=>
-   node.nodeType===1&&(node.matches?.('table,tr,thead,tbody,.admin-card,.admin-table-wrap,section,div')||
+   node.nodeType===1&&(node.matches?.('table,tr,thead,tbody,.admin-table-wrap,.st-v466-scroll-table')||
      node.querySelector?.('table'))));
  }
  function boot(){
