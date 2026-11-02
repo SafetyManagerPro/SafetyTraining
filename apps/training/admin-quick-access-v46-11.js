@@ -60,7 +60,7 @@ const rpc=async(name,p)=>{const {data,error}=await db().rpc(name,p);if(error)thr
 async function load(){
  const user=actor(),seq=++s.seq;if(!validAdmin())throw Error('Accesso amministrativo richiesto.');
  const tasks=[
-  db().from('learners').select('id,first_name,last_name,email,auth_user_id,organization_id,company_id,active').order('last_name').limit(800),
+  db().from('learners').select('id,first_name,last_name,email,phone,auth_user_id,organization_id,company_id,active').order('last_name').limit(800),
   db().from('course_editions').select('id,title,status,organization_id,company_id,course_version_id').eq('status','open').limit(1000),
   db().from('courses').select('id,title,owner_organization_id,active,metadata,certification_mode').eq('active',true).limit(500),
   db().from('course_versions').select('id,course_id,version_number,status').eq('status','published').limit(1000)
@@ -85,8 +85,11 @@ function options(){
 async function draw(){
  if(!s.open||!validAdmin()||!root())return;
  ensureNav();setHeader();ensureStyles();
- const l=learner(),{editions,versions}=options(),q=s.query.toLocaleLowerCase('it-IT');
+ const q=s.query.toLocaleLowerCase('it-IT');
  const matches=s.data.learners.filter(x=>x.active&&[title(x),x.email||''].some(v=>v.toLocaleLowerCase('it-IT').includes(q)));
+ // Never retain a hidden learner from an earlier search when acting on a visible selection.
+ if(!matches.some(x=>x.id===s.learnerId))s.learnerId=matches[0]?.id||'';
+ const l=learner(),{editions,versions}=options();
  if(!editions.some(x=>x.id===s.editionId))s.editionId=editions[0]?.id||'';
  if(!versions.some(x=>x.id===s.versionId))s.versionId=versions[0]?.id||'';
  const courseNames=new Map(s.data.courses.map(x=>[x.id,x.title]));
@@ -138,7 +141,7 @@ function bind(){
   const l=learner(),email=h.querySelector('#qv11Email')?.value.trim().toLowerCase()||'';
   if(!email||!/^\S+@\S+\.\S+$/.test(email))throw Error('Inserisci un indirizzo email valido.');
   if(l.auth_user_id&&email!==String(l.email||'').toLowerCase())throw Error('Account già collegato: modifica l’email con una procedura di verifica dedicata.');
-  await rpc('admin_set_learner_contact',{p_learner_id:l.id,p_email:email,p_phone:null});
+  await rpc('admin_set_learner_contact',{p_learner_id:l.id,p_email:email,p_phone:l.phone||null});
   notice('Email salvata. Ora puoi attivare l’accesso.','success');await load();await draw();
  });
  attach('qv11CreateEdition',async()=>{
