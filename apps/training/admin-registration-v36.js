@@ -195,7 +195,7 @@
   });
  }
  async function decide(id,approve){
-  if(!confirm(approve?'Confermi i dati? Il corsista verrà iscritto e il sistema invierà automaticamente l’invito email.':'Rifiutare questa richiesta?'))return;
+  if(!confirm(approve?'Confermi di aver verificato i dati? Il corsista verrà iscritto e il sistema invierà automaticamente l’invito email.':'Rifiutare questa richiesta?'))return;
   await operate(async()=>{
    const result=await rpc('admin_registration_decide_v36',{p_request_id:id,p_approve:approve});
    if(!approve){notice('Richiesta rifiutata. Nessuna email di attivazione inviata.');await render();return;}
