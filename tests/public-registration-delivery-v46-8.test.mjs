@@ -96,13 +96,13 @@ test('v46.8 PWA, CI and twin handoffs record QR/email fix without a DB migration
  assert.ok(html.includes('admin-registration-v36.js'));
  assert.ok(html.includes('public-registration-v36.js'));
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-8-registration-email'/);
+ assert.match(sw,/const CACHE='safety-training-v46-9-company-review'/);
  assert.match(read('package.json'),/tests\/public-registration-delivery-v46-8\.test\.mjs/);
  const help=read('apps/training/admin-help-v22.js');
  assert.match(help,/Invia \/ reinvia email di accesso/);
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(path);
-  assert.ok(doc.slice(0,950).includes('safety-training-v46-8-registration-email'),path);
+  assert.ok(doc.slice(0,950).includes('safety-training-v46-9-company-review'),path);
   assert.match(doc,/v46\.8 — QR, iscrizione pubblica e inviti email/);
  }
 });
