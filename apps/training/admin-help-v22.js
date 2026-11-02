@@ -22,7 +22,7 @@
     'Controllo percorsi':{title:'Guida · Controllo percorsi',steps:['Seleziona l’edizione da esaminare.','Controlla iscrizioni, qualità didattica, frequenze, test ed evidenze.','Riconcilia anomalie e documenti con docente e registri prima di emettere un attestato.'],note:'I dati sono indicativi e limitati dall’accesso RLS. Nessun rilascio automatico di attestati.'},
     'Dashboard':{
       title:'Guida · Dashboard amministrativa',
-      steps:['Consulta i contatori di aziende, corsisti, edizioni e iscrizioni.','Per una nuova formazione usa «Avvia percorso»: seleziona azienda, corso, edizione e corsisti senza passare da più sezioni.','Usa le sezioni laterali per manutenzione puntuale, controlli e monitoraggio.'],
+      steps:['Consulta i contatori di aziende, corsisti, edizioni e iscrizioni.','Per una nuova formazione o per riprendi un corso già assegnato, usa «Avvia percorso» come punto unico: azienda → corso/edizione → corsisti → iscrizione → stato e prossima azione.','Per corsisti già iscritti, seleziona azienda, edizione e nominativo e premi «Controlla stato esistente» senza creare duplicati.','Le sezioni laterali rimangono disponibili per correzioni amministrative, dettagli e gestione avanzata.'],
       note:'I contatori sono indicatori operativi, non certificano da soli frequenza, verifiche o completamento.'},
     'Organizzazioni':{
       title:'Guida · Organizzazioni',
@@ -99,7 +99,7 @@
     return {title:'Guida · '+(text||'Amministrazione'),steps:[
       'Controlla il titolo della sezione e i filtri prima di effettuare un’operazione.',
       'Usa le azioni esistenti e verifica i dati prima di salvare o confermare.',
-      'Per il percorso completo azienda → edizione → corsista → invito usa «Avvia percorso».'],
+      'Per il percorso completo azienda → corso/edizione → corsista → iscrizione → stato e prossima azione, usa «Avvia percorso».'],
       note:'Le operazioni irreversibili e le modifiche ai permessi non vengono eseguite dalla guida.'};
   }
   let shownTitle='',open=false;
