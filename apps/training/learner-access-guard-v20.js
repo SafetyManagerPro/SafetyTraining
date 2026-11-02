@@ -43,6 +43,11 @@
       setTimeout(assignedOnlyHome, 0);
       return;
     }
+    if(parts[0]&&!window.SAFETY_ACCESS_V46_10?.canVisit?.(location.hash)){
+      location.hash='';
+      setTimeout(assignedOnlyHome,0);
+      return;
+    }
     if (parts[0] === 'library') {
       location.hash = '';
       setTimeout(assignedOnlyHome, 0);

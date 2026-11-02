@@ -11,6 +11,7 @@
     client: null,
     session: null,
     user: null,
+    identityReady: false,
     learner: null,
     assignments: [],
     activeAssignment: null,
@@ -135,6 +136,7 @@
   let lastUserId=null;
   async function syncIdentity() {
     const requestId=++state.identityRequestId;
+    state.identityReady = false;
     const currentUser=state.user;
     const currentUserId=currentUser?.id||null;
     if(lastUserId!==currentUserId){
@@ -148,6 +150,7 @@
       state.learningSession = null;
       updateBadge();
       renderPanel();
+      state.identityReady = true;
       notifyCloudState();
       return;
     }
@@ -174,8 +177,11 @@
     state.assignments = assignments;
     updateBadge();
     renderPanel();
-    await syncRouteContext();
-    if(identityCurrent(requestId,currentUserId))notifyCloudState();
+    try{await syncRouteContext();}catch(error){console.warn('[SafetyTraining Cloud] route context:',error?.message||error);}
+    if(identityCurrent(requestId,currentUserId)){
+      state.identityReady = true;
+      notifyCloudState();
+    }
   }
 
   async function loadAssignments(learnerId) {
@@ -390,7 +396,7 @@
 
   async function init() {
     ensureUi();
-    if (!window.supabase?.createClient) { console.warn('[SafetyTraining Cloud] Supabase client unavailable; local mode remains active.'); return; }
+    if (!window.supabase?.createClient) { console.warn('[SafetyTraining Cloud] Supabase client unavailable; login cannot proceed.'); document.dispatchEvent(new Event('safety:cloud-unavailable')); return; }
     state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
     const { data } = await state.client.auth.getSession();
     state.session = data?.session || null;
@@ -400,6 +406,7 @@
     state.client.auth.onAuthStateChange((_event, session) => {
       state.session = session || null;
       state.user = session?.user || null;
+      state.identityReady = false;
       state.identityRequestId += 1;
       state.quizBindingId += 1;
       state.pendingQuizSubmissions.clear();

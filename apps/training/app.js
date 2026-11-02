@@ -29,19 +29,20 @@ function topicMiniCard(c,t){
  return `<article class="smallcard"><div class="duration">${c.icon} ${esc(c.title)} • ${t.minutes} min</div><h4>${t.icon} ${esc(t.title)}</h4><p class="muted">${esc(t.summary)}</p><button class="softbtn" onclick="setHash('topic/${c.id}/${t.id}')">Apri</button></article>`;
 }
 function topicKey(c,t){return c.id+':'+t.id;}
-function setHash(v){location.hash=v;}
+function setHash(v){if(!window.SAFETY_ACCESS_V46_10?.canVisit?.('#'+String(v||'')))return;location.hash=v;}
 function getCourse(id){return DATA.find(c=>c.id===id)}
 function getTopic(c,id){return c?.topics.find(t=>t.id===id)}
 function listHtml(arr){return '<ul>'+arr.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>'}
 function stepsHtml(arr){return '<ol>'+arr.map(x=>`<li>${esc(x)}</li>`).join('')+'</ol>'}
 
 DATA.forEach(c=>{
+  if(!window.SAFETY_ACCESS_V46_10?.canOpen?.(c.id))return;
   const b=document.createElement('button'); b.className='navbtn'; b.innerHTML=`<span>${c.icon}</span><span>${esc(c.title)}</span>`;
   b.onclick=()=>setHash('course/'+c.id); side.appendChild(b);
 });
 document.querySelector('[data-home]').onclick=()=>setHash('');
 document.getElementById('modeClass').onclick=()=>{mode='class'; document.body.classList.add('bigscreen'); syncMode(); renderRoute();}
-document.getElementById('modeTeacher').onclick=()=>{mode='teacher'; document.body.classList.remove('bigscreen'); syncMode(); renderRoute();}
+document.getElementById('modeTeacher').onclick=()=>{if(!window.SAFETY_ACCESS_V46_10?.canBrowse?.())return; mode='teacher'; document.body.classList.remove('bigscreen'); syncMode(); renderRoute();}
 function syncMode(){
   document.getElementById('modeClass').classList.toggle('active',mode==='class');
   document.getElementById('modeTeacher').classList.toggle('active',mode==='teacher');
@@ -464,10 +465,17 @@ function fitDeckToViewport(){
  slide.style.setProperty('--deck-scale',scale);
 }
 function home(){
+ const gate=window.SAFETY_ACCESS_V46_10;
+ if(!gate?.isAuthenticated?.())return;
+ if(gate.state.phase==='learner'){
+   app.innerHTML='<section class="hero"><h1>I miei corsi</h1><p>Consulta soltanto i corsi assegnati al tuo account.</p><button class="openbtn" type="button" id="stMyCoursesHome">Apri i miei corsi</button></section>';
+   document.getElementById('stMyCoursesHome')?.addEventListener('click',()=>window.SAFETY_LEARNER?.open?.());
+   return;
+ }
  document.body.classList.remove('deckmode');
- const foundation=DATA.find(c=>c.id==='fondamenti');
- const formal=DATA.filter(c=>c.id!=='fondamenti');
- app.innerHTML=`<section class="hero presentation-hero"><span class="pill">MODALITÀ PRESENTAZIONE</span><h1>Safety Training</h1><p>Corso progettato per essere proiettato: agenda temporale, moduli ordinati e slide leggibili da lontano.</p><div class="startpanel"><div><span class="startlabel">MODULO COMUNE</span><h2>🏛️ Fondamenti normativi e sistema prevenzione</h2><p>Normativa, figure della sicurezza, vigilanza, responsabilità e sanzioni.</p></div><button class="openbtn big" onclick="setHash('course/fondamenti')">Apri agenda</button>${continueCourseButton(foundation)}</div></section>
+ const foundation=DATA.find(c=>c.id==='fondamenti'&&gate.canOpen(c.id));
+ const formal=DATA.filter(c=>c.id!=='fondamenti'&&gate.canOpen(c.id));
+ app.innerHTML=`<section class="hero presentation-hero"><span class="pill">MODALITÀ PRESENTAZIONE</span><h1>Safety Training</h1><p>Corso progettato per essere proiettato: agenda temporale, moduli ordinati e slide leggibili da lontano.</p>${foundation?`<div class="startpanel"><div><span class="startlabel">MODULO COMUNE</span><h2>🏛️ Fondamenti normativi e sistema prevenzione</h2><p>Normativa, figure della sicurezza, vigilanza, responsabilità e sanzioni.</p></div><button class="openbtn big" onclick="setHash('course/fondamenti')">Apri agenda</button>${continueCourseButton(foundation)}</div>`:''}</section>
  <h2 class="sectiontitle">Scegli il corso da proiettare</h2><section class="presentation-courses">${formal.map(c=>`<article class="presentation-course"><div class="pc-head"><span class="pc-icon">${c.icon}</span><div><div class="duration">${fmtMin(c.planned_minutes||c.target_minutes||0)}</div><h2>${esc(c.title)}</h2></div></div><p>${esc(c.subtitle)}</p><div class="pc-modules">${(c.modules||[]).map(m=>`<span>${esc(m.title)} · ${fmtMin(m.minutes)}</span>`).join('')}</div><div class="pc-actions"><button class="openbtn" onclick="setHash('deck/${c.id}/0')">▶ Avvia presentazione</button>${continueCourseButton(c)}<button class="ghost" onclick="setHash('course/${c.id}')">Agenda</button></div></article>`).join('')}</section>
  <div class="footer">Le schede di approfondimento restano disponibili, ma la modalità principale è ora la presentazione sequenziale.</div>`;
 }
@@ -651,28 +659,40 @@ window.startTimer=(mins)=>{
  timerInt=setInterval(()=>{let s=Math.floor((Date.now()-timerStart)/1000), m=Math.floor(s/60), ss=s%60; if(el) el.textContent=`${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')} / ${mins}:00`;},1000);
 }
 function searchView(q){
+ const gate=window.SAFETY_ACCESS_V46_10;
+ if(!gate?.canBrowse?.())return;
  const qq=q.trim().toLowerCase(); let found=[];
- DATA.forEach(c=>c.topics.forEach(t=>{
+ DATA.filter(c=>gate.canOpen(c.id)).forEach(c=>c.topics.forEach(t=>{
    const blob=[t.title,t.summary,t.detail,t.norm,...t.risks,...t.prevention,...t.dpi,...t.procedure].join(' ').toLowerCase();
    if(blob.includes(qq)) found.push({c,t});
  }));
  app.innerHTML=`<section class="hero"><h1>Risultati ricerca</h1><p>“${esc(q)}” — ${found.length} risultati</p></section>
  <div class="grid">${found.map(({c,t})=>`<article class="card"><div class="duration">${esc(c.title)} • ${t.minutes} min</div><div class="icon">${t.icon}</div><h3>${esc(t.title)}</h3><p class="muted">${esc(t.summary)}</p><button class="openbtn" onclick="setHash('topic/${c.id}/${t.id}')">Apri</button></article>`).join('')||'<p>Nessun risultato.</p>'}</div>`;
 }
-search.addEventListener('input',()=>{if(search.value.trim().length>=2) searchView(search.value); else renderRoute();});
+search.addEventListener('input',()=>{if(!window.SAFETY_ACCESS_V46_10?.canBrowse?.())return;if(search.value.trim().length>=2)searchView(search.value);else renderRoute();});
 document.getElementById('showFav').onclick=()=>{
- let items=[]; DATA.forEach(c=>c.topics.forEach(t=>{if(favs.has(topicKey(c,t)))items.push({c,t})}));
+ if(!window.SAFETY_ACCESS_V46_10?.canBrowse?.())return;
+ let items=[]; DATA.filter(c=>window.SAFETY_ACCESS_V46_10.canOpen(c.id)).forEach(c=>c.topics.forEach(t=>{if(favs.has(topicKey(c,t)))items.push({c,t})}));
  app.innerHTML=`<section class="hero"><h1>⭐ Preferiti</h1><p>Argomenti salvati per accesso rapido durante la lezione.</p></section><div class="grid">${items.map(({c,t})=>`<article class="card"><div class="icon">${t.icon}</div><div class="duration">${esc(c.title)}</div><h3>${esc(t.title)}</h3><button class="openbtn" onclick="setHash('topic/${c.id}/${t.id}')">Apri</button></article>`).join('')||'<p>Nessun preferito salvato.</p>'}</div>`;
 }
 document.getElementById('showRecent').onclick=()=>{
- const items=getRecentItems();
+ if(!window.SAFETY_ACCESS_V46_10?.canBrowse?.())return;
+ const items=getRecentItems().filter(x=>window.SAFETY_ACCESS_V46_10.canOpen(x.c.id));
  app.innerHTML=`<section class="hero"><h1>🕘 Argomenti recenti</h1><p>Ultime schede aperte, utili per riprendere rapidamente il corso in aula.</p></section><div class="smallgrid">${items.map(({c,t})=>topicMiniCard(c,t)).join('')||'<p>Nessun argomento aperto di recente.</p>'}</div>`;
 }
-document.getElementById('showDpi').onclick=()=>dpiView();
-document.getElementById('showRefs').onclick=()=>resourcesView();
-document.getElementById('showChecklist').onclick=()=>checklistView();
+document.getElementById('showDpi').onclick=()=>{if(window.SAFETY_ACCESS_V46_10?.canBrowse?.())dpiView();};
+document.getElementById('showRefs').onclick=()=>{if(window.SAFETY_ACCESS_V46_10?.canBrowse?.())resourcesView();};
+document.getElementById('showChecklist').onclick=()=>{if(window.SAFETY_ACCESS_V46_10?.canBrowse?.())checklistView();};
 
 async function renderRoute(){
+ const gate=window.SAFETY_ACCESS_V46_10;
+ // Guard first: never render lesson, deck or fetch media before authorization.
+ if(!gate?.isAuthenticated?.())return;
+ if(location.hash&&!gate.canVisit()){
+   gate.guardRoute();
+   if(gate.state.phase==='learner')window.SAFETY_LEARNER?.open?.();
+   return;
+ }
  closeVideoPlayer();
  if(search.value.trim().length>=2){document.body.classList.remove('deckmode');searchView(search.value);return}
  clearInterval(timerInt);
@@ -704,6 +724,14 @@ async function renderRoute(){
  home();
 }
 window.addEventListener('hashchange',renderRoute);
+document.addEventListener('safety:access-ready',()=>{
+  if(window.SAFETY_ACCESS_V46_10?.state.phase==='learner'){
+    mode='class';
+    document.body.classList.add('bigscreen');
+    syncMode();
+  }
+  renderRoute();
+});
 window.addEventListener('resize',()=>{if(document.body.classList.contains('deckmode')){fitDeckContent();fitDeckToViewport();}});
 document.addEventListener('fullscreenchange',()=>setTimeout(()=>{if(document.body.classList.contains('deckmode')){fitDeckContent();fitDeckToViewport();}},60));
 window.addEventListener('keydown',e=>{if(document.getElementById('videoOverlay')){if(e.key==='Escape'){e.preventDefault();closeVideoPlayer();}return;} if(document.getElementById('answerOverlay')){if(e.key==='Escape'){e.preventDefault();closeAnswerOverlay();}return;} if(!window.__deck||!document.body.classList.contains('deckmode'))return; if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey||document.getElementById('deckIndexOverlay')?.classList.contains('hidden')===false||e.target?.closest?.('input,textarea,select,button,a,[contenteditable="true"],[role="dialog"]'))return; if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault(); if(window.__deck.index<window.__deck.total-1)deckGo(window.__deck.cid,window.__deck.index+1)} if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault(); if(window.__deck.index>0)deckGo(window.__deck.cid,window.__deck.index-1)} if(e.key==='Escape'&&document.fullscreenElement)document.exitFullscreen?.();});

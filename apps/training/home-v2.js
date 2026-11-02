@@ -4,9 +4,15 @@
   'use strict';
   function safeData(){return Array.isArray(window.SAFETY_DATA)?window.SAFETY_DATA:[];}
   function homeV2(){
+    const gate=window.SAFETY_ACCESS_V46_10;
+    if(!gate?.isAuthenticated?.())return;
+    if(gate.state.phase==='learner'){
+      window.SAFETY_LEARNER?.open?.();
+      return;
+    }
     document.body.classList.remove('deckmode');
     const root=document.getElementById('app');if(!root)return;
-    const data=safeData(),courses=data.length,units=data.reduce((n,c)=>n+((c.topics||[]).length),0),revised=data.filter(c=>String(c.didactic_version||'').includes('v2')).length;
+    const data=safeData().filter(x=>gate.canOpen(x.id)),courses=data.length,units=data.reduce((n,c)=>n+((c.topics||[]).length),0),revised=data.filter(c=>String(c.didactic_version||'').includes('v2')).length;
     const minutes=data.reduce((n,c)=>n+(c.planned_minutes||c.target_minutes||0),0),hours=Math.round(minutes/60);
     root.innerHTML=`
       <section class="hero presentation-hero"><span class="pill">CENTRO DIDATTICO</span><h1>Safety Training</h1><p>Dashboard e libreria completa dei corsi. Il materiale per docente e corsista è separato dalle regole sulla modalità di erogazione.</p></section>
@@ -29,4 +35,5 @@
   }
   try{home=homeV2;}catch(_){}window.home=homeV2;
   if(!location.hash||location.hash==='#')homeV2();
+  document.addEventListener('safety:access-ready',()=>{if(!location.hash||location.hash==='#')homeV2();});
 })();

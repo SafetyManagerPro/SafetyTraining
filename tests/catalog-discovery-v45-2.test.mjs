@@ -20,7 +20,7 @@ function setup(){
   catalogBrowserRoot:{innerHTML:'',querySelector:()=>null}
  };
  const doc={readyState:'loading',getElementById:id=>controls[id]||null,addEventListener(){},body:{classList:{remove(){}}}};
- const win={SAFETY_DATA:[],SAFETY_CLOUD:{state:{user:{id:'admin'},learner:null,client:{rpc:async()=>({data:rows,error:null})}}}};
+ const win={SAFETY_DATA:[],SAFETY_CLOUD:{state:{user:{id:'admin'},learner:null,client:{rpc:async()=>({data:rows,error:null})}}},SAFETY_ACCESS_V46_10:{isAuthenticated:()=>true,canBrowse:()=>true,canOpen:()=>true,rowsForViewer:items=>items}};
  runInNewContext(read('apps/training/catalog-browser.js'),{window:win,document:doc,console,setTimeout,Number,Set,String,encodeURIComponent,decodeURIComponent});
  const names=()=>[...html.matchAll(/<h3>(.*?)<\/h3>/g)].map(m=>m[1]);
  return {win,controls,names,getCount:()=>count};
@@ -69,7 +69,7 @@ test('v45.2 frontend and handoffs match cache and preserve learner guard',()=>{
  const css=read('apps/training/catalog-learner-v45.css');
  assert.ok(css.includes('@media(max-width:1150px)'));
  assert.ok(css.includes('@media(max-width:680px)'));
- const cache='safety-training-v46-9-company-review';
+ const cache='safety-training-v46-10-auth-gate';
  assert.ok(read('apps/training/sw.js').includes(cache));
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const h=read(path);assert.ok(h.slice(0,750).includes(cache));assert.ok(h.includes('v45.2 — Ricerca e filtri catalogo'));

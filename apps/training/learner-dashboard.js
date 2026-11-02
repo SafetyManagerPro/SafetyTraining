@@ -60,6 +60,11 @@
     shell?.classList.add('hidden');
     document.body.classList.remove('learner-dashboard-open');
     if(wasOpen)window.SAFETY_MODAL_ACCESS?.closed?.(shell);
+    if(cloud()?.state?.learner&&!location.hash){
+      const root=document.getElementById('app');
+      if(root)root.innerHTML='<section class="hero"><h1>I miei corsi</h1><p>Qui trovi soltanto i corsi assegnati.</p><button class="openbtn" id="stReturnCourses" type="button">Apri i miei corsi</button></section>';
+      document.getElementById('stReturnCourses')?.addEventListener('click',open);
+    }
   }
 
   async function claimIfNeeded() {

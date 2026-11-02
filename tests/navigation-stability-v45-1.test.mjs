@@ -24,7 +24,7 @@ test('catalog renders escaped identifiers and safely dispatches a course click',
  };
  const documentMock={readyState:'loading',body:{classList:{remove(){},add(){},toggle(){return false;}}},addEventListener(){},getElementById:id=>elements[id]||null};
  const locationMock={get hash(){return hash;},set hash(v){hash=v;}};
- const windowMock={SAFETY_CLOUD:{state:{client:{rpc:async()=>({data:[row],error:null})},user:{id:'admin'},learner:null}},SAFETY_DATA:[]};
+ const windowMock={SAFETY_CLOUD:{state:{client:{rpc:async()=>({data:[row],error:null})},user:{id:'admin'},learner:null}},SAFETY_DATA:[],SAFETY_ACCESS_V46_10:{isAuthenticated:()=>true,canBrowse:()=>true,canOpen:()=>true,rowsForViewer:rows=>rows}};
  runInNewContext(read('apps/training/catalog-browser.js'),{window:windowMock,document:documentMock,location:locationMock,console,setTimeout,encodeURIComponent,decodeURIComponent,Number,Set,String});
  await windowMock.SAFETY_CATALOG.load();
  assert.match(cardHtml,/slug&#039; onclick=&#039;alert\(1\)/);
@@ -53,7 +53,7 @@ test('learner dialog reuses existing shared focus and escape manager',()=>{
  assert.ok(manager.includes("e.key!=='Tab'"));
 });
 test('PWA and synchronized handoffs identify v45.1',()=>{
- const cache='safety-training-v46-9-company-review';
+ const cache='safety-training-v46-10-auth-gate';
  const sw=read('apps/training/sw.js');assert.ok(sw.includes(cache));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const c=read(p);assert.ok(c.slice(0,780).includes(cache),p);assert.ok(c.includes('v45.1 — Stabilizzazione navigazione e accessibilità'));
