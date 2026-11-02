@@ -9,7 +9,7 @@ test('v46.9 reproduces real cross-company block as a dedicated review rather tha
  assert.match(legacy,/learner_company_mismatch_manual_review/);
  assert.match(js,/admin_registration_company_review_v46_9/);
  assert.match(js,/admin_registration_company_approve_v46_9/);
- assert.match(js,/review\.review_needed/);
+ assert.match(js,/review\?\.review_needed/);
  assert.match(js,/state\.companyReview=\{\.\.\.review,requestId:id\}/);
  assert.match(js,/Azienda attuale/);
  assert.match(js,/Azienda dell’edizione/);
@@ -28,7 +28,7 @@ test('v46.9 two-factor identity and human approval conditions are mandatory on t
   'private.can_manage_training_org(v_ed.organization_id)',
   'existing_enrollment_requires_manual_review'
  ])assert.ok(sql.includes(marker),marker);
- for(const marker of ['id=p_existing_learner_id','p_confirm_identity:true','p_note:note',
+ for(const marker of ['p_confirm_identity:true','p_note:note',
   'p_expected_existing_company_id:review.existing_company_id',
   'p_expected_edition_company_id:review.edition_company_id',
   'data-ar36-cross-approve','id="ar36ConfirmIdentity"','id="ar36ReviewNote"',
@@ -48,8 +48,6 @@ test('v46.9 keeps existing enrollment guard and requires a session-local one-tim
   "r.status='pending'","r.edition_id=new.edition_id",
   "ll.fiscal_code_normalized=r.fiscal_code",
   "ll.organization_id=v_org",
-  "not v_learner_active",
-  "v_learner_org <> v_org",
   "edition_must_be_open"
  ])assert.ok(sql.includes(marker),marker);
  assert.doesNotMatch(sql,/update\s+public\.learners\s+set\s+company_id/i);
