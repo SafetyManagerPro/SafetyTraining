@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const js=read('apps/training/admin-registration-v36.js');
-const sql=read('supabase/migrations/20261102193000_v46_9_cross_company_registration.sql');
+const sql=read('supabase/migrations/20261102185024_v46_9_cross_company_registration.sql');
 test('v46.9 reproduces real cross-company block as a dedicated review rather than an automatic company transfer',()=>{
  const legacy=read('supabase/migrations/20261022144000_v36_public_registration.sql');
  assert.match(legacy,/learner_company_mismatch_manual_review/);
