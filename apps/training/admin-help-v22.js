@@ -80,6 +80,18 @@
       title:'Guida · Qualità didattica',
       steps:['Individua il corso con ricerca e filtri.','Verifica contenuti operativi, scenari specifici, Practice Lab, fonti e percorso di verifica.','Intervieni sui gap reali prima di dichiarare un corso didatticamente completo.'],
       note:'Il punteggio da solo non basta: per il livello Gold servono almeno 85 punti e zero gap.'},
+    'Accesso e autorizzazioni':{
+      title:'Guida · Accesso per ruolo',
+      steps:[
+        'Quando apri SafetyTraining senza sessione appare soltanto la schermata Accedi: inserisci le credenziali abilitate.',
+        'Amministratore piattaforma: console Amministrazione completa, senza cambiare i dati di altre organizzazioni quando si opera come responsabile di un singolo ente.',
+        'Responsabile di organizzazione: gestisce solo il suo perimetro; docente e tutor consultano solo i corsi appartenenti ai rispettivi enti o edizioni.',
+        'Corsista: dopo l’attivazione dell’account vede soltanto I miei corsi, con i corsi assegnati e disponibili. Non può entrare in altri corsi tramite link diretti.',
+        'Se ricevi il messaggio Account non autorizzato, l’amministratore deve collegare anagrafica/iscrizione o ruolo. Non usare account condivisi.',
+        'QR di iscrizione pubblica e invito personale possono essere aperti prima del login: servono a richiedere o attivare l’accesso, non mostrano i corsi.'
+      ],
+      note:'La visualizzazione è separata dalla protezione server: eventuali contenuti statici devono essere pubblicati tramite canali protetti per una segretezza completa.'
+    },
     'Iscrizioni pubbliche':{
       title:'Guida · Iscrizione tramite QR e link pubblico',
       steps:[
