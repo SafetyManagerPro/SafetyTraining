@@ -42,7 +42,7 @@ DATA.forEach(c=>{
 });
 document.querySelector('[data-home]').onclick=()=>setHash('');
 document.getElementById('modeClass').onclick=()=>{mode='class'; document.body.classList.add('bigscreen'); syncMode(); renderRoute();}
-document.getElementById('modeTeacher').onclick=()=>{mode='teacher'; document.body.classList.remove('bigscreen'); syncMode(); renderRoute();}
+document.getElementById('modeTeacher').onclick=()=>{if(!window.SAFETY_ACCESS_V46_10?.canBrowse?.())return; mode='teacher'; document.body.classList.remove('bigscreen'); syncMode(); renderRoute();}
 function syncMode(){
   document.getElementById('modeClass').classList.toggle('active',mode==='class');
   document.getElementById('modeTeacher').classList.toggle('active',mode==='teacher');
@@ -724,7 +724,14 @@ async function renderRoute(){
  home();
 }
 window.addEventListener('hashchange',renderRoute);
-document.addEventListener('safety:access-ready',renderRoute);
+document.addEventListener('safety:access-ready',()=>{
+  if(window.SAFETY_ACCESS_V46_10?.state.phase==='learner'){
+    mode='class';
+    document.body.classList.add('bigscreen');
+    syncMode();
+  }
+  renderRoute();
+});
 window.addEventListener('resize',()=>{if(document.body.classList.contains('deckmode')){fitDeckContent();fitDeckToViewport();}});
 document.addEventListener('fullscreenchange',()=>setTimeout(()=>{if(document.body.classList.contains('deckmode')){fitDeckContent();fitDeckToViewport();}},60));
 window.addEventListener('keydown',e=>{if(document.getElementById('videoOverlay')){if(e.key==='Escape'){e.preventDefault();closeVideoPlayer();}return;} if(document.getElementById('answerOverlay')){if(e.key==='Escape'){e.preventDefault();closeAnswerOverlay();}return;} if(!window.__deck||!document.body.classList.contains('deckmode'))return; if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey||document.getElementById('deckIndexOverlay')?.classList.contains('hidden')===false||e.target?.closest?.('input,textarea,select,button,a,[contenteditable="true"],[role="dialog"]'))return; if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault(); if(window.__deck.index<window.__deck.total-1)deckGo(window.__deck.cid,window.__deck.index+1)} if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault(); if(window.__deck.index>0)deckGo(window.__deck.cid,window.__deck.index-1)} if(e.key==='Escape'&&document.fullscreenElement)document.exitFullscreen?.();});
