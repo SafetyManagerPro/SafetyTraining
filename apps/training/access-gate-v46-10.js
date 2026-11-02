@@ -159,11 +159,11 @@
   state.busy=true;
   const button=document.getElementById('stAccessSubmit');if(button)button.disabled=true;
   notify('Verifica delle credenziali in corso…');
+  setPhase('pending');
   try{
     const {error}=await client().auth.signInWithPassword({email,password});
     if(error)throw error;
     notify('Credenziali corrette. Verifica dei permessi in corso…');
-    setPhase('pending');
     const field=document.getElementById('stAccessPassword');if(field)field.value='';
   }catch(e){
     setPhase('guest');

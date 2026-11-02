@@ -156,9 +156,17 @@ function bind(){
  attach('qv11Enroll',async()=>{
   const l=learner(),edition=s.data.editions.find(x=>x.id===s.editionId);
   if(!l||!edition)throw Error('Seleziona corsista e corso.');
-  const enrolled=await rpc('admin_bulk_enroll',{p_edition_id:edition.id,p_learner_ids:[l.id],p_source:'internal_quick_v46_11'});
-  notice(Number(enrolled?.inserted)?'Corsista iscritto correttamente. Ora attiva l’accesso.':
-   'Il corsista risultava già iscritto. Nessuna iscrizione duplicata.','success');
+  const existing=await db().from('enrollments')
+    .select('id,status').eq('edition_id',edition.id).eq('learner_id',l.id).maybeSingle();
+  if(existing.error)throw existing.error;
+  if(existing.data?.status==='revoked'){
+    await rpc('admin_set_enrollment_revoked',{p_enrollment_id:existing.data.id,p_revoked:false});
+    notice('Iscrizione riattivata. Ora puoi attivare l’accesso.','success');
+  }else{
+    const enrolled=await rpc('admin_bulk_enroll',{p_edition_id:edition.id,p_learner_ids:[l.id],p_source:'internal_quick_v46_11'});
+    notice(Number(enrolled?.inserted)?'Corsista iscritto correttamente. Ora attiva l’accesso.':
+     'Il corsista risultava già iscritto. Nessuna iscrizione duplicata.','success');
+  }
  });
  attach('qv11Activate',()=>credentials('activate'));
  attach('qv11Reset',()=>credentials('reset'));
