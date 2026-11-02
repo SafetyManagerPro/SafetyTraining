@@ -62,9 +62,9 @@ test('assets and both handoffs align with read-only teacher entry',()=>{
  assert.ok(teacher.includes('data-tools-audit')&&teacher.includes('SAFETY_VISUAL_AUDIT_V45_8?.open?.()'));
  for(const s of ['deck-visual-audit-v45-8.js','deck-visual-audit-v45-8.css'])assert.ok(html.includes(s)&&sw.includes(s),s);
  assert.ok(html.indexOf('deck-teacher-tools-v45-7.js')<html.indexOf('deck-visual-audit-v45-8.js'));
- assert.ok(sw.includes('safety-training-v46-4-lesson-enrichment'));
+ assert.ok(sw.includes('safety-training-v46-5-editorial-matrix'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
-  const h=read(p);assert.ok(h.slice(0,850).includes('safety-training-v46-4-lesson-enrichment'),p);
+  const h=read(p);assert.ok(h.slice(0,850).includes('safety-training-v46-5-editorial-matrix'),p);
   assert.ok(h.includes('v45.8 — Verifica visiva slide'));
  }
  assert.ok(read('package.json').includes('tests/deck-visual-audit-v45-8.test.mjs'));
