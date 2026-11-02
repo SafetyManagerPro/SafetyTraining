@@ -64,6 +64,18 @@
       title:'Guida · Readiness corsi',
       steps:['Risolvi prima i blocchi strutturali su moduli, verifiche o requisiti pratici.','Poi completa le configurazioni richieste e sottoponi la versione a revisione.','Pubblica solo con un’azione amministrativa esplicita, dopo i controlli.'],
       note:'I corsi congelati o fuori roadmap devono rimanere esclusi dalla finalizzazione automatica.'},
+    'Revisione Learning Unit':{
+      title:'Guida · Matrice editoriale delle Learning Unit',
+      steps:[
+        'Seleziona il corso dalla lista delle ultime versioni pubblicate: la matrice carica gli argomenti reali del database, senza modificare contenuti o ore.',
+        'Consulta gli avvisi preliminari su quantità di testo, rischi, misure, immagini e fonti: indicano cosa verificare, non equivalgono a idoneità.',
+        'Apri Esamina per ogni singola Learning Unit, controlla la pertinenza delle figure e le autorizzazioni d’uso, poi documenta giudizio e motivazione.',
+        'Testo, immagini, fonti, analisi e diritti vanno valutati separatamente. Per approvare occorre il completamento di tutti gli ambiti e, se sono presenti immagini, la prova dei diritti.',
+        'Il salvataggio è riservato al responsabile editoriale autorizzato; ogni revisione conserva numero progressivo, autore e storico.',
+        'Usa Esporta CSV filtrato per il resoconto. Una revisione approvata non crea né pubblica una nuova versione ufficiale del corso.'
+      ],
+      note:'Corsi frozen, versioni storiche e unità non pubblicate restano in sola lettura. Un giudizio editoriale non certifica conformità normativa o pratica né sostituisce l’approvazione formale del corso.'
+    },
     'Qualità didattica v22':{
       title:'Guida · Qualità didattica',
       steps:['Individua il corso con ricerca e filtri.','Verifica contenuti operativi, scenari specifici, Practice Lab, fonti e percorso di verifica.','Intervieni sui gap reali prima di dichiarare un corso didatticamente completo.'],

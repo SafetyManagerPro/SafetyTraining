@@ -102,6 +102,10 @@ function rows(){
  return '<div class="st-v465-tablewrap"><table class="st-v465-table"><thead><tr><th>Unità / Modulo</th><th>Testo</th><th>Immagini</th><th>Fonti</th><th>Analisi</th><th>Diritti</th><th>Esito</th><th>Dettagli</th></tr></thead><tbody>'+
  (view.length?view.map(u=>{
   const frozen=!editable(u),flags=score(u);
+  const candidate=window.SAFETY_EQUIPMENT_CASES_V46_3?.forSlide?.({type:'concept',title:u.unit_title,topic:{id:u.unit_key,title:u.unit_title}},state.course);
+  const suggested=candidate&&/^assets\\/gp0[1-4]-[a-z0-9-]+\\.svg$/.test(candidate.visual)
+   ?'<figure class="st-v465-editor-figure"><img loading="lazy" src="'+esc(candidate.visual)+'" alt="'+esc(candidate.imageCaption||'Schema originale proposto')+'"><figcaption>Figura tematica proposta, non approvata: '+esc(candidate.imageCaption||'Verificare pertinenza e diritti')+'</figcaption></figure>'
+   :'';
   const row='<tr><td data-label="Unità / Modulo"><strong>'+esc(u.unit_title)+'</strong><small>'+esc(u.module_title)+' · LU v'+esc(u.unit_version)+' · '+esc(u.unit_status)+'</small>'+
    (frozen?'<span class="st-v465-locked">Sola lettura / non idonea alla revisione</span>':'')+'</td>'+
    sections.map(([key,label])=>cell(label,key,u)).join('')+
@@ -113,7 +117,7 @@ function rows(){
    '<dt>Scenari</dt><dd>Caso: '+(u.has_case?'presente':'non rilevato')+' · Domanda: '+(u.has_question?'presente':'non rilevata')+'</dd>'+
    '<dt>Figure</dt><dd>'+esc(u.explicit_visual_count||0)+' riferimenti espliciti; categoria: '+esc(u.visual_hint||'nessuna')+'</dd>'+
    '<dt>Fonti</dt><dd>'+esc(u.source_reference_count||0)+' riferimenti espliciti (non validati)</dd></dl>'+
-   '<h4>Avvisi da controllare</h4>'+(flags.length?'<ul>'+flags.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>Nessuna carenza rilevata automaticamente. È comunque necessaria la valutazione umana.</p>')+'</section>'+
+   suggested+'<h4>Avvisi da controllare</h4>'+(flags.length?'<ul>'+flags.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>Nessuna carenza rilevata automaticamente. È comunque necessaria la valutazione umana.</p>')+'</section>'+
    '<section>'+(frozen?'<div class="st-v465-note"><h3>Revisione non consentita</h3><p>Stato corso/unità o autorizzazione impediscono le modifiche. I dati restano consultabili e non possono essere approvati da questa schermata.</p></div>':editor(u))+'</section></div></td></tr>';
   return row+details;
  }).join(''):'<tr><td colspan="8">Nessuna Learning Unit con i filtri selezionati.</td></tr>')+
@@ -147,7 +151,7 @@ function paint(){
  h.querySelector('[data-v465-export]').addEventListener('click',exportCsv);
  h.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{state.page+=Number(b.dataset.page);paint();}));
  h.querySelectorAll('[data-toggle-editor]').forEach(b=>b.addEventListener('click',()=>{state.expanded=state.expanded===b.dataset.toggleEditor?'':b.dataset.toggleEditor;paint();}));
- h.addEventListener('submit',event=>{if(event.target.closest('[data-review-unit]'))void save(event);},{once:true});
+ h.addEventListener('submit',event=>{if(event.target.closest('[data-review-unit]'))void save(event);});
  h.querySelectorAll('[data-review-history]').forEach(b=>b.addEventListener('click',()=>void history(b.dataset.reviewHistory)));
 }
 async function history(id){
