@@ -103,12 +103,27 @@
     const permitted=(memberships.data||[]).filter(r=>ROLES.has(r.role)&&r.organization_id);
     if(permitted.length){
       const orgs=new Set(permitted.map(x=>x.organization_id));
-      const courseResult=await c.from('courses').select('stable_key,owner_organization_id').eq('active',true);
+      const courseResult=await c.from('courses').select('id,stable_key,owner_organization_id').eq('active',true);
       if(serial!==state.serial||currentUser()?.id!==id)return;
       if(courseResult.error)throw courseResult.error;
       // Never show courses outside organizations confirmed in the membership registry.
+      const allowedCourseIds=new Set((courseResult.data||[])
+        .filter(x=>orgs.has(x.owner_organization_id)).map(x=>x.id).filter(Boolean));
+      // A course owned globally may still be assigned to this organization
+      // through a concrete edition; include only that explicitly scoped course.
+      const editionResult=await c.from('course_editions')
+        .select('course_version_id,organization_id').in('organization_id',[...orgs]);
+      if(serial!==state.serial||currentUser()?.id!==id)return;
+      if(editionResult.error)throw editionResult.error;
+      const versionIds=[...new Set((editionResult.data||[]).map(x=>x.course_version_id).filter(Boolean))];
+      if(versionIds.length){
+        const versions=await c.from('course_versions').select('id,course_id').in('id',versionIds);
+        if(serial!==state.serial||currentUser()?.id!==id)return;
+        if(versions.error)throw versions.error;
+        for(const x of versions.data||[])allowedCourseIds.add(x.course_id);
+      }
       state.allowedKeys=new Set((courseResult.data||[])
-        .filter(x=>orgs.has(x.owner_organization_id)).map(x=>x.stable_key).filter(Boolean));
+        .filter(x=>allowedCourseIds.has(x.id)).map(x=>x.stable_key).filter(Boolean));
       state.staffRoles=permitted.map(x=>x.role);
       setPhase('staff');guardRoute();
       if(permitted.some(x=>x.role==='organization_admin'||x.role==='training_manager') &&
@@ -172,6 +187,7 @@
   window.addEventListener('hashchange',()=>{if(isAuthenticated())guardRoute();});
   // The cloud module may have completed session initialization before boot.
   if(client()&&cloud()?.identityReady)void resolve();
+  else if(!client()&&!window.supabase?.createClient)setPhase('error');
  }
  window.SAFETY_ACCESS_V46_10={state,resolve,canOpen,canVisit,canBrowse,rowsForViewer,guardRoute,isAuthenticated,locked,boot};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
