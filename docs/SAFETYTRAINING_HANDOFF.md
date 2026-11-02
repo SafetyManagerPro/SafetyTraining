@@ -1,7 +1,7 @@
 # SafetyTraining — stato progetto / hand-off
 
 Ultimo aggiornamento: 2026-11-02
-Stato corrente: **v46.5 GitHub feature in test · baseline v46.4 PR #31 merged · main CI #708 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-5-editorial-matrix`.
+Stato corrente: **v46.5 GitHub main · PR #32 merged · CI #713 SUCCESS (PR), #714 SUCCESS (main) · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-5-editorial-matrix`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
 
@@ -1266,3 +1266,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Verificato che esiste **1 account autorizzato** nella allowlist editoriale v33 e 1 amministratore piattaforma corrispondente. Nessun nuovo permesso è stato concesso dalla v46.5.
 - Test negativo senza sessione autenticata: chiamate RPC lettura e scrittura respinte, **0 revisioni, 0 eventi** nel database. Nessuna autorizzazione umana è stata automaticamente registrata.
 - GitHub Actions **#710**, **#711** e **#712** SUCCESS sui commit del ramo feature (inclusi i controlli v46.5). Lo smoke autenticato dell'interfaccia e una revisione visiva delle immagini su browser reali restano necessari, senza consultare Vercel.
+
+## 2026-11-02 — v46.5 — Release GitHub e backend verificati
+- PR #32 merged con squash su `main`, SHA applicativo `edb6f0aea3c53674dd393108814cba70e70fe234`.
+- GitHub Actions **PR #713 SUCCESS** e **main #714 SUCCESS** (run `41406102615`) sul codice applicativo.
+- Migrazione Supabase applicata e allineata allo storico remoto `20261102071929_v46_5_editorial_matrix.sql`. Verificati 2 tabelle con RLS, 2 RPC amministrative, lettura negata ad anon, scrittura diretta negata ad authenticated, salvataggio owner-only e assenza di revisioni/eventi al deploy.
+- Il server blocca revisioni per versioni non correnti, corsi frozen o disattivati, LU non pubblicate; prova diritti e motivazione obbligatorie per approvazione. Nessuna pubblicazione automatica e nessuna modifica a test, Learning Unit, progressi, frequenze, attestati o collegamento SafetyManager.
+- PWA sorgente `safety-training-v46-5-editorial-matrix`; **@Vercel non consultato**. Lo stato di distribuzione in produzione non è verificato; manca collaudo browser autenticato desktop/tablet/mobile, revisione visiva per LU e verifica di uso di produzione.
