@@ -20,6 +20,6 @@ test('v45 asset and handoffs aligned',()=>{
  assert.ok(read('apps/training/index.html').includes('admin-visual-v45.css'));
  const sw=read('apps/training/sw.js');
  assert.ok(sw.includes('"./admin-visual-v45.css"'));
- assert.ok(sw.includes("safety-training-v46-6-admin-scrollbars"));
+ assert.ok(sw.includes("safety-training-v46-7-unified-journey"));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md'])assert.ok(read(p).includes('v45 — Tranche 1: dashboard e navigazione'));
 });
