@@ -28,11 +28,13 @@ test('admin approval sends an activation invitation without a second optional co
  assert.ok(start>0&&end>start);
  assert.match(method,/const result=await rpc\('admin_registration_decide_v36'/);
  assert.match(method,/if\(!approve\)/);
- assert.match(method,/const email=await inviteLearner\(result\?\.learner_id\)/);
+ const helper=admin.slice(admin.indexOf('async function finishApprovedEnrollment'),start);
+ assert.match(method,/await finishApprovedEnrollment\(result\)/);
+ assert.match(helper,/const response=await inviteLearner\(result\?\.learner_id\)/);
  assert.doesNotMatch(method,/if\(approve&&result\?\.learner_id&&confirm\(/);
- assert.ok(method.indexOf("admin_registration_decide_v36")<method.indexOf('inviteLearner(result?.learner_id)'));
- assert.match(method,/Iscrizione approvata, ma email NON inviata/);
- assert.match(method,/Non ripetere l’iscrizione/);
+ assert.ok(method.indexOf("admin_registration_decide_v36")<method.indexOf('finishApprovedEnrollment(result)'));
+ assert.match(helper,/Iscrizione approvata, ma email NON inviata/);
+ assert.match(helper,/Non ripetere l’iscrizione/);
  assert.match(admin,/const activationRedirect=\(\)=>new URL\('\?onboarding=1',PUBLIC_ORIGIN\)\.toString\(\)/);
  assert.doesNotMatch(admin,/redirect_to:new URL\('\?onboarding=1',location.href\)/);
 });
@@ -96,13 +98,13 @@ test('v46.8 PWA, CI and twin handoffs record QR/email fix without a DB migration
  assert.ok(html.includes('admin-registration-v36.js'));
  assert.ok(html.includes('public-registration-v36.js'));
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-8-registration-email'/);
+ assert.match(sw,/const CACHE='safety-training-v46-9-company-review'/);
  assert.match(read('package.json'),/tests\/public-registration-delivery-v46-8\.test\.mjs/);
  const help=read('apps/training/admin-help-v22.js');
  assert.match(help,/Invia \/ reinvia email di accesso/);
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(path);
-  assert.ok(doc.slice(0,950).includes('safety-training-v46-8-registration-email'),path);
+  assert.ok(doc.slice(0,950).includes('safety-training-v46-9-company-review'),path);
   assert.match(doc,/v46\.8 — QR, iscrizione pubblica e inviti email/);
  }
 });
