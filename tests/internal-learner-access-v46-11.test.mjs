@@ -26,6 +26,12 @@ test('quick management exposes one enrollment, one-time credentials, and delete'
  assert.match(ui,/Storico e prove conservati/);
  assert.match(ui,/s\.busy=true/);
 });
+test('quick search acts on visible learner and email changes preserve the existing phone',()=>{
+ assert.match(ui,/select\('id,first_name,last_name,email,phone,auth_user_id/);
+ assert.match(ui,/if\(!matches\.some\(x=>x\.id===s\.learnerId\)\)s\.learnerId=matches\[0\]\?\.id\|\|''/);
+ assert.match(ui,/p_email:email,p_phone:l\.phone\|\|null/);
+ assert.doesNotMatch(ui,/p_email:email,p_phone:null/);
+});
 test('temporary passwords exist only in Auth and are shown once in the administrator screen',()=>{
  assert.match(edge,/crypto\.getRandomValues/);
  assert.match(edge,/admin\.auth\.admin\.createUser/);
