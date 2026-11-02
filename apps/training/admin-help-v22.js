@@ -116,8 +116,10 @@
     panel.hidden=!open||hidden;
     if(!open||hidden){panel.textContent='';return;}
     const guide=helpFor(title);
+    const scrollHint='Per scorrere il menu laterale usa la rotella, il trackpad o trascina la barra verticale; la voce «Torna alla formazione» resta in basso. Nelle tabelle ampie usa la barra orizzontale in fondo al riquadro e quella verticale per le righe, senza spostare l’intera pagina. Da tastiera premi Tab per entrare nel riquadro, poi usa le frecce. Su smartphone scorri con il dito.';
     panel.innerHTML='<h2 tabindex="-1" id="adminHelpHeading">'+esc(guide.title)+'</h2><ol>'+
       guide.steps.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ol><p class="admin-help-note">'+esc(guide.note)+'</p>'+
+      '<p class="admin-help-note">'+esc(scrollHint)+'</p>'+ 
       '<button type="button" data-admin-help-close>Chiudi guida</button>';
   }
   function sync(){paint();}
