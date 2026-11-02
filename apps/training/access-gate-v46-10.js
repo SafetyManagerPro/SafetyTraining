@@ -111,6 +111,8 @@
         .filter(x=>orgs.has(x.owner_organization_id)).map(x=>x.stable_key).filter(Boolean));
       state.staffRoles=permitted.map(x=>x.role);
       setPhase('staff');guardRoute();
+      if(permitted.some(x=>x.role==='organization_admin'||x.role==='training_manager') &&
+          !document.body.classList.contains('admin-open'))void window.SAFETY_ADMIN?.open?.();
       window.SAFETY_SIDEBAR_GROUPS?.loadFull?.();
       window.SAFETY_CATALOG?.load?.(true);
       window.dispatchEvent(new Event('hashchange'));
@@ -166,6 +168,7 @@
   document.getElementById('stAccessOut')?.addEventListener('click',()=>void signOut());
   document.addEventListener('safety:auth-changed',()=>{state.serial++;setPhase('pending');});
   document.addEventListener('safety:cloud-state-changed',()=>{void resolve();});
+  document.addEventListener('safety:cloud-unavailable',()=>setPhase('error'));
   window.addEventListener('hashchange',()=>{if(isAuthenticated())guardRoute();});
   // The cloud module may have completed session initialization before boot.
   if(client()&&cloud()?.identityReady)void resolve();
