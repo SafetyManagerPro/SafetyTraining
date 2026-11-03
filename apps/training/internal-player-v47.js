@@ -4,6 +4,7 @@
  const KEY='sb_publishable_bn9DnocbbBEcf98WAwcSHw_wABCiOSA';
  const root=document.getElementById('internalApp');
  const state={token:'',bundle:null,course:null,deck:[],index:0,lastSlide:null,visitedSlides:0,busy:false,menuOpen:false};
+ let stageResizeObserver=null;
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
  function parseToken(){
   // The bearer token stays in the URL fragment: it is never sent as a referrer.
@@ -22,6 +23,7 @@
   return json;
  }
  function showError(error){
+  stageResizeObserver?.disconnect();
   document.body.classList.remove('deckmode');
   root.innerHTML='<section class="ip-error"><div class="ip-logo">SAFETYTRAINING</div>'+
    '<h1>Non posso aprire il corso</h1><p>'+esc(error?.message||error||'Collegamento non disponibile.')+'</p>'+
@@ -51,6 +53,7 @@
  }
  const pc=()=>state.deck.length?Math.round(100*state.visitedSlides/state.deck.length):0;
  function showHome(){
+  stageResizeObserver?.disconnect();
   document.body.classList.remove('deckmode');
   state.menuOpen=false;
   const c=state.course;
@@ -72,9 +75,13 @@
   const stage=document.getElementById('deckStage'),slide=document.getElementById('projectorSlide');
   if(!stage||!slide)return;
   slide.classList.remove('compact','compact2');
-  const pad=20;
-  const scale=Math.min(Math.max(.1,(stage.clientWidth-pad*2)/1600),Math.max(.1,(stage.clientHeight-pad*2)/900));
-  slide.style.transform='scale('+scale+')';
+  const pad=12;
+  // The original 1600×900 slide must first be centered in the SMALL visible
+  // stage. Scaling it in grid layout alone leaves the content offscreen on phones.
+  const w=stage.clientWidth,h=stage.clientHeight;
+  if(w<1||h<1)return;
+  const scale=Math.min(Math.max(.1,(w-pad*2)/1600),Math.max(.1,(h-pad*2)/900));
+  slide.style.transform='translate(-50%, -50%) scale('+scale+')';
   slide.style.setProperty('--deck-scale',scale);
   requestAnimationFrame(()=>{
    if(slide.scrollHeight>slide.clientHeight+2||slide.scrollWidth>slide.clientWidth+2){
@@ -117,6 +124,12 @@
    if(!document.fullscreenElement)void document.documentElement.requestFullscreen?.();
    else void document.exitFullscreen?.();
   };
+  stageResizeObserver?.disconnect();
+  const stage=document.getElementById('deckStage');
+  if(stage&&typeof ResizeObserver!=='undefined'){
+   stageResizeObserver=new ResizeObserver(()=>requestAnimationFrame(fit));
+   stageResizeObserver.observe(stage);
+  }
   requestAnimationFrame(fit);
  }
  function openIndex(){
@@ -172,7 +185,8 @@
  }};
  // Original module slides call deckGo; only our token-gated navigation may move.
  window.deckGo=(_courseId,index)=>void go(Number(index));
- window.addEventListener('resize',()=>{if(document.body.classList.contains('deckmode'))fit();});
+ window.addEventListener('resize',()=>{if(document.body.classList.contains('deckmode'))requestAnimationFrame(fit);});
+ window.visualViewport?.addEventListener?.('resize',()=>{if(document.body.classList.contains('deckmode'))requestAnimationFrame(fit);});
  document.addEventListener('fullscreenchange',()=>{if(document.body.classList.contains('deckmode'))requestAnimationFrame(fit);});
  document.addEventListener('keydown',event=>{
   if(document.getElementById('answerOverlay')||document.getElementById('videoOverlay')){
