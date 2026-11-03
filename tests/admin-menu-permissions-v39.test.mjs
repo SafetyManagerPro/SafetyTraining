@@ -39,3 +39,33 @@ test('entrypoint and offline cache reference all new assets',()=>{
  }
  assert.match(sw,/const CACHE='safety-training-[^']+'/);
 });
+
+
+test('v47.1: menu reorder reaches a fixed point instead of moving both groups forever',()=>{
+ const code=read('apps/training/admin-menu-v39.js');
+ assert.match(code,/internal\.nextElementSibling!==advanced/);
+ assert.match(code,/home\.nextElementSibling!==\(internal\|\|advanced\)/);
+ assert.doesNotMatch(code,/for\(const id of \['home','internal'\]\)/);
+ assert.match(code,/if\(advanced\.hidden===anyAdvanced\)advanced\.hidden=!anyAdvanced/);
+ assert.doesNotMatch(code,/^\s*advanced\.hidden=!anyAdvanced;/m);
+ const nodes=['advanced','home','internal'];
+ const insertBefore=(item,target)=>{
+  const from=nodes.indexOf(item);
+  if(from<0)throw Error('missing node');
+  nodes.splice(from,1);
+  const idx=nodes.indexOf(target);
+  if(idx<0)throw Error('missing target');
+  nodes.splice(idx,0,item);
+ };
+ const next=(item)=>nodes[nodes.indexOf(item)+1]||null;
+ let moves=0;
+ const converge=()=>{
+  if(next('internal')!=='advanced'){insertBefore('internal','advanced');moves++;}
+  if(next('home')!=='internal'){insertBefore('home','internal');moves++;}
+ };
+ converge();
+ assert.deepEqual(nodes,['home','internal','advanced']);
+ const firstMoves=moves;assert.ok(firstMoves>0);
+ converge();
+ assert.equal(moves,firstMoves,'second render must never rearrange DOM again');
+});
