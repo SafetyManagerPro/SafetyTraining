@@ -1,7 +1,7 @@
 /* SafetyTraining v47 — corsisti interni: independent, non-certifying link-only workflow. */
 (()=>{'use strict';
  const ORIGIN='https://safety-training-safety-manager.vercel.app';
- const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterStatus:'all',notice:'',error:false};
+ const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterStatus:'all',editPerson:'',notice:'',error:false};
  const db=()=>window.SAFETY_CLOUD?.state?.client;
  const gate=()=>window.SAFETY_ACCESS_V46_10?.state;
  const root=()=>document.getElementById('adminContent');
@@ -75,6 +75,8 @@
   const courseFilters=assignedCourses.map(c=>option(c.id,c.title+' · v'+c.version,c.id===state.filterCourse)).join('');
   const choices=courses.map(c=>option(c.version_id,c.title+' · v'+c.version_number+' ('+c.unit_count+' sezioni)',false)).join('');
   const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code+' · '+(p.company_name||'Generico'),false)).join('');
+  const editorRoster='<option value="">Seleziona un corsista da modificare…</option>'+
+   people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code,p.id===state.editPerson)).join('');
   root().innerHTML='<div class="iv47">'+
    '<section class="iv47-card"><h2>Corsisti interni · formazione non certificante</h2>'+
    '<p>Un corsista può seguire più corsi contemporaneamente e nel tempo, con link e progressi separati. Nessun account o password. La percentuale non è una certificazione.</p>'+
@@ -95,13 +97,33 @@
    '<div class="iv47-actions" style="grid-column:1/-1"><button type="submit" class="primary"'+(courses.length?'':' disabled')+'>Genera link personale</button></div></form>'+
    (courses.length?'':'<p>Nessun corso pubblicato e disponibile per questa organizzazione.</p>')+
    '</section>'+
-   '<section class="iv47-card" id="iv47LinkCard"'+(state.link?'':' hidden')+'><h2>2. Condividi il link</h2>'+
+   '<section class="iv47-card" id="iv47RegistryCard"><h2>2. Gestione e modifica anagrafica</h2>'+
+   '<p>Seleziona un corsista per correggere o integrare la sua scheda. Le modifiche non cambiano i corsi assegnati, i link personali o i progressi.</p>'+
+   '<label>Corsista da modificare<select id="iv47EditPerson">'+editorRoster+'</select></label>'+
+   '<form id="iv47EditForm" class="iv47-fields"'+(state.editPerson?'':' hidden')+'>'+
+   '<label>Nome<input id="iv47EditFirst" name="first_name" maxlength="120" required autocomplete="given-name"></label>'+
+   '<label>Cognome<input id="iv47EditLast" name="last_name" maxlength="120" required autocomplete="family-name"></label>'+
+   '<label>Codice fiscale<input id="iv47EditCF" name="fiscal_code" maxlength="16" minlength="16" pattern="[a-zA-Z0-9]{16}" required autocomplete="off" style="text-transform:uppercase"></label>'+
+   '<label>Email<input id="iv47EditEmail" name="email" type="email" maxlength="250" autocomplete="email"></label>'+
+   '<label>Azienda<input id="iv47EditCompany" name="company_name" list="iv47Companies" maxlength="180" placeholder="Generico"></label>'+
+   '<label>Telefono<input id="iv47EditPhone" name="phone" type="tel" maxlength="40" autocomplete="tel"></label>'+
+   '<label>Qualifica / Mansione<input id="iv47EditJob" name="job_title" maxlength="120"></label>'+
+   '<label>Data di nascita<input id="iv47EditBirthDate" name="birth_date" type="date"></label>'+
+   '<label>Comune di nascita<input id="iv47EditBirthCity" name="birth_city" maxlength="120"></label>'+
+   '<label>Indirizzo di residenza<input id="iv47EditAddress" name="residence_address" maxlength="250"></label>'+
+   '<label class="iv47-wide">Note interne<textarea id="iv47EditNotes" name="notes" rows="3" maxlength="1500" placeholder="Informazioni aggiuntive facoltative"></textarea></label>'+
+   '<div class="iv47-actions iv47-wide"><button type="submit" class="primary" id="iv47SavePerson">Salva modifiche anagrafiche</button>'+
+   '<button type="button" id="iv47CancelEdit">Chiudi scheda</button></div>'+
+   '</form>'+
+   '<p class="iv47-muted">Il codice fiscale deve restare univoco all’interno dell’organizzazione. Le schede eliminate si ripristinano dal filtro Eliminati.</p>'+
+   '</section>'+
+   '<section class="iv47-card" id="iv47LinkCard"'+(state.link?'':' hidden')+'><h2>3. Condividi il link</h2>'+
    '<p>'+esc(state.linkRecipient?('Destinatario: '+state.linkRecipient+' · '+state.linkCourse+'. '):'')+'Il link è pronto per essere copiato o condiviso. Per ragioni di sicurezza, il link precedente è disattivato quando viene rigenerato; il corsista conserva tutti i progressi.</p>'+
    '<div class="iv47-clipboard"><input readonly id="iv47LinkValue" aria-label="Link personale" value="'+esc(state.link)+'">'+
    '<div class="iv47-actions"><button type="button" class="primary" id="iv47Copy">Copia link</button>'+
    '<button type="button" id="iv47EmailLink">Prepara email</button>'+
    '<button type="button" id="iv47Share">Condividi</button></div><p class="iv47-muted">L’email viene aperta nel programma di posta: controlla e conferma tu l’invio. Non viene spedita automaticamente.</p></div></section>'+
-   '<section class="iv47-card"><h2>3. Controlla i progressi</h2>'+
+   '<section class="iv47-card"><h2>4. Controlla i progressi</h2>'+
    '<div class="iv47-actions"><button type="button" id="iv47Refresh">Aggiorna progressi</button></div>'+ 
    '<div class="iv47-filters">'+
    '<label>Filtra per corso<select id="iv47CourseFilter">'+option('','Tutti i corsi',!state.filterCourse)+courseFilters+'</select></label>'+ 
@@ -136,6 +158,7 @@
    const firstOfPerson=!seenPeople.has(a.person_id);seenPeople.add(a.person_id);
    const management=firstOfPerson?(a.archived_at?
     '<button type="button" data-internal-restore-person="'+esc(a.person_id)+'">Ripristina corsista</button>':
+    '<button type="button" data-internal-edit-person="'+esc(a.person_id)+'">Modifica anagrafica</button> '+
     '<button type="button" class="danger" data-internal-delete-person="'+esc(a.person_id)+'">Elimina corsista</button>'):'';
    return '<tr><td><strong>'+esc(a.last_name+' '+a.first_name)+'</strong><div class="iv47-muted">'+esc(a.fiscal_code)+'</div></td>'+
     '<td>'+esc(a.company_name||'Generico')+'</td>'+
@@ -156,6 +179,7 @@
   body.querySelectorAll('[data-internal-rotate]').forEach(btn=>btn.onclick=()=>void rotate(btn.dataset.internalRotate));
   body.querySelectorAll('[data-internal-revoke]').forEach(btn=>btn.onclick=()=>void revoke(btn.dataset.internalRevoke));
   body.querySelectorAll('[data-internal-repeat]').forEach(btn=>btn.onclick=()=>void repeatCourse(btn.dataset.internalRepeat));
+  body.querySelectorAll('[data-internal-edit-person]').forEach(btn=>btn.onclick=()=>editPerson(btn.dataset.internalEditPerson));
   body.querySelectorAll('[data-internal-delete-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalDeletePerson,false));
   body.querySelectorAll('[data-internal-restore-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalRestorePerson,true));
  }
@@ -258,7 +282,65 @@
     'Nuovo percorso creato, il precedente resta nello storico. Copia o invia il nuovo link.');
   });
  }
- async function saveCompany(){
+ function fillPersonEditor(){
+  const form=document.getElementById('iv47EditForm');
+  if(!form)return;
+  const record=(state.data?.people||[]).find(p=>p.id===state.editPerson&&!p.archived_at);
+  form.hidden=!record;
+  if(!record)return;
+  const fields={
+   iv47EditFirst:record.first_name,iv47EditLast:record.last_name,
+   iv47EditCF:record.fiscal_code,iv47EditEmail:record.email,
+   iv47EditCompany:record.company_name==='Generico'?'':record.company_name,
+   iv47EditPhone:record.phone,iv47EditJob:record.job_title,
+   iv47EditBirthDate:record.birth_date,iv47EditBirthCity:record.birth_city,
+   iv47EditAddress:record.residence_address,iv47EditNotes:record.notes
+  };
+  for(const [id,value] of Object.entries(fields)){
+   const field=document.getElementById(id);if(field)field.value=value??'';
+  }
+ }
+ function editPerson(personId){
+  const record=(state.data?.people||[]).find(p=>p.id===personId&&!p.archived_at);
+  if(!record){notice('Corsista non disponibile. Aggiorna la schermata.',true);return;}
+  state.editPerson=personId;
+  const selector=document.getElementById('iv47EditPerson');if(selector)selector.value=personId;
+  fillPersonEditor();
+  document.getElementById('iv47RegistryCard')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+ }
+ async function savePerson(event){
+  event.preventDefault();
+  await operate(async()=>{
+   const snapshot=await requireData();
+   const person=snapshot.people.find(p=>p.id===state.editPerson&&!p.archived_at);
+   const form=document.getElementById('iv47EditForm');
+   if(!person||!form)throw Error('Seleziona un corsista attivo da modificare.');
+   if(!form.reportValidity())return;
+   const value=id=>document.getElementById(id)?.value.trim()||'';
+   const first=value('iv47EditFirst'),last=value('iv47EditLast');
+   const cf=value('iv47EditCF').toUpperCase().replace(/\s/g,'');
+   const email=value('iv47EditEmail'),company=value('iv47EditCompany')||'Generico';
+   const birth=value('iv47EditBirthDate');
+   if(first.length<2||last.length<2||!/^[A-Z0-9]{16}$/.test(cf))throw Error('Verifica nome, cognome e codice fiscale (16 caratteri).');
+   if(birth&&birth>new Date().toISOString().slice(0,10))throw Error('La data di nascita non può essere futura.');
+   const other=snapshot.people.find(p=>p.id!==person.id&&p.fiscal_code===cf);
+   if(other)throw Error('Il codice fiscale è già utilizzato da un altro corsista interno.');
+   await rpc('internal_admin_update_person_v47_10',{
+    p_person_id:person.id,p_first_name:first,p_last_name:last,p_fiscal_code:cf,
+    p_email:email||null,p_company_name:company,p_phone:value('iv47EditPhone')||null,
+    p_job_title:value('iv47EditJob')||null,p_birth_date:birth||null,
+    p_birth_city:value('iv47EditBirthCity')||null,
+    p_residence_address:value('iv47EditAddress')||null,
+    p_notes:value('iv47EditNotes')||null,p_expected_updated_at:person.updated_at
+   });
+   if(await load()){
+    await render();
+    notice('Anagrafica aggiornata. Corsi, link e progressi sono rimasti invariati.');
+    document.getElementById('iv47RegistryCard')?.scrollIntoView?.({block:'start'});
+   }
+  });
+ }
+  async function saveCompany(){
   await operate(async()=>{
    const personId=document.getElementById('iv47Person')?.value;
    if(!personId)throw Error('Seleziona prima un corsista esistente.');
@@ -295,8 +377,13 @@
  }
  function bind(){
   const org=document.getElementById('iv47Org');if(org)org.onchange=()=>void operate(async()=>{
-   state.org=org.value;state.link='';state.search='';state.filterStatus='all';state.filterCourse='';if(await load())await render();
+   state.org=org.value;state.link='';state.search='';state.filterStatus='all';state.filterCourse='';state.editPerson='';if(await load())await render();
   });
+  const editorSelect=document.getElementById('iv47EditPerson');
+  if(editorSelect)editorSelect.onchange=()=>{state.editPerson=editorSelect.value;fillPersonEditor();};
+  document.getElementById('iv47EditForm')?.addEventListener('submit',event=>void savePerson(event));
+  document.getElementById('iv47CancelEdit')?.addEventListener('click',()=>{state.editPerson='';if(editorSelect)editorSelect.value='';fillPersonEditor();});
+  fillPersonEditor();
   const person=document.getElementById('iv47Person');if(person)person.onchange=()=>{
    const p=(state.data?.people||[]).find(p=>p.id===person.value);
    document.getElementById('iv47First').value=p?.first_name||'';
@@ -332,7 +419,7 @@
  }
  async function open(){
   if(!allowed())return alert('Accesso amministrativo richiesto.');
-  state.open=true;state.seq++;state.link='';state.linkRecipient='';state.linkCourse='';state.search='';state.filterCourse='';state.filterStatus='all';state.notice='';state.error=false;
+  state.open=true;state.seq++;state.link='';state.linkRecipient='';state.linkCourse='';state.editPerson='';state.search='';state.filterCourse='';state.filterStatus='all';state.notice='';state.error=false;
   document.getElementById('adminShell')?.classList.remove('admin-mobile-nav-open');
   header();if(root())root().innerHTML='<div class="iv47">Carico corsisti interni e corsi…</div>';
   try{if(await load())await render();}
@@ -341,7 +428,7 @@
  function boot(){
   ensureNav();
   document.addEventListener('safety:access-ready',ensureNav);
-  document.addEventListener('safety:auth-changed',()=>{state.open=false;state.data=null;state.link='';state.linkRecipient='';state.linkCourse='';state.org='';state.seq++;ensureNav();});
+  document.addEventListener('safety:auth-changed',()=>{state.open=false;state.data=null;state.link='';state.linkRecipient='';state.linkCourse='';state.org='';state.editPerson='';state.seq++;ensureNav();});
   nav()?.addEventListener('click',e=>{if(!e.target.closest('#adminInternalV47Nav'))state.open=false;},true);
  }
  window.SAFETY_INTERNAL_V47={open};
