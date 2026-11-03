@@ -55,12 +55,16 @@ declare assigned jsonb; name_value text;
 begin
  if auth.uid() is null or not private.can_manage_training_org(p_org_id) then
   raise exception 'training_admin_scope_required' using errcode='42501';end if;
- name_value:=coalesce(nullif(btrim(p_company_name),''),'Generico');
- if length(name_value)>180 then raise exception 'company_name_too_long' using errcode='22023';end if;
+ name_value:=nullif(btrim(p_company_name),'');
+ if name_value is not null and length(name_value)>180 then raise exception 'company_name_too_long' using errcode='22023';end if;
  assigned:=public.internal_admin_assign_v47(
   p_org_id,p_first_name,p_last_name,p_fiscal_code,p_email,p_course_version_id,p_token_hash);
- update private.internal_people_v47 set company_name=name_value,updated_at=now()
- where id=(assigned->>'person_id')::uuid and organization_id=p_org_id;
+ -- When the field is left blank for a returning learner, keep their company;
+ -- new people already default to "Generico".
+ if name_value is not null then
+  update private.internal_people_v47 set company_name=name_value,updated_at=now()
+  where id=(assigned->>'person_id')::uuid and organization_id=p_org_id;
+ end if;
  return assigned;
 end;$func$;
 
