@@ -1382,3 +1382,10 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 - Fix: ordina i gruppi `home → internal → advanced` soltanto se il vicino successivo non è già corretto; la seconda chiamata non muta il DOM. Aggiunto test di regressione nel test menu.
 - Il database Supabase risulta raggiungibile e il deploy v47 precedente ha check GitHub riusciti, ma il collaudo visivo/login in browser non è stato completato senza accesso a @Vercel.
 - Nessuna modifica a corsi, slide, immagini, iscrizioni, password, permessi o tabelle Supabase.
+
+## 2026-11-03 — v47.2 correzione generazione link corsisti interni
+- Errore segnalato dall'amministratore: `column reference "c.id" is ambiguous` durante `Genera link personale`.
+- Causa riprodotta nella definizione SQL `public.internal_admin_assign_v47`: alias `c` usato contemporaneamente come variabile PL/pgSQL (`c public.courses%rowtype`) e alias `public.courses c`. PostgreSQL non poteva risolvere `c.id`.
+- Migrazione additiva `20261103094000_v47_2_unambiguous_internal_course.sql`: alias `course_catalog`, record `course_row`, invariati controlli amministrativi, versione pubblicata e vincoli corsi frozen. Migrazione APPLICATA su Supabase in data 2026-11-03.
+- Verifica transazionale: funzione chiamata con account admin di prova, versione pubblicata valida, token hash fittizio; inserimento controllato e rollback effettuato automaticamente. Verifica dopo il test: 0 persone, 0 assegnazioni, 0 visite nel sistema corsisti interni; definizione SQL aggiornata. Nessun dato reale creato o eliminato.
+- Regression test aggiunto; nessuna modifica a contenuti corsi, slide, permessi, iscrizioni pregresse, credenziali o frontend. Resta da verificare operativamente l'invio di un link reale.
