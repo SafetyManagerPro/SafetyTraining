@@ -83,7 +83,7 @@ test('primary admin menu exposes Corsisti interni and preserves advanced e-learn
 
 test('v47.2: internal course link generation SQL uses a unique alias for the selected course',()=>{
  const fix=read('supabase/migrations/20261103094000_v47_2_unambiguous_internal_course.sql');
- assert.match(fix,/declare[^;]*course_row public\.courses%rowtype/);
+ assert.match(fix,/\bcourse_row public\.courses%rowtype;/);
  assert.match(fix,/select course_catalog\.\* into course_row from public\.courses course_catalog/);
  assert.match(fix,/v\.course_id=course_catalog\.id/);
  assert.match(fix,/'course_title',course_row\.title/);
