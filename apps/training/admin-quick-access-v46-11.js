@@ -11,6 +11,7 @@ const root=()=>document.getElementById('adminContent');
 const nav=()=>document.querySelector('#adminShell .admin-nav nav');
 const learner=()=>s.data?.learners.find(x=>x.id===s.learnerId)||null;
 const title=x=>[x?.last_name,x?.first_name].filter(Boolean).join(' ')||x?.email||'Corsista';
+const abc=new Intl.Collator('it-IT',{sensitivity:'base',numeric:true});
 const validAdmin=()=>!!actor()&&!!db()&&['admin','staff'].includes(gate()?.state?.phase)&&
   (gate()?.state?.phase==='admin'||gate()?.state?.staffRoles?.some(r=>['organization_admin','training_manager'].includes(r)));
 const errorMessage=e=>String(e?.message||e||'Operazione non riuscita.').slice(0,220);
@@ -75,18 +76,18 @@ async function load(){
 function edTitle(e){const v=s.data.versions.find(x=>x.id===e.course_version_id);const c=s.data.courses.find(x=>x.id===v?.course_id);return (c?.title||e.title||'Corso')+' · '+(e.title||'Edizione');}
 function options(){
  const l=learner();if(!l)return {editions:[],versions:[]};
- const editions=s.data.editions.filter(e=>e.organization_id===l.organization_id&&(!e.company_id||e.company_id===l.company_id));
+ const editions=s.data.editions.filter(e=>e.organization_id===l.organization_id&&(!e.company_id||e.company_id===l.company_id)).sort((a,b)=>abc.compare(edTitle(a),edTitle(b)));
  const courses=s.data.courses.filter(c=>c.active&&(!c.owner_organization_id||c.owner_organization_id===l.organization_id)
    &&!c.metadata?.frozen&&!c.metadata?.freeze_scope);
  const ids=new Set(courses.map(c=>c.id));
- const versions=s.data.versions.filter(v=>ids.has(v.course_id));
+ const versions=s.data.versions.filter(v=>ids.has(v.course_id)).sort((a,b)=>abc.compare(s.data.courses.find(c=>c.id===a.course_id)?.title,s.data.courses.find(c=>c.id===b.course_id)?.title)||Number(a.version_number)-Number(b.version_number));
  return {editions,versions};
 }
 async function draw(){
  if(!s.open||!validAdmin()||!root())return;
  ensureNav();setHeader();ensureStyles();
  const q=s.query.toLocaleLowerCase('it-IT');
- const matches=s.data.learners.filter(x=>x.active&&[title(x),x.email||''].some(v=>v.toLocaleLowerCase('it-IT').includes(q)));
+ const matches=s.data.learners.filter(x=>x.active&&[title(x),x.email||''].some(v=>v.toLocaleLowerCase('it-IT').includes(q))).sort((a,b)=>abc.compare(title(a),title(b)));
  // Never retain a hidden learner from an earlier search when acting on a visible selection.
  if(!matches.some(x=>x.id===s.learnerId))s.learnerId=matches[0]?.id||'';
  const l=learner(),{editions,versions}=options();

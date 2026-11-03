@@ -94,7 +94,7 @@
   for(const r of [editions,versions,courses])if(r.error)throw r.error;
   const vm=new Map((versions.data||[]).map(x=>[x.id,x.course_id]));
   const cm=new Map((courses.data||[]).map(x=>[x.id,x.title]));
-  return (editions.data||[]).map(x=>({...x,display:[x.title||cm.get(vm.get(x.course_version_id))||'Corso',cm.get(vm.get(x.course_version_id))].filter(Boolean).join(' · ')}));
+  return (editions.data||[]).map(x=>({...x,display:[x.title||cm.get(vm.get(x.course_version_id))||'Corso',cm.get(vm.get(x.course_version_id))].filter(Boolean).join(' · ')})).sort((a,b)=>a.display.localeCompare(b.display,'it-IT',{numeric:true,sensitivity:'base'}));
  }
  const choice=(edition)=>'<option value="'+esc(edition.id)+'"'+(edition.id===state.editionId?' selected':'')+'>'+esc(edition.display)+'</option>';
  const requestRows=(requests,invites=new Map(),activeReview=null)=>{
