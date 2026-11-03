@@ -1,7 +1,7 @@
 /* SafetyTraining v47 — corsisti interni: independent, non-certifying link-only workflow. */
 (()=>{'use strict';
  const ORIGIN='https://safety-training-safety-manager.vercel.app';
- const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',notice:'',error:false};
+ const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',notice:'',error:false};
  const db=()=>window.SAFETY_CLOUD?.state?.client;
  const gate=()=>window.SAFETY_ACCESS_V46_10?.state;
  const root=()=>document.getElementById('adminContent');
@@ -12,6 +12,8 @@
  const percent=(a)=>Number(a.total_slides)>0?
   Math.round(100*Number(a.visited_slides||0)/Math.max(1,Number(a.total_slides))):
   Math.round(100*Number(a.visited_count||0)/Math.max(1,Number(a.total_units||0)));
+ const lastSlide=a=>Number.isInteger(a.last_slide_index)&&Number(a.total_slides)>0?'Slide '+(a.last_slide_index+1)+' di '+a.total_slides:'Non iniziato';
+ const currentTopic=a=>[a.current_module_title,a.current_unit_title].filter(Boolean).join(' › ')||'Argomento non ancora raggiunto';
  const status=a=>!a.active?(percent(a)>=100?'Storico · terminato':'Storico · disattivato'):!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
  function ensureNav(){
   const n=nav();if(!n)return;
@@ -86,13 +88,14 @@
    (courses.length?'':'<p>Nessun corso pubblicato e disponibile per questa organizzazione.</p>')+
    '</section>'+
    '<section class="iv47-card" id="iv47LinkCard"'+(state.link?'':' hidden')+'><h2>2. Condividi il link</h2>'+
-   '<p>Il corsista apre il collegamento e segue direttamente il corso. Il link si mostra una volta sola: per sostituirlo puoi generarne uno nuovo, conservando i progressi.</p>'+
+   '<p>'+esc(state.linkRecipient?('Destinatario: '+state.linkRecipient+' · '+state.linkCourse+'. '):'')+'Il link è pronto per essere copiato o condiviso. Per ragioni di sicurezza, il link precedente è disattivato quando viene rigenerato; il corsista conserva tutti i progressi.</p>'+
    '<div class="iv47-clipboard"><input readonly id="iv47LinkValue" aria-label="Link personale" value="'+esc(state.link)+'">'+
    '<div class="iv47-actions"><button type="button" class="primary" id="iv47Copy">Copia link</button>'+
-   '<button type="button" id="iv47EmailLink">Apri email</button>'+
-   '<button type="button" id="iv47Share">Condividi</button></div></div></section>'+
+   '<button type="button" id="iv47EmailLink">Prepara email</button>'+
+   '<button type="button" id="iv47Share">Condividi</button></div><p class="iv47-muted">L’email viene aperta nel programma di posta: controlla e conferma tu l’invio. Non viene spedita automaticamente.</p></div></section>'+
    '<section class="iv47-card"><h2>3. Controlla i progressi</h2>'+
-   '<label>Cerca nome, codice fiscale o corso<input id="iv47Search" placeholder="Cerca corsista o corso…" autocomplete="off"></label>'+
+   '<div class="iv47-actions"><button type="button" id="iv47Refresh">Aggiorna progressi</button></div>'+ 
+   '<label>Cerca nome, codice fiscale o corso<input id="iv47Search" value="'+esc(state.search)+'" placeholder="Cerca corsista o corso…" autocomplete="off"></label>'+
    '<div class="iv47-table"><table><thead><tr><th>Corsista</th><th>Corso</th><th>Avanzamento</th><th>Ultima attività</th><th>Stato</th><th>Gestione link</th></tr></thead>'+
    '<tbody id="iv47Rows"></tbody></table></div></section>'+
    '<p id="iv47Notice" class="iv47-notice'+(state.error?' iv47-error':'')+'" role="status" aria-live="polite">'+esc(state.notice)+'</p>'+
@@ -105,14 +108,18 @@
   const items=(state.data?.assignments||[]).filter(a=>[a.first_name,a.last_name,a.fiscal_code,a.course_title].some(x=>String(x||'').toLowerCase().includes(q)));
   body.innerHTML=items.map(a=>{
    const pct=percent(a);
+   const last=lastSlide(a);
+   const topic=currentTopic(a);
    const anotherActive=(state.data?.assignments||[]).some(x=>x.active&&x.person_id===a.person_id&&x.course_version_id===a.course_version_id&&x.id!==a.id);
    return '<tr><td><strong>'+esc(a.last_name+' '+a.first_name)+'</strong><div class="iv47-muted">'+esc(a.fiscal_code)+'</div></td>'+
     '<td>'+esc(a.course_title)+' <small>v'+esc(a.version_number)+'</small><div class="iv47-muted">Assegnato: '+esc(fmt(a.created_at))+'</div></td>'+
-    '<td><progress max="100" value="'+pct+'"></progress><div>'+pct+'% · '+
-     (Number(a.total_slides)>0?esc(a.visited_slides)+'/'+esc(a.total_slides)+' slide aperte · ultima slide '+(Number(a.last_slide_index||0)+1):
-      esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div></td>'+
+    '<td><progress max="100" value="'+pct+'"></progress><div><strong>'+pct+'%</strong> · '+
+     (Number(a.total_slides)>0?esc(a.visited_slides)+'/'+esc(a.total_slides)+' slide aperte':
+      esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div>'+ 
+     '<div class="iv47-progress-detail">Ultima posizione: '+esc(last)+'</div>'+ 
+     '<div class="iv47-progress-detail">'+esc(topic)+'</div></td>'+
     '<td>'+esc(fmt(a.last_activity_at||a.last_opened_at))+'</td><td>'+esc(status(a))+'</td><td>'+
-    (a.active||!anotherActive?'<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Nuovo link':'Nuovo ciclo')+'</button> ':'<span class="iv47-muted">Storico</span> ')+
+    (a.active||!anotherActive?'<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Reinvia link':'Nuovo ciclo')+'</button> ':'<span class="iv47-muted">Storico</span> ')+
     (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
     (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':'')+'</td></tr>';
   }).join('')||'<tr><td colspan="6">Nessuna assegnazione interna.</td></tr>';
@@ -128,9 +135,28 @@
   const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token));
   return Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('');
  };
- function showLink(token,email=''){
+ function showLink(token,email='',recipient='',course=''){
   state.link=ORIGIN+'/interno.html#t='+token;
   state.email=email;
+  state.linkRecipient=recipient;
+  state.linkCourse=course;
+ }
+ function revealLink(){
+  document.getElementById('iv47LinkCard')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+ }
+ async function presentLink(token,email,recipient,course,message){
+  if(!state.open||!allowed())return;
+  showLink(token,email,recipient,course);
+  notice(message);
+  // Make the newly issued token visible BEFORE refreshing the assignment list.
+  // If the progress RPC fails, the admin must still be able to copy and send it.
+  await render();
+  revealLink();
+  try{
+   if(await load()){await render();revealLink();}
+  }catch(e){
+   notice('Il nuovo link è disponibile nel pannello qui sopra. Non sono riuscito ad aggiornare i progressi: '+String(e?.message||e),true);
+  }
  }
  async function operate(fn){
   if(state.busy||!allowed())return;
@@ -161,9 +187,9 @@
    }
    const token=newToken();
    await rpc('internal_admin_assign_v47',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token)});
-   if(!state.open||!allowed())return;
-   showLink(token,email);notice('Assegnazione salvata. Condividi subito il link personale.');
-   if(await load())await render();
+   const chosen=snapshot.courses.find(c=>c.version_id===version);
+   await presentLink(token,email,first+' '+last,chosen?.title||'Corso interno',
+    'Assegnazione salvata. Copia il link oppure prepara un’email da inviare.');
   });
  }
  async function rotate(id){
@@ -176,17 +202,15 @@
     const token=newToken();
     await rpc('internal_admin_assign_v47',{p_org_id:state.org,p_first_name:a.first_name,p_last_name:a.last_name,
      p_fiscal_code:a.fiscal_code,p_email:a.email||null,p_course_version_id:a.course_version_id,p_token_hash:await tokenHash(token)});
-    if(!state.open||!allowed())return;
-    showLink(token,a.email||'');notice('Nuovo percorso creato, storico conservato.');
-    if(await load())await render();
+    await presentLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title,
+     'Nuovo percorso creato, storico conservato. Copia o invia il nuovo link.');
     return;
    }
-   if(!confirm('Generare un nuovo link per '+a.first_name+' '+a.last_name+'? Il vecchio link smetterà di funzionare, ma i progressi resteranno invariati.'))return;
+   if(!confirm('Reinviare l’accesso a '+a.first_name+' '+a.last_name+' per “'+a.course_title+'”? Verrà creato un NUOVO link: quello precedente smetterà di funzionare. Le slide già viste e i progressi resteranno invariati.'))return;
    const token=newToken();
    await rpc('internal_admin_link_v47',{p_assignment_id:id,p_token_hash:await tokenHash(token),p_revoke:false});
-   if(!state.open||!allowed())return;
-   showLink(token,a.email||'');notice('Nuovo link pronto. Il collegamento precedente è stato disattivato.');
-   if(await load())await render();
+   await presentLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title,
+    'Nuovo link pronto. Il precedente è disattivato; il progresso è conservato. Copia il link oppure prepara l’email.');
   });
  }
  async function repeatCourse(id){
@@ -197,9 +221,8 @@
    if(!confirm('Ripetere “'+a.course_title+'” per '+a.first_name+' '+a.last_name+'? Il percorso precedente sarà conservato nello storico, il vecchio link disattivato e il nuovo inizierà da zero.'))return;
    const token=newToken();
    await rpc('internal_admin_repeat_v47_6',{p_assignment_id:id,p_token_hash:await tokenHash(token)});
-   if(!state.open||!allowed())return;
-   showLink(token,a.email||'');notice('Nuovo percorso creato. Il precedente resta nello storico con i progressi conservati.');
-   if(await load())await render();
+   await presentLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title,
+    'Nuovo percorso creato, il precedente resta nello storico. Copia o invia il nuovo link.');
   });
  }
  async function revoke(id){
@@ -214,7 +237,7 @@
  }
  function bind(){
   const org=document.getElementById('iv47Org');if(org)org.onchange=()=>void operate(async()=>{
-   state.org=org.value;state.link='';if(await load())await render();
+   state.org=org.value;state.link='';state.search='';if(await load())await render();
   });
   const person=document.getElementById('iv47Person');if(person)person.onchange=()=>{
    const p=(state.data?.people||[]).find(p=>p.id===person.value);
@@ -224,26 +247,29 @@
    document.getElementById('iv47Email').value=p?.email||'';
   };
   document.getElementById('iv47Form')?.addEventListener('submit',event=>void assign(event));
-  document.getElementById('iv47Search')?.addEventListener('input',paintRows);
+  document.getElementById('iv47Search')?.addEventListener('input',event=>{state.search=event.target.value;paintRows();});
+  document.getElementById('iv47Refresh')?.addEventListener('click',()=>void operate(async()=>{
+   if(await load()){await render();notice('Progressi aggiornati.');}
+  }));
   document.getElementById('iv47Copy')?.addEventListener('click',async()=>{
    try{await navigator.clipboard.writeText(state.link);notice('Link copiato.');}
    catch{const inp=document.getElementById('iv47LinkValue');inp?.select();notice('Seleziona e copia il link con il dispositivo.');}
   });
   document.getElementById('iv47EmailLink')?.addEventListener('click',()=>{
    if(!state.link)return;
-   const sub=encodeURIComponent('SafetyTraining — il tuo corso interno');
-   const body=encodeURIComponent('Apri questo link per seguire il corso assegnato, senza registrarti:\n'+state.link+'\n\nPuoi riaprirlo per riprendere il percorso.');
+   const sub=encodeURIComponent('SafetyTraining — '+(state.linkCourse||'corso interno'));
+   const body=encodeURIComponent('Ciao'+(state.linkRecipient?' '+state.linkRecipient:'')+',\n\nper seguire il corso “'+(state.linkCourse||'assegnato')+'” apri questo link personale (senza registrazione):\n'+state.link+'\n\nPuoi riaprirlo per riprendere il percorso dall’ultima slide.');
    window.location.href='mailto:'+encodeURIComponent(state.email||'')+'?subject='+sub+'&body='+body;
   });
   document.getElementById('iv47Share')?.addEventListener('click',async()=>{
    if(!state.link)return;
-   if(navigator.share){try{await navigator.share({title:'SafetyTraining — corso interno',url:state.link});}catch(_){}}
+   if(navigator.share){try{await navigator.share({title:'SafetyTraining — '+(state.linkCourse||'corso interno'),text:'Link personale per il corso interno',url:state.link});}catch(_){}}
    else{try{await navigator.clipboard.writeText(state.link);notice('Link copiato.');}catch{notice('Copia il link dal campo qui sopra.',true);}}
   });
  }
  async function open(){
   if(!allowed())return alert('Accesso amministrativo richiesto.');
-  state.open=true;state.seq++;state.link='';state.notice='';state.error=false;
+  state.open=true;state.seq++;state.link='';state.linkRecipient='';state.linkCourse='';state.search='';state.notice='';state.error=false;
   document.getElementById('adminShell')?.classList.remove('admin-mobile-nav-open');
   header();if(root())root().innerHTML='<div class="iv47">Carico corsisti interni e corsi…</div>';
   try{if(await load())await render();}
@@ -252,7 +278,7 @@
  function boot(){
   ensureNav();
   document.addEventListener('safety:access-ready',ensureNav);
-  document.addEventListener('safety:auth-changed',()=>{state.open=false;state.data=null;state.link='';state.org='';state.seq++;ensureNav();});
+  document.addEventListener('safety:auth-changed',()=>{state.open=false;state.data=null;state.link='';state.linkRecipient='';state.linkCourse='';state.org='';state.seq++;ensureNav();});
   nav()?.addEventListener('click',e=>{if(!e.target.closest('#adminInternalV47Nav'))state.open=false;},true);
  }
  window.SAFETY_INTERNAL_V47={open};
