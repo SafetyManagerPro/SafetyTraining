@@ -63,9 +63,9 @@
     const host = document.getElementById('adminContent');
     if (!host) return;
     const organizations = snapshot?.organizations || [];
-    const activeOrganizations = organizations.filter(o => o.organization_active);
+    const activeOrganizations = organizations.filter(o => o.organization_active).sort((a,b)=>(a.organization_name||'').localeCompare(b.organization_name||'','it-IT',{sensitivity:'base',numeric:true}));
     const memberships = snapshot?.memberships || [];
-    const rows = memberships.map(item => {
+    const rows = [...memberships].sort((a,b)=>(a.email||'').localeCompare(b.email||'','it-IT',{sensitivity:'base',numeric:true})).map(item => {
       const canReactivate = item.organization_active !== false;
       const action = item.active
         ? `<button type="button" class="admin-row-btn danger" data-membership-toggle="0" data-id="${esc(item.membership_id)}">Revoca</button>`
