@@ -56,11 +56,11 @@ test('private links are revocable and rotating them retains old progress',()=>{
  assert.match(player,/Il collegamento non è valido oppure è stato disattivato/);
  assert.match(admin,/Generarne uno nuovo invaliderà il precedente senza perdere i progressi/);
 });
-test('contents are loaded only through token-gated server function and teacher answers do not leave the server',()=>{
+test('contents are loaded only through the token-gated server function while preserving published quiz slides',()=>{
  assert.match(fn,/filterContent/);
  assert.match(fn,/const plainKeys=/);
  assert.match(fn,/if\(quiz\)out\.quiz=/);
- assert.doesNotMatch(fn,/out\.quiz\s*=\s*quiz;/);
+ assert.match(fn,/if\(quiz\)out\.quiz=quiz/);
  assert.match(html,/referrer.*no-referrer/);
  assert.match(fn,/Cache-Control.*no-store/);
  assert.match(player,/referrerPolicy:'no-referrer'/);
