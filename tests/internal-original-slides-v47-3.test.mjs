@@ -103,3 +103,9 @@ test('existing published course content, tests, registration and source tables a
  assert.match(migration,/create or replace function public\.internal_link_open_v47/);
  assert.match(migration,/create or replace function public\.internal_admin_state_v47/);
 });
+
+test('links used in v47 simplified reader resume at the last previously visited unit',()=>{
+ assert.match(player,/const previousUnit=state\.bundle\.last_unit_version_id\|\|null/);
+ assert.match(player,/state\.deck\.findIndex\(s=>s\.topic\?\.internal_unit_version_id===previousUnit\)/);
+ assert.match(player,/oldUnitSlide>=0\?oldUnitSlide:null/);
+});
