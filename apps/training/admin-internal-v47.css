@@ -33,3 +33,17 @@
 .iv47 #iv47LinkCard{scroll-margin-top:90px;border-color:#56d5a7}
 .iv47 #iv47LinkCard .iv47-muted{line-height:1.6}
 .iv47 #iv47Refresh{background:#244d4c;border-color:#4da491}
+
+
+/* v47.9: optional company and filter controls, without touching slide styles. */
+.iv47 .iv47-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.iv47 .iv47-filters select{min-width:0}
+.iv47 .iv47-company-field{min-width:0}
+.iv47 .iv47-company-save{align-items:end}
+.iv47 .iv47-company-save button{width:100%;font-size:12px}
+.iv47 .iv47-table td:last-child{min-width:125px}
+.iv47 .iv47-table td:last-child button{white-space:normal}
+.iv47 #iv47ResultCount{font-weight:600}
+@media(max-width:720px){
+ .iv47 .iv47-filters{grid-template-columns:1fr}
+}
