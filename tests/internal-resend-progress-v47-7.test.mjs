@@ -57,12 +57,12 @@ test('link reinvite dynamically rotates hash, preserves known progress and expos
  const data={organization_id:'org-1',organizations:[{id:'org-1',name:'Test'}],
   courses:[{version_id:'cv-1',title:'Corso interno',version_number:1,unit_count:10}],
   people:[],assignments:[mockedAssignment]};
- const calls=[], root={innerHTML:'',querySelectorAll:()=>[]};
+ const calls=[], root={innerHTML:'',querySelectorAll:()=>[]},rows={innerHTML:'',querySelectorAll:()=>[]};
  let scrollCount=0;
  const document={
   readyState:'loading',addEventListener:()=>{},
   querySelector:()=>null,
-  getElementById:id=>id==='adminContent'?root:id==='iv47LinkCard'?{
+  getElementById:id=>id==='adminContent'?root:id==='iv47Rows'?rows:id==='iv47LinkCard'?{
    scrollIntoView:()=>{scrollCount++;}
   }:null
  };
@@ -88,10 +88,10 @@ test('link reinvite dynamically rotates hash, preserves known progress and expos
  const link1=state.link;
  assert.ok(link1,'Resend must make a link visible; state: '+String(state.notice));
  assert.match(link1,/^https:\/\/safety-training-safety-manager\.vercel\.app\/interno\.html#t=[A-Za-z0-9_-]{43}$/);
- assert.match(root.innerHTML,/Reinvia link/);
- assert.match(root.innerHTML,/Ultima posizione: Slide 17 di 40/);
- assert.match(root.innerHTML,/Modulo A › Argomento B/);
- assert.match(root.innerHTML,/12\/40 slide aperte/);
+ assert.match(rows.innerHTML,/Reinvia link/);
+ assert.match(rows.innerHTML,/Ultima posizione: Slide 17 di 40/);
+ assert.match(rows.innerHTML,/Modulo A › Argomento B/);
+ assert.match(rows.innerHTML,/12\/40 slide aperte/);
  assert.ok(scrollCount>0);
  const sent1=calls.find(x=>x.name==='internal_admin_link_v47');
  assert.equal(sent1.args.p_assignment_id,'assignment-1');
