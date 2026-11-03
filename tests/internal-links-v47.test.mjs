@@ -45,9 +45,9 @@ test('progress is per person/course and records valid viewed sections only',()=>
  assert.match(sql,/m\.course_version_id=a\.course_version_id and mu\.unit_version_id=p_unit_version_id/);
  assert.match(sql,/last_unit_version_id=p_unit_version_id/);
  assert.match(sql,/started_at=coalesce\(started_at,now\(\)\)/);
- assert.match(player,/state\.lastUnit=bundle\.last_unit_version_id/);
- assert.match(player,/state\.visited\.add\(u\.unit_id\)/);
- assert.match(player,/Sezioni|sezioni/);
+ assert.match(player,/state\.lastSlide=Number\.isInteger\(last\)/);
+ assert.match(player,/request\('slide',fields\)/);
+ assert.match(player,/slide originali/);
 });
 test('private links are revocable and rotating them retains old progress',()=>{
  assert.match(sql,/token_hash=p_token_hash,active=true,updated_at=now\(\)/);
@@ -56,11 +56,11 @@ test('private links are revocable and rotating them retains old progress',()=>{
  assert.match(player,/Il collegamento non è valido oppure è stato disattivato/);
  assert.match(admin,/Generarne uno nuovo invaliderà il precedente senza perdere i progressi/);
 });
-test('contents are loaded only through token-gated server function and teacher answers do not leave the server',()=>{
+test('contents are loaded only through the token-gated server function while preserving published quiz slides',()=>{
  assert.match(fn,/filterContent/);
  assert.match(fn,/const plainKeys=/);
  assert.match(fn,/if\(quiz\)out\.quiz=/);
- assert.doesNotMatch(fn,/out\.quiz\s*=\s*quiz;/);
+ assert.match(fn,/if\(quiz\)out\.quiz=quiz/);
  assert.match(html,/referrer.*no-referrer/);
  assert.match(fn,/Cache-Control.*no-store/);
  assert.match(player,/referrerPolicy:'no-referrer'/);

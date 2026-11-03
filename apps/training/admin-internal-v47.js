@@ -9,8 +9,10 @@
  const allowed=()=>!!db()&&(gate()?.phase==='admin'||(gate()?.phase==='staff'&&gate()?.staffRoles?.some(r=>['organization_admin','training_manager'].includes(r))));
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
  const fmt=v=>v?new Date(v).toLocaleString('it-IT'):'—';
- const percent=(a)=>Math.round(100*Number(a.visited_count||0)/Math.max(1,Number(a.total_units||0)));
- const status=a=>!a.active?'Disattivato':!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le sezioni aperte':'In corso';
+ const percent=(a)=>Number(a.total_slides)>0?
+  Math.round(100*Number(a.visited_slides||0)/Math.max(1,Number(a.total_slides))):
+  Math.round(100*Number(a.visited_count||0)/Math.max(1,Number(a.total_units||0)));
+ const status=a=>!a.active?'Disattivato':!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
  function ensureNav(){
   const n=nav();if(!n)return;
   let btn=document.getElementById('adminInternalV47Nav');
@@ -98,7 +100,9 @@
    const pct=percent(a);
    return '<tr><td><strong>'+esc(a.last_name+' '+a.first_name)+'</strong><div class="iv47-muted">'+esc(a.fiscal_code)+'</div></td>'+
     '<td>'+esc(a.course_title)+' <small>v'+esc(a.version_number)+'</small></td>'+
-    '<td><progress max="100" value="'+pct+'"></progress><div>'+pct+'% · '+esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni</div></td>'+
+    '<td><progress max="100" value="'+pct+'"></progress><div>'+pct+'% · '+
+     (Number(a.total_slides)>0?esc(a.visited_slides)+'/'+esc(a.total_slides)+' slide aperte · ultima slide '+(Number(a.last_slide_index||0)+1):
+      esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div></td>'+
     '<td>'+esc(fmt(a.last_activity_at||a.last_opened_at))+'</td><td>'+esc(status(a))+'</td><td>'+
     '<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Nuovo link':'Riattiva e crea link')+'</button> '+
     (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':'')+'</td></tr>';

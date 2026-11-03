@@ -1,185 +1,183 @@
-/* v47: no account, no login, only the assigned course through a personal bearer link. */
+/* SafetyTraining v47.3. Link-only viewer using the ORIGINAL slide builders from app.js. */
 (()=>{'use strict';
  const API='https://ejkwvatmzdqqjozpxntk.supabase.co/functions/v1/internal-course';
  const KEY='sb_publishable_bn9DnocbbBEcf98WAwcSHw_wABCiOSA';
  const root=document.getElementById('internalApp');
- const state={token:'',course:null,units:[],visited:new Set(),position:0,lastUnit:null,viewing:false,menuOpen:false,busy:false};
- const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
- const text=x=>typeof x==='string'?x.trim():String(typeof x==='number'?x:'').trim();
- const pct=()=>Math.round(100*state.visited.size/Math.max(1,new Set(state.units.map(u=>u.unit_id)).size));
+ const state={token:'',bundle:null,course:null,deck:[],index:0,lastSlide:null,visitedSlides:0,busy:false,menuOpen:false};
+ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
  function parseToken(){
-  const fragment=new URLSearchParams(location.hash.replace(/^#/,''));
-  const query=new URLSearchParams(location.search);
-  const token=fragment.get('t')||query.get('t')||'';
+  // The bearer token stays in the URL fragment: it is never sent as a referrer.
+  const hash=new URLSearchParams(location.hash.replace(/^#/,''));
+  const token=hash.get('t')||'';
   return /^[A-Za-z0-9_-]{43}$/.test(token)?token:'';
  }
- async function request(action,unitId){
-  const body={action,token:state.token};
-  if(unitId)body.unit_id=unitId;
+ async function request(action,fields={}){
   const resp=await fetch(API,{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',
-   headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify(body)});
+   headers:{'Content-Type':'application/json','apikey':KEY},
+   body:JSON.stringify({action,token:state.token,...fields})});
   const json=await resp.json().catch(()=>({}));
-  if(!resp.ok||json.error)throw new Error(resp.status===404?'Il collegamento non è valido oppure è stato disattivato.':'Impossibile connettersi al corso. Verifica Internet e riprova.');
+  if(!resp.ok||json.error)throw new Error(resp.status===404?
+   'Il collegamento non è valido oppure è stato disattivato.':
+   'Impossibile connettersi al corso. Verifica Internet e riprova.');
   return json;
  }
- function showError(message){
-  root.innerHTML='<section class="ip-error"><div class="ip-logo">SAFETYTRAINING</div><h1>Non posso aprire il corso</h1>'+
-   '<p>'+esc(message)+'</p><p>Chiedi all’amministratore un nuovo collegamento personale.</p></section>';
+ function showError(error){
+  document.body.classList.remove('deckmode');
+  root.innerHTML='<section class="ip-error"><div class="ip-logo">SAFETYTRAINING</div>'+
+   '<h1>Non posso aprire il corso</h1><p>'+esc(error?.message||error||'Collegamento non disponibile.')+'</p>'+
+   '<p>Chiedi all’amministratore un nuovo collegamento personale.</p></section>';
  }
- function progress(){return '<div class="ip-progress" role="progressbar" aria-valuenow="'+pct()+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+pct()+'%"></span></div>';}
- function hero(){
-  const c=state.course.course||{},last=state.lastUnit;
+ function adaptExactCourse(data){
+  if(!window.SAFETY_DB_SLIDES?.adaptBundle||!window.SAFETY_DECK_RENDER?.buildDeck||!window.SAFETY_DECK_RENDER?.deckSlideBody)
+   throw Error('Il visualizzatore originale delle slide non è disponibile.');
+  const sourceModules=Array.isArray(data?.modules)?data.modules:[];
+  const courseData=data?.course||{};
+  const course=window.SAFETY_DB_SLIDES.adaptBundle({
+   course:{...courseData,stable_key:courseData.stable_key||'internal-assigned-course'},
+   version:{status:'published',version_number:courseData.version||1},
+   modules:sourceModules
+  });
+  window.SAFETY_PRESENTATION_ENRICHMENT?.enrichCourse?.(course);
+  if(!course.topics?.length)throw Error('Il corso assegnato non contiene slide pubblicate.');
+  // The original adapter preserves stable keys, while the token API supplies
+  // the immutable unit_version_id required for server-side progress tracking.
+  const byStable=new Map(sourceModules.flatMap(m=>(m.units||[]).map(u=>[
+   String(u.stable_key||u.unit_id),String(u.unit_id||'')
+  ])));
+  for(const topic of course.topics)topic.internal_unit_version_id=byStable.get(topic.source_stable_key)||null;
+  const all=window.SAFETY_DATA||(window.SAFETY_DATA=[]);
+  all.splice(0,all.length,course);
+  return course;
+ }
+ const pc=()=>state.deck.length?Math.round(100*state.visitedSlides/state.deck.length):0;
+ function showHome(){
+  document.body.classList.remove('deckmode');
+  state.menuOpen=false;
+  const c=state.course;
+  const resume=Number.isInteger(state.lastSlide);
   root.innerHTML='<header class="ip-header"><div class="ip-logo">SAFETYTRAINING</div><small>Formazione interna</small></header>'+
-   '<section class="ip-hero"><div><div class="ip-eyebrow">Il tuo corso interno</div>'+
-   '<h1>'+esc(c.title||'Corso assegnato')+'</h1><p>'+esc(c.description||'Percorso interno, accessibile senza registrazione.')+'</p></div>'+
-   '<div class="ip-meta"><span class="ip-pill">Benvenuto '+esc(state.course.person_first_name||'')+'</span>'+
-   '<span class="ip-pill">'+state.units.length+' sezioni</span>'+
-   '<span class="ip-pill">'+(c.nominal_minutes?esc(c.nominal_minutes)+' min indicativi · ':'')+'non certificante</span></div>'+
-   '<div>'+progress()+'<p class="ip-footnote">'+pct()+'% delle sezioni aperte · l’accesso non costituisce certificazione, attestato o verifica dell’identità.</p></div>'+
-   '<div><button class="ip-primary" id="ipStart">'+(last?'Riprendi il corso':'Avvia corso')+'</button></div></section>';
-  document.getElementById('ipStart').onclick=()=>void visit(Math.max(0,state.units.findIndex(u=>u.unit_id===last)));
+   '<section class="ip-hero"><div class="ip-eyebrow">Corso assegnato</div>'+
+   '<h1>'+esc(c.title)+'</h1><p>'+esc(c.subtitle||'')+'</p>'+
+   '<div class="ip-meta"><span class="ip-pill">Benvenuto '+esc(state.bundle.person_first_name||'')+'</span>'+
+   '<span class="ip-pill">'+state.deck.length+' slide originali</span>'+
+   '<span class="ip-pill">Corso interno non certificante</span></div>'+
+   '<div class="ip-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pc()+'">'+
+   '<span style="width:'+pc()+'%"></span></div>'+
+   '<p class="ip-footnote">'+state.visitedSlides+' di '+state.deck.length+
+   ' slide aperte. Il percorso non costituisce attestato né verifica dell’identità.</p>'+
+   '<div><button class="ip-primary" id="ipStart">'+(resume?'Riprendi dalle slide':'Avvia il corso')+'</button></div></section>';
+  document.getElementById('ipStart').onclick=()=>void go(resume?state.lastSlide:0);
  }
- function renderValue(v,depth=0){
-  if(v==null||v===false||depth>3)return '';
-  if(typeof v==='string'||typeof v==='number')return '<p>'+esc(v)+'</p>';
-  if(Array.isArray(v)){
-   if(!v.length)return '';
-   return '<ul>'+v.map(x=>'<li>'+(typeof x==='object'?renderValue(x,depth+1):esc(x))+'</li>').join('')+'</ul>';
-  }
-  if(typeof v==='object'){
-   return Object.entries(v).filter(([k,x])=>x!=null&&x!==''&&!['correct','correct_index','teacher','teacher_notes','teacher_expansion','answer','solution'].includes(k)).map(([k,x])=>{
-    const label={before:'Prima',during:'Durante',after:'Dopo',objective:'Obiettivo',observe:'Osserva',
-     apply:'Applica',importance:'Perché è importante',if_problem:'Se emerge un problema',
-     stop_conditions:'Quando fermarsi',step_by_step:'Passaggi',remember:'Da ricordare',
-     adaptation:'Adattamento',title:'Titolo',caption:'Didascalia',file:'File',question:'Domanda',
-     answers:'Possibili risposte'}[k]||k.replaceAll('_',' ');
-    return '<div><strong>'+esc(label)+'</strong>'+renderValue(x,depth+1)+'</div>';
-   }).join('');
-  }
-  return '';
- }
- function section(title,value){
-  if(value==null||value===''||(Array.isArray(value)&&!value.length))return '';
-  return '<section class="ip-card"><h2>'+esc(title)+'</h2>'+renderValue(value)+'</section>';
- }
- function images(content){
-  const data=[...(Array.isArray(content.idea_images)?content.idea_images:[]),...(Array.isArray(content.visuals)?content.visuals:[])];
-  const found=[];
-  for(const item of data){
-   const file=typeof item==='string'?item:String(item?.file||item?.image||'');
-   // Restrict to reviewed same-origin illustrations; do not load arbitrary URLs.
-   if(!/^[a-z0-9_-]+\.(svg|png|jpg|jpeg|webp)$/i.test(file))continue;
-   if(found.some(x=>x.file===file))continue;
-   found.push({file,caption:typeof item==='object'?String(item?.caption||''):''});
-  }
-  if(!found.length)return '';
-  return '<section class="ip-card"><h2>Immagini e schemi del corso</h2><div class="ip-visuals">'+
-   found.map(x=>'<figure><img loading="lazy" alt="'+esc(x.caption||'Illustrazione didattica')+'" src="./assets/'+encodeURIComponent(x.file)+'" referrerpolicy="no-referrer"><figcaption>'+esc(x.caption||'Schema didattico')+'</figcaption></figure>').join('')+
-   '</div></section>';
- }
- function quiz(value){
-  if(!value||!Array.isArray(value.answers)||!value.answers.length)return '';
-  return '<section class="ip-card"><h2>Domanda di autovalutazione</h2><p>'+esc(value.question||'Rifletti sulle possibili risposte')+'</p>'+
-   '<div class="ip-check">'+value.answers.map(x=>'<label><input type="radio" name="ipQuiz"> '+esc(x)+'</label>').join('')+'</div>'+
-   '<p class="ip-footnote">Esercizio di riflessione non valutato. Nessuna prova certificante.</p></section>';
- }
- function resources(items){
-  if(!Array.isArray(items))return '';
-  const html=items.map(x=>{
-   const url=String(x?.url||'');
-   if(!/^https:\/\//i.test(url))return '';
-   return '<li><a href="'+esc(url)+'" target="_blank" rel="noreferrer noopener" referrerpolicy="no-referrer">'+esc(x?.title||x?.source||'Approfondimento')+'</a></li>';
-  }).filter(Boolean);
-  return html.length?'<section class="ip-card"><h2>Fonti e approfondimenti</h2><ul>'+html.join('')+'</ul></section>':'';
- }
- function lessonContent(content){
-  const c=content&&typeof content==='object'?content:{};
-  return '<p class="ip-intro">'+esc(c.summary||'')+'</p>'+
-   section('Spiegazione',c.detail)+
-   section('Punti di attenzione',c.focus)+
-   section('Rischi',c.risks)+
-   section('Misure di prevenzione',c.prevention)+
-   section('Procedura',c.procedure||c.steps||c.step_by_step)+
-   section('Dispositivi di protezione',c.dpi||c.ppe)+
-   images(c)+
-   section('Passaggi operativi',c.operational)+
-   section('Osserva, comprendi, applica',c.guided)+
-   section('Comportamenti corretti',c.good)+
-   section('Da evitare',c.bad)+
-   section('Caso pratico',c.case||c.example_story)+
-   section('Domande per riflettere',c.question)+
-   section('Approfondimento',c.deepdetail)+
-   section('Errori frequenti',c.common_errors)+
-   section('Schede grafiche',c.graphic_cards)+
-   quiz(c.quiz)+resources(c.resources||c.evidence_sources);
- }
- function display(){
-  const unit=state.units[state.position],count=state.units.length;
-  if(!unit)return showError('Nessun contenuto disponibile nel corso selezionato.');
-  const nav=state.units.map((u,i)=>{
-   const done=state.visited.has(u.unit_id);
-   return '<button type="button" data-ip-unit="'+i+'"'+(i===state.position?' aria-current="step"':'')+'>'+
-    '<span class="'+(done?'ip-done':'')+'">'+(done?'✓ ':'')+(i+1)+'. </span>'+esc(u.title)+'</button>';
-  }).join('');
-  root.innerHTML='<header class="ip-header"><div class="ip-logo">SAFETYTRAINING</div>'+
-   '<button id="ipMobileToggle" class="ip-secondary ip-mobile-toggle" aria-expanded="'+state.menuOpen+'">Sezioni ☰</button>'+
-   '<small>'+pct()+'% delle sezioni aperte</small></header>'+
-   '<div class="ip-course'+(state.menuOpen?' ip-menu-open':'')+'">'+
-   '<aside class="ip-sidebar"><h2>'+esc(state.course.course.title)+'</h2><p>Avanzamento '+pct()+'% · '+state.visited.size+' sezioni visitate</p>'+
-   progress()+'<nav class="ip-nav" aria-label="Sezioni del corso">'+nav+'</nav></aside>'+
-   '<article class="ip-stage"><div class="ip-stage-head"><span class="ip-eyebrow">Sezione '+(state.position+1)+' di '+count+'</span>'+
-   '<button class="ip-secondary" id="ipHome">Panoramica</button></div>'+
-   '<h1>'+esc(unit.content?.slide_title||unit.content?.title||unit.title)+'</h1>'+
-   '<p class="ip-footnote">Modulo: '+esc(unit.module_title)+'</p>'+
-   lessonContent(unit.content)+
-   '<div class="ip-actions"><button class="ip-secondary" id="ipPrevious"'+(state.position===0?' disabled':'')+'>← Indietro</button>'+
-   '<button class="ip-primary" id="ipNext">'+(state.position===count-1?'Termina la lettura':'Sezione successiva →')+'</button></div>'+
-   '<p class="ip-footnote">Il salvataggio avviene quando apri una sezione. Puoi chiudere questa pagina e riprendere con lo stesso link.</p>'+
-   '</article></div>';
-  root.querySelectorAll('[data-ip-unit]').forEach(b=>b.onclick=()=>void visit(Number(b.dataset.ipUnit)));
-  document.getElementById('ipPrevious').onclick=()=>void visit(state.position-1);
-  document.getElementById('ipNext').onclick=()=>{
-   if(state.position===count-1){state.viewing=false;hero();}
-   else void visit(state.position+1);
-  };
-  document.getElementById('ipHome').onclick=()=>{state.viewing=false;hero();};
-  document.getElementById('ipMobileToggle').onclick=()=>{
-   state.menuOpen=!state.menuOpen;
-   root.querySelector('.ip-course')?.classList.toggle('ip-menu-open',state.menuOpen);
-   document.getElementById('ipMobileToggle').setAttribute('aria-expanded',String(state.menuOpen));
-  };
- }
- async function visit(index){
-  if(state.busy||index<0||index>=state.units.length)return;
-  state.busy=true;
-  const u=state.units[index];
-  try{
-   const result=await request('visit',u.unit_id);
-   state.position=index;state.viewing=true;state.menuOpen=false;
-   state.visited.add(u.unit_id);state.lastUnit=u.unit_id;
-   // The server is authoritative; local set only mirrors a successful write.
-   if(Number(result.progress?.visited_count)!==state.visited.size){
-    const open=await request('open');state.visited=new Set(open.course.visited_unit_ids||[]);
+ function fit(){
+  const stage=document.getElementById('deckStage'),slide=document.getElementById('projectorSlide');
+  if(!stage||!slide)return;
+  slide.classList.remove('compact','compact2');
+  const pad=20;
+  const scale=Math.min(Math.max(.1,(stage.clientWidth-pad*2)/1600),Math.max(.1,(stage.clientHeight-pad*2)/900));
+  slide.style.transform='scale('+scale+')';
+  slide.style.setProperty('--deck-scale',scale);
+  requestAnimationFrame(()=>{
+   if(slide.scrollHeight>slide.clientHeight+2||slide.scrollWidth>slide.clientWidth+2){
+    slide.classList.add('compact');
+    requestAnimationFrame(()=>{
+     if(slide.scrollHeight>slide.clientHeight+2||slide.scrollWidth>slide.clientWidth+2)slide.classList.add('compact2');
+    });
    }
-   display();window.scrollTo(0,0);
-  }catch(error){showError(error?.message||'Impossibile salvare i progressi.');}
+  });
+ }
+ function makeSlide(){
+  const i=state.index,c=state.course,slides=state.deck,s=slides[i];
+  const pct=(100*(i+1)/slides.length);
+  const body=window.SAFETY_DECK_RENDER.deckSlideBody(s,i);
+  const module=esc(s.module?.title||c.title);
+  const topic=s.topic?'<span>'+esc(s.topic.title)+'</span>':'';
+  document.body.classList.add('deckmode','bigscreen');
+  window.__deck={cid:c.id,index:i,total:slides.length};
+  window.__deckSlides=slides;
+  root.innerHTML='<div class="deck-shell"><div class="deck-top">'+
+   '<div class="deck-top-navigation"><button type="button" id="ipHome" class="deck-home-btn" title="Torna alla home">⌂ Home</button></div>'+
+   '<div class="deck-course">'+esc(c.icon)+' '+esc(c.title)+'</div>'+
+   '<div class="deck-actions"><button type="button" id="ipIndex" aria-label="Apri indice slide">☷ Indice</button>'+
+   '<button type="button" id="ipFullscreen" aria-label="Schermo intero">⛶</button></div></div>'+
+   '<div class="deck-stage" id="deckStage"><article class="projector-slide type-'+esc(s.type)+'" id="projectorSlide">'+body+'</article></div>'+
+   '<div class="deck-footer"><div><strong>'+module+'</strong>'+topic+
+   '</div><div class="deck-time"><span>Slide visitate</span><b>'+state.visitedSlides+' / '+slides.length+'</b></div>'+
+   '<div class="deck-pager"><button type="button" id="ipPrev"'+(i===0?' disabled':'')+'>← Indietro</button>'+
+   '<span class="deck-counter" aria-live="polite">'+(i+1)+' / '+slides.length+'</span>'+
+   '<button type="button" id="ipNext"'+(i===slides.length-1?' disabled':'')+'>Avanti →</button></div></div>'+
+   '<div class="deck-progress"><span style="width:'+pct+'%"></span></div>'+
+   '<button type="button" class="deck-nav prev" aria-label="Slide precedente" id="ipPrevSide"'+(i===0?' disabled':'')+'>‹</button>'+
+   '<button type="button" class="deck-nav next" aria-label="Slide successiva" id="ipNextSide"'+(i===slides.length-1?' disabled':'')+'>›</button>'+
+   '</div><aside class="ip-slide-panel" id="ipSlidePanel" hidden aria-label="Indice delle slide"></aside>';
+  for(const id of ['ipPrev','ipPrevSide'])document.getElementById(id).onclick=()=>void go(state.index-1);
+  for(const id of ['ipNext','ipNextSide'])document.getElementById(id).onclick=()=>void go(state.index+1);
+  document.getElementById('ipHome').onclick=showHome;
+  document.getElementById('ipIndex').onclick=openIndex;
+  document.getElementById('ipFullscreen').onclick=()=>{
+   if(!document.fullscreenElement)void document.documentElement.requestFullscreen?.();
+   else void document.exitFullscreen?.();
+  };
+  requestAnimationFrame(fit);
+ }
+ function openIndex(){
+  const panel=document.getElementById('ipSlidePanel');
+  if(!panel)return;
+  if(!panel.hidden){panel.hidden=true;return;}
+  const rows=state.deck.map((slide,i)=>'<button type="button" data-slide="'+i+'"'+
+   (i===state.index?' aria-current="true"':'')+'>'+(i+1)+'. '+esc(slide.title||slide.module?.title||'Slide')+
+   (slide.type==='module'?' · Modulo':'')+'</button>').join('');
+  panel.innerHTML='<button type="button" class="ip-panel-close" id="ipCloseIndex">✕ Chiudi</button>'+
+   '<h2>Indice delle slide</h2><p class="ip-panel-note">Scegli una slide del corso assegnato.</p>'+rows;
+  panel.hidden=false;
+  document.getElementById('ipCloseIndex').onclick=()=>{panel.hidden=true;};
+  panel.querySelectorAll('[data-slide]').forEach(el=>el.onclick=()=>void go(Number(el.dataset.slide)));
+ }
+ async function go(i){
+  if(state.busy||!Number.isInteger(i)||i<0||i>=state.deck.length)return;
+  state.busy=true;
+  const slide=state.deck[i];
+  try{
+   const fields={slide_index:i,total_slides:state.deck.length,
+    unit_id:slide.topic?.internal_unit_version_id||null};
+   const result=await request('slide',fields);
+   state.index=i;state.lastSlide=i;
+   state.visitedSlides=Number(result.progress?.visited_slides||state.visitedSlides);
+   makeSlide();
+  }catch(e){showError(e);}
   finally{state.busy=false;}
  }
  async function boot(){
   state.token=parseToken();
-  if(!state.token)return showError('Il collegamento personale è mancante o non è valido.');
+  if(!state.token)return showError('Il collegamento personale è mancante o non valido.');
   try{
-   const result=await request('open');
-   const bundle=result.course||{};
-   state.course=bundle;
-   state.visited=new Set(bundle.visited_unit_ids||[]);
-   state.lastUnit=bundle.last_unit_version_id||null;
-   state.units=(Array.isArray(bundle.modules)?bundle.modules:[]).flatMap(m=>
-    (Array.isArray(m.units)?m.units:[]).map(u=>({...u,module_title:m.title||'Modulo'}))
-   );
-   if(!state.units.length)return showError('Questo corso non ha ancora sezioni disponibili.');
-   hero();
-  }catch(error){showError(error?.message||'Impossibile aprire il corso.');}
+   const response=await request('open');
+   state.bundle=response.course||{};
+   state.course=adaptExactCourse(state.bundle);
+   state.deck=window.SAFETY_DECK_RENDER.buildDeck(state.course);
+   if(!state.deck.length)throw Error('Il corso selezionato non contiene slide.');
+   state.visitedSlides=Math.max(0,Number(state.bundle.visited_slides||0));
+   const last=state.bundle.last_slide_index;
+   state.lastSlide=Number.isInteger(last)&&last>=0&&last<state.deck.length?last:null;
+   showHome();
+  }catch(e){showError(e);}
  }
+ window.SAFETY_INTERNAL_SLIDE_V47_3={navigate(route){
+  const segments=String(route||'').split('/');
+  if(segments[0]==='deck')void go(Number(segments[2]));
+  else showHome();
+ }};
+ // Original module slides call deckGo; only our token-gated navigation may move.
+ window.deckGo=(_courseId,index)=>void go(Number(index));
+ window.addEventListener('resize',()=>{if(document.body.classList.contains('deckmode'))fit();});
+ document.addEventListener('fullscreenchange',()=>{if(document.body.classList.contains('deckmode'))requestAnimationFrame(fit);});
+ document.addEventListener('keydown',event=>{
+  if(document.getElementById('answerOverlay')||document.getElementById('videoOverlay')){
+   if(event.key==='Escape'){window.closeAnswerOverlay?.();window.closeVideoPlayer?.();}return;
+  }
+  if(!document.body.classList.contains('deckmode')||state.busy)return;
+  if(event.altKey||event.ctrlKey||event.metaKey||event.target?.closest?.('input,select,textarea,button,a,[role="dialog"]'))return;
+  if(['ArrowRight','PageDown',' '].includes(event.key)){event.preventDefault();void go(state.index+1);}
+  if(['ArrowLeft','PageUp'].includes(event.key)){event.preventDefault();void go(state.index-1);}
+ });
  void boot();
 })();
