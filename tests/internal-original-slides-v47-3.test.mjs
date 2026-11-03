@@ -66,7 +66,7 @@ test('personal link continues to authorize only one course with no login',()=>{
  assert.match(player,/location\.hash/);
  assert.match(api,/internal_link_open_v47/);
  assert.match(api,/internal_link_slide_v47_3/);
- assert.match(api,/!\\['open','visit','slide'\\]\.includes\(action\)/);
+ assert.ok(api.includes("!['open','visit','slide'].includes(action)"));
  assert.doesNotMatch(player,/signIn|signUp|localStorage|sessionStorage|supabase\.auth/);
  assert.match(migration,/where token_hash=p_token_hash and active for update/);
  assert.match(migration,/m\.course_version_id=assignment\.course_version_id and mu\.unit_version_id=p_unit_version_id/);
