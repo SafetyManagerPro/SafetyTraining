@@ -101,12 +101,11 @@ begin
   update private.internal_people_v47 set archived_at=coalesce(archived_at,now()),updated_at=now()
   where id=person_row.id;
   update private.internal_assignments_v47 set active=false,updated_at=now()
-  where person_id=person_row.id and organization_id=person_row.organization_id and active
-  returning 1 into revoked_count;
+  where person_id=person_row.id and organization_id=person_row.organization_id and active;
+  get diagnostics revoked_count = row_count;
  end if;
  return jsonb_build_object('person_id',person_row.id,'restored',p_restore,
-  'archived',not p_restore,'revoked_links',(select count(*) from private.internal_assignments_v47
-  where person_id=person_row.id and not active));
+  'archived',not p_restore,'revoked_links',revoked_count);
 end;$func$;
 
 create or replace function public.internal_admin_state_v47(p_org_id uuid default null)
