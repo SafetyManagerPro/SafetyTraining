@@ -41,6 +41,9 @@
     try{
       const data=await loadData();if(!data)return;
       const vm=new Map(data.versions.map(v=>[v.id,v])),cm=new Map(data.courses.map(c=>[c.id,c.title]));
+      const abc=new Intl.Collator('it-IT',{sensitivity:'base',numeric:true});
+      data.editions.sort((a,b)=>abc.compare(a.title||cm.get(vm.get(a.course_version_id)?.course_id)||'',b.title||cm.get(vm.get(b.course_version_id)?.course_id)||''));
+      data.learners.sort((a,b)=>abc.compare((a.last_name||'')+' '+(a.first_name||''),(b.last_name||'')+' '+(b.first_name||'')));
       const card=document.createElement('section');card.id='bulkEnrollmentCard';card.className='admin-card';
       card.innerHTML=`<h2>Iscrizione multipla</h2><p class="admin-note">Assegna un'edizione a più corsisti compatibili e, se vuoi, invia subito gli accessi alla piattaforma.</p>
         <div class="bulk-enroll-grid"><div><label><strong>Edizione</strong><select id="bulkEdition" class="admin-input"><option value="">Seleziona edizione…</option>${data.editions.map(e=>{const v=vm.get(e.course_version_id);return `<option value="${e.id}">${esc(e.title||cm.get(v?.course_id)||'Edizione')} · v${esc(v?.version_number||'')}</option>`;}).join('')}</select></label><div id="bulkSummary" class="bulk-summary">Seleziona un'edizione.</div></div><div><div class="bulk-enroll-actions" style="margin-top:0"><button type="button" id="bulkSelectAll" class="admin-row-btn">Seleziona tutti</button><button type="button" id="bulkClear" class="admin-row-btn">Deseleziona</button></div><div id="bulkLearners" class="bulk-enroll-list"><div class="bulk-enroll-item">Nessuna edizione selezionata.</div></div></div></div>
