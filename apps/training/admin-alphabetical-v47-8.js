@@ -7,7 +7,7 @@
  const compare=(a,b)=>collator.compare(String(a??'').trim(),String(b??'').trim());
  const sortBy=(items,getLabel)=>[...(items||[])].sort((a,b)=>compare(getLabel(a),getLabel(b)));
  const entityLabel=/corsist|learner|alliev|azienda|company|organizz|organization|edizion|edition|corso|course|modul|persona|person/i;
- const skipLabel=/\b(?:stato|status|modalità|modalita|durata|giorni|mese|anno|scadenza|versione\s+(?:numero|stato)|ordinamento|ordine|risultato|punteggio|tipo|certificazione|step|pagina|percentuale)\b/i;
+ const skipLabel=/\b(?:stato|status|modalità|modalita|durata|giorni|mese|anno|data|scadenza|versione\s+(?:numero|stato)|ordinamento|ordine|risultato|punteggio|tipo|certificazione|step|pagina|percentuale)\b/i;
  let pending=false;
  function labelFor(select){
   const label=select.closest('label');
