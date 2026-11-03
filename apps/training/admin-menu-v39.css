@@ -11,3 +11,14 @@
 .admin-menu-items button[hidden],.admin-menu-items button.hidden{display:none!important}
 .admin-menu-group .admin-menu-items:empty{display:none}
 .admin-menu-count{color:#8296b0;font-size:10px;font-weight:600;letter-spacing:0}
+
+/* v47: optional legacy administration stays available behind one collapsed group. */
+.admin-nav nav .admin-menu-advanced{border-top:1px solid rgba(255,255,255,.15);margin-top:10px;padding-top:10px}
+.admin-nav nav .admin-menu-advanced>summary{list-style:none;display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.06em;font-weight:850;color:#b2c5db;cursor:pointer;padding:13px 11px;border-radius:10px}
+.admin-nav nav .admin-menu-advanced>summary::-webkit-details-marker{display:none}
+.admin-nav nav .admin-menu-advanced>summary:after{content:'▸';margin-left:auto}
+.admin-nav nav .admin-menu-advanced[open]>summary:after{content:'▾'}
+.admin-nav nav .admin-menu-advanced[hidden]{display:none}
+.admin-nav nav [data-admin-menu-group="internal"]>summary{color:#8aefc7}
+.admin-nav nav [data-admin-menu-group="internal"] button{background:rgba(52,182,143,.09)}
+.admin-nav nav .admin-menu-advanced-items{padding-left:8px}

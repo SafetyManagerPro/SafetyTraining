@@ -1,0 +1,53 @@
+*{box-sizing:border-box}
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#edf5ff;background:#0b1424}
+body{margin:0;min-height:100vh;line-height:1.55}
+button{font:inherit;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,a:focus-visible{outline:3px solid #63e2bc;outline-offset:3px}
+a{color:#82d7f4}
+.ip-loading,.ip-error{max-width:620px;margin:12vh auto 0;padding:24px;text-align:center}
+.ip-logo{letter-spacing:.2em;font-weight:900;color:#64dfba;font-size:13px}
+.ip-logo a{text-decoration:none;color:inherit}
+.ip-header{padding:17px max(4vw,20px);display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #24344b;background:#101e32}
+.ip-header small{color:#b4cada}
+.ip-hero{max-width:930px;margin:7vh auto;padding:32px 24px;display:grid;gap:22px}
+.ip-hero h1{font-size:clamp(31px,5vw,52px);line-height:1.14;margin:0}
+.ip-hero p{margin:0;color:#b6cadc;font-size:17px}
+.ip-meta{display:flex;flex-wrap:wrap;gap:10px}
+.ip-pill{border:1px solid #42617b;border-radius:999px;padding:5px 13px;color:#c8e0ee;font-size:13px}
+.ip-primary{border:0;background:#5cddb3;color:#06261f;border-radius:12px;padding:15px 23px;font-weight:850;min-height:50px}
+.ip-secondary{border:1px solid #54708b;background:#1d304a;color:#fff;border-radius:12px;padding:12px 20px;font-weight:750}
+.ip-course{display:grid;grid-template-columns:minmax(230px,300px) minmax(0,1fr);min-height:calc(100vh - 80px)}
+.ip-sidebar{border-right:1px solid #2e415a;background:#101c2f;padding:17px 14px;position:sticky;top:0;height:calc(100vh - 78px);overflow:auto}
+.ip-sidebar h2{font-size:18px;margin:5px 5px 8px}
+.ip-sidebar p{font-size:12px;color:#acc8da;margin:0 5px 18px}
+.ip-sidebar h3{color:#b5d0e2;font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin:19px 6px 8px}
+.ip-nav{display:grid;gap:4px}
+.ip-nav button{text-align:left;color:#d9e8f3;border:1px solid transparent;background:transparent;border-radius:9px;padding:11px 12px;min-height:42px}
+.ip-nav button:hover{background:#21354d}
+.ip-nav button[aria-current="step"]{background:#173c46;border-color:#55c9a9;color:#e6fff6}
+.ip-done{color:#55d8ad}
+.ip-stage{padding:clamp(18px,4vw,50px);max-width:1080px;width:100%;margin:auto}
+.ip-stage-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.ip-eyebrow{font-weight:850;font-size:12px;letter-spacing:.12em;color:#69d9b6;text-transform:uppercase}
+.ip-stage h1{font-size:clamp(27px,4vw,43px);line-height:1.18;margin:10px 0 9px}
+.ip-stage .ip-intro{font-size:17px;color:#c3d7e8;line-height:1.7}
+.ip-card{background:#16263d;border:1px solid #314763;border-radius:15px;padding:22px;margin:18px 0}
+.ip-card h2{font-size:20px;margin:0 0 9px}
+.ip-card p{color:#d8e8f4;margin:8px 0;white-space:pre-wrap}
+.ip-card ul,.ip-card ol{padding-left:22px;margin:10px 0}
+.ip-card li{margin:7px 0}
+.ip-card details{margin:7px 0}
+.ip-visuals{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:15px}
+.ip-visuals figure{margin:0;background:#0b1b30;padding:13px;border:1px solid #30445d;border-radius:12px}
+.ip-visuals img{width:100%;max-height:310px;object-fit:contain}
+.ip-visuals figcaption{font-size:12px;color:#b4cadb;margin-top:7px}
+.ip-check{display:grid;gap:10px}
+.ip-check label{border:1px solid #334d66;border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:10px}
+.ip-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:20px 0}
+.ip-progress{height:11px;max-width:100%;width:240px;background:#2e4159;border-radius:999px;overflow:hidden}
+.ip-progress span{height:100%;display:block;background:#58dcb0}
+.ip-footnote{font-size:12px;color:#a4bbcf;max-width:830px}
+.ip-mobile-toggle{display:none}
+.ip-error{border:1px solid #844a53;border-radius:15px;background:#281b2a;color:#ffd8de}
+@media(max-width:800px){.ip-course{display:block}.ip-mobile-toggle{display:inline-block}.ip-sidebar{display:none;position:static;height:auto;max-height:50vh;border-right:0;border-bottom:1px solid #344a65}.ip-course.ip-menu-open .ip-sidebar{display:block}.ip-stage{padding:18px}.ip-card{padding:16px}.ip-header{position:sticky;top:0;z-index:10}.ip-actions button{flex:1 1 140px}}
