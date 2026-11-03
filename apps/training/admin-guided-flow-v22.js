@@ -158,8 +158,8 @@
       (next?'<button type="button" class="gw-primary" data-gw="next">'+esc(label)+' →</button>':'')+'</div>';
   }
   function stepCompany(r,st){
-    const orgOptions=r.orgs.map(o=>opt(o.id,o.name,o.id===st.organizationId)).join('');
-    const companies=r.companies.filter(c=>c.organization_id===st.organizationId);
+    const orgOptions=ordered(r.orgs,o=>o.name).map(o=>opt(o.id,o.name,o.id===st.organizationId)).join('');
+    const companies=ordered(r.companies.filter(c=>c.organization_id===st.organizationId),c=>c.name);
     const companyOptions=companies.map(c=>opt(c.id,c.name,c.id===st.companyId)).join('');
     return '<div class="gw-panel"><h3>1. Seleziona l’azienda</h3>'+
       '<div class="gw-grid"><label>Organizzazione<select data-field="organizationId">'+opt('','Seleziona organizzazione',!st.organizationId)+orgOptions+'</select></label>'+
@@ -173,11 +173,13 @@
       info('L’azienda selezionata verrà proposta automaticamente nei passaggi successivi.'))+
       navigation(false,true,st.companyMode==='new'?'Crea azienda e continua':'Continua')+'</div>';
   }
+  const alpha=new Intl.Collator('it-IT',{sensitivity:'base',numeric:true});
+  const ordered=(items,label)=>[...(items||[])].sort((a,b)=>alpha.compare(String(label(a)||''),String(label(b)||'')));
   function stepEdition(r,st){
     const v=readyVersions(r.courses,r.versions),validIds=new Set(v.map(x=>x.id)),open=eligibleEditions(r.editions,st.companyId,st.organizationId,validIds);
     const cm=new Map(r.courses.map(x=>[x.id,x])),vm=new Map(r.versions.map(x=>[x.id,x]));
-    const editions=open.map(e=>{const ver=vm.get(e.course_version_id);return opt(e.id,(e.title||cm.get(ver?.course_id)?.title||'Edizione')+' · '+(cm.get(ver?.course_id)?.title||'Corso'),st.editionId===e.id)}).join('');
-    const courses=v.map(ver=>opt(ver.id,(cm.get(ver.course_id)?.title||'Corso')+' · v'+ver.version_number,st.versionId===ver.id)).join('');
+    const editions=ordered(open,e=>e.title||cm.get(vm.get(e.course_version_id)?.course_id)?.title).map(e=>{const ver=vm.get(e.course_version_id);return opt(e.id,(e.title||cm.get(ver?.course_id)?.title||'Edizione')+' · '+(cm.get(ver?.course_id)?.title||'Corso'),st.editionId===e.id)}).join('');
+    const courses=ordered(v,ver=>cm.get(ver.course_id)?.title||'Corso').map(ver=>opt(ver.id,(cm.get(ver.course_id)?.title||'Corso')+' · v'+ver.version_number,st.versionId===ver.id)).join('');
     return '<div class="gw-panel"><h3>2. Corso ed edizione</h3><p>Un corso approvato può essere riutilizzato. Crei una nuova edizione soltanto se manca quella adatta.</p>'+
       '<label class="gw-label">Edizione disponibile<select data-field="editionId">'+opt('','Seleziona edizione aperta…',!st.editionId)+editions+opt('new','+ Crea nuova edizione',st.editionMode==='new')+'</select></label>'+
       (st.editionMode==='new'?'<div class="gw-sub"><h4>Nuova edizione</h4><div class="gw-grid">'+
@@ -191,7 +193,7 @@
       navigation(true,true,st.editionMode==='new'?'Crea edizione e continua':'Continua')+'</div>';
   }
   function stepLearners(r,st){
-    const learners=eligibleLearners(r.learners,st.companyId,st.organizationId), selected=new Set(st.selectedIds);
+    const learners=ordered(eligibleLearners(r.learners,st.companyId,st.organizationId),l=>(l.last_name||'')+' '+(l.first_name||'')), selected=new Set(st.selectedIds);
     const cards=learners.map(l=>'<label class="gw-person"><input type="checkbox" data-existing="'+esc(l.id)+'" '+(selected.has(l.id)?'checked':'')+'><span><strong>'+esc((l.first_name||'')+' '+(l.last_name||''))+'</strong><small>'+esc(l.email||'Email non presente')+(l.auth_user_id?' · account attivo':' · da invitare')+'</small></span></label>').join('');
     const newRows=st.newLearners.map((l,i)=>'<div class="gw-new"><div class="gw-new-head"><strong>Nuovo corsista '+(i+1)+'</strong>'+(l.createdId?'<span class="gw-saved">Anagrafica già salvata</span>':'<button type="button" data-remove="'+esc(l.localId)+'">Rimuovi</button>')+'</div><div class="gw-grid">'+
       ['first_name','last_name','email','fiscal_code','job_title'].map((field,j)=>'<label>'+['Nome *','Cognome *','Email','Codice fiscale','Mansione'][j]+'<input data-person="'+esc(l.localId)+'" data-person-field="'+field+'" '+(field==='email'?'type="email"':'')+' value="'+esc(l[field]||'')+'" '+(l.createdId?'disabled':'')+'></label>').join('')+'</div></div>').join('');
