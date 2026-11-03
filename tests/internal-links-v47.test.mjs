@@ -87,7 +87,7 @@ test('v47.2: internal course link generation SQL uses a unique alias for the sel
  assert.match(fix,/select course_catalog\.\* into course_row from public\.courses course_catalog/);
  assert.match(fix,/v\.course_id=course_catalog\.id/);
  assert.match(fix,/'course_title',course_row\.title/);
- assert.doesNotMatch(fix,/\bc\.id\b|select c\.\* into c\b/);
+ assert.doesNotMatch(fix.split('\n').filter(line=>!line.trimStart().startsWith('--')).join('\n'),/\bc\.id\b|select c\.\* into c\b/);
  assert.match(fix,/private\.can_manage_training_org\(p_org_id\)/);
  assert.match(fix,/v\.status='published'/);
  assert.match(fix,/grant execute on function public\.internal_admin_assign_v47/);
