@@ -157,7 +157,11 @@
    if(!state.deck.length)throw Error('Il corso selezionato non contiene slide.');
    state.visitedSlides=Math.max(0,Number(state.bundle.visited_slides||0));
    const last=state.bundle.last_slide_index;
-   state.lastSlide=Number.isInteger(last)&&last>=0&&last<state.deck.length?last:null;
+   // A link used with the earlier unit-only reader may already have progress.
+   // Preserve its resume point until this reader records the precise slide number.
+   const previousUnit=state.bundle.last_unit_version_id||null;
+   const oldUnitSlide=previousUnit?state.deck.findIndex(s=>s.topic?.internal_unit_version_id===previousUnit):-1;
+   state.lastSlide=Number.isInteger(last)&&last>=0&&last<state.deck.length?last:(oldUnitSlide>=0?oldUnitSlide:null);
    showHome();
   }catch(e){showError(e);}
  }
