@@ -144,6 +144,20 @@
  function revealLink(){
   document.getElementById('iv47LinkCard')?.scrollIntoView?.({behavior:'smooth',block:'start'});
  }
+ async function presentLink(token,email,recipient,course,message){
+  if(!state.open||!allowed())return;
+  showLink(token,email,recipient,course);
+  notice(message);
+  // Make the newly issued token visible BEFORE refreshing the assignment list.
+  // If the progress RPC fails, the admin must still be able to copy and send it.
+  await render();
+  revealLink();
+  try{
+   if(await load()){await render();revealLink();}
+  }catch(e){
+   notice('Il nuovo link è disponibile nel pannello qui sopra. Non sono riuscito ad aggiornare i progressi: '+String(e?.message||e),true);
+  }
+ }
  async function operate(fn){
   if(state.busy||!allowed())return;
   state.busy=true;
@@ -173,11 +187,9 @@
    }
    const token=newToken();
    await rpc('internal_admin_assign_v47',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token)});
-   if(!state.open||!allowed())return;
    const chosen=snapshot.courses.find(c=>c.version_id===version);
-   showLink(token,email,first+' '+last,chosen?.title||'Corso interno');
-   notice('Assegnazione salvata. Copia il link oppure prepara un’email da inviare.');
-   if(await load()){await render();revealLink();}
+   await presentLink(token,email,first+' '+last,chosen?.title||'Corso interno',
+    'Assegnazione salvata. Copia il link oppure prepara un’email da inviare.');
   });
  }
  async function rotate(id){
@@ -190,19 +202,15 @@
     const token=newToken();
     await rpc('internal_admin_assign_v47',{p_org_id:state.org,p_first_name:a.first_name,p_last_name:a.last_name,
      p_fiscal_code:a.fiscal_code,p_email:a.email||null,p_course_version_id:a.course_version_id,p_token_hash:await tokenHash(token)});
-    if(!state.open||!allowed())return;
-    showLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title);
-    notice('Nuovo percorso creato, storico conservato. Copia o invia il nuovo link.');
-    if(await load()){await render();revealLink();}
+    await presentLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title,
+     'Nuovo percorso creato, storico conservato. Copia o invia il nuovo link.');
     return;
    }
    if(!confirm('Reinviare l’accesso a '+a.first_name+' '+a.last_name+' per “'+a.course_title+'”? Verrà creato un NUOVO link: quello precedente smetterà di funzionare. Le slide già viste e i progressi resteranno invariati.'))return;
    const token=newToken();
    await rpc('internal_admin_link_v47',{p_assignment_id:id,p_token_hash:await tokenHash(token),p_revoke:false});
-   if(!state.open||!allowed())return;
-   showLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title);
-   notice('Nuovo link pronto. Il precedente è disattivato; il progresso è conservato. Copia il link oppure prepara l’email.');
-   if(await load()){await render();revealLink();}
+   await presentLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title,
+    'Nuovo link pronto. Il precedente è disattivato; il progresso è conservato. Copia il link oppure prepara l’email.');
   });
  }
  async function repeatCourse(id){
@@ -213,10 +221,8 @@
    if(!confirm('Ripetere “'+a.course_title+'” per '+a.first_name+' '+a.last_name+'? Il percorso precedente sarà conservato nello storico, il vecchio link disattivato e il nuovo inizierà da zero.'))return;
    const token=newToken();
    await rpc('internal_admin_repeat_v47_6',{p_assignment_id:id,p_token_hash:await tokenHash(token)});
-   if(!state.open||!allowed())return;
-   showLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title);
-   notice('Nuovo percorso creato, il precedente resta nello storico. Copia o invia il nuovo link.');
-   if(await load()){await render();revealLink();}
+   await presentLink(token,a.email||'',a.first_name+' '+a.last_name,a.course_title,
+    'Nuovo percorso creato, il precedente resta nello storico. Copia o invia il nuovo link.');
   });
  }
  async function revoke(id){
