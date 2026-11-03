@@ -169,7 +169,18 @@
   await operate(async()=>{
    const snapshot=await requireData();
    const a=snapshot.assignments.find(x=>x.id===id);
-   if(!a||!confirm('Generare un nuovo link per '+a.first_name+' '+a.last_name+'? Il vecchio link smetterà di funzionare, i progressi resteranno invariati.'))return;
+   if(!a)throw Error('Assegnazione non disponibile. Aggiorna la schermata.');
+   if(!a.active){
+    if(!confirm('Avviare un nuovo percorso di “'+a.course_title+'” per '+a.first_name+' '+a.last_name+'? Il precedente e i suoi progressi resteranno nello storico.'))return;
+    const token=newToken();
+    await rpc('internal_admin_assign_v47',{p_org_id:state.org,p_first_name:a.first_name,p_last_name:a.last_name,
+     p_fiscal_code:a.fiscal_code,p_email:a.email||null,p_course_version_id:a.course_version_id,p_token_hash:await tokenHash(token)});
+    if(!state.open||!allowed())return;
+    showLink(token,a.email||'');notice('Nuovo percorso creato, storico conservato.');
+    if(await load())await render();
+    return;
+   }
+   if(!confirm('Generare un nuovo link per '+a.first_name+' '+a.last_name+'? Il vecchio link smetterà di funzionare, ma i progressi resteranno invariati.'))return;
    const token=newToken();
    await rpc('internal_admin_link_v47',{p_assignment_id:id,p_token_hash:await tokenHash(token),p_revoke:false});
    if(!state.open||!allowed())return;
