@@ -80,7 +80,7 @@
   // stage. Scaling it in grid layout alone leaves the content offscreen on phones.
   const w=stage.clientWidth,h=stage.clientHeight;
   if(w<1||h<1)return;
-  const scale=Math.min(Math.max(.1,(w-pad*2)/1600),Math.max(.1,(h-pad*2)/900));
+  const scale=Math.min(Math.max(.04,(w-pad*2)/1600),Math.max(.04,(h-pad*2)/900));
   slide.style.transform='translate(-50%, -50%) scale('+scale+')';
   slide.style.setProperty('--deck-scale',scale);
   requestAnimationFrame(()=>{
@@ -121,8 +121,16 @@
   document.getElementById('ipHome').onclick=showHome;
   document.getElementById('ipIndex').onclick=openIndex;
   document.getElementById('ipFullscreen').onclick=()=>{
-   if(!document.fullscreenElement)void document.documentElement.requestFullscreen?.();
-   else void document.exitFullscreen?.();
+   const button=document.getElementById('ipFullscreen');
+   const active=document.fullscreenElement||document.webkitFullscreenElement;
+   const element=document.documentElement;
+   const action=active
+    ?(document.exitFullscreen||document.webkitExitFullscreen)?.bind(document)
+    :(element.requestFullscreen||element.webkitRequestFullscreen)?.bind(element);
+   if(!action){button.title='Schermo intero non disponibile in questo browser';return;}
+   try{
+    Promise.resolve(action()).catch(()=>{button.title='Schermo intero non consentito dal browser';});
+   }catch(_){button.title='Schermo intero non consentito dal browser';}
   };
   stageResizeObserver?.disconnect();
   const stage=document.getElementById('deckStage');
@@ -178,7 +186,9 @@
    showHome();
   }catch(e){showError(e);}
  }
- window.SAFETY_INTERNAL_SLIDE_V47_3={navigate(route){
+ window.SAFETY_INTERNAL_SLIDE_V47_3={resume(){
+  void go(state.lastSlide??0);
+ },navigate(route){
   const segments=String(route||'').split('/');
   if(segments[0]==='deck')void go(Number(segments[2]));
   else showHome();
