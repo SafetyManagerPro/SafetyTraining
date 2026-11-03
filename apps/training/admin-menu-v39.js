@@ -93,7 +93,8 @@
    const anyAdvanced=advancedGroups.some(id=>{
     const group=nav.querySelector('[data-admin-menu-group="'+id+'"]');return group&&!group.hidden;
    });
-   advanced.hidden=!anyAdvanced;
+   // Writing an unchanged reflected HTML boolean attribute is itself observed.
+   if(advanced.hidden===anyAdvanced)advanced.hidden=!anyAdvanced;
    if(advancedGroups.some(id=>{
     const group=nav.querySelector('[data-admin-menu-group="'+id+'"]');
     return group&&[...group.querySelectorAll('button')].some(b=>b.classList.contains('active')&&visible(b));
