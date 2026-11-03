@@ -61,3 +61,15 @@ body.deckmode #internalApp{overflow:hidden}
   transform-origin:center center!important;
   /* JS translates -50%/-50% and scales without changing source slide styles. */
 }
+
+/* v47.5: Windows snapped windows, macOS Split View and browser zoom.
+   Keep the projector centered and controls inside the visible shell. */
+#internalApp .deck-top > *,#internalApp .deck-footer > *{min-width:0}
+#internalApp .deck-footer > div:first-child{overflow:hidden}
+#internalApp .deck-footer > div:first-child > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#internalApp .deck-pager{white-space:nowrap}
+@media(min-width:681px) and (max-width:1024px){
+ #internalApp .deck-footer{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:0 12px}
+ #internalApp .deck-footer .deck-time{display:none}
+ #internalApp .deck-top{grid-template-columns:minmax(110px,145px) minmax(0,1fr) auto;gap:7px;padding:0 12px}
+}
