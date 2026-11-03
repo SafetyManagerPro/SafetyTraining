@@ -93,6 +93,17 @@ test('Edge Function invite remains JWT-protected and does not claim verified inb
  assert.match(admin,/La consegna|consegna da verificare/);
 });
 
+test('all learner email invites and recovery links use public HTTPS callback, never localhost or preview host',()=>{
+ const invites=read('apps/training/admin-invitations-v20.js');
+ const canonical='https://safety-training-safety-manager.vercel.app/?onboarding=1';
+ assert.match(auth,/const redirectTo = 'https:\/\/safety-training-safety-manager\.vercel\.app\/\?onboarding=1'/);
+ assert.match(auth,/inviteOptions\.redirectTo = redirectTo/);
+ assert.match(auth,/recoveryOptions\.redirectTo = redirectTo/);
+ assert.doesNotMatch(auth,/body\?\.redirect_to/);
+ assert.ok(invites.includes("return '"+canonical+"'"));
+ assert.doesNotMatch(invites,/new URL\(location\.href\)/);
+ assert.ok(admin.includes("new URL('?onboarding=1',PUBLIC_ORIGIN)"));
+});
 test('v46.8 PWA, CI and twin handoffs record QR/email fix without a DB migration',()=>{
  const html=read('apps/training/index.html');
  assert.ok(html.includes('admin-registration-v36.js'));
