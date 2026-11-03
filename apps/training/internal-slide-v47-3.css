@@ -1,0 +1,36 @@
+/* v47.3: only the link-only reader shell changes. Every projector-slide visual rule is still from the original CSS. */
+body.deckmode{height:100dvh;background:#050a12}
+#internalApp{min-height:100dvh}
+body.deckmode #internalApp{height:100dvh;min-height:0}
+#internalApp .deck-shell{height:100dvh;grid-template-rows:48px minmax(0,1fr) 56px 6px!important}
+#internalApp .deck-top{grid-template-columns:minmax(125px,190px) 1fr minmax(125px,210px);gap:10px}
+#internalApp .deck-top-navigation{display:flex;align-items:center;gap:8px}
+#internalApp .deck-top button{cursor:pointer;color:#e3f1fa;border:1px solid #3e5870;border-radius:8px;min-height:34px;padding:5px 10px;font-size:13px;background:#142437}
+#internalApp .deck-top button:focus-visible,#internalApp .deck-footer button:focus-visible{outline:3px solid #5cddb3;outline-offset:2px}
+#internalApp .deck-actions{display:flex;justify-content:flex-end;gap:8px}
+#internalApp .deck-stage{min-height:0;min-width:0}
+#internalApp .deck-footer{grid-template-columns:minmax(0,1fr) minmax(0,180px) auto;gap:16px}
+#internalApp .deck-pager{display:flex;align-items:center;gap:10px}
+#internalApp .deck-pager button{border:1px solid #416381;border-radius:8px;min-height:34px;background:#203952;color:#fff;padding:5px 9px;font-weight:750}
+#internalApp .deck-pager button:disabled{opacity:.3}
+#internalApp .deck-counter{min-width:60px;white-space:nowrap;text-align:center}
+#internalApp .deck-course{text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+#internalApp .ip-slide-panel{position:fixed;inset:48px auto 0 0;z-index:40;width:min(440px,95vw);background:#101e30;border-right:1px solid #47617d;box-shadow:0 15px 55px #000c;padding:18px;overflow:auto}
+#internalApp .ip-slide-panel[hidden]{display:none!important}
+#internalApp .ip-slide-panel h2{font-size:21px}
+#internalApp .ip-slide-panel button{display:block;text-align:left;width:100%;border:1px solid #3b526d;border-radius:9px;background:#1b3046;padding:9px 12px;color:#e1f2ff;margin:6px 0}
+#internalApp .ip-slide-panel button[aria-current="true"]{border-color:#5cddb3;color:#a4ffdb}
+#internalApp .ip-slide-panel button:hover{background:#294966}
+#internalApp .ip-slide-panel .ip-panel-close{width:auto;margin-left:auto}
+#internalApp .ip-slide-panel .ip-panel-note{color:#a6c9dd;font-size:12px}
+#internalApp .ip-slide-progress{font-size:11px;color:#afcce2}
+#internalApp .ip-stage-loading{padding:22px}
+@media(max-width:680px){
+ #internalApp .deck-top{grid-template-columns:100px 1fr 98px;padding:0 8px;gap:5px}
+ #internalApp .deck-top button{font-size:12px;padding:5px;min-height:32px}
+ #internalApp .deck-footer{padding:0 7px;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+ #internalApp .deck-footer .deck-time{display:none}
+ #internalApp .deck-footer button{min-height:30px;padding:4px 6px;font-size:12px}
+ #internalApp .deck-footer strong{max-width:100%;font-size:11px}
+ #internalApp .deck-nav{width:38px;height:72px;font-size:40px}
+}
