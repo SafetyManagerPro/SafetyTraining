@@ -59,6 +59,7 @@ test('link reinvite dynamically rotates hash, preserves known progress and expos
   people:[],assignments:[mockedAssignment]};
  const calls=[], root={innerHTML:'',querySelectorAll:()=>[]},rows={innerHTML:'',querySelectorAll:()=>[]};
  let scrollCount=0;
+ let failRefresh=false;
  const document={
   readyState:'loading',addEventListener:()=>{},
   querySelector:()=>null,
@@ -69,6 +70,7 @@ test('link reinvite dynamically rotates hash, preserves known progress and expos
  const window={
   SAFETY_CLOUD:{state:{client:{rpc:async(name,args)=>{
    calls.push({name,args});
+   if(name==='internal_admin_state_v47'&&failRefresh)return {data:null,error:{message:'server temporarily unavailable'}};
    return {data:name==='internal_admin_state_v47'?data:{active:true},error:null};
   }}}},
   SAFETY_ACCESS_V46_10:{state:{phase:'admin'}},
@@ -107,4 +109,13 @@ test('link reinvite dynamically rotates hash, preserves known progress and expos
  assert.notEqual(updates[0].args.p_token_hash,updates[1].args.p_token_hash);
  assert.equal(state.data.assignments[0].visited_slides,12);
  assert.equal(state.data.assignments[0].last_slide_index,16);
+ // A failed dashboard refresh must not hide the freshly rotated access link.
+ failRefresh=true;
+ const previous=state.link;
+ await rotate('assignment-1');
+ assert.notEqual(state.link,previous);
+ assert.ok(root.innerHTML.includes(state.link),'new link must already be in the panel before the failed refresh');
+ assert.match(state.notice,/Il nuovo link è disponibile nel pannello/);
+ assert.equal(calls.filter(x=>x.name==='internal_admin_link_v47').length,3);
+ assert.equal(state.data.assignments[0].visited_slides,12);
 });
