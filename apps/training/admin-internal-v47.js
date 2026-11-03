@@ -9,6 +9,8 @@
  const allowed=()=>!!db()&&(gate()?.phase==='admin'||(gate()?.phase==='staff'&&gate()?.staffRoles?.some(r=>['organization_admin','training_manager'].includes(r))));
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
  const fmt=v=>v?new Date(v).toLocaleString('it-IT'):'—';
+ const abc=new Intl.Collator('it-IT',{sensitivity:'base',numeric:true});
+ const alpha=(records,name)=>[...(records||[])].sort((x,y)=>abc.compare(String(name(x)||''),String(name(y)||'')));
  const percent=(a)=>Number(a.total_slides)>0?
   Math.round(100*Number(a.visited_slides||0)/Math.max(1,Number(a.total_slides))):
   Math.round(100*Number(a.visited_count||0)/Math.max(1,Number(a.total_units||0)));
@@ -64,9 +66,9 @@
  async function render(){
   if(!state.open||!allowed()||!root()||!state.data)return;
   ensureNav();header();
-  const d=state.data,courses=d.courses||[],people=d.people||[],assignments=d.assignments||[];
+  const d=state.data,courses=alpha(d.courses,x=>x.title),people=alpha(d.people,x=>x.last_name+' '+x.first_name),assignments=d.assignments||[];
   const active=assignments.filter(a=>a.active),started=active.filter(a=>a.started_at),finished=active.filter(a=>a.started_at&&percent(a)===100);
-  const orgs=(d.organizations||[]).map(o=>option(o.id,o.name,o.id===state.org)).join('');
+  const orgs=alpha(d.organizations,o=>o.name).map(o=>option(o.id,o.name,o.id===state.org)).join('');
   const choices=courses.map(c=>option(c.version_id,c.title+' · v'+c.version_number+' ('+c.unit_count+' sezioni)',false)).join('');
   const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code,false)).join('');
   root().innerHTML='<div class="iv47">'+
@@ -105,7 +107,7 @@
  function paintRows(){
   const body=document.getElementById('iv47Rows');if(!body)return;
   const q=(document.getElementById('iv47Search')?.value||'').toLowerCase();
-  const items=(state.data?.assignments||[]).filter(a=>[a.first_name,a.last_name,a.fiscal_code,a.course_title].some(x=>String(x||'').toLowerCase().includes(q)));
+  const items=alpha((state.data?.assignments||[]).filter(a=>[a.first_name,a.last_name,a.fiscal_code,a.course_title].some(x=>String(x||'').toLowerCase().includes(q))),a=>a.last_name+' '+a.first_name+' '+a.course_title);
   body.innerHTML=items.map(a=>{
    const pct=percent(a);
    const last=lastSlide(a);
