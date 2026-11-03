@@ -116,28 +116,48 @@
  }
  function paintRows(){
   const body=document.getElementById('iv47Rows');if(!body)return;
-  const q=(document.getElementById('iv47Search')?.value||'').toLowerCase();
-  const items=alpha((state.data?.assignments||[]).filter(a=>[a.first_name,a.last_name,a.fiscal_code,a.course_title].some(x=>String(x||'').toLowerCase().includes(q))),a=>a.last_name+' '+a.first_name+' '+a.course_title);
+  const q=(document.getElementById('iv47Search')?.value||'').toLocaleLowerCase('it-IT');
+  const filterStatus=state.filterStatus||'all',filterCourse=state.filterCourse||'';
+  const source=state.data?.assignments||[];
+  const items=alpha(source.filter(a=>
+   (filterStatus==='archived'?Boolean(a.archived_at):!a.archived_at)&&
+   (!filterCourse||a.course_version_id===filterCourse)&&
+   (filterStatus==='all'||statusKey(a)===filterStatus)&&
+   [a.first_name,a.last_name,a.fiscal_code,a.company_name,a.course_title].some(x=>String(x||'').toLocaleLowerCase('it-IT').includes(q))
+  ),a=>a.last_name+' '+a.first_name+' '+a.course_title);
+  const info=document.getElementById('iv47ResultCount');
+  if(info)info.textContent=items.length+' percorsi visualizzati';
+  const seenPeople=new Set();
   body.innerHTML=items.map(a=>{
    const pct=percent(a);
    const last=lastSlide(a);
    const topic=currentTopic(a);
-   const anotherActive=(state.data?.assignments||[]).some(x=>x.active&&x.person_id===a.person_id&&x.course_version_id===a.course_version_id&&x.id!==a.id);
+   const anotherActive=source.some(x=>x.active&&x.person_id===a.person_id&&x.course_version_id===a.course_version_id&&x.id!==a.id);
+   const firstOfPerson=!seenPeople.has(a.person_id);seenPeople.add(a.person_id);
+   const management=firstOfPerson?(a.archived_at?
+    '<button type="button" data-internal-restore-person="'+esc(a.person_id)+'">Ripristina corsista</button>':
+    '<button type="button" class="danger" data-internal-delete-person="'+esc(a.person_id)+'">Elimina corsista</button>'):'';
    return '<tr><td><strong>'+esc(a.last_name+' '+a.first_name)+'</strong><div class="iv47-muted">'+esc(a.fiscal_code)+'</div></td>'+
+    '<td>'+esc(a.company_name||'Generico')+'</td>'+
     '<td>'+esc(a.course_title)+' <small>v'+esc(a.version_number)+'</small><div class="iv47-muted">Assegnato: '+esc(fmt(a.created_at))+'</div></td>'+
     '<td><progress max="100" value="'+pct+'"></progress><div><strong>'+pct+'%</strong> · '+
      (Number(a.total_slides)>0?esc(a.visited_slides)+'/'+esc(a.total_slides)+' slide aperte':
-      esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div>'+ 
-     '<div class="iv47-progress-detail">Ultima posizione: '+esc(last)+'</div>'+ 
+      esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div>'+
+     '<div class="iv47-progress-detail">Ultima posizione: '+esc(last)+'</div>'+
      '<div class="iv47-progress-detail">'+esc(topic)+'</div></td>'+
     '<td>'+esc(fmt(a.last_activity_at||a.last_opened_at))+'</td><td>'+esc(status(a))+'</td><td>'+
-    (a.active||!anotherActive?'<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Reinvia link':'Nuovo ciclo')+'</button> ':'<span class="iv47-muted">Storico</span> ')+
-    (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
-    (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':'')+'</td></tr>';
-  }).join('')||'<tr><td colspan="6">Nessuna assegnazione interna.</td></tr>';
+    (a.archived_at?'<span class="iv47-muted">Link eliminati</span>':(a.active||!anotherActive?
+      '<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Reinvia link':'Nuovo ciclo')+'</button> ':
+      '<span class="iv47-muted">Storico</span> ')+
+     (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
+     (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':''))+
+    '</td><td>'+management+'</td></tr>';
+  }).join('')||'<tr><td colspan="8">Nessun corsista o percorso corrispondente ai filtri.</td></tr>';
   body.querySelectorAll('[data-internal-rotate]').forEach(btn=>btn.onclick=()=>void rotate(btn.dataset.internalRotate));
   body.querySelectorAll('[data-internal-revoke]').forEach(btn=>btn.onclick=()=>void revoke(btn.dataset.internalRevoke));
   body.querySelectorAll('[data-internal-repeat]').forEach(btn=>btn.onclick=()=>void repeatCourse(btn.dataset.internalRepeat));
+  body.querySelectorAll('[data-internal-delete-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalDeletePerson,false));
+  body.querySelectorAll('[data-internal-restore-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalRestorePerson,true));
  }
  const newToken=()=>{
   const bytes=crypto.getRandomValues(new Uint8Array(32));
