@@ -51,7 +51,8 @@ test('Elimina corsista revokes EVERY active link, preserves progress and provide
  assert.match(sql,/if p_restore then[\s\S]*?archived_at=null/);
  assert.doesNotMatch(sql,/\bdelete from private\.internal_/i);
  assert.match(sql,/grant execute on function public\.internal_admin_assign_v47/);
- assert.match(sql,/public\.internal_admin_archive_person_v47_9\(uuid,boolean\) to authenticated/);
+ assert.match(sql,/public\.internal_admin_archive_person_v47_9\(uuid,boolean\)/);
+ assert.match(sql,/public\.internal_admin_state_v47\(uuid\) to authenticated/);
  assert.match(ui,/data-internal-delete-person/);
  assert.match(ui,/data-internal-restore-person/);
  assert.match(ui,/async function archivePerson\(personId,restore\)/);
