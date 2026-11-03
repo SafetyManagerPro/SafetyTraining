@@ -1,7 +1,7 @@
 /* SafetyTraining v47 — corsisti interni: independent, non-certifying link-only workflow. */
 (()=>{'use strict';
  const ORIGIN='https://safety-training-safety-manager.vercel.app';
- const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',notice:'',error:false};
+ const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterStatus:'all',notice:'',error:false};
  const db=()=>window.SAFETY_CLOUD?.state?.client;
  const gate=()=>window.SAFETY_ACCESS_V46_10?.state;
  const root=()=>document.getElementById('adminContent');
@@ -16,7 +16,8 @@
   Math.round(100*Number(a.visited_count||0)/Math.max(1,Number(a.total_units||0)));
  const lastSlide=a=>Number.isInteger(a.last_slide_index)&&Number(a.total_slides)>0?'Slide '+(a.last_slide_index+1)+' di '+a.total_slides:'Non iniziato';
  const currentTopic=a=>[a.current_module_title,a.current_unit_title].filter(Boolean).join(' › ')||'Argomento non ancora raggiunto';
- const status=a=>!a.active?(percent(a)>=100?'Storico · terminato':'Storico · disattivato'):!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
+ const statusKey=a=>a.archived_at?'archived':!a.active?'inactive':!a.started_at?'not_started':percent(a)>=100?'viewed_all':'in_progress';
+ const status=a=>a.archived_at?'Eliminato':!a.active?(percent(a)>=100?'Storico · terminato':'Storico · disattivato'):!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
  function ensureNav(){
   const n=nav();if(!n)return;
   let btn=document.getElementById('adminInternalV47Nav');
@@ -66,11 +67,14 @@
  async function render(){
   if(!state.open||!allowed()||!root()||!state.data)return;
   ensureNav();header();
-  const d=state.data,courses=alpha(d.courses,x=>x.title),people=alpha(d.people,x=>x.last_name+' '+x.first_name),assignments=d.assignments||[];
+  const d=state.data,courses=alpha(d.courses,x=>x.title),people=alpha((d.people||[]).filter(p=>!p.archived_at),x=>x.last_name+' '+x.first_name),assignments=d.assignments||[];
   const active=assignments.filter(a=>a.active),started=active.filter(a=>a.started_at),finished=active.filter(a=>a.started_at&&percent(a)===100);
   const orgs=alpha(d.organizations,o=>o.name).map(o=>option(o.id,o.name,o.id===state.org)).join('');
+  const companyChoices=alpha(d.companies||[],c=>c.name).map(c=>'<option value="'+esc(c.name)+'"></option>').join('');
+  const assignedCourses=alpha([...new Map(assignments.map(a=>[a.course_version_id,{id:a.course_version_id,title:a.course_title,version:a.version_number}])).values()],c=>c.title);
+  const courseFilters=assignedCourses.map(c=>option(c.id,c.title+' · v'+c.version,c.id===state.filterCourse)).join('');
   const choices=courses.map(c=>option(c.version_id,c.title+' · v'+c.version_number+' ('+c.unit_count+' sezioni)',false)).join('');
-  const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code,false)).join('');
+  const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code+' · '+(p.company_name||'Generico'),false)).join('');
   root().innerHTML='<div class="iv47">'+
    '<section class="iv47-card"><h2>Corsisti interni · formazione non certificante</h2>'+
    '<p>Un corsista può seguire più corsi contemporaneamente e nel tempo, con link e progressi separati. Nessun account o password. La percentuale non è una certificazione.</p>'+
@@ -84,7 +88,9 @@
    '<form id="iv47Form" class="iv47-fields"><label>Nome<input name="first_name" id="iv47First" maxlength="120" required autocomplete="off"></label>'+
    '<label>Cognome<input name="last_name" id="iv47Last" maxlength="120" required autocomplete="off"></label>'+
    '<label>Codice fiscale<input name="fiscal_code" id="iv47CF" maxlength="16" minlength="16" pattern="[a-zA-Z0-9]{16}" required autocomplete="off" style="text-transform:uppercase"></label>'+
-   '<label>Email facoltativa<input name="email" type="email" id="iv47Email" autocomplete="off"></label>'+
+   '<label>Email facoltativa<input name="email" type="email" id="iv47Email" autocomplete="off"></label>'+ 
+   '<label class="iv47-company-field">Azienda (facoltativa)<input id="iv47Company" name="company_name" list="iv47Companies" maxlength="180" autocomplete="off" placeholder="Generico (nessuna azienda)"><datalist id="iv47Companies">'+companyChoices+'</datalist></label>'+ 
+   '<div class="iv47-actions iv47-company-save"><button type="button" id="iv47SaveCompany" disabled>Aggiorna azienda del corsista</button></div>'+
    '<label style="grid-column:1/-1">Corso da assegnare<select id="iv47Course" name="course_version_id" required>'+choices+'</select></label>'+
    '<div class="iv47-actions" style="grid-column:1/-1"><button type="submit" class="primary"'+(courses.length?'':' disabled')+'>Genera link personale</button></div></form>'+
    (courses.length?'':'<p>Nessun corso pubblicato e disponibile per questa organizzazione.</p>')+
@@ -97,8 +103,12 @@
    '<button type="button" id="iv47Share">Condividi</button></div><p class="iv47-muted">L’email viene aperta nel programma di posta: controlla e conferma tu l’invio. Non viene spedita automaticamente.</p></div></section>'+
    '<section class="iv47-card"><h2>3. Controlla i progressi</h2>'+
    '<div class="iv47-actions"><button type="button" id="iv47Refresh">Aggiorna progressi</button></div>'+ 
-   '<label>Cerca nome, codice fiscale o corso<input id="iv47Search" value="'+esc(state.search)+'" placeholder="Cerca corsista o corso…" autocomplete="off"></label>'+
-   '<div class="iv47-table"><table><thead><tr><th>Corsista</th><th>Corso</th><th>Avanzamento</th><th>Ultima attività</th><th>Stato</th><th>Gestione link</th></tr></thead>'+
+   '<div class="iv47-filters">'+
+   '<label>Filtra per corso<select id="iv47CourseFilter">'+option('','Tutti i corsi',!state.filterCourse)+courseFilters+'</select></label>'+ 
+   '<label>Filtra per stato<select id="iv47StatusFilter">'+[['all','Tutti gli stati'],['not_started','Da iniziare'],['in_progress','In corso'],['viewed_all','Tutte le slide aperte'],['inactive','Disattivato'],['archived','Eliminati']].map(v=>option(v[0],v[1],state.filterStatus===v[0])).join('')+'</select></label></div>'+ 
+   '<label>Cerca nome, codice fiscale, azienda o corso<input id="iv47Search" value="'+esc(state.search)+'" placeholder="Cerca corsista, azienda o corso…" autocomplete="off"></label>'+ 
+   '<p id="iv47ResultCount" class="iv47-muted" role="status"></p>'+
+   '<div class="iv47-table"><table><thead><tr><th>Corsista</th><th>Azienda</th><th>Corso</th><th>Avanzamento</th><th>Ultima attività</th><th>Stato</th><th>Gestione link</th><th>Gestione corsista</th></tr></thead>'+
    '<tbody id="iv47Rows"></tbody></table></div></section>'+
    '<p id="iv47Notice" class="iv47-notice'+(state.error?' iv47-error':'')+'" role="status" aria-live="polite">'+esc(state.notice)+'</p>'+
    '</div>';
@@ -106,28 +116,48 @@
  }
  function paintRows(){
   const body=document.getElementById('iv47Rows');if(!body)return;
-  const q=(document.getElementById('iv47Search')?.value||'').toLowerCase();
-  const items=alpha((state.data?.assignments||[]).filter(a=>[a.first_name,a.last_name,a.fiscal_code,a.course_title].some(x=>String(x||'').toLowerCase().includes(q))),a=>a.last_name+' '+a.first_name+' '+a.course_title);
+  const q=(document.getElementById('iv47Search')?.value||'').toLocaleLowerCase('it-IT');
+  const filterStatus=state.filterStatus||'all',filterCourse=state.filterCourse||'';
+  const source=state.data?.assignments||[];
+  const items=alpha(source.filter(a=>
+   (filterStatus==='archived'?Boolean(a.archived_at):!a.archived_at)&&
+   (!filterCourse||a.course_version_id===filterCourse)&&
+   (filterStatus==='all'||statusKey(a)===filterStatus)&&
+   [a.first_name,a.last_name,a.fiscal_code,a.company_name,a.course_title].some(x=>String(x||'').toLocaleLowerCase('it-IT').includes(q))
+  ),a=>a.last_name+' '+a.first_name+' '+a.course_title);
+  const info=document.getElementById('iv47ResultCount');
+  if(info)info.textContent=items.length+' percorsi visualizzati';
+  const seenPeople=new Set();
   body.innerHTML=items.map(a=>{
    const pct=percent(a);
    const last=lastSlide(a);
    const topic=currentTopic(a);
-   const anotherActive=(state.data?.assignments||[]).some(x=>x.active&&x.person_id===a.person_id&&x.course_version_id===a.course_version_id&&x.id!==a.id);
+   const anotherActive=source.some(x=>x.active&&x.person_id===a.person_id&&x.course_version_id===a.course_version_id&&x.id!==a.id);
+   const firstOfPerson=!seenPeople.has(a.person_id);seenPeople.add(a.person_id);
+   const management=firstOfPerson?(a.archived_at?
+    '<button type="button" data-internal-restore-person="'+esc(a.person_id)+'">Ripristina corsista</button>':
+    '<button type="button" class="danger" data-internal-delete-person="'+esc(a.person_id)+'">Elimina corsista</button>'):'';
    return '<tr><td><strong>'+esc(a.last_name+' '+a.first_name)+'</strong><div class="iv47-muted">'+esc(a.fiscal_code)+'</div></td>'+
+    '<td>'+esc(a.company_name||'Generico')+'</td>'+
     '<td>'+esc(a.course_title)+' <small>v'+esc(a.version_number)+'</small><div class="iv47-muted">Assegnato: '+esc(fmt(a.created_at))+'</div></td>'+
     '<td><progress max="100" value="'+pct+'"></progress><div><strong>'+pct+'%</strong> · '+
      (Number(a.total_slides)>0?esc(a.visited_slides)+'/'+esc(a.total_slides)+' slide aperte':
-      esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div>'+ 
-     '<div class="iv47-progress-detail">Ultima posizione: '+esc(last)+'</div>'+ 
+      esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div>'+
+     '<div class="iv47-progress-detail">Ultima posizione: '+esc(last)+'</div>'+
      '<div class="iv47-progress-detail">'+esc(topic)+'</div></td>'+
     '<td>'+esc(fmt(a.last_activity_at||a.last_opened_at))+'</td><td>'+esc(status(a))+'</td><td>'+
-    (a.active||!anotherActive?'<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Reinvia link':'Nuovo ciclo')+'</button> ':'<span class="iv47-muted">Storico</span> ')+
-    (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
-    (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':'')+'</td></tr>';
-  }).join('')||'<tr><td colspan="6">Nessuna assegnazione interna.</td></tr>';
+    (a.archived_at?'<span class="iv47-muted">Link eliminati</span>':(a.active||!anotherActive?
+      '<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Reinvia link':'Nuovo ciclo')+'</button> ':
+      '<span class="iv47-muted">Storico</span> ')+
+     (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
+     (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':''))+
+    '</td><td>'+management+'</td></tr>';
+  }).join('')||'<tr><td colspan="8">Nessun corsista o percorso corrispondente ai filtri.</td></tr>';
   body.querySelectorAll('[data-internal-rotate]').forEach(btn=>btn.onclick=()=>void rotate(btn.dataset.internalRotate));
   body.querySelectorAll('[data-internal-revoke]').forEach(btn=>btn.onclick=()=>void revoke(btn.dataset.internalRevoke));
   body.querySelectorAll('[data-internal-repeat]').forEach(btn=>btn.onclick=()=>void repeatCourse(btn.dataset.internalRepeat));
+  body.querySelectorAll('[data-internal-delete-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalDeletePerson,false));
+  body.querySelectorAll('[data-internal-restore-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalRestorePerson,true));
  }
  const newToken=()=>{
   const bytes=crypto.getRandomValues(new Uint8Array(32));
@@ -178,6 +208,7 @@
    const last=f.querySelector('#iv47Last').value.trim();
    const cf=f.querySelector('#iv47CF').value.trim().toUpperCase().replace(/\s/g,'');
    const email=f.querySelector('#iv47Email').value.trim();
+   const company=f.querySelector('#iv47Company').value.trim();
    const version=f.querySelector('#iv47Course').value;
    if(!first||!last||!/^[A-Z0-9]{16}$/.test(cf)||!version)throw Error('Compila nome, cognome, codice fiscale e corso.');
    // Auth refresh can invalidate cached UI data while the form stays visible.
@@ -188,7 +219,7 @@
     return;
    }
    const token=newToken();
-   await rpc('internal_admin_assign_v47',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token)});
+   await rpc('internal_admin_assign_company_v47_9',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token),p_company_name:company||null});
    const chosen=snapshot.courses.find(c=>c.version_id===version);
    await presentLink(token,email,first+' '+last,chosen?.title||'Corso interno',
     'Assegnazione salvata. Copia il link oppure prepara un’email da inviare.');
@@ -227,6 +258,31 @@
     'Nuovo percorso creato, il precedente resta nello storico. Copia o invia il nuovo link.');
   });
  }
+ async function saveCompany(){
+  await operate(async()=>{
+   const personId=document.getElementById('iv47Person')?.value;
+   if(!personId)throw Error('Seleziona prima un corsista esistente.');
+   const company=document.getElementById('iv47Company')?.value.trim()||'Generico';
+   await rpc('internal_admin_company_v47_9',{p_person_id:personId,p_company_name:company});
+   if(await load()){await render();notice('Azienda aggiornata: '+company+'.');}
+  });
+ }
+ async function archivePerson(personId,restore){
+  await operate(async()=>{
+   const snapshot=await requireData();
+   const person=(snapshot.people||[]).find(x=>x.id===personId);
+   if(!person)throw Error('Corsista non trovato. Aggiorna la schermata.');
+   const name=person.first_name+' '+person.last_name;
+   if(!restore){
+    const linked=(snapshot.assignments||[]).filter(a=>a.person_id===personId);
+    const current=linked.filter(a=>a.active).length;
+    if(!confirm('Eliminare '+name+' dai Corsisti interni? Verranno disattivati '+current+' link attivi, anche di corsi diversi. Le slide già viste e lo storico rimarranno conservati e sarà possibile ripristinare il corsista.'))return;
+   }else if(!confirm('Ripristinare '+name+' nell’elenco Corsisti interni? I vecchi link restano disattivati; per riprendere il corso dovrai generarne uno nuovo.'))return;
+   await rpc('internal_admin_archive_person_v47_9',{p_person_id:personId,p_restore:!!restore});
+   state.link='';state.filterStatus='all';
+   if(await load()){await render();notice(restore?'Corsista ripristinato. Per riattivare i corsi genera nuovi link.':'Corsista eliminato dall’elenco e tutti i suoi link disattivati. Storico conservato.');}
+  });
+ }
  async function revoke(id){
   await operate(async()=>{
    const snapshot=await requireData();
@@ -239,7 +295,7 @@
  }
  function bind(){
   const org=document.getElementById('iv47Org');if(org)org.onchange=()=>void operate(async()=>{
-   state.org=org.value;state.link='';state.search='';if(await load())await render();
+   state.org=org.value;state.link='';state.search='';state.filterStatus='all';state.filterCourse='';if(await load())await render();
   });
   const person=document.getElementById('iv47Person');if(person)person.onchange=()=>{
    const p=(state.data?.people||[]).find(p=>p.id===person.value);
@@ -247,8 +303,13 @@
    document.getElementById('iv47Last').value=p?.last_name||'';
    document.getElementById('iv47CF').value=p?.fiscal_code||'';
    document.getElementById('iv47Email').value=p?.email||'';
+   document.getElementById('iv47Company').value=p?.company_name&&p.company_name!=='Generico'?p.company_name:'';
+   document.getElementById('iv47SaveCompany').disabled=!p;
   };
   document.getElementById('iv47Form')?.addEventListener('submit',event=>void assign(event));
+  document.getElementById('iv47SaveCompany')?.addEventListener('click',()=>void saveCompany());
+  document.getElementById('iv47CourseFilter')?.addEventListener('change',event=>{state.filterCourse=event.target.value;paintRows();});
+  document.getElementById('iv47StatusFilter')?.addEventListener('change',event=>{state.filterStatus=event.target.value;paintRows();});
   document.getElementById('iv47Search')?.addEventListener('input',event=>{state.search=event.target.value;paintRows();});
   document.getElementById('iv47Refresh')?.addEventListener('click',()=>void operate(async()=>{
    if(await load()){await render();notice('Progressi aggiornati.');}
@@ -271,7 +332,7 @@
  }
  async function open(){
   if(!allowed())return alert('Accesso amministrativo richiesto.');
-  state.open=true;state.seq++;state.link='';state.linkRecipient='';state.linkCourse='';state.search='';state.notice='';state.error=false;
+  state.open=true;state.seq++;state.link='';state.linkRecipient='';state.linkCourse='';state.search='';state.filterCourse='';state.filterStatus='all';state.notice='';state.error=false;
   document.getElementById('adminShell')?.classList.remove('admin-mobile-nav-open');
   header();if(root())root().innerHTML='<div class="iv47">Carico corsisti interni e corsi…</div>';
   try{if(await load())await render();}
