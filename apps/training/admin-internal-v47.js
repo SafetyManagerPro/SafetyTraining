@@ -105,13 +105,14 @@
   const items=(state.data?.assignments||[]).filter(a=>[a.first_name,a.last_name,a.fiscal_code,a.course_title].some(x=>String(x||'').toLowerCase().includes(q)));
   body.innerHTML=items.map(a=>{
    const pct=percent(a);
+   const anotherActive=(state.data?.assignments||[]).some(x=>x.active&&x.person_id===a.person_id&&x.course_version_id===a.course_version_id&&x.id!==a.id);
    return '<tr><td><strong>'+esc(a.last_name+' '+a.first_name)+'</strong><div class="iv47-muted">'+esc(a.fiscal_code)+'</div></td>'+
     '<td>'+esc(a.course_title)+' <small>v'+esc(a.version_number)+'</small><div class="iv47-muted">Assegnato: '+esc(fmt(a.created_at))+'</div></td>'+
     '<td><progress max="100" value="'+pct+'"></progress><div>'+pct+'% · '+
      (Number(a.total_slides)>0?esc(a.visited_slides)+'/'+esc(a.total_slides)+' slide aperte · ultima slide '+(Number(a.last_slide_index||0)+1):
       esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div></td>'+
     '<td>'+esc(fmt(a.last_activity_at||a.last_opened_at))+'</td><td>'+esc(status(a))+'</td><td>'+
-    '<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Nuovo link':'Nuovo ciclo')+'</button> '+
+    (a.active||!anotherActive?'<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Nuovo link':'Nuovo ciclo')+'</button> ':'<span class="iv47-muted">Storico</span> ')+
     (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
     (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':'')+'</td></tr>';
   }).join('')||'<tr><td colspan="6">Nessuna assegnazione interna.</td></tr>';
