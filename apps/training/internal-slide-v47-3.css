@@ -34,3 +34,30 @@ body.deckmode #internalApp{height:100dvh;min-height:0}
  #internalApp .deck-footer strong{max-width:100%;font-size:11px}
  #internalApp .deck-nav{width:38px;height:72px;font-size:40px}
 }
+
+
+/* v47.4 MOBILE VISIBILITY: the 1600×900 original projector is a transformed
+   fixed-size object, not a grid item. As a grid item its 1600px intrinsic size
+   overflows a ~360px phone track; overflow:hidden then clips it completely.
+   Anchor its unscaled center to the viewport center BEFORE applying the scale. */
+#internalApp{box-sizing:border-box;min-width:0;width:100%;max-width:100vw;padding:0!important;margin:0!important}
+body.deckmode #internalApp{overflow:hidden}
+#internalApp .deck-shell{width:100%;max-width:100%;min-width:0;overflow:hidden}
+#internalApp .deck-stage{
+  position:relative!important;
+  display:block!important;
+  width:100%;
+  height:100%;
+  min-width:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding:0!important;
+}
+#internalApp .deck-stage > .projector-slide{
+  position:absolute!important;
+  left:50%;
+  top:50%;
+  margin:0!important;
+  transform-origin:center center!important;
+  /* JS translates -50%/-50% and scales without changing source slide styles. */
+}
