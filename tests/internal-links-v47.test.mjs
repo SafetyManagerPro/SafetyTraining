@@ -38,7 +38,7 @@ test('access control has no learner login and only scopes one published course',
  assert.match(sql,/revoke all on function public\.internal_admin_state_v47/);
  assert.match(sql,/private\.can_manage_training_org/);
  assert.match(sql,/v\.status='published'/);
- assert.match(player,/\/interno\.html#t=/);
+ assert.match(admin,/\/interno\.html#t=/);
 });
 test('progress is per person/course and records valid viewed sections only',()=>{
  assert.match(sql,/primary key\(assignment_id,unit_version_id\)/);
@@ -59,7 +59,7 @@ test('private links are revocable and rotating them retains old progress',()=>{
 test('contents are loaded only through token-gated server function and teacher answers do not leave the server',()=>{
  assert.match(fn,/filterContent/);
  assert.match(fn,/const plainKeys=/);
- assert.match(fn,/quiz\)=/);
+ assert.match(fn,/if\(quiz\)out\.quiz=/);
  assert.doesNotMatch(fn,/out\.quiz\s*=\s*quiz;/);
  assert.match(html,/referrer.*no-referrer/);
  assert.match(fn,/Cache-Control.*no-store/);
