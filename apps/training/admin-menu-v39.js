@@ -2,6 +2,7 @@
 (()=>{'use strict';
  const sections=[
   {id:'home',label:'PANORAMICA',icon:'▦',keys:['dashboard']},
+  {id:'internal',label:'CORSISTI INTERNI',icon:'🔗',keys:['internal']},
   {id:'people',label:'ANAGRAFICHE E ACCESSI',icon:'👥',keys:['organizations','companies','learners','permissions','memberships']},
   {id:'enroll',label:'ISCRIZIONI E FORMAZIONE',icon:'✅',keys:['wizard','enrollments','registrations','access']},
   {id:'courses',label:'CORSI E DIDATTICA',icon:'📚',keys:['courses','editions','catalog','blueprint','readiness','quality','editorial','pathaudit']},
@@ -9,7 +10,7 @@
   {id:'monitor',label:'CONTROLLO E REPORT',icon:'📊',keys:['reports','activity','misc']}
  ];
  const selectors={
-  dashboard:'[data-tab="dashboard"]',organizations:'[data-tab="organizations"]',
+  dashboard:'[data-tab="dashboard"]',internal:'#adminInternalV47Nav',organizations:'[data-tab="organizations"]',
   companies:'[data-tab="companies"]',learners:'[data-tab="learners"]',
   permissions:'#adminLearnerPermissionsNav',memberships:'#adminMembershipsNav',
   wizard:'[data-tab="wizard"]',enrollments:'[data-tab="enrollments"]',
@@ -46,14 +47,22 @@
   if(nav!==root){observer?.disconnect();nav=root;observer=new MutationObserver(schedule);observer.observe(nav,{childList:true,subtree:true,attributes:true,attributeFilter:['class','hidden','aria-hidden']});}
   reconciling=true;
   try{
+   let advanced=nav.querySelector('[data-admin-menu-advanced]');
+   if(!advanced){
+    advanced=document.createElement('details');advanced.className='admin-menu-advanced';advanced.dataset.adminMenuAdvanced='1';
+    advanced.innerHTML='<summary><span aria-hidden="true">⚙</span> GESTIONE E-LEARNING AVANZATA</summary><div class="admin-menu-advanced-items"></div>';
+    nav.appendChild(advanced);
+   }
+   const advancedItems=advanced.querySelector('.admin-menu-advanced-items');
    for(const group of sections){
     let detail=nav.querySelector('[data-admin-menu-group="'+group.id+'"]');
     if(!detail){
      detail=document.createElement('details');detail.className='admin-menu-group';detail.dataset.adminMenuGroup=group.id;
      detail.innerHTML='<summary><span aria-hidden="true">'+group.icon+'</span> '+group.label+'</summary><div class="admin-menu-items" data-admin-menu-items="'+group.id+'"></div>';
-     detail.open=group.id==='home'||group.id==='enroll'||group.id==='monitor';
-     nav.appendChild(detail);
+     detail.open=group.id==='home'||group.id==='internal';
     }
+    const parent=(group.id==='home'||group.id==='internal')?nav:advancedItems;
+    if(detail.parentElement!==parent)parent.appendChild(detail);
    }
    const buttons=[...nav.querySelectorAll('button')].filter(b=>!b.closest('.admin-menu-group summary'));
    for(const button of buttons){
@@ -74,6 +83,15 @@
     if(detail.hidden===isVisible)detail.hidden=!isVisible;
     if(bs.some(b=>b.classList.contains('active')&&visible(b))&&!detail.open)detail.open=true;
    }
+   const advancedGroups=['people','enroll','courses','assets','monitor'];
+   const anyAdvanced=advancedGroups.some(id=>{
+    const group=nav.querySelector('[data-admin-menu-group="'+id+'"]');return group&&!group.hidden;
+   });
+   advanced.hidden=!anyAdvanced;
+   if(advancedGroups.some(id=>{
+    const group=nav.querySelector('[data-admin-menu-group="'+id+'"]');
+    return group&&[...group.querySelectorAll('button')].some(b=>b.classList.contains('active')&&visible(b));
+   }))advanced.open=true;
   }finally{reconciling=false;}
  }
  function schedule(){
