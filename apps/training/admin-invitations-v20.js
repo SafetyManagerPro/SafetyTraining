@@ -30,11 +30,8 @@
   }
 
   function redirectUrl() {
-    const u = new URL(location.href);
-    u.search = '';
-    u.hash = '';
-    u.searchParams.set('onboarding', '1');
-    return u.toString();
+    // Inviti inviati da admin o preview devono sempre terminare nel sito pubblico.
+    return 'https://safety-training-safety-manager.vercel.app/?onboarding=1';
   }
 
   async function sendInvite(learnerId, button) {
