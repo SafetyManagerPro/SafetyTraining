@@ -51,6 +51,7 @@ test('link-only page loads the original course adapter and visual assets without
  for(const file of ['styles.css','presentation-quality.css','slide-visual-design-v41.css',
   'visual-asset-guard-v32.js','graphic-pack-01.js','graphic-pack-02.js','graphic-pack-03.js',
   'graphic-pack-04.js','graphic-atlas-v22.js','db-slide-adapter.js',
+  'db-media-compat-v20.js','presentation-enrichment-v3.js',
   'internal-original-deck-v47-3.js','internal-slide-v47-3.css'])
   assert.ok(html.includes(file),'missing original viewer dependency: '+file);
  assert.doesNotMatch(html,/src="\.\/(admin|cloud-v20|access-gate-v46-10|app)\.js"/);
