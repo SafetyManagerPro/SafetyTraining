@@ -47,3 +47,11 @@
 @media(max-width:720px){
  .iv47 .iv47-filters{grid-template-columns:1fr}
 }
+
+
+/* v47.10 internal learner registry editor. */
+.iv47 #iv47RegistryCard{scroll-margin-top:88px}
+.iv47 #iv47EditForm[hidden]{display:none!important}
+.iv47 .iv47-fields .iv47-wide{grid-column:1/-1}
+.iv47 textarea{width:100%;max-width:100%;min-width:0;resize:vertical;border:1px solid #5b7291;border-radius:10px;background:#09172a;color:#f3f8ff;min-height:88px;padding:10px 12px;font:inherit}
+.iv47 #iv47EditForm input:focus-visible,.iv47 #iv47EditForm textarea:focus-visible{outline:2px solid #56d5a7;outline-offset:2px}
