@@ -87,7 +87,7 @@ test('UI wiring covers all administration screens without touching learner slide
  assert.match(src,/MutationObserver/);
  assert.match(src,/if\(options\.every\(\(o,i\)=>o===desired\[i\]\)\)continue/);
  assert.match(src,/if\(\[\.\.\.select\.options\]\.some\(o=>o\.value===oldValue\)\)select\.value=oldValue/);
- assert.match(internal,/const courses=alpha\(d\.courses,x=>x\.title\)/);
+ assert.match(internal,/courses=alpha\(d\.courses,x=>x\.title\)/);
  assert.match(internal,/people=alpha\(d\.people,x=>x\.last_name\+' '\+x\.first_name\)/);
  assert.match(internal,/alpha\(\(state\.data\?\.assignments\|\|\[\]\)\.filter/);
  assert.match(quick,/const matches=s\.data\.learners\.filter[\s\S]{0,160}\.sort\(\(a,b\)=>abc\.compare\(title\(a\),title\(b\)\)\)/);
