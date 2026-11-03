@@ -1,18 +1,18 @@
 # SafetyTraining — handoff LATEST
 
 
+Ultimo aggiornamento: 2026-11-03
+Stato: **v46.11 GitHub feature in verifica · baseline v46.10 PR #37 merged · CI #742 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-11-internal-access`.
+
+> Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
+
+
 ## 2026-11-03 — v46.12: recupero password con redirect Auth corretto
 - Riproduzione da email iscrizione pubblica: pagina finale `http://localhost:3000` → `ERR_CONNECTION_REFUSED` su telefono. Non è un errore della rete mobile.
 - Diagnosi DB read-only del 2026-11-03: invito `status=sent`, `delivery_mode=recovery`, `redirect_to=https://safety-training-safety-manager.vercel.app/?onboarding=1`; il codice client invia già il redirect corretto.
 - Correzione app/Edge: il servizio `invite-learner` forza il callback pubblico HTTPS per `inviteUserByEmail` e `resetPasswordForEmail` senza fidarsi del browser/origin/anteprima; anche gli inviti legacy della UI usano l'URL fisso. Suite test aggiornata.
 - **BLOCCO OPERATIVO ESTERNO**: configurazione Supabase Auth → URL Configuration va verificata nel dashboard (non accessibile con questi strumenti). Site URL `https://safety-training-safety-manager.vercel.app/` e Redirect URLs che includano `https://safety-training-safety-manager.vercel.app/**`; controllare anche il template Recovery email affinché usi `{{ .ConfirmationURL }}` senza `localhost` hard-coded. La sola patch del codice NON dimostra che l'email funzioni.
 - Dopo impostazione Auth, reinvia una nuova email dalla richiesta approvata (senza duplicare iscrizioni) e testa su telefono il form `?onboarding=1`, il cambio password e la visibilità del solo corso assegnato. Nessun invio di test a un corsista reale, nessuna modifica alle evidenze e ai corsi frozen.
-
-Ultimo aggiornamento: 2026-11-02
-Stato: **v46.11 GitHub feature in verifica · baseline v46.10 PR #37 merged · CI #742 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-11-internal-access`.
-
-> Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
-
 
 ## Vincoli permanenti
 NON sviluppare/modernizzare/finalizzare/pubblicare senza richiesta esplicita:
