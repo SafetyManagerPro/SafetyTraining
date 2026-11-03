@@ -80,3 +80,16 @@ test('primary admin menu exposes Corsisti interni and preserves advanced e-learn
  assert.match(sw,/safety-training-v46-11-internal-access/);
  assert.match(sw,/admin-internal-v47\.js/);
 });
+
+test('v47.2: internal course link generation SQL uses a unique alias for the selected course',()=>{
+ const fix=read('supabase/migrations/20261103094000_v47_2_unambiguous_internal_course.sql');
+ assert.match(fix,/declare[^;]*course_row public\.courses%rowtype/);
+ assert.match(fix,/select course_catalog\.\* into course_row from public\.courses course_catalog/);
+ assert.match(fix,/v\.course_id=course_catalog\.id/);
+ assert.match(fix,/'course_title',course_row\.title/);
+ assert.doesNotMatch(fix,/\bc\.id\b|select c\.\* into c\b/);
+ assert.match(fix,/private\.can_manage_training_org\(p_org_id\)/);
+ assert.match(fix,/v\.status='published'/);
+ assert.match(fix,/grant execute on function public\.internal_admin_assign_v47/);
+ assert.doesNotMatch(fix,/\b(?:drop|truncate)\s+(?:table|function)/i);
+});
