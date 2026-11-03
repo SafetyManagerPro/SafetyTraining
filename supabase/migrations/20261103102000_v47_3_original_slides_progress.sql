@@ -84,7 +84,7 @@ begin
  'position',m.position,'nominal_minutes',m.nominal_minutes,
  'units',coalesce((select jsonb_agg(jsonb_build_object(
  'unit_id',uv.id,'stable_key',lu.stable_key,'title',lu.title,
- 'position',mu.position,'default_minutes',lu.default_minutes,'metadata',uv.metadata,'source_group',uv.source_group,'content',uv.content
+ 'position',mu.position,'default_minutes',lu.default_minutes,'metadata',lu.metadata,'source_group',lu.source_group,'content',uv.content
  ) order by mu.position,mu.id)
  from public.course_module_units mu
  join public.learning_unit_versions uv on uv.id=mu.unit_version_id
