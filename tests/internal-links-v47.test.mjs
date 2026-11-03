@@ -77,6 +77,6 @@ test('primary admin menu exposes Corsisti interni and preserves advanced e-learn
  assert.match(admin,/internal_admin_assign_v47/);
  assert.match(admin,/internal_admin_link_v47/);
  assert.match(admin,/mailto:/);
- assert.match(sw,/safety-training-v47-internal-links/);
+ assert.match(sw,/safety-training-v46-11-internal-access/);
  assert.match(sw,/admin-internal-v47\.js/);
 });
