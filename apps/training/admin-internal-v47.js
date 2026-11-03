@@ -12,7 +12,7 @@
  const percent=(a)=>Number(a.total_slides)>0?
   Math.round(100*Number(a.visited_slides||0)/Math.max(1,Number(a.total_slides))):
   Math.round(100*Number(a.visited_count||0)/Math.max(1,Number(a.total_units||0)));
- const status=a=>!a.active?'Disattivato':!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
+ const status=a=>!a.active?(percent(a)>=100?'Storico · terminato':'Storico · disattivato'):!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
  function ensureNav(){
   const n=nav();if(!n)return;
   let btn=document.getElementById('adminInternalV47Nav');
@@ -40,9 +40,16 @@
   const seq=++state.seq;
   const data=await rpc('internal_admin_state_v47',{p_org_id:state.org||null});
   if(seq!==state.seq||!allowed())return false;
+  if(!data||!Array.isArray(data.assignments)||!Array.isArray(data.courses))
+   throw new Error('Dati Corsisti interni non disponibili. Premi Riprova.');
   state.data=data;
   state.org=data.organization_id;
   return true;
+ }
+ async function requireData(){
+  if(state.data&&Array.isArray(state.data.assignments)&&Array.isArray(state.data.courses))return state.data;
+  if(!await load()||!state.data)throw new Error('Sessione aggiornata. Riapri Corsisti interni e riprova.');
+  return state.data;
  }
  function header(){
   nav()?.querySelectorAll('button.active').forEach(b=>b.classList.remove('active'));
@@ -62,13 +69,13 @@
   const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code,false)).join('');
   root().innerHTML='<div class="iv47">'+
    '<section class="iv47-card"><h2>Corsisti interni · formazione non certificante</h2>'+
-   '<p>Un link personale, nessun account e nessuna password. La percentuale indica le sezioni aperte, non una certificazione.</p>'+
+   '<p>Un corsista può seguire più corsi contemporaneamente e nel tempo, con link e progressi separati. Nessun account o password. La percentuale non è una certificazione.</p>'+
    '<div class="iv47-metrics"><div class="iv47-metric"><strong>'+active.length+'</strong><span>Assegnazioni attive</span></div>'+
    '<div class="iv47-metric"><strong>'+started.length+'</strong><span>Percorsi iniziati</span></div>'+
    '<div class="iv47-metric"><strong>'+finished.length+'</strong><span>Tutte le sezioni aperte</span></div></div>'+
    '<label>Organizzazione<select id="iv47Org">'+orgs+'</select></label></section>'+
    '<section class="iv47-card"><h2>1. Assegna un corso</h2>'+
-   '<p>Inserisci nome, cognome e codice fiscale oppure scegli un corsista già inserito. L’email è facoltativa.</p>'+
+   '<p>Scegli un corsista già presente per assegnare altri corsi, oppure inseriscine uno nuovo. L’email è facoltativa.</p>'+
    '<label>Corsista già presente (facoltativo)<select id="iv47Person">'+roster+'</select></label>'+
    '<form id="iv47Form" class="iv47-fields"><label>Nome<input name="first_name" id="iv47First" maxlength="120" required autocomplete="off"></label>'+
    '<label>Cognome<input name="last_name" id="iv47Last" maxlength="120" required autocomplete="off"></label>'+
@@ -99,16 +106,18 @@
   body.innerHTML=items.map(a=>{
    const pct=percent(a);
    return '<tr><td><strong>'+esc(a.last_name+' '+a.first_name)+'</strong><div class="iv47-muted">'+esc(a.fiscal_code)+'</div></td>'+
-    '<td>'+esc(a.course_title)+' <small>v'+esc(a.version_number)+'</small></td>'+
+    '<td>'+esc(a.course_title)+' <small>v'+esc(a.version_number)+'</small><div class="iv47-muted">Assegnato: '+esc(fmt(a.created_at))+'</div></td>'+
     '<td><progress max="100" value="'+pct+'"></progress><div>'+pct+'% · '+
      (Number(a.total_slides)>0?esc(a.visited_slides)+'/'+esc(a.total_slides)+' slide aperte · ultima slide '+(Number(a.last_slide_index||0)+1):
       esc(a.visited_count)+'/'+esc(a.total_units)+' sezioni')+'</div></td>'+
     '<td>'+esc(fmt(a.last_activity_at||a.last_opened_at))+'</td><td>'+esc(status(a))+'</td><td>'+
-    '<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Nuovo link':'Riattiva e crea link')+'</button> '+
+    '<button type="button" data-internal-rotate="'+esc(a.id)+'">'+(a.active?'Nuovo link':'Nuovo ciclo')+'</button> '+
+    (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
     (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':'')+'</td></tr>';
   }).join('')||'<tr><td colspan="6">Nessuna assegnazione interna.</td></tr>';
   body.querySelectorAll('[data-internal-rotate]').forEach(btn=>btn.onclick=()=>void rotate(btn.dataset.internalRotate));
   body.querySelectorAll('[data-internal-revoke]').forEach(btn=>btn.onclick=()=>void revoke(btn.dataset.internalRevoke));
+  body.querySelectorAll('[data-internal-repeat]').forEach(btn=>btn.onclick=()=>void repeatCourse(btn.dataset.internalRepeat));
  }
  const newToken=()=>{
   const bytes=crypto.getRandomValues(new Uint8Array(32));
@@ -142,27 +151,49 @@
    const email=f.querySelector('#iv47Email').value.trim();
    const version=f.querySelector('#iv47Course').value;
    if(!first||!last||!/^[A-Z0-9]{16}$/.test(cf)||!version)throw Error('Compila nome, cognome, codice fiscale e corso.');
-   const existing=(state.data.assignments||[]).find(a=>a.fiscal_code===cf&&state.data.courses.some(c=>c.version_id===version&&c.title===a.course_title&&c.version_number===a.version_number));
-   if(existing&&!confirm('Esiste già un link per questo corsista e corso. Generarne uno nuovo invaliderà il precedente senza perdere i progressi. Continuare?'))return;
+   // Auth refresh can invalidate cached UI data while the form stays visible.
+   const snapshot=await requireData();
+   const existing=(snapshot.assignments||[]).find(a=>a.fiscal_code===cf&&a.course_version_id===version&&a.active);
+   if(existing){
+    notice('Corso già assegnato. Usa “Nuovo link” per continuare da dove era arrivato, oppure “Ripeti corso” per un nuovo percorso con storico separato.');
+    return;
+   }
    const token=newToken();
    await rpc('internal_admin_assign_v47',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token)});
+   if(!state.open||!allowed())return;
    showLink(token,email);notice('Assegnazione salvata. Condividi subito il link personale.');
    if(await load())await render();
   });
  }
  async function rotate(id){
   await operate(async()=>{
-   const a=state.data.assignments.find(x=>x.id===id);
+   const snapshot=await requireData();
+   const a=snapshot.assignments.find(x=>x.id===id);
    if(!a||!confirm('Generare un nuovo link per '+a.first_name+' '+a.last_name+'? Il vecchio link smetterà di funzionare, i progressi resteranno invariati.'))return;
    const token=newToken();
    await rpc('internal_admin_link_v47',{p_assignment_id:id,p_token_hash:await tokenHash(token),p_revoke:false});
+   if(!state.open||!allowed())return;
    showLink(token,a.email||'');notice('Nuovo link pronto. Il collegamento precedente è stato disattivato.');
+   if(await load())await render();
+  });
+ }
+ async function repeatCourse(id){
+  await operate(async()=>{
+   const snapshot=await requireData();
+   const a=snapshot.assignments.find(x=>x.id===id&&x.active);
+   if(!a)throw Error('Percorso non più attivo. Aggiorna la schermata.');
+   if(!confirm('Ripetere “'+a.course_title+'” per '+a.first_name+' '+a.last_name+'? Il percorso precedente sarà conservato nello storico, il vecchio link disattivato e il nuovo inizierà da zero.'))return;
+   const token=newToken();
+   await rpc('internal_admin_repeat_v47_6',{p_assignment_id:id,p_token_hash:await tokenHash(token)});
+   if(!state.open||!allowed())return;
+   showLink(token,a.email||'');notice('Nuovo percorso creato. Il precedente resta nello storico con i progressi conservati.');
    if(await load())await render();
   });
  }
  async function revoke(id){
   await operate(async()=>{
-   const a=state.data.assignments.find(x=>x.id===id);
+   const snapshot=await requireData();
+   const a=snapshot.assignments.find(x=>x.id===id);
    if(!a||!confirm('Disattivare il link di '+a.first_name+' '+a.last_name+'? Le sezioni già visitate resteranno registrate.'))return;
    await rpc('internal_admin_link_v47',{p_assignment_id:id,p_token_hash:null,p_revoke:true});
    state.link='';notice('Link disattivato. Progressi conservati.');
