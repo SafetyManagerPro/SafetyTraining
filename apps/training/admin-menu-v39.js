@@ -64,6 +64,11 @@
     const parent=(group.id==='home'||group.id==='internal')?nav:advancedItems;
     if(detail.parentElement!==parent)parent.appendChild(detail);
    }
+   // Keep daily-use links first; the optional advanced section remains below.
+   for(const id of ['home','internal']){
+    const d=nav.querySelector('[data-admin-menu-group="'+id+'"]');
+    if(d && d.nextSibling!==advanced)nav.insertBefore(d,advanced);
+   }
    const buttons=[...nav.querySelectorAll('button')].filter(b=>!b.closest('.admin-menu-group summary'));
    for(const button of buttons){
     const destination=container(which(button))||container('monitor');
