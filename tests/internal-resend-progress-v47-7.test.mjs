@@ -86,6 +86,7 @@ test('link reinvite dynamically rotates hash, preserves known progress and expos
  assert.equal(currentTopic(mockedAssignment),'Modulo A › Argomento B');
  await rotate('assignment-1');
  const link1=state.link;
+ assert.ok(link1,'Resend must make a link visible; state: '+String(state.notice));
  assert.match(link1,/^https:\/\/safety-training-safety-manager\.vercel\.app\/interno\.html#t=[A-Za-z0-9_-]{43}$/);
  assert.match(root.innerHTML,/Reinvia link/);
  assert.match(root.innerHTML,/Ultima posizione: Slide 17 di 40/);
