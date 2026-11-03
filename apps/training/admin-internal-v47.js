@@ -1,7 +1,7 @@
 /* SafetyTraining v47 — corsisti interni: independent, non-certifying link-only workflow. */
 (()=>{'use strict';
  const ORIGIN='https://safety-training-safety-manager.vercel.app';
- const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',notice:'',error:false};
+ const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterStatus:'all',notice:'',error:false};
  const db=()=>window.SAFETY_CLOUD?.state?.client;
  const gate=()=>window.SAFETY_ACCESS_V46_10?.state;
  const root=()=>document.getElementById('adminContent');
@@ -16,7 +16,8 @@
   Math.round(100*Number(a.visited_count||0)/Math.max(1,Number(a.total_units||0)));
  const lastSlide=a=>Number.isInteger(a.last_slide_index)&&Number(a.total_slides)>0?'Slide '+(a.last_slide_index+1)+' di '+a.total_slides:'Non iniziato';
  const currentTopic=a=>[a.current_module_title,a.current_unit_title].filter(Boolean).join(' › ')||'Argomento non ancora raggiunto';
- const status=a=>!a.active?(percent(a)>=100?'Storico · terminato':'Storico · disattivato'):!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
+ const statusKey=a=>a.archived_at?'archived':!a.active?'inactive':!a.started_at?'not_started':percent(a)>=100?'viewed_all':'in_progress';
+ const status=a=>a.archived_at?'Eliminato':!a.active?(percent(a)>=100?'Storico · terminato':'Storico · disattivato'):!a.started_at?'Non iniziato':percent(a)>=100?'Tutte le slide aperte':'In corso';
  function ensureNav(){
   const n=nav();if(!n)return;
   let btn=document.getElementById('adminInternalV47Nav');
@@ -66,11 +67,14 @@
  async function render(){
   if(!state.open||!allowed()||!root()||!state.data)return;
   ensureNav();header();
-  const d=state.data,courses=alpha(d.courses,x=>x.title),people=alpha(d.people,x=>x.last_name+' '+x.first_name),assignments=d.assignments||[];
+  const d=state.data,courses=alpha(d.courses,x=>x.title),people=alpha((d.people||[]).filter(p=>!p.archived_at),x=>x.last_name+' '+x.first_name),assignments=d.assignments||[];
   const active=assignments.filter(a=>a.active),started=active.filter(a=>a.started_at),finished=active.filter(a=>a.started_at&&percent(a)===100);
   const orgs=alpha(d.organizations,o=>o.name).map(o=>option(o.id,o.name,o.id===state.org)).join('');
+  const companyChoices=alpha(d.companies||[],c=>c.name).map(c=>'<option value="'+esc(c.name)+'"></option>').join('');
+  const assignedCourses=alpha([...new Map(assignments.map(a=>[a.course_version_id,{id:a.course_version_id,title:a.course_title,version:a.version_number}])).values()],c=>c.title);
+  const courseFilters=assignedCourses.map(c=>option(c.id,c.title+' · v'+c.version,c.id===state.filterCourse)).join('');
   const choices=courses.map(c=>option(c.version_id,c.title+' · v'+c.version_number+' ('+c.unit_count+' sezioni)',false)).join('');
-  const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code,false)).join('');
+  const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code+' · '+(p.company_name||'Generico'),false)).join('');
   root().innerHTML='<div class="iv47">'+
    '<section class="iv47-card"><h2>Corsisti interni · formazione non certificante</h2>'+
    '<p>Un corsista può seguire più corsi contemporaneamente e nel tempo, con link e progressi separati. Nessun account o password. La percentuale non è una certificazione.</p>'+
@@ -84,7 +88,9 @@
    '<form id="iv47Form" class="iv47-fields"><label>Nome<input name="first_name" id="iv47First" maxlength="120" required autocomplete="off"></label>'+
    '<label>Cognome<input name="last_name" id="iv47Last" maxlength="120" required autocomplete="off"></label>'+
    '<label>Codice fiscale<input name="fiscal_code" id="iv47CF" maxlength="16" minlength="16" pattern="[a-zA-Z0-9]{16}" required autocomplete="off" style="text-transform:uppercase"></label>'+
-   '<label>Email facoltativa<input name="email" type="email" id="iv47Email" autocomplete="off"></label>'+
+   '<label>Email facoltativa<input name="email" type="email" id="iv47Email" autocomplete="off"></label>'+ 
+   '<label class="iv47-company-field">Azienda (facoltativa)<input id="iv47Company" name="company_name" list="iv47Companies" maxlength="180" autocomplete="off" placeholder="Generico (nessuna azienda)"><datalist id="iv47Companies">'+companyChoices+'</datalist></label>'+ 
+   '<div class="iv47-actions iv47-company-save"><button type="button" id="iv47SaveCompany" disabled>Aggiorna azienda del corsista</button></div>'+
    '<label style="grid-column:1/-1">Corso da assegnare<select id="iv47Course" name="course_version_id" required>'+choices+'</select></label>'+
    '<div class="iv47-actions" style="grid-column:1/-1"><button type="submit" class="primary"'+(courses.length?'':' disabled')+'>Genera link personale</button></div></form>'+
    (courses.length?'':'<p>Nessun corso pubblicato e disponibile per questa organizzazione.</p>')+
@@ -97,8 +103,12 @@
    '<button type="button" id="iv47Share">Condividi</button></div><p class="iv47-muted">L’email viene aperta nel programma di posta: controlla e conferma tu l’invio. Non viene spedita automaticamente.</p></div></section>'+
    '<section class="iv47-card"><h2>3. Controlla i progressi</h2>'+
    '<div class="iv47-actions"><button type="button" id="iv47Refresh">Aggiorna progressi</button></div>'+ 
-   '<label>Cerca nome, codice fiscale o corso<input id="iv47Search" value="'+esc(state.search)+'" placeholder="Cerca corsista o corso…" autocomplete="off"></label>'+
-   '<div class="iv47-table"><table><thead><tr><th>Corsista</th><th>Corso</th><th>Avanzamento</th><th>Ultima attività</th><th>Stato</th><th>Gestione link</th></tr></thead>'+
+   '<div class="iv47-filters">'+
+   '<label>Filtra per corso<select id="iv47CourseFilter">'+option('','Tutti i corsi',!state.filterCourse)+courseFilters+'</select></label>'+ 
+   '<label>Filtra per stato<select id="iv47StatusFilter">'+[['all','Tutti gli stati'],['not_started','Da iniziare'],['in_progress','In corso'],['viewed_all','Tutte le slide aperte'],['inactive','Disattivato'],['archived','Eliminati']].map(v=>option(v[0],v[1],state.filterStatus===v[0])).join('')+'</select></label></div>'+ 
+   '<label>Cerca nome, codice fiscale, azienda o corso<input id="iv47Search" value="'+esc(state.search)+'" placeholder="Cerca corsista, azienda o corso…" autocomplete="off"></label>'+ 
+   '<p id="iv47ResultCount" class="iv47-muted" role="status"></p>'+
+   '<div class="iv47-table"><table><thead><tr><th>Corsista</th><th>Azienda</th><th>Corso</th><th>Avanzamento</th><th>Ultima attività</th><th>Stato</th><th>Gestione link</th><th>Gestione corsista</th></tr></thead>'+
    '<tbody id="iv47Rows"></tbody></table></div></section>'+
    '<p id="iv47Notice" class="iv47-notice'+(state.error?' iv47-error':'')+'" role="status" aria-live="polite">'+esc(state.notice)+'</p>'+
    '</div>';
