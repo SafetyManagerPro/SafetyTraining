@@ -219,7 +219,7 @@
     return;
    }
    const token=newToken();
-   await rpc('internal_admin_assign_company_v47_9',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token),p_company_name:company||'Generico'});
+   await rpc('internal_admin_assign_company_v47_9',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token),p_company_name:company||null});
    const chosen=snapshot.courses.find(c=>c.version_id===version);
    await presentLink(token,email,first+' '+last,chosen?.title||'Corso interno',
     'Assegnazione salvata. Copia il link oppure prepara un’email da inviare.');
