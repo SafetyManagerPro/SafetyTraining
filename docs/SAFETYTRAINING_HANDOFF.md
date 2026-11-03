@@ -1,5 +1,6 @@
 # SafetyTraining — stato progetto / hand-off
 
+
 ## 2026-11-03 — v46.12: recupero password con redirect Auth corretto
 - Riproduzione da email iscrizione pubblica: pagina finale `http://localhost:3000` → `ERR_CONNECTION_REFUSED` su telefono. Non è un errore della rete mobile.
 - Diagnosi DB read-only del 2026-11-03: invito `status=sent`, `delivery_mode=recovery`, `redirect_to=https://safety-training-safety-manager.vercel.app/?onboarding=1`; il codice client invia già il redirect corretto.
@@ -11,6 +12,7 @@ Ultimo aggiornamento: 2026-11-02
 Stato corrente: **v46.11 GitHub feature in verifica · baseline v46.10 PR #37 merged · CI #742 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-11-internal-access`.
 
 Questo file è il riferimento persistente di SafetyTraining. Dopo OGNI modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF_LATEST.md`.
+
 
 ## Vincoli permanenti
 NON sviluppare/modernizzare/finalizzare/pubblicare salvo richiesta esplicita:
