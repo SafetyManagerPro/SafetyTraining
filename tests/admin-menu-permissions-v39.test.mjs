@@ -46,6 +46,8 @@ test('v47.1: menu reorder reaches a fixed point instead of moving both groups fo
  assert.match(code,/internal\.nextElementSibling!==advanced/);
  assert.match(code,/home\.nextElementSibling!==\(internal\|\|advanced\)/);
  assert.doesNotMatch(code,/for\(const id of \['home','internal'\]\)/);
+ assert.match(code,/if\(advanced\.hidden===anyAdvanced\)advanced\.hidden=!anyAdvanced/);
+ assert.doesNotMatch(code,/^\s*advanced\.hidden=!anyAdvanced;/m);
  const nodes=['advanced','home','internal'];
  const insertBefore=(item,target)=>{
   const from=nodes.indexOf(item);
