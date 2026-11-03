@@ -37,6 +37,7 @@
    version:{status:'published',version_number:courseData.version||1},
    modules:sourceModules
   });
+  window.SAFETY_PRESENTATION_ENRICHMENT?.enrichCourse?.(course);
   if(!course.topics?.length)throw Error('Il corso assegnato non contiene slide pubblicate.');
   // The original adapter preserves stable keys, while the token API supplies
   // the immutable unit_version_id required for server-side progress tracking.
