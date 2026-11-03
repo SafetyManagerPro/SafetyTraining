@@ -111,7 +111,7 @@ test('mock admin UI filters independent courses and archives all learner links w
  assert.match(rows.innerHTML,/Antincendio/);assert.doesNotMatch(rows.innerHTML,/Carrelli/);
  state.filterCourse='';state.filterStatus='not_started';paintRows();
  assert.equal(info.textContent,'1 percorsi visualizzati');
- assert.match(rows.innerHTML,/Anna Verdi/);
+ assert.match(rows.innerHTML,/Verdi Anna/);
  state.filterStatus='all';
  await archivePerson('p1',false);
  assert.equal(calls.filter(c=>c.name==='internal_admin_archive_person_v47_9').length,1);
