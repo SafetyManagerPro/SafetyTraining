@@ -26,3 +26,10 @@
 .iv47 .iv47-notice{min-height:20px;color:#bbf4d8}.iv47 .iv47-error{color:#ffb7b7}
 .iv47 .iv47-muted{color:#b2c6da;font-size:12px}
 @media(max-width:660px){.iv47 .iv47-card{padding:13px}.iv47 .iv47-metrics{gap:6px}.iv47 td{padding:9px}.iv47 .iv47-actions button{flex:1 1 130px}}
+
+/* v47.7: compact per-course progress and a clearly visible resend panel. */
+.iv47-progress-detail{max-width:360px;margin-top:5px;color:#c5d9e9;line-height:1.45;overflow-wrap:anywhere;font-size:12px}
+.iv47-progress-detail:first-of-type{color:#e9f7ff;font-weight:650}
+.iv47 #iv47LinkCard{scroll-margin-top:90px;border-color:#56d5a7}
+.iv47 #iv47LinkCard .iv47-muted{line-height:1.6}
+.iv47 #iv47Refresh{background:#244d4c;border-color:#4da491}
