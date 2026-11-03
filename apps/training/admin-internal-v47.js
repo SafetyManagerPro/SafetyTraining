@@ -100,6 +100,7 @@
    '<section class="iv47-card" id="iv47RegistryCard"><h2>2. Gestione e modifica anagrafica</h2>'+
    '<p>Seleziona un corsista per correggere o integrare la sua scheda. Le modifiche non cambiano i corsi assegnati, i link personali o i progressi.</p>'+
    '<label>Corsista da modificare<select id="iv47EditPerson">'+editorRoster+'</select></label>'+
+   '<p id="iv47EditSummary" class="iv47-muted">Seleziona un corsista per visualizzare la scheda.</p>'+
    '<form id="iv47EditForm" class="iv47-fields"'+(state.editPerson?'':' hidden')+'>'+
    '<label>Nome<input id="iv47EditFirst" name="first_name" maxlength="120" required autocomplete="given-name"></label>'+
    '<label>Cognome<input id="iv47EditLast" name="last_name" maxlength="120" required autocomplete="family-name"></label>'+
@@ -114,6 +115,7 @@
    '<label class="iv47-wide">Note interne<textarea id="iv47EditNotes" name="notes" rows="3" maxlength="1500" placeholder="Informazioni aggiuntive facoltative"></textarea></label>'+
    '<div class="iv47-actions iv47-wide"><button type="submit" class="primary" id="iv47SavePerson">Salva modifiche anagrafiche</button>'+
    '<button type="button" id="iv47CancelEdit">Chiudi scheda</button></div>'+
+   '<p id="iv47EditFeedback" role="status" aria-live="polite" class="iv47-wide"></p>'+
    '</form>'+
    '<p class="iv47-muted">Il codice fiscale deve restare univoco all’interno dell’organizzazione. Le schede eliminate si ripristinano dal filtro Eliminati.</p>'+
    '</section>'+
@@ -287,6 +289,13 @@
   if(!form)return;
   const record=(state.data?.people||[]).find(p=>p.id===state.editPerson&&!p.archived_at);
   form.hidden=!record;
+  const summary=document.getElementById('iv47EditSummary');
+  if(summary){
+   const assignments=(state.data?.assignments||[]).filter(a=>a.person_id===state.editPerson);
+   summary.textContent=record
+    ?'Corsi assegnati: '+assignments.length+' · attivi: '+assignments.filter(a=>a.active).length+' · modifiche anagrafiche indipendenti dai progressi.'
+    :'Seleziona un corsista per visualizzare la scheda.';
+  }
   if(!record)return;
   const fields={
    iv47EditFirst:record.first_name,iv47EditLast:record.last_name,
@@ -325,20 +334,29 @@
    if(birth&&birth>new Date().toISOString().slice(0,10))throw Error('La data di nascita non può essere futura.');
    const other=snapshot.people.find(p=>p.id!==person.id&&p.fiscal_code===cf);
    if(other)throw Error('Il codice fiscale è già utilizzato da un altro corsista interno.');
-   await rpc('internal_admin_update_person_v47_10',{
+   try{await rpc('internal_admin_update_person_v47_10',{
     p_person_id:person.id,p_first_name:first,p_last_name:last,p_fiscal_code:cf,
     p_email:email||null,p_company_name:company,p_phone:value('iv47EditPhone')||null,
     p_job_title:value('iv47EditJob')||null,p_birth_date:birth||null,
     p_birth_city:value('iv47EditBirthCity')||null,
     p_residence_address:value('iv47EditAddress')||null,
     p_notes:value('iv47EditNotes')||null,p_expected_updated_at:person.updated_at
-   });
+   });}catch(error){
+    const message=String(error?.message||error);
+    if(message.includes('person_modified_reload_before_save'))
+     throw Error('Un altro amministratore ha modificato questa anagrafica. Ricarica la pagina e riprova.');
+    if(message.includes('fiscal_code_already_used')||message.includes('internal_people_v47_identity'))
+     throw Error('Codice fiscale già presente per un altro corsista.');
+    throw error;
+   }
    if(await load()){
     await render();
     notice('Anagrafica aggiornata. Corsi, link e progressi sono rimasti invariati.');
     document.getElementById('iv47RegistryCard')?.scrollIntoView?.({block:'start'});
    }
   });
+  const message=document.getElementById('iv47EditFeedback');
+  if(message){message.textContent=state.notice;message.classList.toggle('iv47-error',state.error);}
  }
   async function saveCompany(){
   await operate(async()=>{
