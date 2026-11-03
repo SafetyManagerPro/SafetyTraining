@@ -54,7 +54,8 @@ test('private links are revocable and rotating them retains old progress',()=>{
  assert.match(sql,/active=false,updated_at=now\(\)/);
  assert.doesNotMatch(sql,/delete from private\.internal_visits_v47/);
  assert.match(player,/Il collegamento non è valido oppure è stato disattivato/);
- assert.match(admin,/Generarne uno nuovo invaliderà il precedente senza perdere i progressi/);
+ assert.match(admin,/vecchio link smetterà di funzionare, ma i progressi resteranno invariati/);
+ assert.match(admin,/Ripeti corso/);
 });
 test('contents are loaded only through the token-gated server function while preserving published quiz slides',()=>{
  assert.match(fn,/filterContent/);
