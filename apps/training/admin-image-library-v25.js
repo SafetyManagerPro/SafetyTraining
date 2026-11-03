@@ -129,7 +129,7 @@ function syncFilterControls(){
 async function fillCourseOptions(){
  const cat=await courseOptions(),c=host()?.querySelector('#stImageCourse');
  if(!c)return;
- c.innerHTML='<option value="">Tutti i corsi</option>'+[...cat.courses].map(([key,title])=>'<option value="'+esc(key)+'">'+esc(title)+'</option>').join('');
+ c.innerHTML='<option value="">Tutti i corsi</option>'+[...cat.courses].sort((a,b)=>a[1].localeCompare(b[1],'it-IT',{sensitivity:'base',numeric:true})).map(([key,title])=>'<option value="'+esc(key)+'">'+esc(title)+'</option>').join('');
  c.value=state.course;
  fillModuleOptions(cat);
 }
@@ -137,7 +137,7 @@ function fillModuleOptions(cat){
  const m=host()?.querySelector('#stImageModule');
  if(!m)return;
  const options=state.course?Array.from(cat.modules.get(state.course)||[]):[];
- m.innerHTML='<option value="">Tutti i moduli</option>'+options.map(([key,title])=>'<option value="'+esc(key)+'">'+esc(title)+'</option>').join('');
+ m.innerHTML='<option value="">Tutti i moduli</option>'+options.sort((a,b)=>a[1].localeCompare(b[1],'it-IT',{sensitivity:'base',numeric:true})).map(([key,title])=>'<option value="'+esc(key)+'">'+esc(title)+'</option>').join('');
  m.value=state.module;
  syncFilterControls();
 }
