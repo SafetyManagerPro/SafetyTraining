@@ -1,7 +1,7 @@
 /* SafetyTraining v47 — corsisti interni: independent, non-certifying link-only workflow. */
 (()=>{'use strict';
  const ORIGIN='https://safety-training-safety-manager.vercel.app';
- const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterStatus:'all',editPerson:'',notice:'',error:false};
+ const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterStatus:'all',editPerson:'',importOpen:false,importSeq:0,importResults:[],importTimer:null,importExtras:null,notice:'',error:false};
  const db=()=>window.SAFETY_CLOUD?.state?.client;
  const gate=()=>window.SAFETY_ACCESS_V46_10?.state;
  const root=()=>document.getElementById('adminContent');
@@ -84,8 +84,9 @@
    '<div class="iv47-metric"><strong>'+started.length+'</strong><span>Percorsi iniziati</span></div>'+
    '<div class="iv47-metric"><strong>'+finished.length+'</strong><span>Tutte le sezioni aperte</span></div></div>'+
    '<label>Organizzazione<select id="iv47Org">'+orgs+'</select></label></section>'+
-   '<section class="iv47-card"><h2>1. Assegna un corso</h2>'+
-   '<p>Scegli un corsista già presente per assegnare altri corsi, oppure inseriscine uno nuovo. L’email è facoltativa.</p>'+
+   '<section class="iv47-card" id="iv47AssignCard"><h2>1. Assegna un corso</h2>'+
+   '<p>Scegli un corsista già presente, importalo dall’anagrafica Corsisti oppure inseriscine uno nuovo. L’email è facoltativa.</p>'+
+   '<div class="iv47-actions"><button type="button" id="iv47ImportButton"><span aria-hidden="true">⇩</span> Importa da Corsisti</button></div>'+
    '<label>Corsista già presente (facoltativo)<select id="iv47Person">'+roster+'</select></label>'+
    '<form id="iv47Form" class="iv47-fields"><label>Nome<input name="first_name" id="iv47First" maxlength="120" required autocomplete="off"></label>'+
    '<label>Cognome<input name="last_name" id="iv47Last" maxlength="120" required autocomplete="off"></label>'+
@@ -134,6 +135,12 @@
    '<p id="iv47ResultCount" class="iv47-muted" role="status"></p>'+
    '<div class="iv47-table"><table><thead><tr><th>Corsista</th><th>Azienda</th><th>Corso</th><th>Avanzamento</th><th>Ultima attività</th><th>Stato</th><th>Gestione link</th><th>Gestione corsista</th></tr></thead>'+
    '<tbody id="iv47Rows"></tbody></table></div></section>'+
+   '<div class="iv47-import-overlay" id="iv47ImportModal" role="dialog" aria-modal="true" aria-labelledby="iv47ImportTitle" hidden>'+
+   '<section class="iv47-import-dialog"><div class="iv47-import-heading"><h2 id="iv47ImportTitle">Importa da Corsisti</h2>'+
+   '<button type="button" id="iv47ImportClose" aria-label="Chiudi importazione">Chiudi</button></div>'+
+   '<p>Cerca un corsista già presente nell’organizzazione. <strong>Solo copia dei dati:</strong> nessuna nuova iscrizione o collegamento tra gli archivi.</p>'+
+   '<label>Ricerca per nome, cognome, codice fiscale o email<input id="iv47ImportSearch" type="search" autocomplete="off" maxlength="120" placeholder="Cerca un corsista…"></label>'+
+   '<div id="iv47ImportResults" class="iv47-import-results" role="status" aria-live="polite"></div></section></div>'+
    '<p id="iv47Notice" class="iv47-notice'+(state.error?' iv47-error':'')+'" role="status" aria-live="polite">'+esc(state.notice)+'</p>'+
    '</div>';
   bind();paintRows();
@@ -184,6 +191,84 @@
   body.querySelectorAll('[data-internal-edit-person]').forEach(btn=>btn.onclick=()=>editPerson(btn.dataset.internalEditPerson));
   body.querySelectorAll('[data-internal-delete-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalDeletePerson,false));
   body.querySelectorAll('[data-internal-restore-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalRestorePerson,true));
+ }
+ function renderImportResults(message=''){
+  const box=document.getElementById('iv47ImportResults');if(!box)return;
+  if(message){box.innerHTML='<p class="iv47-muted">'+esc(message)+'</p>';return;}
+  const results=state.importResults||[];
+  box.innerHTML=results.map(person=>{
+   const cf=String(person.fiscal_code||'').toUpperCase().trim();
+   const local=(state.data?.people||[]).find(p=>p.fiscal_code===cf);
+   const note=local?.archived_at?'Archiviato in Corsisti interni':
+    local?'Già presente in Corsisti interni':'Disponibile da copiare';
+   return '<div class="iv47-import-item"><div><strong>'+esc(person.last_name+' '+person.first_name)+'</strong>'+
+    '<div class="iv47-muted">'+esc(person.company_name||'Generico')+' · '+esc(cf||'CF da completare')+'</div>'+
+    '<div class="iv47-muted">'+esc(note)+'</div></div>'+
+    '<button type="button" data-iv47-import-id="'+esc(person.id)+'">Usa dati</button></div>';
+  }).join('')||'<p class="iv47-muted">Nessun corsista trovato. Puoi inserirlo manualmente nel modulo.</p>';
+ }
+ async function searchImport(query=''){
+  if(!state.importOpen||!state.open||!allowed()||!state.org)return;
+  const seq=++state.importSeq,org=state.org;
+  renderImportResults('Ricerca corsisti in corso…');
+  try{
+   const data=await rpc('internal_admin_import_candidates_v47_11',{p_org_id:org,p_query:String(query).trim()});
+   if(!state.importOpen||!state.open||!allowed()||seq!==state.importSeq||org!==state.org)return;
+   if(!Array.isArray(data))throw Error('L’elenco corsisti non è disponibile.');
+   state.importResults=data;
+   renderImportResults();
+  }catch(e){
+   if(state.importOpen&&seq===state.importSeq&&org===state.org)
+    renderImportResults('Impossibile caricare i corsisti: '+String(e?.message||e));
+  }
+ }
+ function closeImport(){
+  state.importOpen=false;state.importSeq++;state.importResults=[];
+  if(state.importTimer!==null){clearTimeout(state.importTimer);state.importTimer=null;}
+  const overlay=document.getElementById('iv47ImportModal');if(overlay)overlay.hidden=true;
+  document.getElementById('iv47ImportButton')?.focus?.();
+ }
+ function openImport(){
+  if(!state.open||!allowed()||!state.org)return;
+  state.importOpen=true;state.importResults=[];
+  const overlay=document.getElementById('iv47ImportModal');if(overlay)overlay.hidden=false;
+  const input=document.getElementById('iv47ImportSearch');
+  if(input){input.value='';input.focus();}
+  void searchImport('');
+ }
+ function useImport(id){
+  if(!state.open||!allowed())return;
+  const candidate=state.importResults.find(p=>p.id===id);
+  if(!candidate)return;
+  const cf=String(candidate.fiscal_code||'').toUpperCase().replace(/\s/g,'');
+  const internal=cf?(state.data?.people||[]).find(p=>p.fiscal_code===cf):null;
+  if(internal?.archived_at){
+   closeImport();state.filterStatus='archived';paintRows();
+   notice('Questo codice fiscale è già presente tra i corsisti eliminati. Ripristina la scheda dal filtro Eliminati prima di assegnare un corso.',true);
+   return;
+  }
+  const source=internal||candidate;
+  const update=(field,value)=>{
+   const element=document.getElementById(field);
+   if(element)element.value=value||'';
+  };
+  update('iv47First',source.first_name);
+  update('iv47Last',source.last_name);
+  update('iv47CF',source.fiscal_code);
+  update('iv47Email',source.email);
+  update('iv47Company',source.company_name&&source.company_name!=='Generico'?source.company_name:'');
+  const person=document.getElementById('iv47Person');
+  if(person)person.value=internal?.id||'';
+  const saveCompany=document.getElementById('iv47SaveCompany');
+  if(saveCompany)saveCompany.disabled=!internal;
+  // Only apply optional extras if the selected fiscal code is unchanged at save time.
+  // For existing internal people, never overwrite already managed personal details.
+  state.importExtras=internal?null:{cf,phone:String(candidate.phone||'').trim(),job_title:String(candidate.job_title||'').trim()};
+  closeImport();
+  notice(internal?'Corsista già presente: ho riutilizzato la scheda interna senza duplicarla. Scegli il corso.':
+   cf.length===16?'Dati copiati nel modulo. Scegli il corso e premi Genera link personale per salvarli.':
+   'Dati copiati. Completa il codice fiscale a 16 caratteri e scegli il corso per salvare.');
+  document.getElementById('iv47AssignCard')?.scrollIntoView?.({behavior:'smooth',block:'start'});
  }
  const newToken=()=>{
   const bytes=crypto.getRandomValues(new Uint8Array(32));
@@ -245,7 +330,16 @@
     return;
    }
    const token=newToken();
-   await rpc('internal_admin_assign_company_v47_9',{p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token),p_company_name:company||null});
+   const args={p_org_id:state.org,p_first_name:first,p_last_name:last,p_fiscal_code:cf,
+    p_email:email||null,p_course_version_id:version,p_token_hash:await tokenHash(token),
+    p_company_name:company||null};
+   const extras=state.importExtras?.cf===cf?state.importExtras:null;
+   if(extras&&(extras.phone||extras.job_title)){
+    await rpc('internal_admin_import_assign_v47_11',{...args,p_phone:extras.phone||null,p_job_title:extras.job_title||null});
+   }else{
+    await rpc('internal_admin_assign_company_v47_9',args);
+   }
+   state.importExtras=null;
    const chosen=snapshot.courses.find(c=>c.version_id===version);
    await presentLink(token,email,first+' '+last,chosen?.title||'Corso interno',
     'Assegnazione salvata. Copia il link oppure prepara un’email da inviare.');
@@ -395,14 +489,29 @@
  }
  function bind(){
   const org=document.getElementById('iv47Org');if(org)org.onchange=()=>void operate(async()=>{
-   state.org=org.value;state.link='';state.search='';state.filterStatus='all';state.filterCourse='';state.editPerson='';if(await load())await render();
+   closeImport();state.org=org.value;state.link='';state.search='';state.importExtras=null;state.filterStatus='all';state.filterCourse='';state.editPerson='';if(await load())await render();
   });
   const editorSelect=document.getElementById('iv47EditPerson');
   if(editorSelect)editorSelect.onchange=()=>{state.editPerson=editorSelect.value;fillPersonEditor();};
   document.getElementById('iv47EditForm')?.addEventListener('submit',event=>void savePerson(event));
   document.getElementById('iv47CancelEdit')?.addEventListener('click',()=>{state.editPerson='';if(editorSelect)editorSelect.value='';fillPersonEditor();});
   fillPersonEditor();
+  document.getElementById('iv47ImportButton')?.addEventListener('click',openImport);
+  document.getElementById('iv47ImportClose')?.addEventListener('click',closeImport);
+  document.getElementById('iv47ImportSearch')?.addEventListener('input',event=>{
+   if(state.importTimer!==null)clearTimeout(state.importTimer);
+   state.importSeq++;state.importResults=[];
+   renderImportResults('Ricerca corsisti in corso…');
+   const term=event.target.value;
+   state.importTimer=setTimeout(()=>{state.importTimer=null;void searchImport(term);},250);
+  });
+  document.getElementById('iv47ImportSearch')?.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closeImport();}});
+  document.getElementById('iv47ImportResults')?.addEventListener('click',event=>{
+   const btn=event.target.closest('[data-iv47-import-id]');
+   if(btn)useImport(btn.dataset.iv47ImportId);
+  });
   const person=document.getElementById('iv47Person');if(person)person.onchange=()=>{
+   state.importExtras=null;
    const p=(state.data?.people||[]).find(p=>p.id===person.value);
    document.getElementById('iv47First').value=p?.first_name||'';
    document.getElementById('iv47Last').value=p?.last_name||'';
@@ -437,7 +546,7 @@
  }
  async function open(){
   if(!allowed())return alert('Accesso amministrativo richiesto.');
-  state.open=true;state.seq++;state.link='';state.linkRecipient='';state.linkCourse='';state.editPerson='';state.search='';state.filterCourse='';state.filterStatus='all';state.notice='';state.error=false;
+  state.open=true;state.seq++;state.link='';state.linkRecipient='';state.linkCourse='';state.editPerson='';state.importOpen=false;state.importSeq++;state.importExtras=null;state.importResults=[];state.search='';state.filterCourse='';state.filterStatus='all';state.notice='';state.error=false;
   document.getElementById('adminShell')?.classList.remove('admin-mobile-nav-open');
   header();if(root())root().innerHTML='<div class="iv47">Carico corsisti interni e corsi…</div>';
   try{if(await load())await render();}
@@ -446,7 +555,7 @@
  function boot(){
   ensureNav();
   document.addEventListener('safety:access-ready',ensureNav);
-  document.addEventListener('safety:auth-changed',()=>{state.open=false;state.data=null;state.link='';state.linkRecipient='';state.linkCourse='';state.org='';state.editPerson='';state.seq++;ensureNav();});
+  document.addEventListener('safety:auth-changed',()=>{state.open=false;state.data=null;state.link='';state.linkRecipient='';state.linkCourse='';state.org='';state.editPerson='';state.importOpen=false;state.importExtras=null;state.importResults=[];state.importSeq++;if(state.importTimer!==null){clearTimeout(state.importTimer);state.importTimer=null;}state.seq++;ensureNav();});
   nav()?.addEventListener('click',e=>{if(!e.target.closest('#adminInternalV47Nav'))state.open=false;},true);
  }
  window.SAFETY_INTERNAL_V47={open};
