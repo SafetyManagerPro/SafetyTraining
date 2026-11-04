@@ -99,7 +99,8 @@ function fixture(){
 
 test('choosing an unregistered learner only fills form (no write) then quick assign imports optional details',async()=>{
  const {api,calls,nodes}=fixture();
- await api.searchImport('Rossi'); // closed until user opens popup, should not display
+ await api.searchImport('Rossi'); // closed modal: no data request until opened
+ assert.equal(calls.filter(([name])=>name==='internal_admin_import_candidates_v47_11').length,0);
  api.openImport();
  await api.searchImport('Rossi');
  assert.equal(api.state.importOpen,true);
@@ -160,6 +161,7 @@ test('changing organization, archived profiles and canceled import cannot mutate
  assert.match(ui,/if\(internal\?\.archived_at\)/);
  assert.match(ui,/state\.filterStatus='archived'/);
  assert.match(ui,/state\.importSeq\+\+/);
+ assert.match(ui,/state\.importSeq\+\+;state\.importResults=\[\]/);
  assert.match(ui,/state\.importExtras=null;state\.filterStatus='all'/);
  assert.match(ui,/clearTimeout\(state\.importTimer\)/);
 });
