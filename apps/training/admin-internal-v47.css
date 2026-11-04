@@ -55,3 +55,18 @@
 .iv47 .iv47-fields .iv47-wide{grid-column:1/-1}
 .iv47 textarea{width:100%;max-width:100%;min-width:0;resize:vertical;border:1px solid #5b7291;border-radius:10px;background:#09172a;color:#f3f8ff;min-height:88px;padding:10px 12px;font:inherit}
 .iv47 #iv47EditForm input:focus-visible,.iv47 #iv47EditForm textarea:focus-visible{outline:2px solid #56d5a7;outline-offset:2px}
+
+
+/* v47.11: lightweight, on-demand import picker; forms and didactic slides unchanged. */
+.iv47 #iv47AssignCard{scroll-margin-top:88px}
+.iv47 #iv47ImportButton{background:#24495a;border-color:#65b7d0}
+.iv47 .iv47-import-overlay{position:fixed;inset:0;z-index:10060;background:rgba(4,12,23,.78);display:grid;place-items:center;padding:16px}
+.iv47 .iv47-import-overlay[hidden]{display:none!important}
+.iv47 .iv47-import-dialog{width:min(100%,640px);max-height:min(85vh,760px);overflow:auto;padding:22px;border-radius:16px;background:#142338;border:1px solid #57728f;box-shadow:0 18px 55px rgba(0,0,0,.4);display:grid;gap:14px}
+.iv47 .iv47-import-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.iv47 .iv47-import-heading h2{font-size:19px}
+.iv47 .iv47-import-results{display:grid;gap:6px;max-height:400px;overflow:auto}
+.iv47 .iv47-import-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px;border:1px solid #38546e;border-radius:10px;min-width:0}
+.iv47 .iv47-import-item strong{overflow-wrap:anywhere}
+.iv47 .iv47-import-item button{flex:0 0 auto}
+@media(max-width:640px){.iv47 .iv47-import-dialog{padding:14px}.iv47 .iv47-import-item{align-items:stretch;flex-direction:column}.iv47 .iv47-import-item button{width:100%}}
