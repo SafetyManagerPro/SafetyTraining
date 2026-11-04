@@ -208,6 +208,7 @@
   }).join('')||'<p class="iv47-muted">Nessun corsista trovato. Puoi inserirlo manualmente nel modulo.</p>';
  }
  async function searchImport(query=''){
+  if(!state.importOpen||!state.open||!allowed()||!state.org)return;
   const seq=++state.importSeq,org=state.org;
   renderImportResults('Ricerca corsisti in corso…');
   try{
@@ -222,7 +223,7 @@
   }
  }
  function closeImport(){
-  state.importOpen=false;state.importSeq++;
+  state.importOpen=false;state.importSeq++;state.importResults=[];
   if(state.importTimer!==null){clearTimeout(state.importTimer);state.importTimer=null;}
   const overlay=document.getElementById('iv47ImportModal');if(overlay)overlay.hidden=true;
   document.getElementById('iv47ImportButton')?.focus?.();
@@ -499,6 +500,8 @@
   document.getElementById('iv47ImportClose')?.addEventListener('click',closeImport);
   document.getElementById('iv47ImportSearch')?.addEventListener('input',event=>{
    if(state.importTimer!==null)clearTimeout(state.importTimer);
+   state.importSeq++;state.importResults=[];
+   renderImportResults('Ricerca corsisti in corso…');
    const term=event.target.value;
    state.importTimer=setTimeout(()=>{state.importTimer=null;void searchImport(term);},250);
   });
