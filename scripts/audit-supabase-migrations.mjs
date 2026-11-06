@@ -1,33 +1,57 @@
 #!/usr/bin/env node
-// Audit read-only delle migrazioni. Nessuna connessione DB o modifica ai file.
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+// Controllo strettamente read-only tra snapshot delle migrazioni applicate e file in Git.
+// Non accede al database; non esegue SQL e non tenta riparazioni automatiche.
+import { createHash } from 'node:crypto';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const manifestPath = join(root, 'docs', 'SUPABASE_REMOTE_MIGRATIONS_2026-11-06.json');
-const migrationsDir = join(root, 'supabase', 'migrations');
-const snapshot = JSON.parse(readFileSync(manifestPath, 'utf8'));
-const local = readdirSync(migrationsDir).filter((name) => /^\d{14}_.+\.sql$/.test(name))
-  .map((name) => ({ name, version: name.slice(0, 14), bytes: statSync(join(migrationsDir, name)).size }));
-const byVersion = new Map(local.map((entry) => [entry.version, entry]));
+const snapshot = JSON.parse(readFileSync(join(root,'docs','SUPABASE_REMOTE_MIGRATIONS_2026-11-06.json'),'utf8'));
+const dir = join(root,'supabase','migrations');
+const local = readdirSync(dir).filter(name => /^\d{14}_.+\.sql$/.test(name)).sort();
 const remote = snapshot.migrations;
-const remoteVersions = new Set(remote.map((entry) => entry.version));
-const remoteOnly = remote.filter((entry) => !byVersion.has(entry.version));
-const localOnly = local.filter((entry) => !remoteVersions.has(entry.version));
-const byteDifferences = remote.filter((entry) => byVersion.has(entry.version) &&
-  Math.abs(byVersion.get(entry.version).bytes - entry.sql_bytes) > 5);
-const duplicates = remote.filter((entry, index) => remote.findIndex((r) => r.name === entry.name) !== index);
-console.log(`Snapshot ${snapshot.captured_on}: Supabase ${remote.length}, GitHub ${local.length}`);
-console.log(`Solo su Supabase (versione): ${remoteOnly.length}`);
-console.log(`Solo su GitHub (versione): ${localOnly.length}`);
-console.log(`Nomi duplicati nello storico remoto: ${duplicates.length}`);
-console.log(`Differenze dimensionali > 5 byte su versioni già abbinate: ${byteDifferences.length}`);
-for (const entry of remoteOnly) console.log(`REMOTE_ONLY ${entry.version} ${entry.name}`);
-for (const entry of localOnly) console.log(`LOCAL_ONLY ${entry.name}`);
-for (const entry of byteDifferences) console.log(`SIZE_DIFF ${entry.version} ${entry.name}`);
-if (process.argv.includes('--strict') && (remoteOnly.length || localOnly.length || byteDifferences.length)) {
-  console.error('Allineamento incompleto: nessuna operazione SQL eseguita.');
-  process.exitCode = 1;
+const byVersion = new Map();
+for (const entry of remote) {
+  if (byVersion.has(entry.version)) throw new Error('Versione remota duplicata: '+entry.version);
+  byVersion.set(entry.version,entry);
 }
-// Il confronto dimensionale NON dimostra uguaglianza semantica del SQL.
+const latestRemote = remote.map(x=>x.version).sort().at(-1);
+const remoteMissing = remote.filter(x => !local.includes(x.version+'_'+x.name+'.sql'));
+const obsolete = local.filter(filename => !byVersion.has(filename.slice(0,14)) && filename.slice(0,14)<=latestRemote);
+const pending = local.filter(filename => !byVersion.has(filename.slice(0,14)) && filename.slice(0,14)>latestRemote);
+const wrongNames = local.filter(filename => {
+  const entry=byVersion.get(filename.slice(0,14));
+  return entry && filename!==entry.version+'_'+entry.name+'.sql';
+});
+let exactSQL = 0;
+const sqlDiffs = [];
+for (const migration of remote) {
+  const filename=migration.version+'_'+migration.name+'.sql';
+  if (!local.includes(filename)) continue;
+  const sql=readFileSync(join(dir,filename));
+  const md5=createHash('md5').update(sql).digest('hex');
+  if (md5===migration.sql_md5) exactSQL++;
+  else sqlDiffs.push({name:filename,localBytes:sql.length,remoteBytes:migration.sql_bytes});
+}
+console.log('Snapshot '+snapshot.captured_on+': '+remote.length+' versioni Supabase; '+local.length+' file SQL GitHub');
+console.log('Versioni/nome mancanti nel repository: '+remoteMissing.length);
+console.log('File storici senza versione remota: '+obsolete.length);
+console.log('File per migrazioni future (dopo snapshot): '+pending.length);
+console.log('Filename non corrispondenti a nome remoto: '+wrongNames.length);
+console.log('SQL coincidente byte-per-byte con testo storico disponibile: '+exactSQL+'/'+remote.length);
+console.log('Testo SQL non identico (non necessariamente anomalia): '+sqlDiffs.length);
+for (const x of remoteMissing) console.error('MISSING '+x.version+'_'+x.name+'.sql');
+for (const x of obsolete) console.error('OBSOLETE '+x);
+for (const x of wrongNames) console.error('WRONG_NAME '+x);
+for (const x of pending) console.log('PENDING '+x);
+if (process.argv.includes('--strict') && (remoteMissing.length||obsolete.length||wrongNames.length)) {
+  console.error('ERRORE: riconciliazione degli identificativi incompleta.');
+  process.exitCode=1;
+}
+if (process.argv.includes('--strict-content') && sqlDiffs.length) {
+  console.error('ERRORE: il contenuto SQL non coincide esattamente con il testo storico.');
+  process.exitCode=1;
+}
+// Differenze SQL storiche: alcune migration entries contengono placeholder e non il SQL effettivamente applicato.
+// Non riscrivere i file SQL dai record remoti senza verificare dipendenze ed eseguire replay isolato.
