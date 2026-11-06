@@ -5,7 +5,7 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const js=read('apps/training/admin-registration-v36.js');
 const sql=read('supabase/migrations/20261102185024_v46_9_cross_company_registration.sql');
 test('v46.9 reproduces real cross-company block as a dedicated review rather than an automatic company transfer',()=>{
- const legacy=read('supabase/migrations/20261022144000_v36_public_registration.sql');
+ const legacy=read('supabase/migrations/20261022135530_v36_public_course_registration.sql');
  assert.match(legacy,/learner_company_mismatch_manual_review/);
  assert.match(js,/admin_registration_company_review_v46_9/);
  assert.match(js,/admin_registration_company_approve_v46_9/);

@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import{readFileSync}from'node:fs';
 const rd=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('PDF sources are private staged assets, not published learning content',()=>{
- const sql=rd('supabase/migrations/20261020200000_v22_017_private_source_figures.sql');
+ const sql=rd('supabase/migrations/20261020045047_v22_017_private_source_figures.sql');
  assert.match(sql,/false,5242880/);assert.match(sql,/enable row level security/);assert.match(sql,/private.is_platform_admin\(\)/);assert.match(sql,/rights_status='review_required'/);
  assert.doesNotMatch(sql,/create policy .* for select to anon/i);
 });

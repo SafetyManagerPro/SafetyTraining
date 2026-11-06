@@ -1,0 +1,1136 @@
+{
+  "schema_version": 1,
+  "captured_on": "2026-11-06",
+  "source": "Supabase SafetyTraining, read-only supabase_migrations.schema_migrations",
+  "note": "SQL MD5 is only a historical fingerprint; compare against canonical source before reconciliation. No user data included.",
+  "migrations": [
+    {
+      "version": "20261013211736",
+      "name": "v20_001_core_tenancy",
+      "sql_bytes": 8075,
+      "sql_md5": "154a73c2744c558274ef4dda60d4255c"
+    },
+    {
+      "version": "20261013211755",
+      "name": "v20_002_catalog",
+      "sql_bytes": 9053,
+      "sql_md5": "996b26705dc3f179e54cad419204d721"
+    },
+    {
+      "version": "20261013211830",
+      "name": "v20_003_delivery_tracking",
+      "sql_bytes": 7878,
+      "sql_md5": "bca67f765a3d6b06425952767a98e09f"
+    },
+    {
+      "version": "20261013211854",
+      "name": "v20_004_assessment_integration",
+      "sql_bytes": 10677,
+      "sql_md5": "17a788d57a7a19cbf5bd762f528930fa"
+    },
+    {
+      "version": "20261013211940",
+      "name": "v20_005_private_rls_helpers",
+      "sql_bytes": 2847,
+      "sql_md5": "ff2c7cb6d78ea73532e31e134d670e9a"
+    },
+    {
+      "version": "20261013212757",
+      "name": "v20_006_question_grading_risk_catalog",
+      "sql_bytes": 6405,
+      "sql_md5": "a8869420c05da6e3fdb44cf6f0b60e94"
+    },
+    {
+      "version": "20261013212825",
+      "name": "v20_007_content_import_metadata",
+      "sql_bytes": 290,
+      "sql_md5": "98dde9c67f076cf24c85dc18e0930ae7"
+    },
+    {
+      "version": "20261013213356",
+      "name": "v20_008_enable_temporary_http_import",
+      "sql_bytes": 59,
+      "sql_md5": "ffe79137e2b09357a0f4fe854d7643f1"
+    },
+    {
+      "version": "20261013214311",
+      "name": "v20_009_remove_temporary_http_import",
+      "sql_bytes": 30,
+      "sql_md5": "36d05e8dd8c21093157206bedcce7c26"
+    },
+    {
+      "version": "20261013214559",
+      "name": "v20_010_enable_course_structure_import",
+      "sql_bytes": 59,
+      "sql_md5": "ffe79137e2b09357a0f4fe854d7643f1"
+    },
+    {
+      "version": "20261013214631",
+      "name": "v20_011_remove_course_structure_import",
+      "sql_bytes": 30,
+      "sql_md5": "36d05e8dd8c21093157206bedcce7c26"
+    },
+    {
+      "version": "20261013214714",
+      "name": "v20_012_trusted_active_time",
+      "sql_bytes": 2327,
+      "sql_md5": "5ff1c56e1b2b4b241e394b4a53094af1"
+    },
+    {
+      "version": "20261013220834",
+      "name": "v20_013_admin_console_rls_fixes",
+      "sql_bytes": 999,
+      "sql_md5": "373885cafd2d22cc92e5573c91e44566"
+    },
+    {
+      "version": "20261014170308",
+      "name": "v20_014_learner_onboarding_and_progress",
+      "sql_bytes": 6197,
+      "sql_md5": "52367f6321dd9318a24fac00ae4f18ec"
+    },
+    {
+      "version": "20261014172843",
+      "name": "v20_015_safetymanager_import_bridge",
+      "sql_bytes": 17333,
+      "sql_md5": "7809c526eab4de504f7f215fb76c50b1"
+    },
+    {
+      "version": "20261014175935",
+      "name": "v20_016_fix_safetymanager_import_validation",
+      "sql_bytes": 13758,
+      "sql_md5": "d8249f500b1d8f970525ae09a5ee5a35"
+    },
+    {
+      "version": "20261014181457",
+      "name": "v20_017_safetymanager_course_catalog",
+      "sql_bytes": 33307,
+      "sql_md5": "a2a25cfaea6e0d090141ae71b12061f9"
+    },
+    {
+      "version": "20261014182705",
+      "name": "v20_018_seed_safetymanager_course_catalog",
+      "sql_bytes": 5380,
+      "sql_md5": "dbd58eb25729d77b8d378da713e897d0"
+    },
+    {
+      "version": "20261014183912",
+      "name": "v20_019_worker_learning_unit_blueprints",
+      "sql_bytes": 11230,
+      "sql_md5": "b65271b6852485e38b449e653428ac05"
+    },
+    {
+      "version": "20261014185508",
+      "name": "v20_020_risk_composition_engine",
+      "sql_bytes": 38567,
+      "sql_md5": "120b92a7ec43a382a6cd04f79baa8315"
+    },
+    {
+      "version": "20261014192009",
+      "name": "v20_021_learning_unit_composition_v2",
+      "sql_bytes": 12460,
+      "sql_md5": "3dd7a617eb30d44dd214c922fe6f4582"
+    },
+    {
+      "version": "20261014192123",
+      "name": "v20_022_prioritize_project_risks",
+      "sql_bytes": 12798,
+      "sql_md5": "87a328387463c5705efaca0370859376"
+    },
+    {
+      "version": "20261014194616",
+      "name": "v20_023_course_blueprints_and_content_profiles",
+      "sql_bytes": 24783,
+      "sql_md5": "6a6721799869b6f1c83e3940981ebd96"
+    },
+    {
+      "version": "20261014200652",
+      "name": "v20_024_complete_emergency_course_family",
+      "sql_bytes": 17753,
+      "sql_md5": "d0755e765c0b26aa4ac97618c8e2f082"
+    },
+    {
+      "version": "20261014201746",
+      "name": "v20_025_first_aid_learning_units",
+      "sql_bytes": 16313,
+      "sql_md5": "20812f40fe4196dacf8eb25c35a2e4c3"
+    },
+    {
+      "version": "20261014203308",
+      "name": "v20_026_compose_first_aid_courses",
+      "sql_bytes": 10548,
+      "sql_md5": "89ed133e93603bdc8a24d6921b5ba44c"
+    },
+    {
+      "version": "20261014210826",
+      "name": "v20_027_master_registry_variants_rules",
+      "sql_bytes": 9557,
+      "sql_md5": "8ae3b78e67a0b5b15a9d50bd36f1a1c0"
+    },
+    {
+      "version": "20261014212656",
+      "name": "v20_028_asr2025_role_registry_and_learning_units",
+      "sql_bytes": 33111,
+      "sql_md5": "c814e2c533249ade40575d8805a3eebf"
+    },
+    {
+      "version": "20261014212847",
+      "name": "v20_029_compose_asr2025_role_courses",
+      "sql_bytes": 11672,
+      "sql_md5": "7f0ee569bddfecb1e8596d5ca8df6949"
+    },
+    {
+      "version": "20261014213555",
+      "name": "v20_030_confined_spaces_and_work_height",
+      "sql_bytes": 19109,
+      "sql_md5": "9b15f9e87b1724efe433f32ce94aafb9"
+    },
+    {
+      "version": "20261014214102",
+      "name": "v20_031_equipment_asr2025_family",
+      "sql_bytes": 28704,
+      "sql_md5": "38c655c4c3e6c4d6e5438feac025887a"
+    },
+    {
+      "version": "20261014214342",
+      "name": "v20_032_worker_and_rls_updates",
+      "sql_bytes": 12166,
+      "sql_md5": "91c868ada52c464a4981c301c199daad"
+    },
+    {
+      "version": "20261014214828",
+      "name": "v20_033_course_readiness_gate",
+      "sql_bytes": 9481,
+      "sql_md5": "46810debde1c29e17f7132477f262965"
+    },
+    {
+      "version": "20261014215318",
+      "name": "v20_034_test_registry_and_readiness",
+      "sql_bytes": 13413,
+      "sql_md5": "aa015e2ae867e0313ffbe980d97855a5"
+    },
+    {
+      "version": "20261014215527",
+      "name": "v20_035_verification_path_selection",
+      "sql_bytes": 15461,
+      "sql_md5": "c6c85123a96c584775cc7019ed5d7456"
+    },
+    {
+      "version": "20261015104014",
+      "name": "v20_036_general_training_didactic_v2",
+      "sql_bytes": 26147,
+      "sql_md5": "8439df91d192b09562ba33fd449baa67"
+    },
+    {
+      "version": "20261015132808",
+      "name": "v20_037_preposto_didactic_v2",
+      "sql_bytes": 29423,
+      "sql_md5": "b594ea37d4cb018184c4bc68bfbd30e3"
+    },
+    {
+      "version": "20261015135338",
+      "name": "v20_038_dirigente_didactic_v2",
+      "sql_bytes": 31204,
+      "sql_md5": "ff812950a0d96c8bafe3ca219ea70a30"
+    },
+    {
+      "version": "20261015152657",
+      "name": "v20_039_datore_lavoro_didactic_v2",
+      "sql_bytes": 42122,
+      "sql_md5": "4c3289480d1feb4ad16236b0cee304af"
+    },
+    {
+      "version": "20261015162550",
+      "name": "v20_040_datore_lavoro_update_didactic_v2",
+      "sql_bytes": 15862,
+      "sql_md5": "86dd7048331fe0f27d2ebfa8e5f1924a"
+    },
+    {
+      "version": "20261015170044",
+      "name": "v20_041_dl_rspp_common_didactic_v2",
+      "sql_bytes": 22231,
+      "sql_md5": "b08c9844a94e6dc09d656dec6a6bacfc"
+    },
+    {
+      "version": "20261015171452",
+      "name": "v20_042_dl_rspp_sector_didactic_v2",
+      "sql_bytes": 14901,
+      "sql_md5": "49228fc034c0d907b488e58b9c6184a4"
+    },
+    {
+      "version": "20261015171932",
+      "name": "v20_043_dl_rspp_update_didactic_v2",
+      "sql_bytes": 7405,
+      "sql_md5": "25009ed0f87a7049dc319fe14d12f528"
+    },
+    {
+      "version": "20261015173713",
+      "name": "v20_0439_rspp_aspp_catalog_registry",
+      "sql_bytes": 2989,
+      "sql_md5": "2a5feec22d38e3a115f78e4f82ac6d90"
+    },
+    {
+      "version": "20261015174100",
+      "name": "v20_044_rspp_aspp_family_didactic_v2",
+      "sql_bytes": 26935,
+      "sql_md5": "3c03f4bf199fef715192e021f3fe3626"
+    },
+    {
+      "version": "20261015175301",
+      "name": "v20_045_catalog_visibility_and_material_rpc",
+      "sql_bytes": 3339,
+      "sql_md5": "7a7ce003228c91f8327790fd2d6b2758"
+    },
+    {
+      "version": "20261015175352",
+      "name": "v20_0451_catalog_rpc_security",
+      "sql_bytes": 439,
+      "sql_md5": "6893c8e3adf8e4dc1de920b326a50060"
+    },
+    {
+      "version": "20261015191108",
+      "name": "training_source_library_schema_v20_046",
+      "sql_bytes": 2154,
+      "sql_md5": "efadd7272a7a249e626877c8a19b0e91"
+    },
+    {
+      "version": "20261015203342",
+      "name": "v20_055_preposto_evidence_enrichment",
+      "sql_bytes": 10643,
+      "sql_md5": "f60fd1ea9c26bc6d674f4a0c8e8f1088"
+    },
+    {
+      "version": "20261015203806",
+      "name": "v20_056_rls_evidence_enrichment",
+      "sql_bytes": 11092,
+      "sql_md5": "4fa21169d25bca547fac602ac8649ee9"
+    },
+    {
+      "version": "20261015203956",
+      "name": "v20_057_rls_roles_interferences_enrichment",
+      "sql_bytes": 7440,
+      "sql_md5": "9fc5596e38e366e7b15ce1157cbc4535"
+    },
+    {
+      "version": "20261015204152",
+      "name": "v20_058_rls_legal_health_psychosocial_enrichment",
+      "sql_bytes": 9617,
+      "sql_md5": "f8080ea4c2b51c7b2a955cab553b6657"
+    },
+    {
+      "version": "20261015204311",
+      "name": "v20_059_rls_ppe_emergency_specific_risks_enrichment",
+      "sql_bytes": 6935,
+      "sql_md5": "508c0dc221b75be4c054a028253be302"
+    },
+    {
+      "version": "20261015204825",
+      "name": "v20_060_first_aid_core_evidence_enrichment",
+      "sql_bytes": 13830,
+      "sql_md5": "7753c829241edb2e9e561bfa4a877c36"
+    },
+    {
+      "version": "20261015205027",
+      "name": "v20_061_first_aid_extended_evidence_enrichment",
+      "sql_bytes": 13296,
+      "sql_md5": "58b869b457c8ea54460b41be79feda59"
+    },
+    {
+      "version": "20261015205221",
+      "name": "v20_062_first_aid_updates_evidence_enrichment",
+      "sql_bytes": 10665,
+      "sql_md5": "de1a0a52ae0c839188c68e5daae9a4c2"
+    },
+    {
+      "version": "20261015205509",
+      "name": "v20_063_dirigente_managerial_evidence_enrichment",
+      "sql_bytes": 11626,
+      "sql_md5": "40ad1932325949c13668365b70e9494e"
+    },
+    {
+      "version": "20261015205647",
+      "name": "v20_064_dirigente_governance_evidence_enrichment",
+      "sql_bytes": 10531,
+      "sql_md5": "cd5ca4aea131e0e7bdc167d1e719e640"
+    },
+    {
+      "version": "20261015210055",
+      "name": "v20_065_worker_general_evidence_enrichment",
+      "sql_bytes": 13432,
+      "sql_md5": "0df469bdc03962e8213723a12041136c"
+    },
+    {
+      "version": "20261015210500",
+      "name": "v20_066_worker_specific_shared_core_enrichment",
+      "sql_bytes": 12212,
+      "sql_md5": "a219eea4674ce4b839a21e015c3a3309"
+    },
+    {
+      "version": "20261015211000",
+      "name": "v20_067_worker_specific_medium_high_enrichment",
+      "sql_bytes": 82,
+      "sql_md5": "7afa2ec26dc6e98a424a4ee6520885fb"
+    },
+    {
+      "version": "20261015214500",
+      "name": "v20_047_completion_equipment_updates",
+      "sql_bytes": 98,
+      "sql_md5": "aa5b7b209850211b78865b8b80e292b3"
+    },
+    {
+      "version": "20261015220000",
+      "name": "v20_048_completion_role_updates",
+      "sql_bytes": 98,
+      "sql_md5": "aa5b7b209850211b78865b8b80e292b3"
+    },
+    {
+      "version": "20261015222000",
+      "name": "v20_049_completion_rls_updates",
+      "sql_bytes": 98,
+      "sql_md5": "aa5b7b209850211b78865b8b80e292b3"
+    },
+    {
+      "version": "20261015224000",
+      "name": "v20_050a_completion_first_aid_updates",
+      "sql_bytes": 90,
+      "sql_md5": "88d813139aeb9b72d2be98f1ac903942"
+    },
+    {
+      "version": "20261015224500",
+      "name": "v20_050b_completion_confined_update",
+      "sql_bytes": 93,
+      "sql_md5": "d47b2f9235e2f15c08e52bae2674d488"
+    },
+    {
+      "version": "20261015225000",
+      "name": "v20_050c_completion_work_height",
+      "sql_bytes": 93,
+      "sql_md5": "d47b2f9235e2f15c08e52bae2674d488"
+    },
+    {
+      "version": "20261015230000",
+      "name": "v20_051_csp_cse_reconciliation",
+      "sql_bytes": 118,
+      "sql_md5": "3b05288aad8928f3fd54fd0566dc73a5"
+    },
+    {
+      "version": "20261015232000",
+      "name": "v20_052_fire_family_reconciliation",
+      "sql_bytes": 121,
+      "sql_md5": "381d88550c65d3bb1eae2fe7d1dec562"
+    },
+    {
+      "version": "20261015234000",
+      "name": "v20_053a_ponteggi_reconciliation",
+      "sql_bytes": 128,
+      "sql_md5": "14c61077581af681d8cd3187dfb4e485"
+    },
+    {
+      "version": "20261015235000",
+      "name": "v20_053b_funi_reconciliation",
+      "sql_bytes": 128,
+      "sql_md5": "488a7e7868e3fd473d1afad001712b61"
+    },
+    {
+      "version": "20261015235900",
+      "name": "v20_054_road_sign_reconciliation",
+      "sql_bytes": 126,
+      "sql_md5": "0f3fbe7f42c7c33ba5b9ba54ac26fd56"
+    },
+    {
+      "version": "20261016045413",
+      "name": "v20_068a_rspp_aspp_module_a1_authored_enrichment",
+      "sql_bytes": 8577,
+      "sql_md5": "fe97170cbd42a83e8fed0c1534f4fd67"
+    },
+    {
+      "version": "20261016045611",
+      "name": "v20_068b_rspp_aspp_module_a2_authored_enrichment",
+      "sql_bytes": 8359,
+      "sql_md5": "a061e6de926d6acf763bafc117f13c58"
+    },
+    {
+      "version": "20261016045641",
+      "name": "v20_068c_rspp_aspp_module_a3_authored_enrichment",
+      "sql_bytes": 9403,
+      "sql_md5": "21e2efbbd11e7a53e371ed7e9741d59a"
+    },
+    {
+      "version": "20261016045711",
+      "name": "v20_068d_rspp_aspp_module_a4_authored_enrichment",
+      "sql_bytes": 8700,
+      "sql_md5": "e0f9d6aa674b2eee3b5614fdc1e2e565"
+    },
+    {
+      "version": "20261016045738",
+      "name": "v20_068e_rspp_aspp_module_a5_authored_enrichment",
+      "sql_bytes": 8751,
+      "sql_md5": "dec9a7447ef2318137245a6ba5a849bc"
+    },
+    {
+      "version": "20261016052107",
+      "name": "v20_069_rspp_aspp_module_b_common_authored_enrichment",
+      "sql_bytes": 63519,
+      "sql_md5": "8f2f4bc986fc9850ffc2419d16f8f66e"
+    },
+    {
+      "version": "20261016055218",
+      "name": "v20_070_preposto_dirigente_authored_completion",
+      "sql_bytes": 12393,
+      "sql_md5": "5aaedd7ba7618f79736d9301d5413b15"
+    },
+    {
+      "version": "20261016122356",
+      "name": "v20_071_datore_lavoro_authored_completion",
+      "sql_bytes": 29890,
+      "sql_md5": "fa4a1cbf22f95f4d152b51e39418e672"
+    },
+    {
+      "version": "20261016125239",
+      "name": "v20_072_dl_rspp_noncantieri_authored_completion",
+      "sql_bytes": 31584,
+      "sql_md5": "8af4542d9a7064899f18d32cef065411"
+    },
+    {
+      "version": "20261016130358",
+      "name": "v20_073_worker_high_update_job_specific_authored_completion",
+      "sql_bytes": 25709,
+      "sql_md5": "2ced10ba63972a28e2abd15ba014a5ff"
+    },
+    {
+      "version": "20261016130603",
+      "name": "v20_074_worker_general_authored_completion",
+      "sql_bytes": 8122,
+      "sql_md5": "5a53599e9ea10611f50dd8d89833bc9e"
+    },
+    {
+      "version": "20261016131759",
+      "name": "v20_075_rls_authored_completion",
+      "sql_bytes": 22254,
+      "sql_md5": "927665935f8aaa88bd7e7d5925098470"
+    },
+    {
+      "version": "20261016132900",
+      "name": "v20_076_first_aid_authored_completion",
+      "sql_bytes": 22137,
+      "sql_md5": "377ed242d2589e730ca7f7f664720ddd"
+    },
+    {
+      "version": "20261016134027",
+      "name": "v20_077_fire_authored_completion",
+      "sql_bytes": 24597,
+      "sql_md5": "9101411d44e8d167680902500d89803c"
+    },
+    {
+      "version": "20261016154330",
+      "name": "v20_078_equipment_authored_completion",
+      "sql_bytes": 38153,
+      "sql_md5": "a46994c2f1f6b8aa8adabe0051e8d381"
+    },
+    {
+      "version": "20261016155345",
+      "name": "v20_079_freeze_external_rspp_aspp",
+      "sql_bytes": 3120,
+      "sql_md5": "b6ccd9288f508ae0754ab3c7e51fea38"
+    },
+    {
+      "version": "20261016160609",
+      "name": "v20_080_emergency_height_authored_completion",
+      "sql_bytes": 32812,
+      "sql_md5": "81d74bd3648b6b6e3de662c9858691f7"
+    },
+    {
+      "version": "20261016162021",
+      "name": "v20_081a_dl_rspp_costruzioni_sources_metadata",
+      "sql_bytes": 4868,
+      "sql_md5": "b7cc0c0ce2ad4149e10c8d383b17607b"
+    },
+    {
+      "version": "20261016162106",
+      "name": "v20_081b_dl_rspp_costruzioni_authored_part1",
+      "sql_bytes": 11949,
+      "sql_md5": "4290eecd08e01f78c3d709c16f82cf7c"
+    },
+    {
+      "version": "20261016162143",
+      "name": "v20_081c_dl_rspp_costruzioni_authored_part2",
+      "sql_bytes": 12528,
+      "sql_md5": "dc556de9c8a9389464f10b111ea999ef"
+    },
+    {
+      "version": "20261016162235",
+      "name": "v20_081d_dl_rspp_costruzioni_provenance_audit",
+      "sql_bytes": 4615,
+      "sql_md5": "bb67a36decbec2c1c23e63fa42096e38"
+    },
+    {
+      "version": "20261016163358",
+      "name": "v20_082_datore_cantieri_authored_completion",
+      "sql_bytes": 22983,
+      "sql_md5": "1664b02e989c673d4116a8c3b7d1b50a"
+    },
+    {
+      "version": "20261016164702",
+      "name": "v20_083_dirigente_cantieri_authored_completion",
+      "sql_bytes": 26680,
+      "sql_md5": "79a22b45d3b5aef24a15e37fd5a1512e"
+    },
+    {
+      "version": "20261016170459",
+      "name": "v20_084_freeze_out_of_roadmap_specialist_courses",
+      "sql_bytes": 2739,
+      "sql_md5": "8f2e38ae0b03a0bc24c3ee9be1f592b7"
+    },
+    {
+      "version": "20261016171306",
+      "name": "v20_085_fire_practical_gates_and_emergency_drill_boundary",
+      "sql_bytes": 3991,
+      "sql_md5": "8890314a05073820b894c6d828feb77d"
+    },
+    {
+      "version": "20261016171716",
+      "name": "v20_086_blueprint_normalization_and_finalization_scope",
+      "sql_bytes": 4629,
+      "sql_md5": "fbf1f6477aff98940c304910572e9ea5"
+    },
+    {
+      "version": "20261016171926",
+      "name": "v20_087_authored_candidate_course_compositions",
+      "sql_bytes": 6922,
+      "sql_md5": "b4bcba50b8a9a1d2465eda4d6c03bc35"
+    },
+    {
+      "version": "20261016172049",
+      "name": "v20_088_cantieri_role_candidate_course_versions",
+      "sql_bytes": 6051,
+      "sql_md5": "8559681cdee62e3fa1652137c5e79817"
+    },
+    {
+      "version": "20261016172702",
+      "name": "v20_089_candidate_verification_paths",
+      "sql_bytes": 10109,
+      "sql_md5": "72125a2bac5f8e1a16ed80f0f78ddc65"
+    },
+    {
+      "version": "20261016173008",
+      "name": "v20_090_authored_final_question_bank",
+      "sql_bytes": 7717,
+      "sql_md5": "357201af9aa8308ad90efc2a123dcdb1"
+    },
+    {
+      "version": "20261016173305",
+      "name": "v20_091_candidate_tests_from_authored_bank",
+      "sql_bytes": 6020,
+      "sql_md5": "4e94ee3f5b40e8b898075cedeb7f15f1"
+    },
+    {
+      "version": "20261016175340",
+      "name": "v20_091_secure_test_runtime",
+      "sql_bytes": 6333,
+      "sql_md5": "f070ebc7a6ec8e4b51e0a10918a34143"
+    },
+    {
+      "version": "20261016180510",
+      "name": "v20_092_enrollment_completion_gates",
+      "sql_bytes": 11322,
+      "sql_md5": "bf0df1651cf3577ba349a89e6012f86d"
+    },
+    {
+      "version": "20261016181052",
+      "name": "v20_093_blueprint_finalization_review",
+      "sql_bytes": 5907,
+      "sql_md5": "e6e16d77035da21d9223c1e83cf9401b"
+    },
+    {
+      "version": "20261016181935",
+      "name": "v20_094_napo_url_normalization",
+      "sql_bytes": 3345,
+      "sql_md5": "d9275a7d06e58a909d1fd99e04b8ff2a"
+    },
+    {
+      "version": "20261016184523",
+      "name": "v20_095_test_activation_block_metadata_cleanup",
+      "sql_bytes": 1106,
+      "sql_md5": "273c8bdaccecb821f5f6cb750f8b78ef"
+    },
+    {
+      "version": "20261016190217",
+      "name": "v20_096_learner_account_invitation_registry",
+      "sql_bytes": 3378,
+      "sql_md5": "87fea9079677abf6de0e2be07ff86e34"
+    },
+    {
+      "version": "20261016192402",
+      "name": "v20_097_publish_candidate_learning_units",
+      "sql_bytes": 1985,
+      "sql_md5": "67d012b5b058485cb8922ea804f8cace"
+    },
+    {
+      "version": "20261016192912",
+      "name": "v20_098_publish_candidate_course_versions_blocked",
+      "sql_bytes": 2183,
+      "sql_md5": "c6bf55775cf0235df1b334171b391ffd"
+    },
+    {
+      "version": "20261016193110",
+      "name": "v20_099_activate_candidate_tests_qa",
+      "sql_bytes": 2093,
+      "sql_md5": "e96c147fae574d1e913d767b68691251"
+    },
+    {
+      "version": "20261016193922",
+      "name": "v20_100_enable_candidate_course_versions_go_live",
+      "sql_bytes": 3991,
+      "sql_md5": "30c255d97e884456e72285beab6cad6e"
+    },
+    {
+      "version": "20261016212444",
+      "name": "v21_001_admin_backend_service_layer",
+      "sql_bytes": 17009,
+      "sql_md5": "7c4e3631c0861619aeb063e2bf3e05f8"
+    },
+    {
+      "version": "20261016212541",
+      "name": "v21_002_admin_backend_core_crud",
+      "sql_bytes": 8839,
+      "sql_md5": "91389570c6b56392d5246aeb5900193f"
+    },
+    {
+      "version": "20261016212933",
+      "name": "v21_003_admin_backend_guardrails",
+      "sql_bytes": 7268,
+      "sql_md5": "aab61e9013b3f210215ae4dac7737d17"
+    },
+    {
+      "version": "20261016213037",
+      "name": "v21_004_fix_enrollment_rls_recursion",
+      "sql_bytes": 731,
+      "sql_md5": "185616db0837fe8ce2639caa01b42b6a"
+    },
+    {
+      "version": "20261016213106",
+      "name": "v21_005_break_edition_enrollment_rls_cycle",
+      "sql_bytes": 1712,
+      "sql_md5": "4dd43ba664e340e25840352eb2c201e5"
+    },
+    {
+      "version": "20261016213147",
+      "name": "v21_006_admin_audit_actor_index",
+      "sql_bytes": 117,
+      "sql_md5": "ec234436b51e3f003040370568295194"
+    },
+    {
+      "version": "20261016214908",
+      "name": "v21_007_admin_requirement_evidence_service",
+      "sql_bytes": 10745,
+      "sql_md5": "9b95092973ffd61c39ec384a63d2e932"
+    },
+    {
+      "version": "20261016215039",
+      "name": "v21_008_harden_platform_requirement_evidence_status",
+      "sql_bytes": 4537,
+      "sql_md5": "7cfae03433ee640d700578f000cb7564"
+    },
+    {
+      "version": "20261016215923",
+      "name": "v21_009_restore_safetymanager_staging_compatibility",
+      "sql_bytes": 4634,
+      "sql_md5": "979395eca4e6d30effe4eec21420e2ee"
+    },
+    {
+      "version": "20261016220140",
+      "name": "v21_010_harden_safetymanager_course_configuration",
+      "sql_bytes": 10563,
+      "sql_md5": "ae95d5a442619b5eaf4468f1ad5591b1"
+    },
+    {
+      "version": "20261016220621",
+      "name": "v21_011_admin_detail_read_service",
+      "sql_bytes": 13669,
+      "sql_md5": "fbecfb3ae7131e8d296cf6e35c08ed45"
+    },
+    {
+      "version": "20261016221243",
+      "name": "v21_012_scoped_admin_capabilities",
+      "sql_bytes": 40604,
+      "sql_md5": "f80e2e1310c978efc65c8f16092c3eda"
+    },
+    {
+      "version": "20261016221548",
+      "name": "v21_013_scoped_invitation_visibility",
+      "sql_bytes": 303,
+      "sql_md5": "0858515563e5b67f8a83862b4de868be"
+    },
+    {
+      "version": "20261016221704",
+      "name": "v21_014_allow_rls_training_scope_helper",
+      "sql_bytes": 95,
+      "sql_md5": "d6ee3fc70c6e4f62cec9913675756597"
+    },
+    {
+      "version": "20261017042346",
+      "name": "v21_007_admin_requirement_evidence_service",
+      "sql_bytes": 10745,
+      "sql_md5": "9b95092973ffd61c39ec384a63d2e932"
+    },
+    {
+      "version": "20261017042729",
+      "name": "v21_015_restore_platform_evidence_status_guard",
+      "sql_bytes": 4723,
+      "sql_md5": "187ad6b814e758bffd8a23b103a62b94"
+    },
+    {
+      "version": "20261017042912",
+      "name": "v21_016_admin_membership_service",
+      "sql_bytes": 8954,
+      "sql_md5": "1f254b3b0b170748c41579a6e3b443ba"
+    },
+    {
+      "version": "20261017045703",
+      "name": "v21_017_registry_identity_deduplication",
+      "sql_bytes": 10442,
+      "sql_md5": "64202b60f795c06ffcd10fcd4a70eb38"
+    },
+    {
+      "version": "20261017045832",
+      "name": "v21_018_fix_case_insensitive_registry_normalization",
+      "sql_bytes": 10772,
+      "sql_md5": "802d56f461430057f4a0bb3c8584099b"
+    },
+    {
+      "version": "20261017052016",
+      "name": "v21_019_multichannel_learner_invites",
+      "sql_bytes": 13538,
+      "sql_md5": "7592c9a4a483d3e09ec89ec1e9949c9a"
+    },
+    {
+      "version": "20261017052054",
+      "name": "v21_020_company_bulk_and_registry_import",
+      "sql_bytes": 12390,
+      "sql_md5": "6754d5f4815adb48f67bab5b398028f1"
+    },
+    {
+      "version": "20261017052210",
+      "name": "v21_021_invite_public_claim_flow",
+      "sql_bytes": 6634,
+      "sql_md5": "d556523d4220f165836e58978b6b13b6"
+    },
+    {
+      "version": "20261017052954",
+      "name": "v21_022_qualify_invite_crypto_extensions",
+      "sql_bytes": 10351,
+      "sql_md5": "b6d1104a261d4b080f686d576e685520"
+    },
+    {
+      "version": "20261017150936",
+      "name": "v21_023_preserve_current_company_training_history",
+      "sql_bytes": 11323,
+      "sql_md5": "305f69405f3d6b34786e5244fad058d0"
+    },
+    {
+      "version": "20261017160512",
+      "name": "v21_024_fix_course_readiness_test_gate",
+      "sql_bytes": 11013,
+      "sql_md5": "559b9c4816d1cf3274068e17a8ee4b3a"
+    },
+    {
+      "version": "20261017173942",
+      "name": "v22_001_practice_scenarios_quality",
+      "sql_bytes": 39054,
+      "sql_md5": "a7ad93509b2d5a84d779066981696940"
+    },
+    {
+      "version": "20261017175140",
+      "name": "v22_002_quality_gap_gate_and_profile_practice",
+      "sql_bytes": 26269,
+      "sql_md5": "3237514670e0a802cdd2793d3d125800"
+    },
+    {
+      "version": "20261017175534",
+      "name": "v22_003_equipment_specific_practice",
+      "sql_bytes": 36654,
+      "sql_md5": "bd39abd5ec1d3efe04d205dc9fd6726d"
+    },
+    {
+      "version": "20261017175654",
+      "name": "v22_004_emergency_fire_first_aid_specific_practice",
+      "sql_bytes": 18569,
+      "sql_md5": "3958df48afa94f70231a1dfc0cd70ab0"
+    },
+    {
+      "version": "20261017175827",
+      "name": "v22_005_workers_roles_rls_management_specific_practice",
+      "sql_bytes": 21146,
+      "sql_md5": "0fee5c72e1ad7d5f564929cddb3676e0"
+    },
+    {
+      "version": "20261017175941",
+      "name": "v22_006_dl_spp_sector_specific_practice",
+      "sql_bytes": 17466,
+      "sql_md5": "c1a361df597fe1efcd85d180ebcc517e"
+    },
+    {
+      "version": "20261017180016",
+      "name": "v22_007_quality_specificity_gate",
+      "sql_bytes": 9575,
+      "sql_md5": "f5154d4e405905bd34ae3098e648f5e8"
+    },
+    {
+      "version": "20261017180645",
+      "name": "v22_008_bind_practice_labs_to_requirement_evidence",
+      "sql_bytes": 1658,
+      "sql_md5": "1c2cd8b61fc4162e6fed0249715b52e3"
+    },
+    {
+      "version": "20261017185410",
+      "name": "v22_009_fix_safe_moves_visual_and_v22_indexes",
+      "sql_bytes": 425,
+      "sql_md5": "adb30ae48a7db5b55ea9605bbabed5e4"
+    },
+    {
+      "version": "20261018141147",
+      "name": "v22_010_additive_practice_assessment_forms",
+      "sql_bytes": 8179,
+      "sql_md5": "ce6608ad35903400c1c4a4ab2c297a7a"
+    },
+    {
+      "version": "20261018142341",
+      "name": "v22_011_practice_assessment_staff_history",
+      "sql_bytes": 2514,
+      "sql_md5": "dbb3c13c759c1b6c124e13b120da469d"
+    },
+    {
+      "version": "20261018163653",
+      "name": "v22_012_fix_claim_learner_uuid_aggregate",
+      "sql_bytes": 972,
+      "sql_md5": "ccedef5f92bd9af2fab87082b381bc4e"
+    },
+    {
+      "version": "20261019135645",
+      "name": "v22_013_admin_deletion_read_only_preview",
+      "sql_bytes": 7934,
+      "sql_md5": "08d5831f2b5559b52f874796bb374e91"
+    },
+    {
+      "version": "20261019141118",
+      "name": "v22_014_admin_deletion_indirect_read_only_preview",
+      "sql_bytes": 12389,
+      "sql_md5": "fc1747c8553b4a0e98b47aa6849f3e54"
+    },
+    {
+      "version": "20261019142009",
+      "name": "v22_015_revoke_direct_delete_client_roles",
+      "sql_bytes": 2416,
+      "sql_md5": "57c8fbe0dae622e5c02a718aaa2cb4fc"
+    },
+    {
+      "version": "20261019183150",
+      "name": "v22_016_equipment_in_person_refresher_instructor_workshops",
+      "sql_bytes": 9089,
+      "sql_md5": "ad2e57d01c892db44feabde07fdce149"
+    },
+    {
+      "version": "20261020045047",
+      "name": "v22_017_private_source_figures",
+      "sql_bytes": 3345,
+      "sql_md5": "8896abcd1a7d2f374b935787de9fae1d"
+    },
+    {
+      "version": "20261020055444",
+      "name": "v22_018_review_private_source_figures",
+      "sql_bytes": 956,
+      "sql_md5": "978f1db93b010be5ff9eaf3a2a448b98"
+    },
+    {
+      "version": "20261020070604",
+      "name": "v22_018_review_private_source_figures",
+      "sql_bytes": 956,
+      "sql_md5": "978f1db93b010be5ff9eaf3a2a448b98"
+    },
+    {
+      "version": "20261020174055",
+      "name": "v24_001_integral_pdf_media",
+      "sql_bytes": 3134,
+      "sql_md5": "91c7a8607cd9033cba767574084bbbaf"
+    },
+    {
+      "version": "20261020185639",
+      "name": "v24_005_delete_imported_pdf_figures",
+      "sql_bytes": 3743,
+      "sql_md5": "8fdc86317cd7020f6b24ac1286cdc1cc"
+    },
+    {
+      "version": "20261020203108",
+      "name": "v24_007_assisted_cleanup_audit",
+      "sql_bytes": 623,
+      "sql_md5": "8e0ba016565f820328bcab1340e3b3c8"
+    },
+    {
+      "version": "20261021083538",
+      "name": "v25_001_integral_pdf_review_workflow",
+      "sql_bytes": 5435,
+      "sql_md5": "45c3dedcf4f86ac5c371c0657a996c7f"
+    },
+    {
+      "version": "20261021091152",
+      "name": "v25_002_integral_pdf_manual_placements",
+      "sql_bytes": 6602,
+      "sql_md5": "cad8f12f9c6ac2f1f9dc39710ce3ee07"
+    },
+    {
+      "version": "20261021150217",
+      "name": "v26_image_matching_and_exclusions",
+      "sql_bytes": 5421,
+      "sql_md5": "41c8bf0eb776bc5259f124492d9da8f9"
+    },
+    {
+      "version": "20261021152831",
+      "name": "v27_visual_figure_audit",
+      "sql_bytes": 19615,
+      "sql_md5": "fda98854b31e660a38eb1bf8b290d5ee"
+    },
+    {
+      "version": "20261021154811",
+      "name": "v28_complete_image_triage",
+      "sql_bytes": 210496,
+      "sql_md5": "267afa53e633826fa17ef037c9585197"
+    },
+    {
+      "version": "20261021172640",
+      "name": "v29_admin_image_filters",
+      "sql_bytes": 6420,
+      "sql_md5": "cde5fbcb7cbccb7ca5d4f24adce3c88e"
+    },
+    {
+      "version": "20261021180818",
+      "name": "v30_multiple_placement_proposals",
+      "sql_bytes": 4380,
+      "sql_md5": "9c855e522b4960f94ba28eef9f49ffed"
+    },
+    {
+      "version": "20261021203900",
+      "name": "v33_slide_image_owner_editor",
+      "sql_bytes": 14773,
+      "sql_md5": "8a0be863dac2c8921275f38c07729f8d"
+    },
+    {
+      "version": "20261021212430",
+      "name": "v34_slide_uid_colons",
+      "sql_bytes": 3444,
+      "sql_md5": "ec557bb7cd70e26013a632974c3978d3"
+    },
+    {
+      "version": "20261022135530",
+      "name": "v36_public_course_registration",
+      "sql_bytes": 15429,
+      "sql_md5": "636e6c750122ef1083d23473d1774dbc"
+    },
+    {
+      "version": "20261022141138",
+      "name": "v37_learner_archive_auth_guard",
+      "sql_bytes": 3259,
+      "sql_md5": "0773a0d56d2642f6dc2f86c93af79363"
+    },
+    {
+      "version": "20261022141403",
+      "name": "v38_delete_unused_learner",
+      "sql_bytes": 3820,
+      "sql_md5": "2b4b37005f102e15cfd8ebd47e6e2b38"
+    },
+    {
+      "version": "20261022212241",
+      "name": "v43_bulk_pdf_reviews",
+      "sql_bytes": 4774,
+      "sql_md5": "2e1e9c087626921a2921df591ada71fb"
+    },
+    {
+      "version": "20261023174530",
+      "name": "v44_001_learner_course_documents",
+      "sql_bytes": 6409,
+      "sql_md5": "ac43396f437c78c1802e5e66d46b87ed"
+    },
+    {
+      "version": "20261023175113",
+      "name": "v44_002_allow_multiple_linked_documents",
+      "sql_bytes": 322,
+      "sql_md5": "283b3356c12efea48531f15e2bd08915"
+    },
+    {
+      "version": "20261023180441",
+      "name": "v44_003_remove_print_status_dependencies",
+      "sql_bytes": 1919,
+      "sql_md5": "8533b5a39179f4ccf4a7a9ecfd680cac"
+    },
+    {
+      "version": "20261102071929",
+      "name": "v46_5_editorial_matrix",
+      "sql_bytes": 15696,
+      "sql_md5": "0cbdd15a522f353014f0c2f0f119d9de"
+    },
+    {
+      "version": "20261102185024",
+      "name": "v46_9_cross_company_registration",
+      "sql_bytes": 9398,
+      "sql_md5": "e788dda7a5810e4a0bbf7024edc38929"
+    },
+    {
+      "version": "20261102194705",
+      "name": "v46_10_catalog_rpc_scope",
+      "sql_bytes": 2819,
+      "sql_md5": "4768eeadf152a57e3259d635675fad60"
+    },
+    {
+      "version": "20261102210137",
+      "name": "v46_11_simple_learner_access",
+      "sql_bytes": 5073,
+      "sql_md5": "07b03dbb576d4955a61027a92ada9ace"
+    },
+    {
+      "version": "20261103081944",
+      "name": "v47_internal_link_courses",
+      "sql_bytes": 15151,
+      "sql_md5": "7db514641109a7a068df8fe673f15166"
+    },
+    {
+      "version": "20261103083550",
+      "name": "v47_2_unambiguous_internal_course",
+      "sql_bytes": 3442,
+      "sql_md5": "af8fa75f230585d8de0f0d98867ab991"
+    },
+    {
+      "version": "20261103085911",
+      "name": "v47_3_original_slides_progress",
+      "sql_bytes": 10748,
+      "sql_md5": "08027ffc77c9ba6ae0a4c65a366777b0"
+    },
+    {
+      "version": "20261103100654",
+      "name": "v47_6_multi_course_history",
+      "sql_bytes": 9868,
+      "sql_md5": "6ebcee0f92c88a8eb51f10cad80d8083"
+    },
+    {
+      "version": "20261103103712",
+      "name": "v47_7_internal_progress_detail",
+      "sql_bytes": 4663,
+      "sql_md5": "c33d5df6dc751add5033578de42f2435"
+    },
+    {
+      "version": "20261103123352",
+      "name": "v47_9_internal_company_archive",
+      "sql_bytes": 13349,
+      "sql_md5": "b5c00b6097184aad69f32a34fc4ac639"
+    },
+    {
+      "version": "20261103175734",
+      "name": "v47_10_internal_registry_editor",
+      "sql_bytes": 9554,
+      "sql_md5": "f1a2925616e2557f325d81dea53fd442"
+    },
+    {
+      "version": "20261104115002",
+      "name": "v47_11_fast_copy_regular_learners",
+      "sql_bytes": 3914,
+      "sql_md5": "73201abe9b2aafe76625742d796d6d1f"
+    }
+  ]
+}

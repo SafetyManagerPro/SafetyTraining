@@ -12,7 +12,7 @@ test('candidate matching is cautious, evidence-labelled and avoids guessed locat
  assert.equal(hit.basis.includes('NON verificato'),true);
 });
 test('image exclusions are reversible and do not delete storage objects',()=>{
- const sql=read('supabase/migrations/20261021170000_v26_image_matching_and_exclusions.sql');
+ const sql=read('supabase/migrations/20261021150217_v26_image_matching_and_exclusions.sql');
  const js=read('apps/training/image-suggestions-v26.js');
  assert.match(sql,/private.is_platform_admin\(\)/);
  assert.match(sql,/training_set_image_exclusion_v26/);
@@ -28,7 +28,7 @@ test('image exclusions are reversible and do not delete storage objects',()=>{
 
 test('visual inspection evidence and similarity flags appear as auditable private metadata',()=>{
  const source=read('apps/training/image-suggestions-v26.js');
- const sql=read('supabase/migrations/20261021174500_v27_visual_figure_audit.sql');
+ const sql=read('supabase/migrations/20261021152831_v27_visual_figure_audit.sql');
  assert.match(source,/training_integral_pdf_visual_audit_v27/);
  assert.match(source,/training_integral_pdf_comparison_v28/);
  assert.match(source,/Questa osservazione non approva i diritti/);

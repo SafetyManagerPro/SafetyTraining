@@ -22,7 +22,7 @@ test('registration is per edition, QR share uses canonical production URL, and r
 });
 test('archiving is reversible and permanent deletion remains through guarded planner',()=>{
  const app=file('apps/training/admin.js');
- const sql=file('supabase/migrations/20261022144000_v36_public_registration.sql');
+ const sql=file('supabase/migrations/20261022135530_v36_public_course_registration.sql');
  for(const needle of ['Rimuovi corsista','Mostra','showArchivedLearners','admin_archive_learner_v36','quick-delete-learner-v38'])
   assert.ok(app.includes(needle),needle);
  assert.match(sql,/update public\.learners set active=false/);
@@ -31,7 +31,7 @@ test('archiving is reversible and permanent deletion remains through guarded pla
  assert.match(sql,/revoke execute on function public\.admin_archive_learner_v36\(uuid\) from public,anon/);
 });
 test('signup databases are private, requests await approval, public functions are allowlisted',()=>{
- const sql=file('supabase/migrations/20261022144000_v36_public_registration.sql');
+ const sql=file('supabase/migrations/20261022135530_v36_public_course_registration.sql');
  assert.match(sql,/create table if not exists private\.course_registration_links_v36/);
  assert.match(sql,/create table if not exists private\.course_registration_requests_v36/);
  assert.match(sql,/status text not null default 'pending'/);
@@ -41,7 +41,7 @@ test('signup databases are private, requests await approval, public functions ar
 });
 
 test('archive severs live Auth linkage and restoration checks for conflicts',()=>{
- const archive=file('supabase/migrations/20261022163500_v37_learner_archive_auth_guard.sql');
+ const archive=file('supabase/migrations/20261022141138_v37_learner_archive_auth_guard.sql');
  const app=file('apps/training/admin.js');
  assert.match(archive,/update public\.learners set active=false,auth_user_id=null/);
  assert.match(archive,/not exists\(select 1 from public\.learners where auth_user_id=v_saved/);
@@ -49,7 +49,7 @@ test('archive severs live Auth linkage and restoration checks for conflicts',()=
  assert.match(app,/restore-learner-v37/);
 });
 test('fast permanent deletion cannot cascade into recorded training evidence',()=>{
- const sql=file('supabase/migrations/20261022170000_v38_delete_unused_learner.sql');
+ const sql=file('supabase/migrations/20261022141403_v38_delete_unused_learner.sql');
  const app=file('apps/training/admin.js');
  for(const marker of [
   'learner_has_training_history_protected',

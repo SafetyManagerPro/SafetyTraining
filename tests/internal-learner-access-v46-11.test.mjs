@@ -5,7 +5,7 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const ui=read('apps/training/admin-quick-access-v46-11.js');
 const cloud=read('apps/training/cloud-v20.js');
 const gate=read('apps/training/access-gate-v46-10.js');
-const sql=read('supabase/migrations/20261102204000_v46_11_simple_learner_access.sql');
+const sql=read('supabase/migrations/20261102210137_v46_11_simple_learner_access.sql');
 const edge=read('supabase/functions/learner-access/index.ts');
 test('auth fixes link a confirmed existing learner before choosing role',()=>{
  assert.match(cloud,/state\.client\.rpc\('claim_learner_account'\)/);

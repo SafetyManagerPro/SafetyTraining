@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const ui=read('apps/training/admin-internal-v47.js');
-const sql=read('supabase/migrations/20261103180500_v47_10_internal_registry_editor.sql');
+const sql=read('supabase/migrations/20261103175734_v47_10_internal_registry_editor.sql');
 const css=read('apps/training/admin-internal-v47.css');
 
 test('registry editing is separate from course enrollment and exposes all expected fields',()=>{

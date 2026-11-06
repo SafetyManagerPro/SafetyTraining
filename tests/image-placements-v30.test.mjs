@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
 const rd=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('image destinations support multiple courses but do not create bogus expert certification',()=>{
- const sql=rd('supabase/migrations/20261021194500_v30_multiple_placement_proposals.sql');
+ const sql=rd('supabase/migrations/20261021180818_v30_multiple_placement_proposals.sql');
  assert.match(sql,/primary key\(ref_id,course_key,module_key,unit_position\)/);
  assert.match(sql,/contact_sheet_visual_inspection/);
  assert.match(sql,/training_integral_pdf_visual_audit_v27/);

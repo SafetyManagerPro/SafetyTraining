@@ -8,7 +8,7 @@ const extracted=read('apps/training/internal-original-deck-v47-3.js');
 const player=read('apps/training/internal-player-v47.js');
 const html=read('apps/training/interno.html');
 const api=read('supabase/functions/internal-course/index.ts');
-const migration=read('supabase/migrations/20261103102000_v47_3_original_slides_progress.sql');
+const migration=read('supabase/migrations/20261103085911_v47_3_original_slides_progress.sql');
 const admin=read('apps/training/admin-internal-v47.js');
 
 test('the internal viewer uses verbatim original buildDeck and slide HTML, not a simplified renderer',()=>{
