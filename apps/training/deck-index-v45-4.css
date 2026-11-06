@@ -22,10 +22,10 @@
 .deck-index-item[aria-current="step"] .deck-index-number{background:#15796b}
 .deck-index-description{display:grid;gap:3px;min-width:0;font-size:13px}
 .deck-index-description strong{overflow-wrap:anywhere}
-.deck-index-description small{font-size:11px;color:#afcee6}
-.deck-index-type{font-size:11px;color:#bcd4e9}
+.deck-index-description small{font-size:12px;color:#afcee6}
+.deck-index-type{font-size:12px;color:#bcd4e9}
 .deck-index-empty{color:#f1d19c;padding:15px}
-.deck-index-panel footer{font-size:11px;line-height:1.45;color:#b7cee2;border-top:1px solid rgba(160,200,240,.18);padding:11px 21px}
+.deck-index-panel footer{font-size:12px;line-height:1.45;color:#b7cee2;border-top:1px solid rgba(160,200,240,.18);padding:11px 21px}
 .deck-index-overlay :is(button,input,select):focus-visible{outline:2px solid #a5d6ff;outline-offset:2px}
 @media(max-width:700px){.deck-top .deck-actions{gap:4px}.deck-top .deck-actions button{min-width:42px;padding:7px}.deck-top .deck-actions .deck-index-btn{min-width:65px;font-size:11px}.deck-index-overlay{padding:7px;align-items:end}.deck-index-panel{max-height:94dvh;border-radius:13px}.deck-index-header{padding:14px 14px 7px}.deck-index-filters{grid-template-columns:1fr;padding:9px 14px}.deck-index-count{padding:0 14px 8px}.deck-index-list{padding:4px 12px 12px}.deck-index-item{grid-template-columns:34px minmax(0,1fr)}.deck-index-type{display:none}.deck-index-panel footer{padding:9px 14px}}
 @media print{.deck-index-overlay,.deck-index-btn{display:none!important}}
