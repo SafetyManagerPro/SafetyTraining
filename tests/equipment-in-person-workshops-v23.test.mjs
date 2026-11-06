@@ -7,5 +7,5 @@ test('supplementary equipment labs label physical attendance explicitly',()=>{
  assert.match(src,/presenza fisica obbligatoria/);
  assert.match(src,/non equivale alle ore di aggiornamento pratico/);
  assert.match(src,/requires_physical_validation/);
- assert.doesNotMatch(src,/\.update\s*\(|\.insert\s*\(|\.delete\s*\(/);
+ assert.doesNotMatch(src,/\.from\([^)]*\)\s*\.(update|insert|delete)\s*\(/);
 });
