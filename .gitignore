@@ -1,0 +1,22 @@
+# Dipendenze e build
+node_modules/
+dist/
+coverage/
+
+# Ambiente e segreti (.env.example resta tracciato)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Sistema operativo ed editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Log e file temporanei
+*.log
+npm-debug.log*
+tmp/
