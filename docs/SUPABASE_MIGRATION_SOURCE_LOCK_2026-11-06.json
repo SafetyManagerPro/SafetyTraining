@@ -1,0 +1,948 @@
+{
+  "schema_version": 1,
+  "captured_on": "2026-11-06",
+  "source_commit": "f4e5d61936b2d3f1cfc6553a3d4aa2008f944477",
+  "note": "Impronte Git degli script storici gia applicati a Supabase. Verifica read-only: vietato rigenerare automaticamente un lock per nascondere modifiche.",
+  "migrations": [
+    {
+      "version": "20261013211736",
+      "name": "v20_001_core_tenancy",
+      "git_blob_sha": "32fefabd74fab99120530f9bdb0a6d79b04a7c42"
+    },
+    {
+      "version": "20261013211755",
+      "name": "v20_002_catalog",
+      "git_blob_sha": "eb146fc4031a6140d5ebd2153f5cca2adabec69d"
+    },
+    {
+      "version": "20261013211830",
+      "name": "v20_003_delivery_tracking",
+      "git_blob_sha": "60ee9b858a852dcdfbe4fd75f9fdd3ba1013ca7a"
+    },
+    {
+      "version": "20261013211854",
+      "name": "v20_004_assessment_integration",
+      "git_blob_sha": "8028542b11d0dfd6226d94a68321308298a11119"
+    },
+    {
+      "version": "20261013211940",
+      "name": "v20_005_private_rls_helpers",
+      "git_blob_sha": "d3ca1d95c155030a7a22e820badbd9be8648aa16"
+    },
+    {
+      "version": "20261013212757",
+      "name": "v20_006_question_grading_risk_catalog",
+      "git_blob_sha": "68a52914cd697869d099621a34a63e22d5b456ef"
+    },
+    {
+      "version": "20261013212825",
+      "name": "v20_007_content_import_metadata",
+      "git_blob_sha": "f78aaa83a0e19b75635c2c01e9a07982974f08b9"
+    },
+    {
+      "version": "20261013213356",
+      "name": "v20_008_enable_temporary_http_import",
+      "git_blob_sha": "b0ad9996f5de14e35d6b8f7da51bee876ef6a993"
+    },
+    {
+      "version": "20261013214311",
+      "name": "v20_009_remove_temporary_http_import",
+      "git_blob_sha": "14e830075add1b8957128fd7cbf8ab3c8fecd965"
+    },
+    {
+      "version": "20261013214559",
+      "name": "v20_010_enable_course_structure_import",
+      "git_blob_sha": "8b5201a4db9c3f123f3726b13c9521a153fc0302"
+    },
+    {
+      "version": "20261013214631",
+      "name": "v20_011_remove_course_structure_import",
+      "git_blob_sha": "67ed277f88c18ab1600537dddcd11d6bfc9a487c"
+    },
+    {
+      "version": "20261013214714",
+      "name": "v20_012_trusted_active_time",
+      "git_blob_sha": "4527d7efd512f7dd52d95dfcc2d52d96ba468f94"
+    },
+    {
+      "version": "20261013220834",
+      "name": "v20_013_admin_console_rls_fixes",
+      "git_blob_sha": "d5e023e5abaa5be2728dad9be98136b03e5ffa5d"
+    },
+    {
+      "version": "20261014170308",
+      "name": "v20_014_learner_onboarding_and_progress",
+      "git_blob_sha": "8be8d83026578de45250d2a20909bd4717476017"
+    },
+    {
+      "version": "20261014172843",
+      "name": "v20_015_safetymanager_import_bridge",
+      "git_blob_sha": "8a9ad4de258b8e3ca292c0a38500a8145a40e6ef"
+    },
+    {
+      "version": "20261014175935",
+      "name": "v20_016_fix_safetymanager_import_validation",
+      "git_blob_sha": "e2b9277d1dca0c613ba53ae9d0bb6100a61689fa"
+    },
+    {
+      "version": "20261014181457",
+      "name": "v20_017_safetymanager_course_catalog",
+      "git_blob_sha": "dca7097ad29eceb0876d1993ac2d70ab249936f1"
+    },
+    {
+      "version": "20261014182705",
+      "name": "v20_018_seed_safetymanager_course_catalog",
+      "git_blob_sha": "5150275a9ffba094989304a7ffcf36b83b6d2376"
+    },
+    {
+      "version": "20261014183912",
+      "name": "v20_019_worker_learning_unit_blueprints",
+      "git_blob_sha": "1e864017837c5c551b76177c3f5ca695d33cd418"
+    },
+    {
+      "version": "20261014185508",
+      "name": "v20_020_risk_composition_engine",
+      "git_blob_sha": "9c24e63f8acd2b77ab771d2abe878f9f366fc75d"
+    },
+    {
+      "version": "20261014192009",
+      "name": "v20_021_learning_unit_composition_v2",
+      "git_blob_sha": "fb627ba6618361d1a944c2d89df1c3e7532ee3d8"
+    },
+    {
+      "version": "20261014192123",
+      "name": "v20_022_prioritize_project_risks",
+      "git_blob_sha": "801a5e2a142af7b655c9a7ac40f1c79b21c731a3"
+    },
+    {
+      "version": "20261014194616",
+      "name": "v20_023_course_blueprints_and_content_profiles",
+      "git_blob_sha": "9d81d0744b8c0be05259ecb13cdd4729fba55e0b"
+    },
+    {
+      "version": "20261014200652",
+      "name": "v20_024_complete_emergency_course_family",
+      "git_blob_sha": "2dbb14ac8585da16e6a6d5d542700a38c9cc3188"
+    },
+    {
+      "version": "20261014201746",
+      "name": "v20_025_first_aid_learning_units",
+      "git_blob_sha": "3f2caa20b6982abf840bb634b8da6136e83d30c8"
+    },
+    {
+      "version": "20261014203308",
+      "name": "v20_026_compose_first_aid_courses",
+      "git_blob_sha": "8d29f5c2493cf99dd36b4ea6c75d9f292ed2d350"
+    },
+    {
+      "version": "20261014210826",
+      "name": "v20_027_master_registry_variants_rules",
+      "git_blob_sha": "719438100df77329cdb01ed687d9fab353d54494"
+    },
+    {
+      "version": "20261014212656",
+      "name": "v20_028_asr2025_role_registry_and_learning_units",
+      "git_blob_sha": "8970eb9b08cd4bc1f3bf58d61f33e316ee846d51"
+    },
+    {
+      "version": "20261014212847",
+      "name": "v20_029_compose_asr2025_role_courses",
+      "git_blob_sha": "d53bdf5af3c44ce82b2dd7012dcf06c0a53445fc"
+    },
+    {
+      "version": "20261014213555",
+      "name": "v20_030_confined_spaces_and_work_height",
+      "git_blob_sha": "c2735b2976fe15c94b406594a3c1625062361bf9"
+    },
+    {
+      "version": "20261014214102",
+      "name": "v20_031_equipment_asr2025_family",
+      "git_blob_sha": "1415fffa62cfcb9185f894a36edb2706385cca00"
+    },
+    {
+      "version": "20261014214342",
+      "name": "v20_032_worker_and_rls_updates",
+      "git_blob_sha": "38656ae100db45c519d92f130ce76511b5e2ab39"
+    },
+    {
+      "version": "20261014214828",
+      "name": "v20_033_course_readiness_gate",
+      "git_blob_sha": "5430801c6b1a456d82afb5bfe3fc4c8081b3a0f7"
+    },
+    {
+      "version": "20261014215318",
+      "name": "v20_034_test_registry_and_readiness",
+      "git_blob_sha": "3557896660134e38cafd882f17ab2f46b8ee12f7"
+    },
+    {
+      "version": "20261014215527",
+      "name": "v20_035_verification_path_selection",
+      "git_blob_sha": "bf5fee1fea9c7472c8c1cfe67603234cc9ba183f"
+    },
+    {
+      "version": "20261015104014",
+      "name": "v20_036_general_training_didactic_v2",
+      "git_blob_sha": "0b638d176b3f60ab0f64a21c89d547266d82223f"
+    },
+    {
+      "version": "20261015132808",
+      "name": "v20_037_preposto_didactic_v2",
+      "git_blob_sha": "dd0b32a0d49a95888c3f40c8d128dc4068f45b6b"
+    },
+    {
+      "version": "20261015135338",
+      "name": "v20_038_dirigente_didactic_v2",
+      "git_blob_sha": "6945391ee4b5ac459087040fbffa420b4a714642"
+    },
+    {
+      "version": "20261015152657",
+      "name": "v20_039_datore_lavoro_didactic_v2",
+      "git_blob_sha": "9115b577d9d620eb07c0a555542670b273a43dff"
+    },
+    {
+      "version": "20261015162550",
+      "name": "v20_040_datore_lavoro_update_didactic_v2",
+      "git_blob_sha": "97f51e5d35c686d52902c2c0716ec0754226d583"
+    },
+    {
+      "version": "20261015170044",
+      "name": "v20_041_dl_rspp_common_didactic_v2",
+      "git_blob_sha": "57deba3aa8e1758a0f50c4ac303a095072d4ac92"
+    },
+    {
+      "version": "20261015171452",
+      "name": "v20_042_dl_rspp_sector_didactic_v2",
+      "git_blob_sha": "33c4452cbbbf0e9532a8297cda1fbcd9a3e08894"
+    },
+    {
+      "version": "20261015171932",
+      "name": "v20_043_dl_rspp_update_didactic_v2",
+      "git_blob_sha": "010c4548f022881095a4afcc4af966a6c5e9f713"
+    },
+    {
+      "version": "20261015173713",
+      "name": "v20_0439_rspp_aspp_catalog_registry",
+      "git_blob_sha": "d434909c5e9a32ec347d3141c641505104a13bf6"
+    },
+    {
+      "version": "20261015174100",
+      "name": "v20_044_rspp_aspp_family_didactic_v2",
+      "git_blob_sha": "919d6ff4705c989f049adbdd07c94980f46e554c"
+    },
+    {
+      "version": "20261015175301",
+      "name": "v20_045_catalog_visibility_and_material_rpc",
+      "git_blob_sha": "bae67170dbdc4cb4a2e5ec1cbf17f1349b6db3e2"
+    },
+    {
+      "version": "20261015175352",
+      "name": "v20_0451_catalog_rpc_security",
+      "git_blob_sha": "7534e77b95b0a403f2b618ff87571ed1f1016f97"
+    },
+    {
+      "version": "20261015191108",
+      "name": "training_source_library_schema_v20_046",
+      "git_blob_sha": "af252250e294094faccdaa0775a2c2d909ee8237"
+    },
+    {
+      "version": "20261015203342",
+      "name": "v20_055_preposto_evidence_enrichment",
+      "git_blob_sha": "908a162fe430707d029081f73812b86d8582adcf"
+    },
+    {
+      "version": "20261015203806",
+      "name": "v20_056_rls_evidence_enrichment",
+      "git_blob_sha": "f4b4e4f8d8d14f682b34b6da905cdb0067b9b227"
+    },
+    {
+      "version": "20261015203956",
+      "name": "v20_057_rls_roles_interferences_enrichment",
+      "git_blob_sha": "c34ad94e812a3a399ffca09d38f0f1482ae08f3c"
+    },
+    {
+      "version": "20261015204152",
+      "name": "v20_058_rls_legal_health_psychosocial_enrichment",
+      "git_blob_sha": "0fb0f02ec5c630895fe009793030ecde5d52101e"
+    },
+    {
+      "version": "20261015204311",
+      "name": "v20_059_rls_ppe_emergency_specific_risks_enrichment",
+      "git_blob_sha": "450edefae4d9bf6b00f0aa2024abc838d880528d"
+    },
+    {
+      "version": "20261015204825",
+      "name": "v20_060_first_aid_core_evidence_enrichment",
+      "git_blob_sha": "5490f57b60c935d571028d40dced4c8e1040557e"
+    },
+    {
+      "version": "20261015205027",
+      "name": "v20_061_first_aid_extended_evidence_enrichment",
+      "git_blob_sha": "e61ef733d163c2f4002503027465a927060f5258"
+    },
+    {
+      "version": "20261015205221",
+      "name": "v20_062_first_aid_updates_evidence_enrichment",
+      "git_blob_sha": "b3776bab0c22d9148e099f6133446a938db58619"
+    },
+    {
+      "version": "20261015205509",
+      "name": "v20_063_dirigente_managerial_evidence_enrichment",
+      "git_blob_sha": "3171f27e8747fd221540fec3e1aa9e4bdd0ee632"
+    },
+    {
+      "version": "20261015205647",
+      "name": "v20_064_dirigente_governance_evidence_enrichment",
+      "git_blob_sha": "9507f9f6a8cccea442de49d7fc9623aca9d8c69f"
+    },
+    {
+      "version": "20261015210055",
+      "name": "v20_065_worker_general_evidence_enrichment",
+      "git_blob_sha": "f904f3fbccee2c952941cdcfa3a6017ca2550758"
+    },
+    {
+      "version": "20261015210500",
+      "name": "v20_066_worker_specific_shared_core_enrichment",
+      "git_blob_sha": "ae4148a5652aebb2c96da4140355523b02333801"
+    },
+    {
+      "version": "20261015211000",
+      "name": "v20_067_worker_specific_medium_high_enrichment",
+      "git_blob_sha": "8f3d62610393019ccd903cfe6537e070a8b7207f"
+    },
+    {
+      "version": "20261015214500",
+      "name": "v20_047_completion_equipment_updates",
+      "git_blob_sha": "8219ac7fc966460b6f2282e60392653b9d298404"
+    },
+    {
+      "version": "20261015220000",
+      "name": "v20_048_completion_role_updates",
+      "git_blob_sha": "600b887339f9a8437fedb9a075920cdedc2af46b"
+    },
+    {
+      "version": "20261015222000",
+      "name": "v20_049_completion_rls_updates",
+      "git_blob_sha": "950f200cea0bfb946616d349d27e9c6266e83946"
+    },
+    {
+      "version": "20261015224000",
+      "name": "v20_050a_completion_first_aid_updates",
+      "git_blob_sha": "596631fe5be00ca864b4f2ba36e853e59c564081"
+    },
+    {
+      "version": "20261015224500",
+      "name": "v20_050b_completion_confined_update",
+      "git_blob_sha": "cd31b2521184ead45214c4ab3b8661a25cd89ca8"
+    },
+    {
+      "version": "20261015225000",
+      "name": "v20_050c_completion_work_height",
+      "git_blob_sha": "b8a94b54300d264c39516ac0f564aad5ac291ac9"
+    },
+    {
+      "version": "20261015230000",
+      "name": "v20_051_csp_cse_reconciliation",
+      "git_blob_sha": "0003e51b295b21f919bf9041e4a225813acf40ab"
+    },
+    {
+      "version": "20261015232000",
+      "name": "v20_052_fire_family_reconciliation",
+      "git_blob_sha": "397ba6a09ccd3f13e5d758be9bcaa9433628c4f2"
+    },
+    {
+      "version": "20261015234000",
+      "name": "v20_053a_ponteggi_reconciliation",
+      "git_blob_sha": "b3dbe0f3d839c94ab35fa04ad6b89acbc61ce5c9"
+    },
+    {
+      "version": "20261015235000",
+      "name": "v20_053b_funi_reconciliation",
+      "git_blob_sha": "b23d47ccd971e02f539f7308f5579aee18b65c45"
+    },
+    {
+      "version": "20261015235900",
+      "name": "v20_054_road_sign_reconciliation",
+      "git_blob_sha": "ede36310b1bb141f083d6819ae8932836a8cca00"
+    },
+    {
+      "version": "20261016045413",
+      "name": "v20_068a_rspp_aspp_module_a1_authored_enrichment",
+      "git_blob_sha": "f06bd16f18212d97eec3d0bd61de76b3e785e5f2"
+    },
+    {
+      "version": "20261016045611",
+      "name": "v20_068b_rspp_aspp_module_a2_authored_enrichment",
+      "git_blob_sha": "2b8c64f21b6bfcc06a990db99c5c3a9bb5d56963"
+    },
+    {
+      "version": "20261016045641",
+      "name": "v20_068c_rspp_aspp_module_a3_authored_enrichment",
+      "git_blob_sha": "5bd5f0e707581a0a446d85f9825a70934c7d1b3a"
+    },
+    {
+      "version": "20261016045711",
+      "name": "v20_068d_rspp_aspp_module_a4_authored_enrichment",
+      "git_blob_sha": "fdf093e4ecf6d67ddc7005c93b9eb8fddb72da43"
+    },
+    {
+      "version": "20261016045738",
+      "name": "v20_068e_rspp_aspp_module_a5_authored_enrichment",
+      "git_blob_sha": "cbef05441c111f3d2ca0d23af3f37044bc22ef3c"
+    },
+    {
+      "version": "20261016052107",
+      "name": "v20_069_rspp_aspp_module_b_common_authored_enrichment",
+      "git_blob_sha": "62d99a225ffc0b214d9bfa8827ad112d411a6580"
+    },
+    {
+      "version": "20261016055218",
+      "name": "v20_070_preposto_dirigente_authored_completion",
+      "git_blob_sha": "7e942aaa515c2f2a746951e5e9b07b09faea2cbc"
+    },
+    {
+      "version": "20261016122356",
+      "name": "v20_071_datore_lavoro_authored_completion",
+      "git_blob_sha": "8a364c2556b157f66f2b189bb2ffd0e73201de40"
+    },
+    {
+      "version": "20261016125239",
+      "name": "v20_072_dl_rspp_noncantieri_authored_completion",
+      "git_blob_sha": "382c331357f2c0ab46c24f91befd73a071902ca3"
+    },
+    {
+      "version": "20261016130358",
+      "name": "v20_073_worker_high_update_job_specific_authored_completion",
+      "git_blob_sha": "3a639f59f7738e8264c21facb80ab87c0ba427c9"
+    },
+    {
+      "version": "20261016130603",
+      "name": "v20_074_worker_general_authored_completion",
+      "git_blob_sha": "27726c22ed66bb204e0cc7bbd546a3b18d6d0b84"
+    },
+    {
+      "version": "20261016131759",
+      "name": "v20_075_rls_authored_completion",
+      "git_blob_sha": "17ae21e1d11a7de25bb4a075b1c8784608b26adc"
+    },
+    {
+      "version": "20261016132900",
+      "name": "v20_076_first_aid_authored_completion",
+      "git_blob_sha": "9ff7650876adbd469ad7381396021ea796ec1e95"
+    },
+    {
+      "version": "20261016134027",
+      "name": "v20_077_fire_authored_completion",
+      "git_blob_sha": "2c8a9397821698154a262f2443f6b2f6ced43ef8"
+    },
+    {
+      "version": "20261016154330",
+      "name": "v20_078_equipment_authored_completion",
+      "git_blob_sha": "c325b7d1e86b94fe4bab8d510fd6f97a8f7e7b8d"
+    },
+    {
+      "version": "20261016155345",
+      "name": "v20_079_freeze_external_rspp_aspp",
+      "git_blob_sha": "35141d15aa1560a7020a5078de0a4a5b95123382"
+    },
+    {
+      "version": "20261016160609",
+      "name": "v20_080_emergency_height_authored_completion",
+      "git_blob_sha": "a0d63d66148d338a5188de476bd7ee1b7b37f910"
+    },
+    {
+      "version": "20261016162021",
+      "name": "v20_081a_dl_rspp_costruzioni_sources_metadata",
+      "git_blob_sha": "60858541111864421ababa05bd2cf3cf7f7f926c"
+    },
+    {
+      "version": "20261016162106",
+      "name": "v20_081b_dl_rspp_costruzioni_authored_part1",
+      "git_blob_sha": "8bff1906e50764cd1d55844439af6c2f16f6c099"
+    },
+    {
+      "version": "20261016162143",
+      "name": "v20_081c_dl_rspp_costruzioni_authored_part2",
+      "git_blob_sha": "60e0a2e028e5ad8ceee58133aa41685c4121e368"
+    },
+    {
+      "version": "20261016162235",
+      "name": "v20_081d_dl_rspp_costruzioni_provenance_audit",
+      "git_blob_sha": "20f4797046da9a0b2a89e3ee5977182bdd3fefa6"
+    },
+    {
+      "version": "20261016163358",
+      "name": "v20_082_datore_cantieri_authored_completion",
+      "git_blob_sha": "a561d79350a0ddc85f0736eb19b6b27711ea9bd0"
+    },
+    {
+      "version": "20261016164702",
+      "name": "v20_083_dirigente_cantieri_authored_completion",
+      "git_blob_sha": "76dfb8d9318ba1d900eb1bc511d63542647833e4"
+    },
+    {
+      "version": "20261016170459",
+      "name": "v20_084_freeze_out_of_roadmap_specialist_courses",
+      "git_blob_sha": "a7918294d8c6a313aaa1e3493cf56ae1421d78cf"
+    },
+    {
+      "version": "20261016171306",
+      "name": "v20_085_fire_practical_gates_and_emergency_drill_boundary",
+      "git_blob_sha": "0ba61d8572ba8bf89c74ef413d4c3d09682022f5"
+    },
+    {
+      "version": "20261016171716",
+      "name": "v20_086_blueprint_normalization_and_finalization_scope",
+      "git_blob_sha": "d626df9bdf987ad23bc2a1a3d19d34b696912662"
+    },
+    {
+      "version": "20261016171926",
+      "name": "v20_087_authored_candidate_course_compositions",
+      "git_blob_sha": "1ca4b8411a1494aae6191048a687ccf76b9ff20e"
+    },
+    {
+      "version": "20261016172049",
+      "name": "v20_088_cantieri_role_candidate_course_versions",
+      "git_blob_sha": "b2d1e170cd693e487230663f9a42c48250d02781"
+    },
+    {
+      "version": "20261016172702",
+      "name": "v20_089_candidate_verification_paths",
+      "git_blob_sha": "5d76881dc821de2ce3406e5354e1180898e4fca5"
+    },
+    {
+      "version": "20261016173008",
+      "name": "v20_090_authored_final_question_bank",
+      "git_blob_sha": "6d3d5fcf64c87d4199cfed9ee6a6acac6744b5fd"
+    },
+    {
+      "version": "20261016173305",
+      "name": "v20_091_candidate_tests_from_authored_bank",
+      "git_blob_sha": "8b6521fed52b86d0e22869d0a952ef383b316adf"
+    },
+    {
+      "version": "20261016175340",
+      "name": "v20_091_secure_test_runtime",
+      "git_blob_sha": "adba341655f9fd87b1c07bf331c3b64d8649cdd2"
+    },
+    {
+      "version": "20261016180510",
+      "name": "v20_092_enrollment_completion_gates",
+      "git_blob_sha": "fcd597f2b7c798bb632de29e3f337a8b6cec25e5"
+    },
+    {
+      "version": "20261016181052",
+      "name": "v20_093_blueprint_finalization_review",
+      "git_blob_sha": "dcdc9c35bfdb76d6b9d9c014cafc6d93224854cc"
+    },
+    {
+      "version": "20261016181935",
+      "name": "v20_094_napo_url_normalization",
+      "git_blob_sha": "682bb1155eebda1a1209e6598abc516688158dbb"
+    },
+    {
+      "version": "20261016184523",
+      "name": "v20_095_test_activation_block_metadata_cleanup",
+      "git_blob_sha": "c1fdbbf74b27e080a4051ece46e6235b37d264a1"
+    },
+    {
+      "version": "20261016190217",
+      "name": "v20_096_learner_account_invitation_registry",
+      "git_blob_sha": "a0c873277ce07f3375de6cc1600be1f44e6d1666"
+    },
+    {
+      "version": "20261016192402",
+      "name": "v20_097_publish_candidate_learning_units",
+      "git_blob_sha": "c0ff243e7dfd0fd5876d5f20bcf32988466cbd1d"
+    },
+    {
+      "version": "20261016192912",
+      "name": "v20_098_publish_candidate_course_versions_blocked",
+      "git_blob_sha": "c9a06bb587a94cbc0e1f4e1409601e6fe21a1891"
+    },
+    {
+      "version": "20261016193110",
+      "name": "v20_099_activate_candidate_tests_qa",
+      "git_blob_sha": "b6e0cadb838f3c5c29c0db05ff8a3759e1e55b6d"
+    },
+    {
+      "version": "20261016193922",
+      "name": "v20_100_enable_candidate_course_versions_go_live",
+      "git_blob_sha": "766bb4baa1ccd77bb7dfdf3acaadbfd9d72dc0ec"
+    },
+    {
+      "version": "20261016212444",
+      "name": "v21_001_admin_backend_service_layer",
+      "git_blob_sha": "48dedcd80ca622c1e7cd0d4361abf4334d4d8ca1"
+    },
+    {
+      "version": "20261016212541",
+      "name": "v21_002_admin_backend_core_crud",
+      "git_blob_sha": "5f179ab0763351726d56a2f3edf940d23951a10a"
+    },
+    {
+      "version": "20261016212933",
+      "name": "v21_003_admin_backend_guardrails",
+      "git_blob_sha": "9331366154bb9842318dbd8de2631f829f57e77f"
+    },
+    {
+      "version": "20261016213037",
+      "name": "v21_004_fix_enrollment_rls_recursion",
+      "git_blob_sha": "6622194a246106b9a6c48686908221acfdac7ba7"
+    },
+    {
+      "version": "20261016213106",
+      "name": "v21_005_break_edition_enrollment_rls_cycle",
+      "git_blob_sha": "958557cbf0015051af05f016a425053bbe90a7e6"
+    },
+    {
+      "version": "20261016213147",
+      "name": "v21_006_admin_audit_actor_index",
+      "git_blob_sha": "9e0589542b38c37126cf222d08752fc0eed21efd"
+    },
+    {
+      "version": "20261016214908",
+      "name": "v21_007_admin_requirement_evidence_service",
+      "git_blob_sha": "1d06f9f5810a1dd41849178fbc335f0e360fcc24"
+    },
+    {
+      "version": "20261016215039",
+      "name": "v21_008_harden_platform_requirement_evidence_status",
+      "git_blob_sha": "a2417ccb996172f4d8fec05b0f2a6e2de2f9b7fb"
+    },
+    {
+      "version": "20261016215923",
+      "name": "v21_009_restore_safetymanager_staging_compatibility",
+      "git_blob_sha": "b0abd9201f61d30aef72b22488dba8b0a19d6502"
+    },
+    {
+      "version": "20261016220140",
+      "name": "v21_010_harden_safetymanager_course_configuration",
+      "git_blob_sha": "1817c7bd4142781cb3123add6e2f6b7aa44d96a2"
+    },
+    {
+      "version": "20261016220621",
+      "name": "v21_011_admin_detail_read_service",
+      "git_blob_sha": "2cdb9c42bc5083aaf8ca7d4154b87a5ae309b753"
+    },
+    {
+      "version": "20261016221243",
+      "name": "v21_012_scoped_admin_capabilities",
+      "git_blob_sha": "62517fc7c02a559e02d8304a16c65a0eac95a01b"
+    },
+    {
+      "version": "20261016221548",
+      "name": "v21_013_scoped_invitation_visibility",
+      "git_blob_sha": "90377e90bd7625d6ba57f940e67e7df8c4462d1a"
+    },
+    {
+      "version": "20261016221704",
+      "name": "v21_014_allow_rls_training_scope_helper",
+      "git_blob_sha": "66e7a71b7c4e96524de4842301e5cf5352bdea2c"
+    },
+    {
+      "version": "20261017042346",
+      "name": "v21_007_admin_requirement_evidence_service",
+      "git_blob_sha": "1d06f9f5810a1dd41849178fbc335f0e360fcc24"
+    },
+    {
+      "version": "20261017042729",
+      "name": "v21_015_restore_platform_evidence_status_guard",
+      "git_blob_sha": "79b0cb07617b3761268ffc28171b29829c26cf0d"
+    },
+    {
+      "version": "20261017042912",
+      "name": "v21_016_admin_membership_service",
+      "git_blob_sha": "2399938433df6b15926b18b271d5238adab6ca6f"
+    },
+    {
+      "version": "20261017045703",
+      "name": "v21_017_registry_identity_deduplication",
+      "git_blob_sha": "c6eafccfa57a542474634d499b3851e1e2e462dd"
+    },
+    {
+      "version": "20261017045832",
+      "name": "v21_018_fix_case_insensitive_registry_normalization",
+      "git_blob_sha": "71d31ddd5fe8ea04b27163843e24e76d7f22c889"
+    },
+    {
+      "version": "20261017052016",
+      "name": "v21_019_multichannel_learner_invites",
+      "git_blob_sha": "7c01773eb8de053867abdaa5edc303df08a45875"
+    },
+    {
+      "version": "20261017052054",
+      "name": "v21_020_company_bulk_and_registry_import",
+      "git_blob_sha": "684163c509c48fe6866bcfbb9c380dc07d8e6bc6"
+    },
+    {
+      "version": "20261017052210",
+      "name": "v21_021_invite_public_claim_flow",
+      "git_blob_sha": "b86a810582a4c8980acd1b39baa08b3dc202723a"
+    },
+    {
+      "version": "20261017052954",
+      "name": "v21_022_qualify_invite_crypto_extensions",
+      "git_blob_sha": "a55249249907c3a9115b1c3b10b9c5ad3351477d"
+    },
+    {
+      "version": "20261017150936",
+      "name": "v21_023_preserve_current_company_training_history",
+      "git_blob_sha": "787d3720581bf97c854ba9a6a88871d173688942"
+    },
+    {
+      "version": "20261017160512",
+      "name": "v21_024_fix_course_readiness_test_gate",
+      "git_blob_sha": "30206624ef794981cefbc0447167efa175a6466a"
+    },
+    {
+      "version": "20261017173942",
+      "name": "v22_001_practice_scenarios_quality",
+      "git_blob_sha": "5cc598d3cd4e07b4d8e56734cfe7bc0d7ba2820d"
+    },
+    {
+      "version": "20261017175140",
+      "name": "v22_002_quality_gap_gate_and_profile_practice",
+      "git_blob_sha": "48f1b8aced9be3e823df3eb1370380b5384e0ea7"
+    },
+    {
+      "version": "20261017175534",
+      "name": "v22_003_equipment_specific_practice",
+      "git_blob_sha": "60ac286eebebb30a9444858ddfb8a538fcf38d28"
+    },
+    {
+      "version": "20261017175654",
+      "name": "v22_004_emergency_fire_first_aid_specific_practice",
+      "git_blob_sha": "c2cba52086765081dfeb0defc6ac62cbe86bd496"
+    },
+    {
+      "version": "20261017175827",
+      "name": "v22_005_workers_roles_rls_management_specific_practice",
+      "git_blob_sha": "48434846a4cfbedf26346d1c530af721a3a9c003"
+    },
+    {
+      "version": "20261017175941",
+      "name": "v22_006_dl_spp_sector_specific_practice",
+      "git_blob_sha": "c80dbf36bf3881e1014d188075f77fbbe40d7baf"
+    },
+    {
+      "version": "20261017180016",
+      "name": "v22_007_quality_specificity_gate",
+      "git_blob_sha": "6666a6e38dac280b23b539a342a290eecd18533d"
+    },
+    {
+      "version": "20261017180645",
+      "name": "v22_008_bind_practice_labs_to_requirement_evidence",
+      "git_blob_sha": "1eea9c2f820d14d249298138aeca02dfe4df6871"
+    },
+    {
+      "version": "20261017185410",
+      "name": "v22_009_fix_safe_moves_visual_and_v22_indexes",
+      "git_blob_sha": "447a1f3a33594a64b0982720449c51e8b619f234"
+    },
+    {
+      "version": "20261018141147",
+      "name": "v22_010_additive_practice_assessment_forms",
+      "git_blob_sha": "1e92020c6ad875763e2c763e97db0d00e24077e1"
+    },
+    {
+      "version": "20261018142341",
+      "name": "v22_011_practice_assessment_staff_history",
+      "git_blob_sha": "a3858020faed7bf205fe6f31eb9760f2ee2143ff"
+    },
+    {
+      "version": "20261018163653",
+      "name": "v22_012_fix_claim_learner_uuid_aggregate",
+      "git_blob_sha": "2b8ae95646fa6f9b0e6ff4111df296c7d5f15386"
+    },
+    {
+      "version": "20261019135645",
+      "name": "v22_013_admin_deletion_read_only_preview",
+      "git_blob_sha": "f6e9fd928239dbd516bdffb1deb6a19031d19b32"
+    },
+    {
+      "version": "20261019141118",
+      "name": "v22_014_admin_deletion_indirect_read_only_preview",
+      "git_blob_sha": "cad45bcd87c579555993e985c310bec647c272b5"
+    },
+    {
+      "version": "20261019142009",
+      "name": "v22_015_revoke_direct_delete_client_roles",
+      "git_blob_sha": "165d8d62c142534d08b224e18128c7eaedbc1dd6"
+    },
+    {
+      "version": "20261019183150",
+      "name": "v22_016_equipment_in_person_refresher_instructor_workshops",
+      "git_blob_sha": "8a4d1c9b3c9492f434da87a5c472778f8829f735"
+    },
+    {
+      "version": "20261020045047",
+      "name": "v22_017_private_source_figures",
+      "git_blob_sha": "92cdeea0ad3e6c7195323cee2d6fac232ca60bb9"
+    },
+    {
+      "version": "20261020055444",
+      "name": "v22_018_review_private_source_figures",
+      "git_blob_sha": "d63ef747e1dbcec8c03b09dc7ad051d5986bff6b"
+    },
+    {
+      "version": "20261020070604",
+      "name": "v22_018_review_private_source_figures",
+      "git_blob_sha": "d63ef747e1dbcec8c03b09dc7ad051d5986bff6b"
+    },
+    {
+      "version": "20261020174055",
+      "name": "v24_001_integral_pdf_media",
+      "git_blob_sha": "62f1bbc9ee31b7b000194fc87b0ceead9ddef897"
+    },
+    {
+      "version": "20261020185639",
+      "name": "v24_005_delete_imported_pdf_figures",
+      "git_blob_sha": "9c73ce2b9104db1542b7aa28765e0efa3e6d8597"
+    },
+    {
+      "version": "20261020203108",
+      "name": "v24_007_assisted_cleanup_audit",
+      "git_blob_sha": "763c2a415a59365c3a9064c501b466efb92fb264"
+    },
+    {
+      "version": "20261021083538",
+      "name": "v25_001_integral_pdf_review_workflow",
+      "git_blob_sha": "32da383153aba8edbc2237e9449411696e2bb657"
+    },
+    {
+      "version": "20261021091152",
+      "name": "v25_002_integral_pdf_manual_placements",
+      "git_blob_sha": "3bcf0bd8c9accdbef20ea0bc0d1359d0541717ab"
+    },
+    {
+      "version": "20261021150217",
+      "name": "v26_image_matching_and_exclusions",
+      "git_blob_sha": "a54c1f107c954d722fd603471da2b10b7841ad52"
+    },
+    {
+      "version": "20261021152831",
+      "name": "v27_visual_figure_audit",
+      "git_blob_sha": "883c861fbac9ec3224e9ce4967976fffb69e41ad"
+    },
+    {
+      "version": "20261021154811",
+      "name": "v28_complete_image_triage",
+      "git_blob_sha": "d57be51c97a84ead6826eae88711ac060da3ef1a"
+    },
+    {
+      "version": "20261021172640",
+      "name": "v29_admin_image_filters",
+      "git_blob_sha": "a9e18aaf3fc775650571f0ba5313a20372005fd7"
+    },
+    {
+      "version": "20261021180818",
+      "name": "v30_multiple_placement_proposals",
+      "git_blob_sha": "015e95e8cc37c488909e6afd7a32a2ed54b950d1"
+    },
+    {
+      "version": "20261021203900",
+      "name": "v33_slide_image_owner_editor",
+      "git_blob_sha": "82732b07c965e4b99786c739f7be1dcfc354f3a4"
+    },
+    {
+      "version": "20261021212430",
+      "name": "v34_slide_uid_colons",
+      "git_blob_sha": "550b6ca6217f32068b8a5104220ae181e138f376"
+    },
+    {
+      "version": "20261022135530",
+      "name": "v36_public_course_registration",
+      "git_blob_sha": "78c938b055e1acac673da02da41f6b126e7985ff"
+    },
+    {
+      "version": "20261022141138",
+      "name": "v37_learner_archive_auth_guard",
+      "git_blob_sha": "b7b2a2929b027b23ad19eb215e59418dd882ccd8"
+    },
+    {
+      "version": "20261022141403",
+      "name": "v38_delete_unused_learner",
+      "git_blob_sha": "4ebaae3a435ee0b4f3f7f9b63f5539a059879f37"
+    },
+    {
+      "version": "20261022212241",
+      "name": "v43_bulk_pdf_reviews",
+      "git_blob_sha": "6310648ece60c9a69baa59db3ea7d141035c6a74"
+    },
+    {
+      "version": "20261023174530",
+      "name": "v44_001_learner_course_documents",
+      "git_blob_sha": "9db07c17be672d7cb0c96a8225a80f721e02855b"
+    },
+    {
+      "version": "20261023175113",
+      "name": "v44_002_allow_multiple_linked_documents",
+      "git_blob_sha": "ef2643aa1a8729f431f816dc86c878839f7cdd02"
+    },
+    {
+      "version": "20261023180441",
+      "name": "v44_003_remove_print_status_dependencies",
+      "git_blob_sha": "5f2c916fb19fa8b554a7cab5e16dd9a36c920815"
+    },
+    {
+      "version": "20261102071929",
+      "name": "v46_5_editorial_matrix",
+      "git_blob_sha": "cd435ebe498ae1f9f59f269a3c141859d5aeb2a8"
+    },
+    {
+      "version": "20261102185024",
+      "name": "v46_9_cross_company_registration",
+      "git_blob_sha": "fce3818c43e2940f3282cfa17a70195aefc89847"
+    },
+    {
+      "version": "20261102194705",
+      "name": "v46_10_catalog_rpc_scope",
+      "git_blob_sha": "c379a07f2474c10d1a5e061899fa9cfd0119cdeb"
+    },
+    {
+      "version": "20261102210137",
+      "name": "v46_11_simple_learner_access",
+      "git_blob_sha": "6f06383392d954358a4846140cdcbd1ff881d661"
+    },
+    {
+      "version": "20261103081944",
+      "name": "v47_internal_link_courses",
+      "git_blob_sha": "c838360859626035ce677dde458b70d29d75a58b"
+    },
+    {
+      "version": "20261103083550",
+      "name": "v47_2_unambiguous_internal_course",
+      "git_blob_sha": "c2d0521d50669b7efab4be81bbf7d6f5479b3775"
+    },
+    {
+      "version": "20261103085911",
+      "name": "v47_3_original_slides_progress",
+      "git_blob_sha": "cc6fa74b4ed203cb6db6ce936051f2062267b210"
+    },
+    {
+      "version": "20261103100654",
+      "name": "v47_6_multi_course_history",
+      "git_blob_sha": "138ae3e66d55b4b0970de71af775de210c7865ec"
+    },
+    {
+      "version": "20261103103712",
+      "name": "v47_7_internal_progress_detail",
+      "git_blob_sha": "80eeb5b2dbaa35ba1ee9794c8d8e7f4f87b18fd9"
+    },
+    {
+      "version": "20261103123352",
+      "name": "v47_9_internal_company_archive",
+      "git_blob_sha": "cd65b7b8bbe4481ec9786a3cb72a92261d267480"
+    },
+    {
+      "version": "20261103175734",
+      "name": "v47_10_internal_registry_editor",
+      "git_blob_sha": "cedd3a1704aea908fc3bc925e0c8c7b386e7646c"
+    },
+    {
+      "version": "20261104115002",
+      "name": "v47_11_fast_copy_regular_learners",
+      "git_blob_sha": "1a039c09a1a7b5fed6c8f6c507fcb267b4c86d17"
+    }
+  ]
+}

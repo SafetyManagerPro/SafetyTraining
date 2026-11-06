@@ -26,3 +26,4 @@ jobs:
           node --check scripts/audit-supabase-migrations.mjs
           node scripts/audit-supabase-migrations.mjs --strict
           node --test tests/migration-version-history-v47.test.mjs
+          node --test tests/migration-source-lock-v47.test.mjs

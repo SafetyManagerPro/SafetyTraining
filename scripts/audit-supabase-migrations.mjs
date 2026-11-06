@@ -34,6 +34,31 @@ for (const migration of remote) {
   if (md5===migration.sql_md5) exactSQL++;
   else sqlDiffs.push({name:filename,localBytes:sql.length,remoteBytes:migration.sql_bytes});
 }
+// Impronte dei file applicati, indipendenti dal contenuto abbreviato di schema_migrations.statements.
+const locked=JSON.parse(readFileSync(join(root,'docs','SUPABASE_MIGRATION_SOURCE_LOCK_2026-11-06.json'),'utf8'));
+const lockedByVersion=new Map();
+const integrityErrors=[];
+for (const item of locked.migrations) {
+  if (lockedByVersion.has(item.version)) integrityErrors.push('LOCK_DUPLICATE '+item.version);
+  lockedByVersion.set(item.version,item);
+}
+if (locked.migrations.length!==remote.length) integrityErrors.push('LOCK_COUNT '+locked.migrations.length+' != '+remote.length);
+for (const migration of remote) {
+  const item=lockedByVersion.get(migration.version);
+  const filename=migration.version+'_'+migration.name+'.sql';
+  if (!item || item.name!==migration.name) {
+    integrityErrors.push('LOCK_MISSING '+filename);
+    continue;
+  }
+  if (!local.includes(filename)) continue; // already reported by remoteMissing
+  const sql=readFileSync(join(dir,filename));
+  const blobSha=createHash('sha1').update(Buffer.from('blob '+sql.length+'\0')).update(sql).digest('hex');
+  if (blobSha!==item.git_blob_sha) integrityErrors.push('LOCK_MODIFIED '+filename);
+}
+for (const item of locked.migrations) {
+  if (!byVersion.has(item.version)) integrityErrors.push('LOCK_UNKNOWN '+item.version);
+}
+
 console.log('Snapshot '+snapshot.captured_on+': '+remote.length+' versioni Supabase; '+local.length+' file SQL GitHub');
 console.log('Versioni/nome mancanti nel repository: '+remoteMissing.length);
 console.log('File storici senza versione remota: '+obsolete.length);
@@ -41,11 +66,13 @@ console.log('File per migrazioni future (dopo snapshot): '+pending.length);
 console.log('Filename non corrispondenti a nome remoto: '+wrongNames.length);
 console.log('SQL coincidente byte-per-byte con testo storico disponibile: '+exactSQL+'/'+remote.length);
 console.log('Testo SQL non identico (non necessariamente anomalia): '+sqlDiffs.length);
+console.log('Integrita sorgenti storici (Git SHA): '+(remote.length-integrityErrors.length)+'/'+remote.length);
 for (const x of remoteMissing) console.error('MISSING '+x.version+'_'+x.name+'.sql');
 for (const x of obsolete) console.error('OBSOLETE '+x);
 for (const x of wrongNames) console.error('WRONG_NAME '+x);
 for (const x of pending) console.log('PENDING '+x);
-if (process.argv.includes('--strict') && (remoteMissing.length||obsolete.length||wrongNames.length)) {
+for (const x of integrityErrors) console.error(x);
+if (process.argv.includes('--strict') && (remoteMissing.length||obsolete.length||wrongNames.length||integrityErrors.length)) {
   console.error('ERRORE: riconciliazione degli identificativi incompleta.');
   process.exitCode=1;
 }
