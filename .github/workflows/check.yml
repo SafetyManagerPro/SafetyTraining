@@ -21,3 +21,5 @@ jobs:
           node-version: 24
       - name: Run syntax checks
         run: npm run check
+      - name: Audit Supabase migration history (read-only report)
+        run: node scripts/audit-supabase-migrations.mjs
