@@ -1,10 +1,20 @@
--- Read-only SQL; tracks the database-installed function. No DELETE, UPDATE, or destructive executor.
-CREATE OR REPLACE FUNCTION public.admin_preview_deletion_v25(p_kind text, p_root_id uuid, p_actions jsonb, p_delete_parent boolean)
- RETURNS jsonb
- LANGUAGE plpgsql
- STABLE
- SET search_path TO ''
-AS $function$
+-- SafetyTraining v22.5.1: read-only deletion impact inspection.
+-- No DELETE, UPDATE, TRUNCATE or other data-modifying commands.
+
+create or replace function public.admin_delete_capabilities_v25()
+returns jsonb language sql stable security invoker set search_path='' as $fn$
+  select pg_catalog.jsonb_build_object(
+    'version','v25',
+    'preview_ready', auth.uid() is not null and private.is_platform_admin(),
+    'ready', false,
+    'execution_enabled', false
+  );
+$fn$;
+
+create or replace function public.admin_preview_deletion_v25(
+  p_kind text, p_root_id uuid, p_actions jsonb, p_delete_parent boolean
+) returns jsonb
+language plpgsql stable security invoker set search_path='' as $fn$
 declare
   v_root text;
   v_row jsonb;
@@ -21,17 +31,6 @@ declare
   v_seen text[] := '{}'::text[];
   v_warning jsonb := '[]'::jsonb;
   v_dep record;
-
-  v_selected_enrollments uuid[] := '{}'::uuid[];
-  v_selected_learners uuid[] := '{}'::uuid[];
-  v_selected_editions uuid[] := '{}'::uuid[];
-  v_selected_sessions uuid[] := '{}'::uuid[];
-  v_selected_attempts uuid[] := '{}'::uuid[];
-  v_impacted_enrollments uuid[] := '{}'::uuid[];
-  v_impacted_sessions uuid[] := '{}'::uuid[];
-  v_impacted_attempts uuid[] := '{}'::uuid[];
-  v_stat record;
-
 begin
   if auth.uid() is null or not private.is_platform_admin() then
     raise exception 'platform_admin_required' using errcode='42501';
@@ -104,22 +103,6 @@ begin
       raise exception 'selected_row_missing_or_outside_root' using errcode='P0002';
     end if;
     v_actions:=v_actions+1;
-
-    -- Only already-validated explicit DELETE decisions enter the impact graph.
-    if v_action='delete' then
-      if v_child='enrollments' then
-        v_selected_enrollments := pg_catalog.array_append(v_selected_enrollments,(v_key->>1)::uuid);
-      elsif v_child='learners' then
-        v_selected_learners := pg_catalog.array_append(v_selected_learners,(v_key->>1)::uuid);
-      elsif v_child='course_editions' then
-        v_selected_editions := pg_catalog.array_append(v_selected_editions,(v_key->>1)::uuid);
-      elsif v_child='learning_sessions' then
-        v_selected_sessions := pg_catalog.array_append(v_selected_sessions,(v_key->>1)::uuid);
-      elsif v_child='test_attempts' then
-        v_selected_attempts := pg_catalog.array_append(v_selected_attempts,(v_key->>1)::uuid);
-      end if;
-    end if;
-
     v_impact:=v_impact || pg_catalog.jsonb_build_array(pg_catalog.jsonb_build_object(
       'label',v_child,'action',v_action,'count',1,'selected',true));
     if v_action='delete' and v_child in ('test_attempts','learning_sessions') then
@@ -152,87 +135,6 @@ begin
         'count',v_count,'selected',false));
     end if;
   end loop;
-
-  -- Conservative, read-only two-level/three-level effects of *requested*
-  -- root/child deletions. Counts are RLS-visible, never approval to DELETE.
-  select coalesce(pg_catalog.array_agg(distinct e.id),'{}'::uuid[])
-    into v_impacted_enrollments
-  from public.enrollments e
-  where e.id=any(v_selected_enrollments)
-    or e.learner_id=any(v_selected_learners)
-    or e.edition_id=any(v_selected_editions)
-    or (coalesce(p_delete_parent,false) and (
-       (p_kind='enrollment' and e.id=p_root_id)
-       or (p_kind='learner' and e.learner_id=p_root_id)
-       or (p_kind='edition' and e.edition_id=p_root_id)
-       or (p_kind='company' and (
-         exists(select 1 from public.learners l
-           where l.id=e.learner_id and l.company_id=p_root_id)
-         or exists(select 1 from public.course_editions d
-           where d.id=e.edition_id and d.company_id=p_root_id)
-       ))
-    ));
-
-  select coalesce(pg_catalog.array_agg(distinct s.id),'{}'::uuid[])
-    into v_impacted_sessions
-  from public.learning_sessions s
-  where s.enrollment_id=any(v_impacted_enrollments)
-    or s.id=any(v_selected_sessions);
-
-  select coalesce(pg_catalog.array_agg(distinct t.id),'{}'::uuid[])
-    into v_impacted_attempts
-  from public.test_attempts t
-  where t.enrollment_id=any(v_impacted_enrollments)
-    or t.id=any(v_selected_attempts);
-
-  for v_stat in
-    select label,effect,row_count from (
-      values
-        ('enrollments','CASCADE',coalesce(pg_catalog.array_length(v_impacted_enrollments,1),0)::bigint),
-        ('learning_sessions','CASCADE',coalesce(pg_catalog.array_length(v_impacted_sessions,1),0)::bigint),
-        ('test_attempts','CASCADE',coalesce(pg_catalog.array_length(v_impacted_attempts,1),0)::bigint),
-        ('test_answers','CASCADE',(
-          select count(*) from public.test_answers a
-          where a.test_attempt_id=any(v_impacted_attempts))),
-        ('learning_events','CASCADE',(
-          select count(*) from public.learning_events ev
-          where ev.enrollment_id=any(v_impacted_enrollments)
-          or ev.session_id=any(v_impacted_sessions))),
-        ('learning_progress','CASCADE',(
-          select count(*) from public.learning_progress pr
-          where pr.enrollment_id=any(v_impacted_enrollments))),
-        ('question_attempts','CASCADE',(
-          select count(*) from public.question_attempts qa
-          where qa.enrollment_id=any(v_impacted_enrollments))),
-        ('question_attempts','SET NULL',(
-          select count(*) from public.question_attempts qa
-          where qa.session_id=any(v_impacted_sessions)
-            and not(qa.enrollment_id=any(v_impacted_enrollments)))),
-        ('enrollment_requirement_evidence','CASCADE',(
-          select count(*) from public.enrollment_requirement_evidence re
-          where re.enrollment_id=any(v_impacted_enrollments))),
-        ('enrollment_practice_assessments_v22','CASCADE',(
-          select count(*) from public.enrollment_practice_assessments_v22 pa
-          where pa.enrollment_id=any(v_impacted_enrollments))),
-        ('learner_company_training_history','CASCADE',(
-          select count(*) from public.learner_company_training_history th
-          where th.enrollment_id=any(v_impacted_enrollments)))
-    ) as risk(label,effect,row_count)
-  loop
-    if v_stat.row_count>0 then
-      v_impact := v_impact || pg_catalog.jsonb_build_array(
-        pg_catalog.jsonb_build_object(
-          'label',v_stat.label,'action','Effetto indiretto '||v_stat.effect,
-          'count',v_stat.row_count,'selected',false,'source','indirect_rls_visible'));
-    end if;
-  end loop;
-  if pg_catalog.array_length(v_impacted_enrollments,1)>0
-     or pg_catalog.array_length(v_impacted_sessions,1)>0
-     or pg_catalog.array_length(v_impacted_attempts,1)>0 then
-    v_warning:=v_warning || pg_catalog.jsonb_build_array(
-      'Il conteggio indiretto considera i dati visibili alle policy RLS. Non è una verifica transazionale completa e non abilita la cancellazione.');
-  end if;
-
   return pg_catalog.jsonb_build_object(
     'version','v25','preview_ready',true,'execution_ready',false,
     'safe',false,'impact',v_impact,'validated_actions',v_actions,
@@ -241,5 +143,9 @@ begin
     'message','Anteprima in sola lettura: transazione di eliminazione non installata.'
   );
 end;
-$function$
+$fn$;
 
+revoke all on function public.admin_delete_capabilities_v25() from public,anon;
+revoke all on function public.admin_preview_deletion_v25(text,uuid,jsonb,boolean) from public,anon;
+grant execute on function public.admin_delete_capabilities_v25() to authenticated;
+grant execute on function public.admin_preview_deletion_v25(text,uuid,jsonb,boolean) to authenticated;

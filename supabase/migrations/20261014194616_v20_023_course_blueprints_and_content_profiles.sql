@@ -137,6 +137,7 @@ on conflict (stable_key) do update
 set title=excluded.title,family=excluded.family,strategy=excluded.strategy,status=excluded.status,
     description=excluded.description,metadata=public.training_blueprints.metadata||excluded.metadata,updated_at=now();
 
+-- Reclassify the original job-based Art.37 courses as reusable content profiles.
 insert into public.learning_content_profiles(stable_key,title,profile_kind,source_course_id,status,metadata)
 select x.profile_key,x.profile_title,x.profile_kind,c.id,'active',x.metadata
 from (values
@@ -166,6 +167,7 @@ set metadata=metadata || case stable_key
   updated_at=now()
 where stable_key in ('generale','fondamenti','backoffice','frontoffice','ecologici','polizia','verde');
 
+-- Blueprint sections. Null minutes mean the section must be fitted to the administrative course duration.
 insert into public.training_blueprint_sections
 (blueprint_key,section_key,title,position,section_type,nominal_minutes,source_course_stable_key,source_profile_key,required,practical,metadata) values
 ('worker_initial','general_4h','Formazione generale',1,'fixed_course',240,'generale','general_core',true,false,'{"locked":true}'),
@@ -216,6 +218,7 @@ set title=excluded.title,position=excluded.position,section_type=excluded.sectio
     source_profile_key=excluded.source_profile_key,required=excluded.required,practical=excluded.practical,
     metadata=public.training_blueprint_sections.metadata||excluded.metadata,updated_at=now();
 
+-- Map every current SafetyManager administrative course type to a blueprint.
 insert into public.training_blueprint_course_types
 (source_system,external_course_code,blueprint_key,variant_key,development_status,metadata)
 select 'safetymanager',c.external_course_code,
@@ -281,6 +284,7 @@ set blueprint_key=excluded.blueprint_key,variant_key=excluded.variant_key,
     development_status=excluded.development_status,
     metadata=public.training_blueprint_course_types.metadata||excluded.metadata,updated_at=now();
 
+-- Make the new architecture visible on the imported catalog itself.
 update public.integration_course_catalog c
 set metadata=c.metadata || jsonb_build_object(
   'blueprint_key',m.blueprint_key,

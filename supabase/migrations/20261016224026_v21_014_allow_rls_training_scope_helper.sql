@@ -1,1 +1,0 @@
-grant execute on function private.can_manage_training_org(uuid) to authenticated, service_role;

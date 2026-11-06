@@ -1,0 +1,45 @@
+-- SafetyTraining v22.7: additive equipment refresher instructor labs, never completion or attendance.
+-- Non-frozen course allowlist only. No published LU/course versions changed.
+-- Check user-visible physical attendance requirement against Ministero FAQ n.19 (2026).
+INSERT INTO public.practice_labs_v22 (stable_key,title,lab_type,objective,briefing,steps,checklist,critical_errors,stop_conditions,media,sources,requires_physical_validation,active)
+VALUES
+('v23:agg_attr_carrelli_ind_4h:workshop-docente','Carrelli industriali: quattro stazioni pratiche guidate','physical','Approfondimento operativo per esercitazioni reali supervisionate: controlli sul mezzo, separazione dai pedoni, movimentazione e gestione di anomalie. Il materiale digitale non sostituisce la sessione pratica in presenza.','Programmazione orientativa in quattro blocchi di lavoro; durata e proporzioni effettive sono registrate dal docente in presenza. Usare il manuale del carrello specifico e un''area di prova segregata. Verificare identità, DPI, idoneità dei mezzi e delimitazioni prima di iniziare. La sequenza NON certifica ore né abilita alla conduzione.','["1 · Controlli pre-utilizzo: identificare targhe, portata, organi e dispositivi di sicurezza; eseguire ispezioni previste dal fabbricante sul carrello realmente impiegato. Se un controllo fallisce, non avviare l''attività e attivare la segnalazione.","2 · Carico che ostruisce la visuale: allestire con istruttore un percorso protetto con passaggio pedonale simulato. Valutare visibilità e alternative, fermarsi quando non si garantisce la separazione dalle persone; il clacson non elimina da solo il rischio.","3 · Stabilità e presa/deposito: usare un carico didattico compatibile con portata e caratteristiche del mezzo; verificare piano di transito, baricentro, compatibilità della presa, manovre senza bruschi cambi di direzione e sosta controllata.","4 · Anomalie e verifica individuale: simulare guasto e quasi incidente senza creare rischi reali. Eseguire arresto, segnalazione, messa in sicurezza secondo istruzioni d''uso; il docente osserva e verbalizza l''esecuzione individuale."]'::jsonb,'["Identifica mezzi, limiti, portata e procedure applicabili dal manuale.","Controlla comandi, dispositivi di sicurezza, area, forche e stato delle ruote secondo istruzioni del costruttore.","Riconosce interferenze tra mezzo, carico e persone e modifica l''organizzazione della manovra prima della partenza.","Arresta il mezzo quando il carico impedisce la visuale o una persona entra nell''area di rischio.","Dimostra presa, trasporto, deposito e sosta con carico didattico appropriato.","Riconosce carico anomalo o sbilanciato e non improvvisa movimentazioni.","Segnala un guasto e sospende l''uso fino al ripristino autorizzato.","Il docente registra osservazioni, errori, recuperi ed eventuale esito pratico separatamente dalla frequenza."]'::jsonb,'["Procedere in presenza di ostacolo alla visione o passaggio pedonale non protetto.","Ignorare un dispositivo di sicurezza non funzionante o proseguire oltre le condizioni ammesse dal manuale.","Movimentare carichi non verificati o trattare il suono del clacson come misura sufficiente di segregazione.","Compilare un esito positivo sulla sola base della lettura della scheda digitale."]'::jsonb,'["Pedoni o altri mezzi non separati dal percorso di prova.","Portata, visibilità o condizioni della pavimentazione non compatibili con la movimentazione.","Guasto, allarme o protezione non funzionante.","Assenza di istruttore, mezzo idoneo, manuale o area sicura."]'::jsonb,'[]'::jsonb,'[{"kind":"source","title":"Ministero del Lavoro — Accordo Stato-Regioni del 17 aprile 2025","url":"https://www.lavoro.gov.it/en/node/41930"},{"kind":"source","title":"Ministero del Lavoro — FAQ n. 19, aggiornamento attrezzature in presenza fisica","url":"https://www.lavoro.gov.it/temi-e-priorita-salute-e-sicurezza/focus/faq-accordo-stato-regioni-27032026"}]'::jsonb,true,true),
+('v23:agg_attr_ple_4h:workshop-docente','PLE: quattro stazioni pratiche guidate','physical','Approfondimento operativo in presenza: verifica dell''area e della macchina, manovre sorvegliate, interferenze, comunicazione ed emergenze per la tipologia di PLE realmente disponibile.','Attività reali soltanto con PLE adeguata, docente competente, area sicura e procedura aziendale. Controlli, stabilizzatori, DPI, condizioni ambientali e recupero dipendono da modello e manuale. Distribuzione in quattro blocchi indicativa; i tempi effettivi sono registrati e convalidati durante la presenza fisica.','["1 · Contesto e appoggio: osservare pendenza, terreno, ostacoli, linee aeree, accesso di terzi, vento e stabilizzatori dove presenti. Esaminare un pozzetto vicino alla zona di appoggio; sospendere il posizionamento finché la portanza non sia verificata.","2 · Verifiche della PLE: individuare dati di targa, portata, limiti, comandi, arresti di emergenza e dispositivi di protezione pertinenti; seguire il manuale e la checklist specifica. La presenza di un''anomalia simulata comporta fermo e segnalazione, mai una riparazione improvvisata.","3 · Manovre sorvegliate: esercitare accesso, posizionamento e movimenti consentiti in area protetta, con comunicazione a terra. Introdurre un''interferenza simulata nell''ingombro del braccio o del cestello; arrestare e rivalutare la manovra prima della ripresa.","4 · Emergenza e verifica individuale: illustrare il piano di recupero e le funzioni a terra seguendo il fabbricante, senza provocare veri guasti. Simulare una segnalazione di vento fuori limite e verificare decisioni di stop, comunicazione e adozione della procedura stabilita."]'::jsonb,'["Verifica portanza e caratteristiche della zona di lavoro rispetto alla PLE.","Identifica limite di carico, stabilizzatori ove previsti, ingombri e fattori ambientali secondo il manuale.","Controlla funzioni e dispositivi prima dell''uso, inclusi comandi e arresto emergenza previsti.","Verifica i DPI applicabili a quel modello e alle condizioni operative senza generalizzazioni.","Mantiene area a terra delimitata e comunicazioni efficaci con il personale presente.","Arresta movimenti quando persone o ostacoli possono interferire.","Identifica chi è autorizzato a usare i comandi di emergenza e il piano di recupero.","Il docente osserva la prova individuale, annota errori e necessità di recupero."]'::jsonb,'["Impiego su terreno non valutato o sotto condizioni ambientali vietate dal costruttore.","Utilizzo di dispositivi non funzionanti o bypass di limitazioni della piattaforma.","Proseguire in presenza di rischio di urto, intrappolamento, schiacciamento o collisione.","Far coincidere il completamento digitale con la competenza pratica."]'::jsonb,'["Terreno, stabilità o area non valutati; ostacoli o linee aeree non gestiti.","Vento, condizioni ambientali o configurazioni fuori dai limiti indicati per la macchina.","Dispositivi di comando/sicurezza difettosi o piano di recupero non disponibile.","Istruttore assente o attrezzatura non idonea alla prova."]'::jsonb,'[]'::jsonb,'[{"kind":"source","title":"Ministero del Lavoro — Accordo Stato-Regioni del 17 aprile 2025","url":"https://www.lavoro.gov.it/en/node/41930"},{"kind":"source","title":"Ministero del Lavoro — FAQ n. 19, aggiornamento attrezzature in presenza fisica","url":"https://www.lavoro.gov.it/temi-e-priorita-salute-e-sicurezza/focus/faq-accordo-stato-regioni-27032026"}]'::jsonb,true,true)
+ON CONFLICT (stable_key) DO NOTHING;
+
+INSERT INTO public.course_practice_labs_v22
+  (course_id,practice_lab_id,position,required,context)
+SELECT c.id,l.id,3,false,
+  jsonb_build_object(
+    'specific',true,'instructor_led',true,'supplementary',true,
+    'training_mode','in_person_practice_only',
+    'source','v22.7 guided instructor workshop',
+    'explanation','Supporto didattico; non contabilizza frequenza né abilita automaticamente.'
+  )
+FROM public.courses c
+JOIN public.practice_labs_v22 l
+ ON l.stable_key = CASE c.stable_key
+  WHEN 'agg_attr_carrelli_ind_4h' THEN 'v23:agg_attr_carrelli_ind_4h:workshop-docente'
+  WHEN 'agg_attr_ple_4h' THEN 'v23:agg_attr_ple_4h:workshop-docente'
+ END
+WHERE c.stable_key IN ('agg_attr_carrelli_ind_4h','agg_attr_ple_4h')
+ AND c.active IS TRUE AND coalesce(c.metadata->>'frozen','false')<>'true'
+ AND coalesce(c.metadata->>'freeze_scope','false')<>'true'
+ON CONFLICT (course_id,practice_lab_id) DO NOTHING;
+
+DO $$
+DECLARE actual_count integer;
+BEGIN
+ SELECT count(*) INTO actual_count
+ FROM public.courses c
+ JOIN public.course_practice_labs_v22 l ON l.course_id=c.id
+ JOIN public.practice_labs_v22 p ON p.id=l.practice_lab_id
+ WHERE c.stable_key IN ('agg_attr_carrelli_ind_4h','agg_attr_ple_4h')
+ AND p.stable_key IN (
+   'v23:agg_attr_carrelli_ind_4h:workshop-docente',
+   'v23:agg_attr_ple_4h:workshop-docente'
+ ) AND p.requires_physical_validation AND p.lab_type='physical'
+ AND l.context->>'training_mode'='in_person_practice_only'
+ AND l.required=false;
+ IF actual_count <> 2 THEN RAISE EXCEPTION 'Expected 2 noncertifying instructor labs, found %',actual_count; END IF;
+END $$;

@@ -41,6 +41,7 @@ using (
   or private.can_manage_training_org(organization_id)
 );
 
+-- Existing enrollments already carry their historical company through course_editions.
 insert into public.learner_company_training_history(
   organization_id, learner_id, company_id, edition_id, enrollment_id,
   source_system, source_project_external_id, source_enrollment_external_id,
@@ -53,7 +54,7 @@ select
   d.id,
   e.id,
   coalesce(nullif(e.metadata->>'source_system',''), nullif(d.metadata->>'source_system',''), 'safetytraining'),
-  nullif(coalesce(e.metadata->>'source_project_id', d.metadata->>'source_external_id'),''),
+  nullif(coalesce(e.metadata->>'source_project_id', d.metadata->>'source_external_id'),'') ,
   nullif(e.metadata->>'source_enrollment_id',''),
   d.available_from,
   coalesce(d.recommended_due_at, d.available_until),
@@ -74,6 +75,7 @@ set organization_id=excluded.organization_id,
     metadata=public.learner_company_training_history.metadata || excluded.metadata,
     updated_at=now();
 
+-- Keep the previous importer implementation private and wrap it with current-company preservation.
 alter function public.import_safetymanager_package(jsonb)
   rename to import_safetymanager_package_v21_legacy;
 revoke all on function public.import_safetymanager_package_v21_legacy(jsonb) from public, anon, authenticated, service_role;
@@ -110,6 +112,7 @@ begin
     raise exception 'unsupported SafetyManager transfer package';
   end if;
 
+  -- Snapshot ONLY pre-existing current-company links before the legacy importer runs.
   for v_item in select value from jsonb_array_elements(coalesce(p_payload->'learners','[]'::jsonb))
   loop
     v_learner_id := null;
@@ -156,6 +159,7 @@ begin
 
   v_result := public.import_safetymanager_package_v21_legacy(p_payload);
 
+  -- Restore authoritative current company for learners that already had one.
   for v_saved in select value from jsonb_array_elements(v_existing)
   loop
     update public.learners

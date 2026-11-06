@@ -27,6 +27,7 @@ drop trigger if exists course_practical_requirements_touch on public.course_prac
 create trigger course_practical_requirements_touch before update on public.course_practical_requirements
 for each row execute function public.touch_updated_at();
 
+-- Helper locale: crea/aggiorna un corso, una versione bozza e un modulo teorico.
 do $$
 declare
   v_course_id uuid;
@@ -181,7 +182,7 @@ begin
      where source_system='safetymanager' and external_course_code=v_code;
 
     update public.training_blueprint_course_types
-       set development_status='hybrid_partial',
+       set development_status=case when v_update then 'hybrid_partial' else 'hybrid_partial' end,
            metadata=metadata||jsonb_build_object('mapped_course_key',v_code,'theory_minutes',v_theory_minutes,
                                                   'practical_minutes',v_practical_minutes,'composition_version','v20_026'),
            updated_at=now()
