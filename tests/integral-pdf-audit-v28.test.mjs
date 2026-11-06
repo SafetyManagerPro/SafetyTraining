@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('the full source archive is screened without asserting full per-page visual validation',()=>{
- const s=read('supabase/migrations/20261021185500_v28_complete_image_triage.sql');
+ const s=read('supabase/migrations/20261021154811_v28_complete_image_triage.sql');
  assert.match(s,/contact_sheet_group_visual_triage/);
  assert.match(s,/training_integral_pdf_screening_v28/);
  assert.match(s,/left join public\.training_integral_pdf_visual_audit_v27/);

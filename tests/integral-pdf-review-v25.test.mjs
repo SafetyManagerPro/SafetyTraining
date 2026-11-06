@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const rd=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('private PDF review preserves imported provenance and never grants automatic publication',()=>{
- const sql=rd('supabase/migrations/20261021094500_v25_001_integral_pdf_review_workflow.sql');
+ const sql=rd('supabase/migrations/20261021083538_v25_001_integral_pdf_review_workflow.sql');
  assert.match(sql,/training_integral_pdf_reviews_v25/);
  assert.match(sql,/training_integral_pdf_review_events_v25/);
  assert.match(sql,/on delete cascade/);

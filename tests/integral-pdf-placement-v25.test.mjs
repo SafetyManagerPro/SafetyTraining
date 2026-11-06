@@ -5,7 +5,7 @@ import {runInNewContext} from 'node:vm';
 const rd=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('manual PDF placement is administrative, version-specific and audited',()=>{
- const sql=rd('supabase/migrations/20261021105000_v25_002_integral_pdf_manual_placements.sql');
+ const sql=rd('supabase/migrations/20261021091152_v25_002_integral_pdf_manual_placements.sql');
  for(const token of [
  'training_integral_pdf_placements_v25','training_integral_pdf_placement_events_v25',
  'private.is_platform_admin()','cv.status=','cv.version_number desc','metadata',

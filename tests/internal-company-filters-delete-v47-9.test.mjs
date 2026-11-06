@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const ui=read('apps/training/admin-internal-v47.js');
-const sql=read('supabase/migrations/20261103124500_v47_9_internal_company_archive.sql');
+const sql=read('supabase/migrations/20261103123352_v47_9_internal_company_archive.sql');
 const style=read('apps/training/admin-internal-v47.css');
 
 test('company is optional, stored only for internal people and displayed with Generic fallback',()=>{

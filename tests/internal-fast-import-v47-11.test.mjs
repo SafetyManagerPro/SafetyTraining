@@ -6,7 +6,7 @@ import {webcrypto} from 'node:crypto';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const ui=read('apps/training/admin-internal-v47.js');
-const sql=read('supabase/migrations/20261104121500_v47_11_fast_copy_regular_learners.sql');
+const sql=read('supabase/migrations/20261104115002_v47_11_fast_copy_regular_learners.sql');
 const css=read('apps/training/admin-internal-v47.css');
 
 test('source learner lookup is read-only, organization-scoped, authenticated and capped',()=>{

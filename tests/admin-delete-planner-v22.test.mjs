@@ -211,7 +211,7 @@ test('confirmation responds while typing; linked login only blocks root deletion
 test('read-only server preview exposes explicit indirect counts and safety warnings',()=>{
  const src=read('apps/training/admin-delete-planner-v22.js');
  assert.match(src,/serverPreview\.warnings/);
- const migration=read('supabase/migrations/20261019152200_v22_014_admin_deletion_indirect_read_only_preview.sql');
+ const migration=read('supabase/migrations/20261019141118_v22_014_admin_deletion_indirect_read_only_preview.sql');
  for(const phrase of ['test_answers','learning_sessions','SET NULL','indirect_rls_visible'])assert.ok(migration.includes(phrase));
  assert.doesNotMatch(migration,/\bDELETE\s+FROM\b|\bTRUNCATE\s+TABLE\b/i);
 });

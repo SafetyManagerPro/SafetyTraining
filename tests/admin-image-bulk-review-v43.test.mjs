@@ -26,7 +26,7 @@ test('the bulk review workspace is actually mounted, with persistent page select
  assert.match(sw,/admin-image-bulk-review-v43\.css/);
 });
 test('server enforces technical review, source-scoped rights and writes audit only through reviewed RPC',()=>{
- const sql=file('supabase/migrations/20261022232000_v43_bulk_pdf_reviews.sql');
+ const sql=file('supabase/migrations/20261022212241_v43_bulk_pdf_reviews.sql');
  for(const key of ['private.is_platform_admin()','auth.uid() is null','p_confirm_visual_review','p_confirm_rights_review',"p_rights_status='cleared_internal'",'v_source_count<>1','training_review_integral_pdf_v25','v_skipped:=v_skipped+1','cardinality(p_ref_ids)>100','revoke all on function'])assert.ok(sql.includes(key),key);
  assert.doesNotMatch(sql,/\bupdate\s+public\.learning_units|\bdelete\s+from\s+public\.training_integral_pdf_assets/i);
  const client=file('apps/training/admin-image-bulk-review-v43.js');

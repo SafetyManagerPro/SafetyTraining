@@ -26,7 +26,7 @@ test('source is private, admin-only, and signed urls must be allowlisted',()=>{
  assert.ok(s.includes("trusted.has(url)"));
  assert.ok(s.includes("trusted.has(url)"));
  assert.ok(s.includes("private.is_platform_admin()")===false);
- assert.ok(rd('supabase/migrations/20261020191000_v24_001_integral_pdf_media.sql').includes('private.is_platform_admin()'));
+ assert.ok(rd('supabase/migrations/20261020174055_v24_001_integral_pdf_media.sql').includes('private.is_platform_admin()'));
 });
 test('slides + two-up print invoke exact same private source placement',()=>{
  const app=rd('apps/training/app.js'),printer=rd('apps/training/admin-print-slides-v23.js');
@@ -41,7 +41,7 @@ test('slides + two-up print invoke exact same private source placement',()=>{
 
 test('multi-select deletion removes imported figure references, persists tombstones and protects frozen courses',()=>{
  const s=rd('apps/training/integral-pdf-v24.js');
- const sql=rd('supabase/migrations/20261020204500_v24_005_delete_imported_pdf_figures.sql');
+ const sql=rd('supabase/migrations/20261020185639_v24_005_delete_imported_pdf_figures.sql');
  for(const token of ['integralPdfSelectPage','integralPdfClearSelection','integralPdfDeleteSelected','selected=new Set()','training_delete_integral_pdf_assets_v24','window.confirm(','cleanupDeletedStorage','discarded.has(f.asset_id)','selected.size>=100','storage_cleared_at'])assert.ok(s.includes(token),token);
  for(const token of ['security definer','private.is_platform_admin()','training_integral_pdf_refs_v24','training_integral_pdf_assets_v24','training_integral_pdf_deleted_v24','source_pdf_integral_admin_delete','grant execute','deleted_by'])assert.ok(sql.includes(token),token);
  assert.ok(sql.includes("name like 'integral/v1/%'"));
