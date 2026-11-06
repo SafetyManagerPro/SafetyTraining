@@ -5,7 +5,7 @@ import {runInNewContext} from 'node:vm';
 import {webcrypto} from 'node:crypto';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const ui=read('apps/training/admin-internal-v47.js');
-const sql=read('supabase/migrations/20261103112500_v47_7_internal_progress_detail.sql');
+const sql=read('supabase/migrations/20261103103712_v47_7_internal_progress_detail.sql');
 const style=read('apps/training/admin-internal-v47.css');
 
 test('resending remains available after reopening admin page and never exposes previous token',()=>{

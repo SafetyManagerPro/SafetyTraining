@@ -63,7 +63,7 @@ test('public QR form is explicitly a pending approval request, not an instant en
  assert.match(registration,/friendlyError\(/);
  assert.match(registration,/registration_limit_reached/);
  assert.doesNotMatch(registration,/auth\.signUp|admin_bulk_enroll|admin_registration_decide_v36|sendEmail\(/);
- const sql=read('supabase/migrations/20261022144000_v36_public_registration.sql');
+ const sql=read('supabase/migrations/20261022135530_v36_public_course_registration.sql');
  assert.match(sql,/status text not null default 'pending'/);
  assert.match(sql,/private\.can_manage_training_org/);
  assert.match(sql,/on conflict\(edition_id,email\) do nothing/);

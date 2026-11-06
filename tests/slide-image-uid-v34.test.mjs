@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('DB slide UID uses colon-delimited unit stable keys and migration permits exact expected characters',()=>{
- const adapter=read('apps/training/db-slide-adapter.js'),app=read('apps/training/app.js'),migration=read('supabase/migrations/20261021232000_v34_slide_uid_colons.sql');
+ const adapter=read('apps/training/db-slide-adapter.js'),app=read('apps/training/app.js'),migration=read('supabase/migrations/20261021212430_v34_slide_uid_colons.sql');
  assert.match(adapter,/presentationId:.*::/);
  assert.match(app,/uid:`\$\{c\.id\}-\$\{t\.id\}-\$\{s\.type\}-\$\{si\}`/);
  assert.match(migration,/p_slide_uid !~ '\^\[A-Za-z0-9_:-\]\+\$'/);

@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('owner-only slide editor is restricted by an immutable one-time user allowlist and RLS',()=>{
- const sql=read('supabase/migrations/20261021172500_v33_slide_image_owner_editor.sql');
+ const sql=read('supabase/migrations/20261021203900_v33_slide_image_owner_editor.sql');
  for(const word of ['private.slide_image_editor_allowlist_v33','private.can_edit_slide_images_v33()','public.save_slide_images_v33','auth.uid()','from auth.users','count(*) from public.platform_admins','count(*) from auth.users','slide_image_overrides_v33','edited_by','private_pdf','technical_status=\'approved\'','rights_status=\'cleared_internal\'','is_platform_admin']){if(word==='is_platform_admin')continue;assert.ok(sql.includes(word),word);}
  assert.match(sql,/revoke all on public.slide_image_overrides_v33 from public,anon,authenticated/);
  assert.match(sql,/not private.can_edit_slide_images_v33\(\)/);

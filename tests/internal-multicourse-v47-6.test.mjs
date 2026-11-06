@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const ui=read('apps/training/admin-internal-v47.js');
-const sql=read('supabase/migrations/20261103110000_v47_6_multi_course_history.sql');
+const sql=read('supabase/migrations/20261103100654_v47_6_multi_course_history.sql');
 
 test('free internal learner creation does not access null assignments during an auth refresh',()=>{
  assert.match(ui,/async function requireData\(\)/);
