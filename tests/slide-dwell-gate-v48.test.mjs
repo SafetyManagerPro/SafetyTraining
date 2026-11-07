@@ -50,11 +50,12 @@ test('app.js gates forward navigation in deckGo and blocks skipping ahead',()=>{
 test('app.js applies the gate on both slide render paths and checks history jumps',()=>{
  const calls=app.match(/syncDwellGate\(c,index,deck\);/g)||[];
  assert.equal(calls.length,2);
- assert.match(app,/if\(dwellLearnerActive\(\)&&dwellGate\.cid===c\.id&&dwellGate\.index>=0&&!dwellCanMove\(c\.id,index\)\)\{setHash/);
+ assert.match(app,/if\(dwellLearnerActive\(c\.id\)&&dwellGate\.cid===c\.id&&dwellGate\.index>=0&&!dwellCanMove\(c\.id,index\)\)\{setHash/);
 });
 
-test('the gate only applies to registered learners with an active session',()=>{
- assert.match(app,/const dwellLearnerActive=\(\)=>\{const st=window\.SAFETY_CLOUD\?\.state;return !!\(st\?\.user&&st\?\.learningSession&&st\?\.activeAssignment\);\};/);
+test('the gate applies to registered learners with an assignment for the course, not to the session',()=>{
+ assert.match(app,/const dwellLearnerActive=\(cid\)=>\{const st=window\.SAFETY_CLOUD\?\.state;return !!\(st\?\.user&&st\?\.learner&&cid&&\(st\.assignments\|\|\[\]\)\.some\(a=>a\.courseStableKey===cid&&\['not_started','in_progress'\]\.includes\(a\.status\)\)\);\};/);
+ assert.doesNotMatch(app,/dwellLearnerActive\(\)/);
 });
 
 test('progress is logged as an existing interaction event, not a new event type',()=>{
