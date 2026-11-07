@@ -84,12 +84,12 @@ test('v46.9 UI is available only on pending selected request; auth/edition chang
 test('v46.9 no new permissions, full PWA and instructions in both handoffs',()=>{
  assert.doesNotThrow(()=>new Function(js));
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-11-internal-access'/);
+ assert.match(sw,/const CACHE='safety-training-v48-slide-dwell'/);
  assert.match(read('package.json'),/tests\/public-registration-company-review-v46-9\.test\.mjs/);
  assert.match(read('apps/training/admin-help-v22.js'),/Iscrizione in un’altra azienda/);
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const c=read(path);
-  assert.ok(c.slice(0,950).includes('safety-training-v46-11-internal-access'),path);
+  assert.ok(c.slice(0,950).includes('safety-training-v48-slide-dwell'),path);
   assert.match(c,/v46\.9 — Approvazione richiesta per corsista già in altra azienda/);
  }
 });

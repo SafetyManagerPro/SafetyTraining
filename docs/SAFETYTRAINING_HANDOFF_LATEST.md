@@ -1,7 +1,7 @@
 # SafetyTraining — handoff LATEST
 
-Ultimo aggiornamento: 2026-11-02
-Stato: **v46.11 GitHub feature in verifica · baseline v46.10 PR #37 merged · CI #742 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v46-11-internal-access`.
+Ultimo aggiornamento: 2026-11-07
+Stato: **v46.11 GitHub feature in verifica · baseline v46.10 PR #37 merged · CI #742 SUCCESS · produzione non verificata per richiesta no @Vercel · smoke controllo visivo pendente / baseline v44.1 Fase 1 stabilizzazione Amministrazione / 65 corsi non frozen** · guard anti re-entry analytics confermato · recupero manuale dagli errori transitori · doppia verifica tecnico/diritti invariata · PWA `safety-training-v48-slide-dwell`.
 
 > Fonte operativa più recente. Dopo ogni modifica sostanziale aggiornare nello stesso blocco anche `docs/SAFETYTRAINING_HANDOFF.md`.
 
@@ -1473,3 +1473,12 @@ Su richiesta dell'utente, **nessun vincolo sullo stato del corso, sulla frequenz
 
 - **Applicazione Supabase verificata (2026-11-04):** migrazione `v47_11_fast_copy_regular_learners` riuscita. Controlli di sola lettura prima/dopo: 4 `public.learners`, 9 `private.internal_people_v47`, 16 assegnazioni, 25 visite unità e 384 visite slide invariati. Entrambe le nuove RPC presenti, eseguibili dal ruolo `authenticated` ma non da `anon`; entrambe verificano `auth.uid()` e autorizzazione all'organizzazione. Il linter Supabase segnala genericamente l'esecuzione da `authenticated` per funzioni `SECURITY DEFINER`, intenzionale e mitigata da controllo amministrativo per organizzazione in ogni funzione, come nelle RPC esistenti. Nessun test end-to-end con account reale svolto.
 - **Rifinitura interfaccia:** al cambio del testo di ricerca le risposte obsolete vengono invalidate subito; alla chiusura del popup si svuotano i risultati importabili. Le nuove verifiche sono incluse nella suite CI.
+
+## 2026-11-07 — SafetyTraining v48: tempo minimo di lettura per slide (bozza)
+
+- Ramo `feat/slide-dwell-gate`; PWA `safety-training-v48-slide-dwell`. Non unito su main: serve approvazione esplicita.
+- Nuovo `apps/training/slide-dwell-gate-v48.js`: tempo minimo per slide = 3 s più circa 1 s ogni 200 parole, massimo 180 s. Immagini, percorsi, strutture e risposte nascoste non contano.
+- `app.js`: il gate vale solo per i corsisti registrati con sessione attiva. "Avanti" e frecce si sbloccano dopo il tempo minimo; i salti in avanti sono bloccati in `deckGo` e nella navigazione da cronologia. Indietro e indice restano liberi. Admin e docente non sono limitati.
+- Tracciamento con l'evento esistente `interaction` e `kind: slide_dwell` nel payload. Nessuna migrazione del database.
+- Limiti noti: controllo solo nel browser (aggirabile da un utente esperto); il tempo non è ancora verificato dal server; un ricaricamento della pagina azzera lo stato; il percorso dei corsisti con link interno non è incluso.
+- Test: `tests/slide-dwell-gate-v48.test.mjs`, aggiunti alla catena `npm run check`.
