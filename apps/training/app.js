@@ -398,9 +398,67 @@ window.addEventListener('safety:auth-changed',()=>{
  liveDeckCache=new WeakMap();window.__deck=null;window.__deckSlides=[];
 });
 document.addEventListener('safety:image-review-updated',()=>{liveDeckCache=new WeakMap();});
+// v48: minimum reading time per slide for registered learners with an active session.
+// Admin and teacher views are never gated. Back navigation and the index are always free.
+const dwellGate={cid:null,index:-1,startedAt:0,requiredMs:0,timer:null};
+const dwellUnlocked=new Set();
+const dwellKey=(cid,index)=>`${cid}#${index}`;
+const dwellLearnerActive=()=>{const st=window.SAFETY_CLOUD?.state;return !!(st?.user&&st?.learningSession&&st?.activeAssignment);};
+function dwellPassed(cid,index){
+ const key=dwellKey(cid,index);
+ if(dwellUnlocked.has(key))return true;
+ if(dwellGate.cid!==cid||dwellGate.index!==index||!dwellGate.requiredMs)return false;
+ if(Date.now()<dwellGate.startedAt+dwellGate.requiredMs)return false;
+ dwellUnlocked.add(key);
+ const st=window.SAFETY_CLOUD?.state;
+ window.SAFETY_CLOUD?.recordEvent?.('interaction',st?.currentUnitVersionId||null,0,{kind:'slide_dwell',course_id:cid,slide_index:index,seconds_required:Math.round(dwellGate.requiredMs/1000),seconds_spent:Math.round((Date.now()-dwellGate.startedAt)/1000)}).catch(()=>{});
+ return true;
+}
+function dwellCanMove(cid,target){
+ if(!dwellLearnerActive()||dwellGate.cid!==cid||dwellGate.index<0)return true;
+ const cur=dwellGate.index;
+ if(target<=cur)return true;
+ if(target>cur+1)return false;
+ return dwellPassed(cid,cur);
+}
+function stopDwellTimer(){if(dwellGate.timer){clearInterval(dwellGate.timer);dwellGate.timer=null;}}
+function updateDwellButtons(){
+ if(!dwellLearnerActive()||dwellGate.cid===null||dwellGate.index<0){stopDwellTimer();return;}
+ const passed=!dwellGate.requiredMs||dwellPassed(dwellGate.cid,dwellGate.index);
+ const remaining=Math.ceil(Math.max(0,dwellGate.startedAt+dwellGate.requiredMs-Date.now())/1000);
+ document.querySelectorAll('.deck-nav.next,.deck-pager-next').forEach(b=>{
+  if(passed){if(b.dataset.dwellLocked){b.disabled=false;delete b.dataset.dwellLocked;b.title='Slide successiva';}}
+  else if(!b.disabled||b.dataset.dwellLocked){b.disabled=true;b.dataset.dwellLocked='1';b.title='Disponibile tra '+remaining+' s';}
+ });
+ const pager=document.querySelector('.deck-pager');
+ if(pager){
+  let hint=document.getElementById('deckDwellHint');
+  if(!hint){hint=document.createElement('span');hint.id='deckDwellHint';hint.className='deck-dwell-hint';hint.setAttribute('aria-live','polite');pager.appendChild(hint);}
+  hint.textContent=passed?'':'Tempo di lettura: '+remaining+' s';
+ }
+ if(passed)stopDwellTimer();
+}
+function syncDwellGate(c,index,deck){
+ if(!dwellLearnerActive()){stopDwellTimer();dwellGate.cid=null;dwellGate.index=-1;return;}
+ const last=index>=deck.length-1;
+ if(dwellGate.cid!==c.id||dwellGate.index!==index){
+  dwellGate.cid=c.id;dwellGate.index=index;dwellGate.startedAt=Date.now();
+  dwellGate.requiredMs=last?0:window.SAFETY_SLIDE_DWELL_V48.requiredSeconds(deck[index])*1000;
+ }
+ if(last||dwellPassed(c.id,index)){stopDwellTimer();updateDwellButtons();return;}
+ updateDwellButtons();
+ if(!dwellGate.timer)dwellGate.timer=setInterval(updateDwellButtons,250);
+}
+window.deckGo=(cid,i)=>{
+ const target=Math.max(0,i);
+ if(!dwellCanMove(cid,target)){updateDwellButtons();return;}
+ setHash(`deck/${cid}/${target}`);
+};
 function deckView(c,index=0){
  const deck=cachedDeck(c);
  index=Math.min(Math.max(0,Number(index)||0),deck.length-1);
+ // v48: a forward jump (browser history or typed hash) cannot skip a slide whose reading time is not met.
+ if(dwellLearnerActive()&&dwellGate.cid===c.id&&dwellGate.index>=0&&!dwellCanMove(c.id,index)){setHash(`deck/${c.id}/${dwellGate.index}`);return;}
  const s=deck[index];
  // The bookmark is navigation only: it must not credit time, attendance or completion.
  window.SAFETY_DECK_BOOKMARK_V42?.save?.(c,deck,index);
@@ -423,6 +481,7 @@ function deckView(c,index=0){
        if(button){button.disabled=index+offset<0||index+offset>=deck.length;button.onclick=()=>deckGo(c.id,index+offset);}
      }
      window.__deck={cid:c.id,index,total:deck.length};window.__deckSlides=deck;
+     syncDwellGate(c,index,deck);
      document.dispatchEvent(new Event('safety:deck-slide-rendered'));
      void window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.visit?.(c,s,index);
      requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});
@@ -435,6 +494,7 @@ function deckView(c,index=0){
  <div class="deck-progress"><span style="width:${pct}%"></span></div>
  <button class="deck-nav prev" aria-label="Slide precedente" title="Slide precedente" ${index===0?'disabled':''} onclick="deckGo('${c.id}',${index-1})">‹</button><button class="deck-nav next" aria-label="Slide successiva" title="Slide successiva" ${index===deck.length-1?'disabled':''} onclick="deckGo('${c.id}',${index+1})">›</button></div>`;
  window.__deck={cid:c.id,index,total:deck.length}; window.__deckSlides=deck;
+ syncDwellGate(c,index,deck);
  document.dispatchEvent(new Event('safety:deck-slide-rendered'));
  void window.SAFETY_SLIDE_IMAGE_EDITOR_V33?.visit?.(c,s,index);
  requestAnimationFrame(()=>{fitDeckContent();fitDeckToViewport();});

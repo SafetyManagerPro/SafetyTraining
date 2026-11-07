@@ -58,13 +58,13 @@ test('scoped backend denies anonymous provisioning and cross-organization or pri
  assert.doesNotMatch(sql,/delete\s+from\s+public\.(?:enrollments|learners)/i);
 });
 test('PWA, help and both handoffs align to v46.11',()=>{
- const cache='safety-training-v46-11-internal-access';
+ const cache='safety-training-v48-slide-dwell';
  const html=read('apps/training/index.html');
  const sw=read('apps/training/sw.js');
  const pkg=read('package.json');
  assert.match(html,/admin-quick-access-v46-11\.js/);
  assert.match(sw,/admin-quick-access-v46-11\.js/);
- assert.match(sw,/safety-training-v46-11-internal-access/);
+ assert.match(sw,/safety-training-v48-slide-dwell/);
  assert.match(pkg,/tests\/internal-learner-access-v46-11\.test\.mjs/);
  assert.match(read('apps/training/admin-help-v22.js'),/Gestione rapida corsisti/);
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){

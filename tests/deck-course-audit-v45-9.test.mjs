@@ -71,11 +71,11 @@ test('feature is loaded in teacher panel with PWA cache, guide and both handoffs
  for(const n of ['deck-course-audit-v45-9.js','deck-course-audit-v45-9.css'])
   assert.ok(html.includes(n)&&sw.includes(n),n);
  assert.ok(html.indexOf('deck-visual-audit-v45-8.js')<html.indexOf('deck-course-audit-v45-9.js'));
- assert.match(sw,/const CACHE='safety-training-v46-11-internal-access'/);
+ assert.match(sw,/const CACHE='safety-training-v48-slide-dwell'/);
  assert.ok(help.includes('Controlla figure del corso'));
  for(const p of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(p);
-  assert.ok(doc.slice(0,800).includes('safety-training-v46-11-internal-access'));
+  assert.ok(doc.slice(0,800).includes('safety-training-v48-slide-dwell'));
   assert.ok(doc.includes('v45.9 — Report immagini intero corso'));
  }
  assert.ok(read('package.json').includes('tests/deck-course-audit-v45-9.test.mjs'));

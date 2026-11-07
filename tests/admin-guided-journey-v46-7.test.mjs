@@ -126,13 +126,13 @@ test('dashboard, help, PWA and both handoffs share the unified flow',()=>{
  assert.ok(html.includes('admin-guided-journey-v46-7.js'));
  assert.ok(html.includes('admin-guided-journey-v46-7.css'));
  const sw=read('apps/training/sw.js');
- assert.match(sw,/const CACHE='safety-training-v46-11-internal-access'/);
+ assert.match(sw,/const CACHE='safety-training-v48-slide-dwell'/);
  assert.ok(sw.includes('./admin-guided-journey-v46-7.js'));
  assert.ok(sw.includes('./admin-guided-journey-v46-7.css'));
  assert.match(read('package.json'),/tests\/admin-guided-journey-v46-7\.test\.mjs/);
  for(const path of ['docs/SAFETYTRAINING_HANDOFF.md','docs/SAFETYTRAINING_HANDOFF_LATEST.md']){
   const doc=read(path);
-  assert.ok(doc.slice(0,950).includes('safety-training-v46-11-internal-access'),path);
+  assert.ok(doc.slice(0,950).includes('safety-training-v48-slide-dwell'),path);
   assert.match(doc,/v46\.7 — Avvia percorso come punto unico/i);
  }
 });
