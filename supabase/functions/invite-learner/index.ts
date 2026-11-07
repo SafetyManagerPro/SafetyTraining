@@ -24,7 +24,9 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json().catch(() => ({}));
     const learnerId = String(body?.learner_id || '').trim();
-    const redirectTo = String(body?.redirect_to || '').trim() || undefined;
+    // Enforce the single production destination; never trust browser/preview origins
+    // or rely on Supabase Auth's default Site URL (which may still be localhost).
+    const redirectTo = 'https://safety-training-safety-manager.vercel.app/?onboarding=1';
     if (!learnerId) return json({ error: 'learner_id_required' }, 400);
 
     const { data: learner, error: learnerError } = await admin.from('learners')
@@ -93,14 +95,14 @@ Deno.serve(async (req: Request) => {
     let mode = 'invite';
     let sendError: any = null;
     const inviteOptions: any = { data: metadata };
-    if (redirectTo) inviteOptions.redirectTo = redirectTo;
+    inviteOptions.redirectTo = redirectTo;
     const invited = await admin.auth.admin.inviteUserByEmail(email, inviteOptions);
     sendError = invited.error;
 
     if (sendError && /already|registered|exists/i.test(String(sendError.message || ''))) {
       mode = 'recovery';
       const recoveryOptions: any = {};
-      if (redirectTo) recoveryOptions.redirectTo = redirectTo;
+      recoveryOptions.redirectTo = redirectTo;
       const recovery = await admin.auth.resetPasswordForEmail(email, recoveryOptions);
       sendError = recovery.error;
     }
