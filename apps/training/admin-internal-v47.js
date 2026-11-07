@@ -552,12 +552,31 @@
   try{if(await load())await render();}
   catch(e){if(root())root().innerHTML='<div class="iv47"><section class="iv47-card"><h2>Impossibile caricare Corsisti interni</h2><p>'+esc(e.message||e)+'</p><button id="iv47Retry">Riprova</button></section></div>';document.getElementById('iv47Retry')?.addEventListener('click',()=>void open());}
  }
+ async function openFromLearner(candidate){
+  if(!allowed())return;
+  await open();
+  if(!state.open||!document.getElementById('iv47Form'))return;
+  if(candidate.organization_id&&candidate.organization_id!==state.org){
+   notice('Il corsista appartiene a un’altra organizzazione: selezionala in alto e riprova.',true);
+   return;
+  }
+  const cf=String(candidate.fiscal_code||'').toUpperCase().replace(/\s/g,'');
+  const internalExists=!!cf&&(state.data?.people||[]).some(p=>p.fiscal_code===cf);
+  // Registered learners often store "COGNOME NOME" in first_name with an empty last_name.
+  const full=String(candidate.first_name||'').trim().replace(/\s+/g,' ');
+  const split=!String(candidate.last_name||'').trim()&&full.includes(' ');
+  const first=split?full.slice(full.indexOf(' ')+1):full;
+  const last=split?full.slice(0,full.indexOf(' ')):String(candidate.last_name||'').trim();
+  state.importResults=[{...candidate,first_name:first,last_name:last}];
+  useImport(candidate.id);
+  if(split&&!internalExists)notice('Ho separato il nome completo in cognome e nome: controlla i campi, scegli il corso e premi Genera link personale.');
+ }
  function boot(){
   ensureNav();
   document.addEventListener('safety:access-ready',ensureNav);
   document.addEventListener('safety:auth-changed',()=>{state.open=false;state.data=null;state.link='';state.linkRecipient='';state.linkCourse='';state.org='';state.editPerson='';state.importOpen=false;state.importExtras=null;state.importResults=[];state.importSeq++;if(state.importTimer!==null){clearTimeout(state.importTimer);state.importTimer=null;}state.seq++;ensureNav();});
   nav()?.addEventListener('click',e=>{if(!e.target.closest('#adminInternalV47Nav'))state.open=false;},true);
  }
- window.SAFETY_INTERNAL_V47={open};
+ window.SAFETY_INTERNAL_V47={open,openFromLearner};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

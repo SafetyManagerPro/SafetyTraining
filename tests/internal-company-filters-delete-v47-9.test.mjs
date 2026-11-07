@@ -99,8 +99,8 @@ test('mock admin UI filters independent courses and archives all learner links w
   }
   return {data:name==='internal_admin_state_v47'?data:{},error:null};
  }}}},SAFETY_ACCESS_V46_10:{state:{phase:'admin'}},SAFETY_ADMIN_MENU_V39:{reconcile(){}}};
- const code=ui.replace('window.SAFETY_INTERNAL_V47={open};',
-  'window.__vTest={state,paintRows,archivePerson,statusKey};window.SAFETY_INTERNAL_V47={open};');
+ const code=ui.replace('window.SAFETY_INTERNAL_V47={open,openFromLearner};',
+  'window.__vTest={state,paintRows,archivePerson,statusKey};window.SAFETY_INTERNAL_V47={open,openFromLearner};');
  assert.notEqual(code,ui);
  runInNewContext(code,{window,document,console,confirm:()=>true,alert:()=>{},Intl});
  const {state,paintRows,archivePerson,statusKey}=window.__vTest;
