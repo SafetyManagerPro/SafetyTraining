@@ -403,7 +403,7 @@ document.addEventListener('safety:image-review-updated',()=>{liveDeckCache=new W
 const dwellGate={cid:null,index:-1,startedAt:0,requiredMs:0,timer:null};
 const dwellUnlocked=new Set();
 const dwellKey=(cid,index)=>`${cid}#${index}`;
-const dwellLearnerActive=()=>{const st=window.SAFETY_CLOUD?.state;return !!(st?.user&&st?.learningSession&&st?.activeAssignment);};
+const dwellLearnerActive=(cid)=>{const st=window.SAFETY_CLOUD?.state;return !!(st?.user&&st?.learner&&cid&&(st.assignments||[]).some(a=>a.courseStableKey===cid&&['not_started','in_progress'].includes(a.status)));};
 function dwellPassed(cid,index){
  const key=dwellKey(cid,index);
  if(dwellUnlocked.has(key))return true;
@@ -415,7 +415,7 @@ function dwellPassed(cid,index){
  return true;
 }
 function dwellCanMove(cid,target){
- if(!dwellLearnerActive()||dwellGate.cid!==cid||dwellGate.index<0)return true;
+ if(!dwellLearnerActive(cid)||dwellGate.cid!==cid||dwellGate.index<0)return true;
  const cur=dwellGate.index;
  if(target<=cur)return true;
  if(target>cur+1)return false;
@@ -423,7 +423,7 @@ function dwellCanMove(cid,target){
 }
 function stopDwellTimer(){if(dwellGate.timer){clearInterval(dwellGate.timer);dwellGate.timer=null;}}
 function updateDwellButtons(){
- if(!dwellLearnerActive()||dwellGate.cid===null||dwellGate.index<0){stopDwellTimer();return;}
+ if(!dwellLearnerActive(dwellGate.cid)||dwellGate.cid===null||dwellGate.index<0){stopDwellTimer();return;}
  const passed=!dwellGate.requiredMs||dwellPassed(dwellGate.cid,dwellGate.index);
  const remaining=Math.ceil(Math.max(0,dwellGate.startedAt+dwellGate.requiredMs-Date.now())/1000);
  document.querySelectorAll('.deck-nav.next,.deck-pager-next').forEach(b=>{
@@ -439,7 +439,7 @@ function updateDwellButtons(){
  if(passed)stopDwellTimer();
 }
 function syncDwellGate(c,index,deck){
- if(!dwellLearnerActive()){stopDwellTimer();dwellGate.cid=null;dwellGate.index=-1;return;}
+ if(!dwellLearnerActive(c.id)){stopDwellTimer();dwellGate.cid=null;dwellGate.index=-1;return;}
  const last=index>=deck.length-1;
  if(dwellGate.cid!==c.id||dwellGate.index!==index){
   dwellGate.cid=c.id;dwellGate.index=index;dwellGate.startedAt=Date.now();
@@ -458,7 +458,7 @@ function deckView(c,index=0){
  const deck=cachedDeck(c);
  index=Math.min(Math.max(0,Number(index)||0),deck.length-1);
  // v48: a forward jump (browser history or typed hash) cannot skip a slide whose reading time is not met.
- if(dwellLearnerActive()&&dwellGate.cid===c.id&&dwellGate.index>=0&&!dwellCanMove(c.id,index)){setHash(`deck/${c.id}/${dwellGate.index}`);return;}
+ if(dwellLearnerActive(c.id)&&dwellGate.cid===c.id&&dwellGate.index>=0&&!dwellCanMove(c.id,index)){setHash(`deck/${c.id}/${dwellGate.index}`);return;}
  const s=deck[index];
  // The bookmark is navigation only: it must not credit time, attendance or completion.
  window.SAFETY_DECK_BOOKMARK_V42?.save?.(c,deck,index);
