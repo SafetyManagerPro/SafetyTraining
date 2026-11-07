@@ -81,8 +81,8 @@ test('editor loads an existing learner, saves added details and keeps course pro
    return {data:name==='internal_admin_state_v47'?data:{},error:null};
   }}}},SAFETY_ACCESS_V46_10:{state:{phase:'admin'}},
   SAFETY_ADMIN_MENU_V39:{reconcile(){}}};
- const code=ui.replace('window.SAFETY_INTERNAL_V47={open};',
-  'window.__registryTest={state,editPerson,fillPersonEditor,savePerson};window.SAFETY_INTERNAL_V47={open};');
+ const code=ui.replace('window.SAFETY_INTERNAL_V47={open,openFromLearner};',
+  'window.__registryTest={state,editPerson,fillPersonEditor,savePerson};window.SAFETY_INTERNAL_V47={open,openFromLearner};');
  assert.notEqual(code,ui);
  runInNewContext(code,{window,document,Intl,Date,confirm:()=>true,console});
  const {state,editPerson,savePerson}=window.__registryTest;

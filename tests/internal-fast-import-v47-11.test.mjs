@@ -87,8 +87,8 @@ function fixture(){
   if(name==='internal_admin_state_v47')return {data,error:null};
   return {data:{assignment_id:'new-assignment'},error:null};
  }}}},SAFETY_ACCESS_V46_10:{state:{phase:'admin'}},SAFETY_ADMIN_MENU_V39:{reconcile(){}}};
- const source=ui.replace('window.SAFETY_INTERNAL_V47={open};',
-  'window.__test={state,openImport,searchImport,useImport,closeImport,assign};window.SAFETY_INTERNAL_V47={open};');
+ const source=ui.replace('window.SAFETY_INTERNAL_V47={open,openFromLearner};',
+  'window.__test={state,openImport,searchImport,useImport,closeImport,assign};window.SAFETY_INTERNAL_V47={open,openFromLearner};');
  assert.notEqual(source,ui);
  runInNewContext(source,{window,document,crypto:webcrypto,btoa,TextEncoder,Intl,Date,
   setTimeout,clearTimeout,navigator:{clipboard:{writeText:async()=>{}}},confirm:()=>true,console});

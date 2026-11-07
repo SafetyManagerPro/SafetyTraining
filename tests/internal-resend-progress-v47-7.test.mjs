@@ -76,8 +76,8 @@ test('link reinvite dynamically rotates hash, preserves known progress and expos
   SAFETY_ACCESS_V46_10:{state:{phase:'admin'}},
   SAFETY_ADMIN_MENU_V39:{reconcile:()=>{}},
  };
- const source=ui.replace('window.SAFETY_INTERNAL_V47={open};',
-  'window.__testState={state,rotate,percent,lastSlide,currentTopic};window.SAFETY_INTERNAL_V47={open};');
+ const source=ui.replace('window.SAFETY_INTERNAL_V47={open,openFromLearner};',
+  'window.__testState={state,rotate,percent,lastSlide,currentTopic};window.SAFETY_INTERNAL_V47={open,openFromLearner};');
  assert.notEqual(source,ui,'test seam must be inserted');
  runInNewContext(source,{window,document,navigator:{},crypto:webcrypto,btoa,TextEncoder,
   confirm:()=>true,alert:()=>{},console});

@@ -239,7 +239,7 @@
     const q = state.filters.learners || '', rows = alphabeticalBy((l||[]).filter(x => (state.showArchivedLearners||x.active)&&match(q,x.first_name,x.last_name,x.email,x.fiscal_code,x.job_title,cm.get(x.company_id))),x=>(x.last_name||'')+' '+(x.first_name||''));
     const archivedCount=(l||[]).filter(x=>!x.active).length;
     const missing = (l||[]).filter(x=>x.active&&!x.email).length;
-    current(seq, `${missing?`<div class="admin-warning">${missing} corsist${missing===1?'a attivo non ha':'i attivi non hanno'} un indirizzo email: l’invito via email non è disponibile. Usa Invita o Reinvia e scegli Copia link o QR code.</div>`:''}<section class="admin-card"><div class="admin-card-head"><div><h2>Corsisti</h2><p>Rimuovi subito i corsisti errati dall’elenco attivo, senza perdere lo storico.</p></div><button type="button" data-action="toggle-archived-learners">${state.showArchivedLearners?'Nascondi':'Mostra'} rimossi (${archivedCount})</button><button class="admin-primary" data-action="new-learner">+ Nuovo corsista</button></div>${searchBox('learners','Nome, email, CF, azienda, mansione…')}${table(['Corsista','Email','Azienda',...(state.multiOrg?['Organizzazione']:[]),'Mansione','Accesso','Stato','Azioni'], rows.map(x => { const inv=im.get(x.id), [s,k]=inviteState(x,inv); return [esc(`${x.first_name||''} ${x.last_name||''}`.trim()||'—'),esc(x.email||'—'),esc(cm.get(x.company_id)||'—'),...(state.multiOrg?[esc(om.get(x.organization_id)||'—')]:[]),esc(x.job_title||'—'),`${badge(s,k)}${inv?.last_sent_at?`<small class="admin-cell-note">${fmtDateTime(inv.last_sent_at)}</small>`:''}`,badge(x.active?'Attivo':'Disattivo',x.active?'ok':'muted'),`${btn('Modifica','edit-learner',x.id)} ${x.active&&!x.auth_user_id?btn(inv?'Reinvia':'Invita','invite-learner',x.id):''}${x.active?btn('Rimuovi corsista','archive-learner-v36',x.id,'danger'):btn('Ripristina','restore-learner-v37',x.id)} ${btn('Elimina definitivamente…','quick-delete-learner-v38',x.id,'danger')}`]; }))}</section>`);
+    current(seq, `${missing?`<div class="admin-warning">${missing} corsist${missing===1?'a attivo non ha':'i attivi non hanno'} un indirizzo email: l’invito via email non è disponibile. Usa Invita o Reinvia e scegli Copia link o QR code.</div>`:''}<section class="admin-card"><div class="admin-card-head"><div><h2>Corsisti</h2><p>Rimuovi subito i corsisti errati dall’elenco attivo, senza perdere lo storico.</p></div><button type="button" data-action="toggle-archived-learners">${state.showArchivedLearners?'Nascondi':'Mostra'} rimossi (${archivedCount})</button><button class="admin-primary" data-action="new-learner">+ Nuovo corsista</button></div>${searchBox('learners','Nome, email, CF, azienda, mansione…')}${table(['Corsista','Email','Azienda',...(state.multiOrg?['Organizzazione']:[]),'Mansione','Accesso','Stato','Azioni'], rows.map(x => { const inv=im.get(x.id), [s,k]=inviteState(x,inv); return [esc(`${x.first_name||''} ${x.last_name||''}`.trim()||'—'),esc(x.email||'—'),esc(cm.get(x.company_id)||'—'),...(state.multiOrg?[esc(om.get(x.organization_id)||'—')]:[]),esc(x.job_title||'—'),`${badge(s,k)}${inv?.last_sent_at?`<small class="admin-cell-note">${fmtDateTime(inv.last_sent_at)}</small>`:''}`,badge(x.active?'Attivo':'Disattivo',x.active?'ok':'muted'),`${btn('Modifica','edit-learner',x.id)} ${x.active&&!x.auth_user_id?btn(inv?'Reinvia':'Invita','invite-learner',x.id):''} ${!x.email&&x.active?btn('Sposta in interni','move-learner-internal',x.id):''} ${x.active?btn('Rimuovi corsista','archive-learner-v36',x.id,'danger'):btn('Ripristina','restore-learner-v37',x.id)} ${btn('Elimina definitivamente…','quick-delete-learner-v38',x.id,'danger')}`]; }))}</section>`);
     void renderLearnerProgress(seq,q);
   }
 
@@ -427,6 +427,16 @@
     const {data,error}=await db().functions.invoke('invite-learner',{body:{learner_id:id,redirect_to:new URL('?onboarding=1',location.href).toString()}});
     if(error)throw error;if(data?.error)throw new Error(data.message||data.error);toast(data?.already_linked?'Account già collegato.':'Invito inviato.','success');await render();
   }
+  async function moveLearnerToInternal(id) {
+    // Copies only what the internal form needs. Nothing is saved until the admin picks a course and presses "Genera link personale".
+    const {data:l,error}=await db().from('learners').select('id,organization_id,company_id,first_name,last_name,fiscal_code,phone,job_title,active').eq('id',id).single();
+    if(error)throw error;
+    if(!l.active)return toast('Il corsista non è attivo.','error');
+    const {data:co}=l.company_id?await db().from('companies').select('name').eq('id',l.company_id).maybeSingle():{data:null};
+    const api=window.SAFETY_INTERNAL_V47;
+    if(!api?.openFromLearner)return toast('Corsisti interni non disponibili: ricarica la pagina.','error');
+    await api.openFromLearner({id:l.id,organization_id:l.organization_id,first_name:l.first_name||'',last_name:l.last_name||'',fiscal_code:l.fiscal_code||'',email:'',company_name:co?.name||'',phone:l.phone||'',job_title:l.job_title||''});
+  }
   async function createEdition(ev,companies) {
     ev.preventDefault();const f=new FormData(ev.currentTarget),organization_id=f.get('organization_id')||state.defaultOrgId,company=companies.find(x=>x.id===f.get('company_id'));
     if(company&&company.organization_id!==organization_id)return toast('L’azienda non appartiene all’organizzazione selezionata.','error');
@@ -534,6 +544,7 @@
       if(a==='new-learner'||a==='edit-learner')return editLearner(a==='edit-learner'?id:null);
       if(a==='toggle-learner'){const {data}=await db().from('learners').select('active').eq('id',id).single();return update('learners',id,{active:!data.active},data.active?'Corsista disattivato.':'Corsista riattivato.');}
       if(a==='invite-learner')return sendInvite(id);
+      if(a==='move-learner-internal')return moveLearnerToInternal(id);
       if(a==='new-course'||a==='edit-course')return editCourse(a==='edit-course'?id:null);
       if(a==='materials-course'){const {data}=await db().from('courses').select('stable_key').eq('id',id).single();close();location.hash=`library/${data.stable_key}`;return;}
       if(a==='edit-edition')return editEdition(id);
