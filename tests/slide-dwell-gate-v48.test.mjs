@@ -68,3 +68,7 @@ test('helper is loaded by the page and precached by the service worker',()=>{
  assert.match(sw,/"\.\/slide-dwell-gate-v48\.js"/);
  assert.match(sw,/const CACHE='safety-training-v48-slide-dwell'/);
 });
+
+test('the gate is re-applied when the learner identity and assignments become known',()=>{
+ assert.match(app,/document\.addEventListener\('safety:cloud-state-changed',\(\)=>\{[\s\S]*?if\(!c\|\|!dwellLearnerActive\(c\.id\)\|\|dwellGate\.cid===c\.id\)return;\s*deckView\(c,now\[2\]\|\|0\);/);
+});

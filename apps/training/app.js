@@ -449,6 +449,15 @@ function syncDwellGate(c,index,deck){
  updateDwellButtons();
  if(!dwellGate.timer)dwellGate.timer=setInterval(updateDwellButtons,250);
 }
+// v48: the learner's assignments load after the first render. When the identity is known and the gate
+// becomes active for the open course, re-render the current slide so the first slide is gated too.
+document.addEventListener('safety:cloud-state-changed',()=>{
+ const now=location.hash.replace('#','').split('/');
+ if(now[0]!=='deck')return;
+ const c=getCourse(now[1]);
+ if(!c||!dwellLearnerActive(c.id)||dwellGate.cid===c.id)return;
+ deckView(c,now[2]||0);
+});
 window.deckGo=(cid,i)=>{
  const target=Math.max(0,i);
  if(!dwellCanMove(cid,target)){updateDwellButtons();return;}
