@@ -4,6 +4,47 @@
  const KEY='sb_publishable_bn9DnocbbBEcf98WAwcSHw_wABCiOSA';
  const root=document.getElementById('internalApp');
  const state={token:'',bundle:null,course:null,deck:[],index:0,lastSlide:null,visitedSlides:0,busy:false,menuOpen:false};
+// v48: minimum reading time per slide for internal link learners (client side, same rule as registered learners).
+// Forward movement needs the reading time of the current slide; resume to an already reached slide is allowed.
+const dwell={index:-1,startedAt:0,requiredMs:0,timer:null,passed:new Set(),frontier:0};
+const dwellHelper=()=>window.SAFETY_SLIDE_DWELL_V48;
+function dwellIsPassed(i){
+ if(dwell.passed.has(i))return true;
+ if(dwell.index!==i||!dwell.requiredMs)return false;
+ if(Date.now()<dwell.startedAt+dwell.requiredMs)return false;
+ dwell.passed.add(i);
+ return true;
+}
+function dwellCanGo(target){
+ const i=state.index;
+ if(target<=i||target<=dwell.frontier)return true;
+ if(target>i+1)return false;
+ return dwellIsPassed(i);
+}
+function dwellPaint(){
+ const i=state.index;
+ const passed=dwell.index!==i||dwellIsPassed(i);
+ const remaining=Math.ceil(Math.max(0,dwell.startedAt+dwell.requiredMs-Date.now())/1000);
+ document.querySelectorAll('#ipNext,#ipNextSide').forEach(b=>{
+  if(passed){if(b.dataset.dwellLocked){b.disabled=false;delete b.dataset.dwellLocked;b.title='Slide successiva';}}
+  else{b.disabled=true;b.dataset.dwellLocked='1';b.title='Disponibile tra '+remaining+' s';}
+ });
+ const pager=document.querySelector('.deck-pager');
+ if(pager){
+  let hint=document.getElementById('ipDwellHint');
+  if(!hint){hint=document.createElement('span');hint.id='ipDwellHint';hint.className='deck-dwell-hint';hint.setAttribute('aria-live','polite');pager.appendChild(hint);}
+  hint.textContent=passed?'':'Tempo di lettura: '+remaining+' s';
+ }
+ if(passed&&dwell.timer){clearInterval(dwell.timer);dwell.timer=null;}
+}
+function dwellSync(){
+ const i=state.index,slides=state.deck;
+ if(dwell.timer){clearInterval(dwell.timer);dwell.timer=null;}
+ if(i<0||i>=slides.length-1||!dwellHelper())return;
+ if(dwell.index!==i){dwell.index=i;dwell.startedAt=Date.now();dwell.requiredMs=dwellHelper().requiredSeconds(slides[i])*1000;}
+ dwellPaint();
+ if(!dwellIsPassed(i))dwell.timer=setInterval(dwellPaint,250);
+}
  let stageResizeObserver=null;
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
  function parseToken(){
@@ -116,6 +157,7 @@
    '<button type="button" class="deck-nav prev" aria-label="Slide precedente" id="ipPrevSide"'+(i===0?' disabled':'')+'>‹</button>'+
    '<button type="button" class="deck-nav next" aria-label="Slide successiva" id="ipNextSide"'+(i===slides.length-1?' disabled':'')+'>›</button>'+
    '</div><aside class="ip-slide-panel" id="ipSlidePanel" hidden aria-label="Indice delle slide"></aside>';
+  dwellSync();
   for(const id of ['ipPrev','ipPrevSide'])document.getElementById(id).onclick=()=>void go(state.index-1);
   for(const id of ['ipNext','ipNextSide'])document.getElementById(id).onclick=()=>void go(state.index+1);
   document.getElementById('ipHome').onclick=showHome;
@@ -155,13 +197,14 @@
  }
  async function go(i){
   if(state.busy||!Number.isInteger(i)||i<0||i>=state.deck.length)return;
+  if(!dwellCanGo(i)){dwellPaint();return;}
   state.busy=true;
   const slide=state.deck[i];
   try{
    const fields={slide_index:i,total_slides:state.deck.length,
     unit_id:slide.topic?.internal_unit_version_id||null};
    const result=await request('slide',fields);
-   state.index=i;state.lastSlide=i;
+   state.index=i;state.lastSlide=i;dwell.frontier=Math.max(dwell.frontier,i);
    state.visitedSlides=Number(result.progress?.visited_slides||state.visitedSlides);
    makeSlide();
   }catch(e){showError(e);}
@@ -183,6 +226,7 @@
    const previousUnit=state.bundle.last_unit_version_id||null;
    const oldUnitSlide=previousUnit?state.deck.findIndex(s=>s.topic?.internal_unit_version_id===previousUnit):-1;
    state.lastSlide=Number.isInteger(last)&&last>=0&&last<state.deck.length?last:(oldUnitSlide>=0?oldUnitSlide:null);
+   dwell.frontier=Number.isInteger(last)&&last>=0?last:0;
    showHome();
   }catch(e){showError(e);}
  }
