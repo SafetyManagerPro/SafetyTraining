@@ -1,7 +1,7 @@
 /* SafetyTraining v47 — corsisti interni: independent, non-certifying link-only workflow. */
 (()=>{'use strict';
  const ORIGIN='https://safety-training-safety-manager.vercel.app';
- const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterStatus:'all',editPerson:'',importOpen:false,importSeq:0,importResults:[],importTimer:null,importExtras:null,notice:'',error:false};
+ const state={open:false,busy:false,seq:0,org:'',data:null,link:'',email:'',linkRecipient:'',linkCourse:'',search:'',filterCourse:'',filterCompany:'',filterPerson:'',groupBy:'person',filterStatus:'all',editPerson:'',importOpen:false,importSeq:0,importResults:[],importTimer:null,importExtras:null,notice:'',error:false};
  const db=()=>window.SAFETY_CLOUD?.state?.client;
  const gate=()=>window.SAFETY_ACCESS_V46_10?.state;
  const root=()=>document.getElementById('adminContent');
@@ -73,7 +73,10 @@
   const companyChoices=alpha(d.companies||[],c=>c.name).map(c=>'<option value="'+esc(c.name)+'"></option>').join('');
   const assignedCourses=alpha([...new Map(assignments.map(a=>[a.course_version_id,{id:a.course_version_id,title:a.course_title,version:a.version_number}])).values()],c=>c.title);
   const courseFilters=assignedCourses.map(c=>option(c.id,c.title+' · v'+c.version,c.id===state.filterCourse)).join('');
-  const choices=courses.map(c=>option(c.version_id,c.title+' · v'+c.version_number+' ('+c.unit_count+' sezioni)',false)).join('');
+  const companyFilters=[...new Set(assignments.map(a=>a.company_name||'Generico'))].sort((x,y)=>x.localeCompare(y,'it')).map(c=>option(c,c,c===state.filterCompany)).join('');
+  const personFilters=[...new Map(assignments.map(a=>[a.person_id,a.last_name+' '+a.first_name])).entries()].sort((x,y)=>String(x[1]).localeCompare(String(y[1]),'it')).map(([id,name])=>option(id,name,id===state.filterPerson)).join('');
+  // No course is preselected: the admin must choose one before saving or generating a link.
+  const choices='<option value="" selected>— Scegli il corso —</option>'+courses.map(c=>option(c.version_id,c.title+' · v'+c.version_number+' ('+c.unit_count+' sezioni)',false)).join('');
   const roster='<option value="">Nuovo corsista</option>'+people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code+' · '+(p.company_name||'Generico'),false)).join('');
   const editorRoster='<option value="">Seleziona un corsista da modificare…</option>'+
    people.map(p=>option(p.id,p.last_name+' '+p.first_name+' · '+p.fiscal_code,p.id===state.editPerson)).join('');
@@ -94,8 +97,8 @@
    '<label>Email facoltativa<input name="email" type="email" id="iv47Email" autocomplete="off"></label>'+ 
    '<label class="iv47-company-field">Azienda (facoltativa)<input id="iv47Company" name="company_name" list="iv47Companies" maxlength="180" autocomplete="off" placeholder="Generico (nessuna azienda)"><datalist id="iv47Companies">'+companyChoices+'</datalist></label>'+ 
    '<div class="iv47-actions iv47-company-save"><button type="button" id="iv47SaveCompany" disabled>Aggiorna azienda del corsista</button></div>'+
-   '<label style="grid-column:1/-1">Corso da assegnare<select id="iv47Course" name="course_version_id" required>'+choices+'</select></label>'+
-   '<div class="iv47-actions" style="grid-column:1/-1"><button type="submit" class="primary"'+(courses.length?'':' disabled')+'>Genera link personale</button></div></form>'+
+   '<label style="grid-column:1/-1">Corso da assegnare<select id="iv47Course" name="course_version_id" required autocomplete="off">'+choices+'</select></label>'+
+   '<div class="iv47-actions iv47-save-actions" style="grid-column:1/-1"><button type="button" id="iv47SaveAssignment"'+(courses.length?'':' disabled')+'>Salva corsista</button><button type="submit" class="primary"'+(courses.length?'':' disabled')+'>Genera link personale</button></div></form>'+
    (courses.length?'':'<p>Nessun corso pubblicato e disponibile per questa organizzazione.</p>')+
    '</section>'+
    '<section class="iv47-card" id="iv47RegistryCard"><h2>2. Gestione e modifica anagrafica</h2>'+
@@ -130,6 +133,9 @@
    '<div class="iv47-actions"><button type="button" id="iv47Refresh">Aggiorna progressi</button></div>'+ 
    '<div class="iv47-filters">'+
    '<label>Filtra per corso<select id="iv47CourseFilter">'+option('','Tutti i corsi',!state.filterCourse)+courseFilters+'</select></label>'+ 
+   '<label>Filtra per azienda<select id="iv47CompanyFilter">'+option('','Tutte le aziende',!state.filterCompany)+companyFilters+'</select></label>'+
+   '<label>Filtra per corsista<select id="iv47PersonFilter">'+option('','Tutti i corsisti',!state.filterPerson)+personFilters+'</select></label>'+
+   '<label>Raggruppa per<select id="iv47GroupBy">'+[['person','Corsista'],['company','Azienda'],['none','Nessun gruppo']].map(v=>option(v[0],v[1],(state.groupBy||'person')===v[0])).join('')+'</select></label>'+
    '<label>Filtra per stato<select id="iv47StatusFilter">'+[['all','Tutti gli stati'],['not_started','Da iniziare'],['in_progress','In corso'],['viewed_all','Tutte le slide aperte'],['inactive','Disattivato'],['archived','Eliminati']].map(v=>option(v[0],v[1],state.filterStatus===v[0])).join('')+'</select></label></div>'+ 
    '<label>Cerca nome, codice fiscale, azienda o corso<input id="iv47Search" value="'+esc(state.search)+'" placeholder="Cerca corsista, azienda o corso…" autocomplete="off"></label>'+ 
    '<p id="iv47ResultCount" class="iv47-muted" role="status"></p>'+
@@ -148,18 +154,20 @@
  function paintRows(){
   const body=document.getElementById('iv47Rows');if(!body)return;
   const q=(document.getElementById('iv47Search')?.value||'').toLocaleLowerCase('it-IT');
-  const filterStatus=state.filterStatus||'all',filterCourse=state.filterCourse||'';
+  const filterStatus=state.filterStatus||'all',filterCourse=state.filterCourse||'',filterCompany=state.filterCompany||'',filterPerson=state.filterPerson||'';
   const source=state.data?.assignments||[];
   const items=alpha(source.filter(a=>
    (filterStatus==='archived'?Boolean(a.archived_at):!a.archived_at)&&
    (!filterCourse||a.course_version_id===filterCourse)&&
+   (!filterCompany||(a.company_name||'Generico')===filterCompany)&&
+   (!filterPerson||a.person_id===filterPerson)&&
    (filterStatus==='all'||statusKey(a)===filterStatus)&&
    [a.first_name,a.last_name,a.fiscal_code,a.company_name,a.course_title].some(x=>String(x||'').toLocaleLowerCase('it-IT').includes(q))
   ),a=>a.last_name+' '+a.first_name+' '+a.course_title);
   const info=document.getElementById('iv47ResultCount');
   if(info)info.textContent=items.length+' percorsi visualizzati';
   const seenPeople=new Set();
-  body.innerHTML=items.map(a=>{
+  const rowHtml=a=>{
    const pct=percent(a);
    const last=lastSlide(a);
    const topic=currentTopic(a);
@@ -184,13 +192,34 @@
      (a.active?'<button type="button" data-internal-repeat="'+esc(a.id)+'">Ripeti corso</button> ':'')+
      (a.active?'<button type="button" class="danger" data-internal-revoke="'+esc(a.id)+'">Disattiva</button>':''))+
     '</td><td>'+management+'</td></tr>';
-  }).join('')||'<tr><td colspan="8">Nessun corsista o percorso corrispondente ai filtri.</td></tr>';
+  };
+  body.innerHTML=items.length?groupItems(items).map(g=>(g.head?'<tr class="iv47-group"><th colspan="8">'+g.head+'</th></tr>':'')+g.items.map(rowHtml).join('')).join(''):'<tr><td colspan="8">Nessun corsista o percorso corrispondente ai filtri.</td></tr>';
   body.querySelectorAll('[data-internal-rotate]').forEach(btn=>btn.onclick=()=>void rotate(btn.dataset.internalRotate));
   body.querySelectorAll('[data-internal-revoke]').forEach(btn=>btn.onclick=()=>void revoke(btn.dataset.internalRevoke));
   body.querySelectorAll('[data-internal-repeat]').forEach(btn=>btn.onclick=()=>void repeatCourse(btn.dataset.internalRepeat));
   body.querySelectorAll('[data-internal-edit-person]').forEach(btn=>btn.onclick=()=>editPerson(btn.dataset.internalEditPerson));
   body.querySelectorAll('[data-internal-delete-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalDeletePerson,false));
   body.querySelectorAll('[data-internal-restore-person]').forEach(btn=>btn.onclick=()=>void archivePerson(btn.dataset.internalRestorePerson,true));
+ }
+ function groupItems(items){
+  // Compact grouping: rows keep the same order, each group gets one header line.
+  const mode=state.groupBy||'person';
+  if(mode==='none')return [{head:'',items}];
+  const groups=new Map();
+  for(const a of items){
+   const key=mode==='company'?(a.company_name||'Generico'):a.person_id;
+   if(!groups.has(key))groups.set(key,[]);
+   groups.get(key).push(a);
+  }
+  return [...groups.values()].map(list=>{
+   const a=list[0],n=list.length,avg=Math.round(list.reduce((s,x)=>s+percent(x),0)/n);
+   const people=new Set(list.map(x=>x.person_id)).size;
+   const count=n+' percors'+(n===1?'o':'i')+' · media '+avg+'%';
+   const head=mode==='company'
+    ?'<strong>'+esc(a.company_name||'Generico')+'</strong> · '+people+' corsist'+(people===1?'a':'i')+' · '+count
+    :'<strong>'+esc(a.last_name+' '+a.first_name)+'</strong> · '+esc(a.company_name||'Generico')+' · '+count;
+   return {head,items:list};
+  });
  }
  function renderImportResults(message=''){
   const box=document.getElementById('iv47ImportResults');if(!box)return;
@@ -311,8 +340,8 @@
    root()?.querySelectorAll('.iv47 button').forEach(b=>b.disabled=false);
   }
  }
- async function assign(event){
-  event.preventDefault();
+ async function assign(event,mode='link'){
+  event?.preventDefault?.();
   await operate(async()=>{
    const f=document.getElementById('iv47Form');
    const first=f.querySelector('#iv47First').value.trim();
@@ -321,7 +350,8 @@
    const email=f.querySelector('#iv47Email').value.trim();
    const company=f.querySelector('#iv47Company').value.trim();
    const version=f.querySelector('#iv47Course').value;
-   if(!first||!last||!/^[A-Z0-9]{16}$/.test(cf)||!version)throw Error('Compila nome, cognome, codice fiscale e corso.');
+   if(!first||!last||!/^[A-Z0-9]{16}$/.test(cf))throw Error('Compila nome, cognome e codice fiscale.');
+   if(!version)throw Error('Scegli il corso da assegnare prima di salvare o generare il link.');
    // Auth refresh can invalidate cached UI data while the form stays visible.
    const snapshot=await requireData();
    const existing=(snapshot.assignments||[]).find(a=>a.fiscal_code===cf&&a.course_version_id===version&&a.active);
@@ -341,6 +371,13 @@
    }
    state.importExtras=null;
    const chosen=snapshot.courses.find(c=>c.version_id===version);
+   if(mode==='save'){
+    // Saved without showing a link: the link is created later with "Reinvia link" in section 4.
+    state.link='';state.linkRecipient='';state.linkCourse='';
+    if(await load())await render();
+    notice('Corsista salvato per “'+(chosen?.title||'corso interno')+'”. Il link si crea con “Reinvia link” nella sezione 4.');
+    return;
+   }
    await presentLink(token,email,first+' '+last,chosen?.title||'Corso interno',
     'Assegnazione salvata. Copia il link oppure prepara un’email da inviare.');
   });
@@ -489,7 +526,7 @@
  }
  function bind(){
   const org=document.getElementById('iv47Org');if(org)org.onchange=()=>void operate(async()=>{
-   closeImport();state.org=org.value;state.link='';state.search='';state.importExtras=null;state.filterStatus='all';state.filterCourse='';state.editPerson='';if(await load())await render();
+   closeImport();state.org=org.value;state.link='';state.search='';state.importExtras=null;state.filterStatus='all';state.filterCourse='';state.filterCompany='';state.filterPerson='';state.editPerson='';if(await load())await render();
   });
   const editorSelect=document.getElementById('iv47EditPerson');
   if(editorSelect)editorSelect.onchange=()=>{state.editPerson=editorSelect.value;fillPersonEditor();};
@@ -524,6 +561,10 @@
   document.getElementById('iv47SaveCompany')?.addEventListener('click',()=>void saveCompany());
   document.getElementById('iv47CourseFilter')?.addEventListener('change',event=>{state.filterCourse=event.target.value;paintRows();});
   document.getElementById('iv47StatusFilter')?.addEventListener('change',event=>{state.filterStatus=event.target.value;paintRows();});
+  document.getElementById('iv47CompanyFilter')?.addEventListener('change',event=>{state.filterCompany=event.target.value;paintRows();});
+  document.getElementById('iv47PersonFilter')?.addEventListener('change',event=>{state.filterPerson=event.target.value;paintRows();});
+  document.getElementById('iv47GroupBy')?.addEventListener('change',event=>{state.groupBy=event.target.value;paintRows();});
+  document.getElementById('iv47SaveAssignment')?.addEventListener('click',event=>void assign(event,'save'));
   document.getElementById('iv47Search')?.addEventListener('input',event=>{state.search=event.target.value;paintRows();});
   document.getElementById('iv47Refresh')?.addEventListener('click',()=>void operate(async()=>{
    if(await load()){await render();notice('Progressi aggiornati.');}
