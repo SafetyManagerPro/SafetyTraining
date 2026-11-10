@@ -69,4 +69,7 @@
 .iv47 .iv47-import-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px;border:1px solid #38546e;border-radius:10px;min-width:0}
 .iv47 .iv47-import-item strong{overflow-wrap:anywhere}
 .iv47 .iv47-import-item button{flex:0 0 auto}
+.iv47 .iv47-table td{padding:7px 9px;vertical-align:top}
+.iv47 .iv47-table tr.iv47-group th{background:#13243a;color:#e9f7ff;text-align:left;padding:7px 9px;font-size:13px;font-weight:650;border-top:2px solid #2b4a6b}
+.iv47 .iv47-save-actions{display:flex;gap:8px;flex-wrap:wrap}
 @media(max-width:640px){.iv47 .iv47-import-dialog{padding:14px}.iv47 .iv47-import-item{align-items:stretch;flex-direction:column}.iv47 .iv47-import-item button{width:100%}}
