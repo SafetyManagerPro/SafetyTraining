@@ -1,0 +1,52 @@
+{
+  "schema": "safetytraining.transfer",
+  "schema_version": "1.2",
+  "source_system": "safetymanager",
+  "export_id": "123e4567-e89b-42d3-a456-426614174000",
+  "exported_at": "2026-11-12T10:30:00.000Z",
+  "company": {
+    "external_id": "company-001",
+    "name": "Azienda Demo S.r.l.",
+    "vat_or_fiscal_code": "12345678901",
+    "ateco_code": "41.20",
+    "address": "Via Roma 10",
+    "operating_site": "Via Milano 20"
+  },
+  "project": {
+    "external_id": "project-001",
+    "code": "CORSO-2026-01",
+    "course_code": "base",
+    "course_title": "Formazione lavoratori",
+    "course_duration_minutes": 480,
+    "course_normative_ref": "D.Lgs. 81/08",
+    "requires_presence": false,
+    "title": "CORSO-2026-01 · Formazione lavoratori",
+    "available_from": "2026-11-15",
+    "recommended_due_at": "2026-11-30",
+    "source_mode": "e-learning",
+    "site": "Via Milano 20",
+    "risk_sector_code": "RISCHIO_MEDIO",
+    "risk_sector_label": "Rischio medio",
+    "risk_codes": ["RUMORE", "VDT"],
+    "custom_risks": ["Caduta materiali"],
+    "needs_analysis_accepted": true
+  },
+  "learners": [
+    {
+      "external_id": "learner-001",
+      "enrollment_external_id": "enrollment-001",
+      "full_name": "Mario Rossi",
+      "fiscal_code": "RSSMRA80A01H501U",
+      "job_title": "Operaio",
+      "source_company_id": "company-001"
+    },
+    {
+      "external_id": "learner-002",
+      "enrollment_external_id": "enrollment-002",
+      "full_name": "Anna Bianchi",
+      "fiscal_code": "BNCNNA85B41F205X",
+      "job_title": "Impiegata",
+      "source_company_id": "company-001"
+    }
+  ]
+}
